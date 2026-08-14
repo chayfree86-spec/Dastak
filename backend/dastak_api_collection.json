@@ -1,0 +1,427 @@
+{
+	"info": {
+		"_postman_id": "dastak-delivery-api-v1-collection",
+		"name": "Dastak Delivery Platform — Complete Production REST API (130 Endpoints)",
+		"description": "Production-ready Postman collection for Dastak Delivery Platform covering Authentication, Public Catalog, Customer Ordering & Live GPS Tracking, Delivery Boy Fleet Management, Restaurant Kitchen Partner Portal, and Multi-Role Super Admin Operations.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://127.0.0.1:8000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "01. Authentication & Device Tokens",
+			"item": [
+				{
+					"name": "Login (Email or Mobile)",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"login\": \"admin@dastakdelivery.com\",\n    \"password\": \"password123\",\n    \"device_name\": \"Postman API Client\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+					}
+				},
+				{
+					"name": "Get Authenticated User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"current_password\": \"password123\",\n    \"new_password\": \"newPassword@123\",\n    \"new_password_confirmation\": \"newPassword@123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/auth/change-password", "host": ["{{baseUrl}}"], "path": ["auth", "change-password"] }
+					}
+				},
+				{
+					"name": "Register FCM Device Token",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"fcm_device_token_xyz_12345\",\n    \"device_type\": \"ANDROID\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/auth/device-token", "host": ["{{baseUrl}}"], "path": ["auth", "device-token"] }
+					}
+				},
+				{
+					"name": "Remove FCM Device Token",
+					"request": {
+						"method": "DELETE",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"fcm_device_token_xyz_12345\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/auth/device-token", "host": ["{{baseUrl}}"], "path": ["auth", "device-token"] }
+					}
+				},
+				{
+					"name": "Logout (Revoke Current Token)",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "02. Public Catalog (Discovery & Menu)",
+			"item": [
+				{
+					"name": "List Nearby Restaurants (Haversine Distance)",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": {
+							"raw": "{{baseUrl}}/restaurants?latitude=26.4499&longitude=80.3319&radius_km=12&is_pure_veg=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["restaurants"],
+							"query": [
+								{ "key": "latitude", "value": "26.4499" },
+								{ "key": "longitude", "value": "80.3319" },
+								{ "key": "radius_km", "value": "12" },
+								{ "key": "is_pure_veg", "value": "0" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Restaurant by Slug",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/restaurants/dastak-biryani-mahal", "host": ["{{baseUrl}}"], "path": ["restaurants", "dastak-biryani-mahal"] }
+					}
+				},
+				{
+					"name": "Get Full Restaurant Menu (Nested Categories & Variants)",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/restaurants/dastak-biryani-mahal/menu", "host": ["{{baseUrl}}"], "path": ["restaurants", "dastak-biryani-mahal", "menu"] }
+					}
+				},
+				{
+					"name": "Get Restaurant Public Reviews",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/restaurants/dastak-biryani-mahal/reviews", "host": ["{{baseUrl}}"], "path": ["restaurants", "dastak-biryani-mahal", "reviews"] }
+					}
+				},
+				{
+					"name": "List Active Service Zones",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/zones", "host": ["{{baseUrl}}"], "path": ["zones"] }
+					}
+				},
+				{
+					"name": "List Public Active Coupons",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [{ "key": "Accept", "value": "application/json" }],
+						"url": { "raw": "{{baseUrl}}/coupons", "host": ["{{baseUrl}}"], "path": ["coupons"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "03. Customer Portal (Cart, Orders, Tracking & Reviews)",
+			"item": [
+				{
+					"name": "Get Customer Profile",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/profile", "host": ["{{baseUrl}}"], "path": ["customer", "profile"] } }
+				},
+				{
+					"name": "Update Customer Profile",
+					"request": {
+						"method": "PUT",
+						"body": { "mode": "raw", "raw": "{\n    \"name\": \"Priya Sharma\",\n    \"gender\": \"FEMALE\"\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{baseUrl}}/customer/profile", "host": ["{{baseUrl}}"], "path": ["customer", "profile"] }
+					}
+				},
+				{
+					"name": "List Saved Addresses",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/addresses", "host": ["{{baseUrl}}"], "path": ["customer", "addresses"] } }
+				},
+				{
+					"name": "Add New Address",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"HOME\",\n    \"contact_name\": \"Priya Sharma\",\n    \"contact_mobile\": \"9666600001\",\n    \"address_line1\": \"Flat 402, Ganga Heights\",\n    \"city\": \"Kanpur\",\n    \"pincode\": \"208001\",\n    \"latitude\": 26.4500000,\n    \"longitude\": 80.3320000,\n    \"is_default\": true\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/customer/addresses", "host": ["{{baseUrl}}"], "path": ["customer", "addresses"] }
+					}
+				},
+				{
+					"name": "Get Active Cart",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/cart", "host": ["{{baseUrl}}"], "path": ["customer", "cart"] } }
+				},
+				{
+					"name": "Add Item to Cart",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"menu_item_id\": 1,\n    \"variant_id\": 1,\n    \"quantity\": 2,\n    \"addon_ids\": [1, 3],\n    \"cooking_instructions\": \"Make it spicy please\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/customer/cart/items", "host": ["{{baseUrl}}"], "path": ["customer", "cart", "items"] }
+					}
+				},
+				{
+					"name": "Apply Coupon to Cart",
+					"request": {
+						"method": "POST",
+						"body": { "mode": "raw", "raw": "{\n    \"coupon_code\": \"FIRST50\"\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{baseUrl}}/customer/cart/apply-coupon", "host": ["{{baseUrl}}"], "path": ["customer", "cart", "apply-coupon"] }
+					}
+				},
+				{
+					"name": "Checkout Order",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address_id\": 1,\n    \"payment_mode\": \"COD\",\n    \"special_instructions\": \"Please ring the bell twice\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/customer/orders/checkout", "host": ["{{baseUrl}}"], "path": ["customer", "orders", "checkout"] }
+					}
+				},
+				{
+					"name": "Get Customer Order Details",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/orders/DSTK-2026-XXXX", "host": ["{{baseUrl}}"], "path": ["customer", "orders", "DSTK-2026-XXXX"] } }
+				},
+				{
+					"name": "Live Order GPS Tracking (Map Coordinates)",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/customer/orders/DSTK-2026-XXXX/live-tracking", "host": ["{{baseUrl}}"], "path": ["customer", "orders", "DSTK-2026-XXXX", "live-tracking"] } }
+				},
+				{
+					"name": "Submit Ratings & Review (Food & Rider)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": 1,\n    \"food_rating\": 5,\n    \"delivery_rating\": 5,\n    \"comment\": \"Amazing biryani and lightning-fast delivery!\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/customer/reviews", "host": ["{{baseUrl}}"], "path": ["customer", "reviews"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "04. Delivery Rider Fleet Portal",
+			"item": [
+				{
+					"name": "Get Rider Profile & Duty Status",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/delivery/profile", "host": ["{{baseUrl}}"], "path": ["delivery", "profile"] } }
+				},
+				{
+					"name": "Toggle Duty Online / Offline",
+					"request": {
+						"method": "PATCH",
+						"body": { "mode": "raw", "raw": "{\n    \"is_online\": true\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{baseUrl}}/delivery/duty-status", "host": ["{{baseUrl}}"], "path": ["delivery", "duty-status"] }
+					}
+				},
+				{
+					"name": "Stream Live GPS Location (Background Telemetry)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"latitude\": 26.4520000,\n    \"longitude\": 80.3340000,\n    \"heading\": 180.5,\n    \"speed\": 28.5\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/delivery/location/stream", "host": ["{{baseUrl}}"], "path": ["delivery", "location", "stream"] }
+					}
+				},
+				{
+					"name": "Get Current Assigned Delivery Task",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/delivery/orders/assigned", "host": ["{{baseUrl}}"], "path": ["delivery", "orders", "assigned"] } }
+				},
+				{
+					"name": "Pickup Order from Kitchen",
+					"request": { "method": "PATCH", "url": { "raw": "{{baseUrl}}/delivery/orders/DSTK-2026-XXXX/pickup", "host": ["{{baseUrl}}"], "path": ["delivery", "orders", "DSTK-2026-XXXX", "pickup"] } }
+				},
+				{
+					"name": "Verify Delivery (With 4-Digit OTP)",
+					"request": {
+						"method": "POST",
+						"body": { "mode": "raw", "raw": "{\n    \"otp\": \"1234\"\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{baseUrl}}/delivery/orders/DSTK-2026-XXXX/verify-delivery", "host": ["{{baseUrl}}"], "path": ["delivery", "orders", "DSTK-2026-XXXX", "verify-delivery"] }
+					}
+				},
+				{
+					"name": "Get Rider COD Cash Ledger",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/delivery/cod/ledger", "host": ["{{baseUrl}}"], "path": ["delivery", "cod", "ledger"] } }
+				},
+				{
+					"name": "Rider Analytics & Earnings Summary",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/delivery/analytics/summary", "host": ["{{baseUrl}}"], "path": ["delivery", "analytics", "summary"] } }
+				}
+			]
+		},
+		{
+			"name": "05. Restaurant Partner Kitchen Portal",
+			"item": [
+				{
+					"name": "Get Kitchen Profile",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/partner/restaurant", "host": ["{{baseUrl}}"], "path": ["partner", "restaurant"] } }
+				},
+				{
+					"name": "Toggle Store Open / Closed",
+					"request": {
+						"method": "PATCH",
+						"body": { "mode": "raw", "raw": "{\n    \"is_open\": true\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{baseUrl}}/partner/restaurant/toggle-open", "host": ["{{baseUrl}}"], "path": ["partner", "restaurant", "toggle-open"] }
+					}
+				},
+				{
+					"name": "List Incoming Live Kitchen Orders",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/partner/orders", "host": ["{{baseUrl}}"], "path": ["partner", "orders"] } }
+				},
+				{
+					"name": "Accept Order",
+					"request": { "method": "PATCH", "url": { "raw": "{{baseUrl}}/partner/orders/DSTK-2026-XXXX/accept", "host": ["{{baseUrl}}"], "path": ["partner", "orders", "DSTK-2026-XXXX", "accept"] } }
+				},
+				{
+					"name": "Mark Order as Preparing",
+					"request": { "method": "PATCH", "url": { "raw": "{{baseUrl}}/partner/orders/DSTK-2026-XXXX/preparing", "host": ["{{baseUrl}}"], "path": ["partner", "orders", "DSTK-2026-XXXX", "preparing"] } }
+				},
+				{
+					"name": "Mark Order Ready For Pickup",
+					"request": { "method": "PATCH", "url": { "raw": "{{baseUrl}}/partner/orders/DSTK-2026-XXXX/ready", "host": ["{{baseUrl}}"], "path": ["partner", "orders", "DSTK-2026-XXXX", "ready"] } }
+				},
+				{
+					"name": "1-Click Toggle Menu Item In/Out of Stock",
+					"request": { "method": "PATCH", "url": { "raw": "{{baseUrl}}/partner/menu/items/1/toggle-availability", "host": ["{{baseUrl}}"], "path": ["partner", "menu", "items", "1", "toggle-availability"] } }
+				},
+				{
+					"name": "Kitchen Analytics & Revenue Dashboard",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/partner/analytics/dashboard", "host": ["{{baseUrl}}"], "path": ["partner", "analytics", "dashboard"] } }
+				},
+				{
+					"name": "View Merchant Settlements",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/partner/settlements", "host": ["{{baseUrl}}"], "path": ["partner", "settlements"] } }
+				}
+			]
+		},
+		{
+			"name": "06. Super Admin Operations & Control Center",
+			"item": [
+				{
+					"name": "Admin KPI Overview Dashboard",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/analytics/dashboard", "host": ["{{baseUrl}}"], "path": ["admin", "analytics", "dashboard"] } }
+				},
+				{
+					"name": "Live Fleet GPS Map (All Online & Busy Riders)",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/fleet/live-map", "host": ["{{baseUrl}}"], "path": ["admin", "fleet", "live-map"] } }
+				},
+				{
+					"name": "List All Platform Orders (Filter by Status)",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/orders?status=PENDING", "host": ["{{baseUrl}}"], "path": ["admin", "orders"] } }
+				},
+				{
+					"name": "Manual Order Dispatch (Assign Rider)",
+					"request": {
+						"method": "PATCH",
+						"body": { "mode": "raw", "raw": "{\n    \"delivery_boy_id\": 7\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{baseUrl}}/admin/orders/1/assign-rider", "host": ["{{baseUrl}}"], "path": ["admin", "orders", "1", "assign-rider"] }
+					}
+				},
+				{
+					"name": "Generate Merchant Settlement Batch",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"restaurant_id\": 1,\n    \"start_date\": \"2026-08-01\",\n    \"end_date\": \"2026-08-14\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/admin/settlements/generate", "host": ["{{baseUrl}}"], "path": ["admin", "settlements", "generate"] }
+					}
+				},
+				{
+					"name": "Process Merchant Settlement Payout (With UTR)",
+					"request": {
+						"method": "PATCH",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payout_method\": \"BANK_TRANSFER\",\n    \"payout_reference\": \"UTR998877665544\",\n    \"notes\": \"Direct NEFT transfer to verified merchant account\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{baseUrl}}/admin/settlements/1/process-payout", "host": ["{{baseUrl}}"], "path": ["admin", "settlements", "1", "process-payout"] }
+					}
+				},
+				{
+					"name": "Export Sales Report as CSV",
+					"request": { "method": "GET", "url": { "raw": "{{baseUrl}}/admin/reports/sales/export?start_date=2026-08-01&end_date=2026-08-14", "host": ["{{baseUrl}}"], "path": ["admin", "reports", "sales", "export"] } }
+				},
+				{
+					"name": "Verify Rider COD Office Deposit",
+					"request": { "method": "PATCH", "url": { "raw": "{{baseUrl}}/admin/cod/verify-deposit/1", "host": ["{{baseUrl}}"], "path": ["admin", "cod", "verify-deposit", "1"] } }
+				},
+				{
+					"name": "Manage Support Tickets (Assign & Respond)",
+					"request": {
+						"method": "POST",
+						"body": { "mode": "raw", "raw": "{\n    \"message\": \"We have verified your order issue with the restaurant. Your refund has been initiated.\"\n}", "options": { "raw": { "language": "json" } } },
+						"url": { "raw": "{{baseUrl}}/admin/support/tickets/1/messages", "host": ["{{baseUrl}}"], "path": ["admin", "support", "tickets", "1", "messages"] }
+					}
+				}
+			]
+		}
+	]
+}

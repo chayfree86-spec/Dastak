@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Http\Requests\Cart;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ApplyCouponRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return auth('sanctum')->check();
+    }
+
+    public function rules(): array
+    {
+        return [
+            'code' => ['required', 'string', 'max:50'],
+        ];
+    }
+}
