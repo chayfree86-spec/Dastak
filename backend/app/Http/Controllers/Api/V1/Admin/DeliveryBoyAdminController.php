@@ -125,6 +125,42 @@ class DeliveryBoyAdminController extends Controller
         return ApiResponse::success(['id' => $rider->id], 'Delivery boy onboarded successfully.', 201);
     }
 
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => ['sometimes', 'string', 'max:150'],
+            'mobile' => ['sometimes', 'string', 'max:20'],
+            'email' => ['nullable', 'email', 'max:150'],
+            'vehicle_type' => ['nullable', 'string', 'max:30'],
+            'vehicle_number' => ['nullable', 'string', 'max:30'],
+            'license_number' => ['nullable', 'string', 'max:50'],
+            'status' => ['nullable', 'string'],
+        ]);
+
+        $rider = User::findOrFail($id);
+
+        $userUpdate = [];
+        if (array_key_exists('name', $data)) $userUpdate['name'] = $data['name'];
+        if (array_key_exists('mobile', $data)) $userUpdate['mobile'] = $data['mobile'];
+        if (! empty($data['email'])) $userUpdate['email'] = $data['email'];
+        if (! empty($data['status'])) {
+            $userUpdate['status'] = strtoupper($data['status']) === 'ACTIVE' ? AccountStatus::ACTIVE : AccountStatus::SUSPENDED;
+        }
+        if ($userUpdate) {
+            $rider->update($userUpdate);
+        }
+
+        $profileUpdate = [];
+        if (! empty($data['vehicle_type'])) $profileUpdate['vehicle_type'] = strtoupper($data['vehicle_type']);
+        if (array_key_exists('vehicle_number', $data)) $profileUpdate['vehicle_number'] = $data['vehicle_number'];
+        if (array_key_exists('license_number', $data)) $profileUpdate['driving_license_number'] = $data['license_number'];
+        if ($profileUpdate) {
+            $rider->deliveryProfile()->updateOrCreate(['user_id' => $rider->id], $profileUpdate);
+        }
+
+        return ApiResponse::success(['id' => $rider->id], 'Delivery boy updated successfully.');
+    }
+
     public function updateStatus(Request $request, int $id): JsonResponse
     {
         $data = $request->validate(['status' => ['required', 'string', 'in:ACTIVE,SUSPENDED']]);

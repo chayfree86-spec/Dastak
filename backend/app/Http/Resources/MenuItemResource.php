@@ -17,7 +17,9 @@ class MenuItemResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'image' => $this->image,
+            'image' => $this->image
+                ? (str_starts_with($this->image, 'http') ? $this->image : asset('storage/'.ltrim($this->image, '/')))
+                : null,
             'base_price' => (float) $this->base_price,
             'discount_price' => $this->discount_price !== null ? (float) $this->discount_price : null,
             'food_type' => $this->food_type?->value ?? (string) $this->food_type,

@@ -31,6 +31,12 @@ export const RestaurantFormModal = ({
   const [image, setImage] = useState(null)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  const [latitude, setLatitude] = useState(26.8467)
+  const [longitude, setLongitude] = useState(80.9462)
+  const [geocodeLoading, setGeocodeLoading] = useState(false)
+
+  const mapRef = useRef(null)
+  const markerRef = useRef(null)
 
   const toast = useToast()
   const formRef = useRef(null)
@@ -49,6 +55,8 @@ export const RestaurantFormModal = ({
       setDeliveryRadiusKm(String(restaurant.delivery_radius_km || '7'))
       setIsActive(restaurant.status === 'ACTIVE')
       setIsVegOnly(!!restaurant.is_veg_only)
+      setLatitude(Number(restaurant.latitude) || 26.8467)
+      setLongitude(Number(restaurant.longitude) || 80.9462)
     } else {
       setName('')
       setOwnerName('')
@@ -62,9 +70,147 @@ export const RestaurantFormModal = ({
       setIsActive(true)
       setIsVegOnly(false)
       setImage(null)
+      setLatitude(26.8467)
+      setLongitude(80.9462)
     }
     setErrors({})
   }, [restaurant, isOpen])
+
+  const updateMapMarker = (lat, lng) => {
+    setLatitude(lat)
+    setLongitude(lng)
+    if (mapRef.current) {
+      mapRef.current.setView([lat, lng], 14)
+    }
+    if (markerRef.current) {
+      markerRef.current.setLatLng([lat, lng])
+    }
+  }
+
+  const handleAutoFetchLocation = () => {
+    if (!navigator.geolocation) {
+      toast.warning('Not Supported', 'Geolocation is not supported by your browser.')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude
+        const lng = position.coords.longitude
+        updateMapMarker(lat, lng)
+        toast.success('Location Fetched', 'Device coordinates loaded successfully.')
+      },
+      (error) => {
+        toast.error('Location Error', error.message || 'Unable to retrieve location.')
+      },
+      { enableHighAccuracy: true }
+    )
+  }
+
+  const handleGeocodeAddress = async () => {
+    if (!address.trim()) return
+    setGeocodeLoading(true)
+    try {
+      const query = encodeURIComponent(`${address}, ${city}`)
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`)
+      const data = await res.json()
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat)
+        const lng = parseFloat(data[0].lon)
+        updateMapMarker(lat, lng)
+        toast.success('Address Located', 'Map center updated based on address lookup.')
+      } else {
+        toast.warning('Not Found', 'Could not locate address on map. Please try a different query or drag pin manually.')
+      }
+    } catch (err) {
+      toast.error('Search Failed', 'Unable to reach geocoding service.')
+    } finally {
+      setGeocodeLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    let isMounted = true
+
+    const initModalMap = () => {
+      if (!window.L) return
+
+      const lat = Number(latitude) || 26.8467
+      const lng = Number(longitude) || 80.9462
+
+      if (mapRef.current) {
+        mapRef.current.setView([lat, lng], 13)
+        if (markerRef.current) {
+          markerRef.current.setLatLng([lat, lng])
+        }
+        return
+      }
+
+      const mapDiv = document.getElementById('modal-delivery-map')
+      if (!mapDiv) {
+        setTimeout(() => {
+          if (isMounted) initModalMap()
+        }, 100)
+        return
+      }
+
+      const map = window.L.map('modal-delivery-map').setView([lat, lng], 13)
+      mapRef.current = map
+
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map)
+
+      const customIcon = window.L.divIcon({
+        html: `
+          <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[#2845D6]/20 border-2 border-[#2845D6] shadow-lg animate-pulse">
+            <div class="w-3.5 h-3.5 rounded-full bg-[#2845D6] border-2 border-white"></div>
+          </div>
+        `,
+        className: 'custom-div-icon',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      })
+
+      const marker = window.L.marker([lat, lng], { draggable: true, icon: customIcon }).addTo(map)
+      markerRef.current = marker
+
+      marker.on('dragend', () => {
+        const position = marker.getLatLng()
+        setLatitude(position.lat)
+        setLongitude(position.lng)
+      })
+    }
+
+    if (!window.L) {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+      document.head.appendChild(link)
+
+      const script = document.createElement('script')
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+      script.onload = () => {
+        if (isMounted) initModalMap()
+      }
+      document.body.appendChild(script)
+    } else {
+      const timer = setTimeout(() => {
+        if (isMounted) initModalMap()
+      }, 200)
+      return () => clearTimeout(timer)
+    }
+
+    return () => {
+      isMounted = false
+      if (mapRef.current) {
+        mapRef.current.remove()
+        mapRef.current = null
+        markerRef.current = null
+      }
+    }
+  }, [isOpen])
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault()
@@ -96,6 +242,8 @@ export const RestaurantFormModal = ({
         delivery_radius_km: Number(deliveryRadiusKm),
         status: isActive ? 'ACTIVE' : 'INACTIVE',
         is_veg_only: isVegOnly,
+        latitude: Number(latitude),
+        longitude: Number(longitude),
       }
 
       if (restaurant?.id) {
@@ -163,12 +311,50 @@ export const RestaurantFormModal = ({
           />
         </div>
 
-        <Input
-          label="Full Address"
-          placeholder="Shop No, Street, Landmark, Area"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="modal-address-input" className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Full Address <span className="text-rose-500">*</span>
+            </label>
+            <div className="flex items-center gap-2 select-none">
+              <button
+                type="button"
+                onClick={handleAutoFetchLocation}
+                className="px-2 py-0.5 text-[9px] font-bold bg-[#2845D6]/10 hover:bg-[#2845D6]/20 text-[#2845D6] dark:bg-blue-900/30 dark:text-blue-400 rounded-md transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2845D6] animate-pulse"></span>
+                Fetch Location
+              </button>
+              {address.trim().length > 3 && (
+                <button
+                  type="button"
+                  onClick={handleGeocodeAddress}
+                  className="px-2 py-0.5 text-[9px] font-bold bg-emerald-50 hover:bg-emerald-100/60 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 rounded-md transition-all cursor-pointer"
+                  disabled={geocodeLoading}
+                >
+                  {geocodeLoading ? 'Locating...' : 'Locate on Map'}
+                </button>
+              )}
+            </div>
+          </div>
+          <Input
+            id="modal-address-input"
+            placeholder="Shop No, Street, Landmark, Area"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+        </div>
+
+        {/* Map Container in Modal */}
+        <div className="space-y-1.5">
+          <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex justify-between select-none">
+            <span>Coordinates (Drag Pin to refine)</span>
+            <span className="font-mono">Lat: {Number(latitude).toFixed(5)}, Lng: {Number(longitude).toFixed(5)}</span>
+          </div>
+          <div className="h-[200px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 relative bg-slate-50 dark:bg-slate-900">
+            <div id="modal-delivery-map" className="w-full h-full z-0" />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Input

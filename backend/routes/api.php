@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\FinanceAdminController;
 use App\Http\Controllers\Api\V1\Admin\FinanceScreenController;
 use App\Http\Controllers\Api\V1\Admin\FleetAdminController;
 use App\Http\Controllers\Api\V1\Admin\MarketingAdminController;
+use App\Http\Controllers\Api\V1\Admin\MenuAdminController;
 use App\Http\Controllers\Api\V1\Admin\OrderAdminController;
 use App\Http\Controllers\Api\V1\Admin\ReportAdminController;
 use App\Http\Controllers\Api\V1\Admin\ReportScreenController;
@@ -254,20 +255,29 @@ Route::prefix('v1')->group(function () {
                 Route::get('/restaurants/{id}', [RestaurantAdminController::class, 'show']);
                 Route::put('/restaurants/{restaurant}', [RestaurantAdminController::class, 'update']);
                 Route::patch('/restaurants/{restaurant}/status', [RestaurantAdminController::class, 'updateStatus']);
+                Route::put('/restaurants/{id}/operating-hours', [RestaurantAdminController::class, 'updateOperatingHours']);
 
                 // Restaurant detail tabs: menu, orders, earnings, settlements
-                Route::get('/restaurants/{id}/menu', [RestaurantAdminController::class, 'getMenu']);
                 Route::get('/restaurants/{id}/orders', [RestaurantAdminController::class, 'getOrders']);
                 Route::get('/restaurants/{id}/earnings', [RestaurantAdminController::class, 'getEarnings']);
                 Route::get('/restaurants/{id}/settlements', [RestaurantAdminController::class, 'getSettlements']);
-                Route::post('/restaurants/{id}/menu/items', [RestaurantAdminController::class, 'storeMenuItem']);
-                Route::put('/restaurants/{id}/menu/items/{itemId}', [RestaurantAdminController::class, 'updateMenuItem']);
-                Route::patch('/restaurants/{id}/menu/items/{itemId}/availability', [RestaurantAdminController::class, 'toggleMenuItemAvailability']);
+
+                // Full menu management: categories, sub-categories, items, image upload
+                Route::get('/restaurants/{id}/menu', [MenuAdminController::class, 'menu']);
+                Route::post('/restaurants/{id}/menu/upload-image', [MenuAdminController::class, 'uploadImage']);
+                Route::post('/restaurants/{id}/menu/categories', [MenuAdminController::class, 'storeCategory']);
+                Route::put('/restaurants/{id}/menu/categories/{categoryId}', [MenuAdminController::class, 'updateCategory']);
+                Route::delete('/restaurants/{id}/menu/categories/{categoryId}', [MenuAdminController::class, 'destroyCategory']);
+                Route::post('/restaurants/{id}/menu/items', [MenuAdminController::class, 'storeItem']);
+                Route::put('/restaurants/{id}/menu/items/{itemId}', [MenuAdminController::class, 'updateItem']);
+                Route::delete('/restaurants/{id}/menu/items/{itemId}', [MenuAdminController::class, 'destroyItem']);
+                Route::patch('/restaurants/{id}/menu/items/{itemId}/availability', [MenuAdminController::class, 'toggleItemAvailability']);
 
                 // Delivery Fleet Management
                 Route::get('/delivery-boys', [DeliveryBoyAdminController::class, 'index']);
                 Route::post('/delivery-boys', [DeliveryBoyAdminController::class, 'store']);
                 Route::get('/delivery-boys/{id}', [DeliveryBoyAdminController::class, 'show']);
+                Route::put('/delivery-boys/{id}', [DeliveryBoyAdminController::class, 'update']);
                 Route::patch('/delivery-boys/{id}/status', [DeliveryBoyAdminController::class, 'updateStatus']);
                 Route::get('/delivery-boys/{id}/active-deliveries', [DeliveryBoyAdminController::class, 'activeDeliveries']);
                 Route::get('/delivery-boys/{id}/orders', [DeliveryBoyAdminController::class, 'orderHistory']);

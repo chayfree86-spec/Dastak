@@ -8,9 +8,10 @@ export const Switch = ({
   disabled = false,
   className = '',
 }) => {
+  const isCentered = !description
   return (
-    <label className={`inline-flex items-start gap-3 cursor-pointer select-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
-      <div className="relative inline-flex items-center mt-0.5">
+    <label className={`inline-flex ${isCentered ? 'items-center' : 'items-start'} gap-3 cursor-pointer select-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
+      <div className={`relative inline-flex items-center ${isCentered ? '' : 'mt-0.5'}`}>
         <input
           type="checkbox"
           checked={checked}

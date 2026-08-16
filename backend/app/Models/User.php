@@ -23,6 +23,7 @@ class User extends Authenticatable
         'status',
         'avatar',
         'password',
+        'login_pin',
         'email_verified_at',
         'mobile_verified_at',
         'last_login_at',
@@ -41,6 +42,7 @@ class User extends Authenticatable
             'mobile_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
             'password' => 'hashed',
+            'login_pin' => 'hashed',
             'status' => AccountStatus::class,
             'metadata' => 'array',
         ];

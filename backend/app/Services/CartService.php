@@ -69,6 +69,33 @@ class CartService
                 ]);
             }
 
+            // Validate Delivery Radius if address is already selected
+            if ($cart->delivery_address_id) {
+                $address = Address::where('user_id', $user->id)->find($cart->delivery_address_id);
+                if ($address && $restaurant->latitude !== null && $restaurant->longitude !== null &&
+                    $address->latitude !== null && $address->longitude !== null) {
+                    
+                    $distance = Restaurant::calculateDistance(
+                        (float) $restaurant->latitude,
+                        (float) $restaurant->longitude,
+                        (float) $address->latitude,
+                        (float) $address->longitude
+                    );
+                    
+                    $radiusLimit = (float) ($restaurant->delivery_radius_km ?? 12);
+                    
+                    if ($distance > $radiusLimit) {
+                        throw ValidationException::withMessages([
+                            'address' => [sprintf(
+                                'This restaurant is outside your delivery range (%.2f km away, max range %d km).',
+                                $distance,
+                                $radiusLimit
+                            )],
+                        ]);
+                    }
+                }
+            }
+
             // Single Restaurant Constraint
             if ($cart->restaurant_id && $cart->restaurant_id !== $restaurantId && $cart->items()->exists()) {
                 if (! $forceClear) {
@@ -222,6 +249,33 @@ class CartService
     {
         $cart = $this->getOrCreateCart($user);
         $address = $user->addresses()->findOrFail($addressId);
+
+        // Validate Delivery Radius if cart has a restaurant
+        if ($cart->restaurant_id) {
+            $restaurant = Restaurant::find($cart->restaurant_id);
+            if ($restaurant && $restaurant->latitude !== null && $restaurant->longitude !== null &&
+                $address->latitude !== null && $address->longitude !== null) {
+                
+                $distance = Restaurant::calculateDistance(
+                    (float) $restaurant->latitude,
+                    (float) $restaurant->longitude,
+                    (float) $address->latitude,
+                    (float) $address->longitude
+                );
+                
+                $radiusLimit = (float) ($restaurant->delivery_radius_km ?? 12);
+                
+                if ($distance > $radiusLimit) {
+                    throw ValidationException::withMessages([
+                        'address' => [sprintf(
+                            'Your delivery location is %.2f km away, which is outside this restaurant\'s delivery range (max %d km).',
+                            $distance,
+                            $radiusLimit
+                        )],
+                    ]);
+                }
+            }
+        }
 
         $cart->update(['delivery_address_id' => $address->id]);
 

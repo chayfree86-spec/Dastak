@@ -66,6 +66,8 @@ class RestaurantAdminController extends Controller
             'settlement_cycle' => ['nullable', 'string', 'in:DAILY,WEEKLY,MONTHLY'],
             'min_order' => ['nullable', 'numeric', 'min:0'],
             'delivery_radius_km' => ['nullable', 'numeric', 'min:0'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'status' => ['nullable', 'string'],
             'is_veg_only' => ['nullable', 'boolean'],
         ]);
@@ -96,6 +98,11 @@ class RestaurantAdminController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:150'],
             'owner_name' => ['sometimes', 'string', 'max:150'],
+            'owner_email' => ['nullable', 'email', 'max:150', 'unique:users,email,'.($restaurant->owner?->id ?? 0)],
+            'owner_mobile' => ['nullable', 'string', 'max:20', 'unique:users,mobile,'.($restaurant->owner?->id ?? 0)],
+            'owner_status' => ['nullable', 'string', 'in:ACTIVE,SUSPENDED'],
+            'password' => ['nullable', 'string', 'min:6'],
+            'login_pin' => ['nullable', 'string', 'regex:/^\d{4,6}$/'],
             'mobile' => ['sometimes', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -104,14 +111,36 @@ class RestaurantAdminController extends Controller
             'settlement_cycle' => ['nullable', 'string', 'in:DAILY,WEEKLY,MONTHLY'],
             'min_order' => ['nullable', 'numeric', 'min:0'],
             'delivery_radius_km' => ['nullable', 'numeric', 'min:0'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'status' => ['nullable', 'string'],
             'is_veg_only' => ['nullable', 'boolean'],
         ]);
 
         $updated = $this->restaurantService->updateRestaurant($restaurant, $this->mapRestaurantData($validated, false));
 
-        if (! empty($validated['owner_name']) && $restaurant->owner) {
-            $restaurant->owner->update(['name' => $validated['owner_name']]);
+        $userUpdate = [];
+        if (! empty($validated['owner_name'])) {
+            $userUpdate['name'] = $validated['owner_name'];
+        }
+        if ($request->filled('owner_email')) {
+            $userUpdate['email'] = $validated['owner_email'];
+        }
+        if ($request->filled('owner_mobile')) {
+            $userUpdate['mobile'] = $validated['owner_mobile'];
+        }
+        if ($request->filled('owner_status')) {
+            $userUpdate['status'] = $validated['owner_status'];
+        }
+        if ($request->filled('password')) {
+            $userUpdate['password'] = Hash::make($validated['password']);
+        }
+        if ($request->filled('login_pin')) {
+            $userUpdate['login_pin'] = Hash::make($validated['login_pin']);
+        }
+
+        if (! empty($userUpdate) && $restaurant->owner) {
+            $restaurant->owner->update($userUpdate);
         }
 
         return ApiResponse::success(
@@ -137,6 +166,25 @@ class RestaurantAdminController extends Controller
         return ApiResponse::success(
             new AdminRestaurantDetailResource($restaurant->fresh(['owner', 'operatingHours'])),
             'Restaurant status updated.'
+        );
+    }
+
+    public function updateOperatingHours(Request $request, int $id): JsonResponse
+    {
+        $restaurant = Restaurant::findOrFail($id);
+        $data = $request->validate([
+            'hours' => ['required', 'array', 'min:1', 'max:7'],
+            'hours.*.day_of_week' => ['required', 'integer', 'between:0,6'],
+            'hours.*.opening_time' => ['required', 'string'],
+            'hours.*.closing_time' => ['required', 'string'],
+            'hours.*.is_closed' => ['nullable', 'boolean'],
+        ]);
+
+        $this->restaurantService->updateOperatingHours($restaurant, $data['hours']);
+
+        return ApiResponse::success(
+            new AdminRestaurantDetailResource($restaurant->fresh(['owner', 'operatingHours'])),
+            'Operating hours updated successfully.'
         );
     }
 
@@ -312,15 +360,16 @@ class RestaurantAdminController extends Controller
         if (array_key_exists('min_order', $v)) $map['min_order_value'] = $v['min_order'];
         if (array_key_exists('is_veg_only', $v)) $map['is_pure_veg'] = (bool) $v['is_veg_only'];
         if (array_key_exists('status', $v)) $map['is_active'] = strtoupper((string) $v['status']) === 'ACTIVE';
+        // Map coordinates on both create AND update (delivery-area map save relies on this).
+        if (array_key_exists('latitude', $v) && $v['latitude'] !== null) $map['latitude'] = $v['latitude'];
+        if (array_key_exists('longitude', $v) && $v['longitude'] !== null) $map['longitude'] = $v['longitude'];
 
         if ($isCreate) {
-            // Backend requires these NOT NULL columns; the admin form does not collect them.
-            $map += [
-                'pincode' => $v['pincode'] ?? '000000',
-                'latitude' => $v['latitude'] ?? 26.4499,
-                'longitude' => $v['longitude'] ?? 80.3319,
-                'is_open' => true,
-            ];
+            // Backend requires these NOT NULL columns; the admin form may not collect them.
+            $map['pincode'] ??= $v['pincode'] ?? '000000';
+            $map['latitude'] ??= 26.4499;
+            $map['longitude'] ??= 80.3319;
+            $map['is_open'] ??= true;
             $map['address_line1'] ??= 'N/A';
             $map['city'] ??= 'Kanpur';
         }

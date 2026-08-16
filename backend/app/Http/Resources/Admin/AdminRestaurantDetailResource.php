@@ -23,10 +23,15 @@ class AdminRestaurantDetailResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'owner_name' => $this->owner?->name,
+            'owner_email' => $this->owner?->email,
+            'owner_mobile' => $this->owner?->mobile,
+            'owner_status' => $this->owner?->status?->value ?? 'ACTIVE',
             'mobile' => $this->phone,
             'email' => $this->email,
             'address' => trim(($this->address_line1 ?? '').' '.($this->address_line2 ?? '')),
             'city' => $this->city,
+            'latitude' => $this->latitude !== null ? (float) $this->latitude : null,
+            'longitude' => $this->longitude !== null ? (float) $this->longitude : null,
             'rating' => (float) $this->rating,
             'total_reviews' => (int) $this->total_ratings,
             'status' => $this->is_active ? 'ACTIVE' : 'SUSPENDED',
@@ -41,6 +46,14 @@ class AdminRestaurantDetailResource extends JsonResource
             'total_orders' => (int) $this->orders()->count(),
             'lifetime_sales' => $lifetimeSales,
             'pending_settlement' => $pendingSettlement,
+            'operating_hours' => $this->relationLoaded('operatingHours')
+                ? $this->operatingHours->map(fn ($h) => [
+                    'day_of_week' => $h->day_of_week,
+                    'opening_time' => $h->opening_time,
+                    'closing_time' => $h->closing_time,
+                    'is_closed' => (bool) $h->is_closed,
+                ])->values()->all()
+                : [],
         ];
     }
 

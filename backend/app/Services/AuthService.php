@@ -17,12 +17,23 @@ class AuthService
 
     public function login(string $identifier, string $password, ?string $deviceName = 'API Client'): array
     {
-        // Allow login with either email or mobile number
-        $user = User::where('email', $identifier)
-            ->orWhere('mobile', $identifier)
-            ->first();
+        // Allow login with either email (checks password) or mobile number (checks login_pin)
+        $isEmail = str_contains($identifier, '@');
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        $user = $isEmail
+            ? User::where('email', $identifier)->first()
+            : User::where('mobile', $identifier)->first();
+
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'identifier' => ['The provided credentials do not match our records.'],
+            ]);
+        }
+
+        // Verify password for email login, or login_pin for mobile login (fallback to password if pin not set)
+        $hashToCheck = $isEmail ? $user->password : ($user->login_pin ?: $user->password);
+
+        if (! Hash::check($password, $hashToCheck)) {
             throw ValidationException::withMessages([
                 'identifier' => ['The provided credentials do not match our records.'],
             ]);

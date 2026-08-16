@@ -14,6 +14,7 @@ class MenuCategory extends Model
 
     protected $fillable = [
         'restaurant_id',
+        'parent_id',
         'name',
         'slug',
         'description',
@@ -44,5 +45,15 @@ class MenuCategory extends Model
     public function items(): HasMany
     {
         return $this->hasMany(MenuItem::class, 'category_id')->orderBy('sort_order', 'asc');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(MenuCategory::class, 'parent_id');
+    }
+
+    public function subcategories(): HasMany
+    {
+        return $this->hasMany(MenuCategory::class, 'parent_id')->orderBy('sort_order', 'asc');
     }
 }

@@ -54,6 +54,30 @@ class OrderService
 
             $address = Address::where('user_id', $user->id)->findOrFail($addressId);
 
+            // Validate Delivery Radius
+            if ($restaurant->latitude !== null && $restaurant->longitude !== null &&
+                $address->latitude !== null && $address->longitude !== null) {
+                
+                $distance = \App\Models\Restaurant::calculateDistance(
+                    (float) $restaurant->latitude,
+                    (float) $restaurant->longitude,
+                    (float) $address->latitude,
+                    (float) $address->longitude
+                );
+                
+                $radiusLimit = (float) ($restaurant->delivery_radius_km ?? 12);
+                
+                if ($distance > $radiusLimit) {
+                    throw ValidationException::withMessages([
+                        'address' => [sprintf(
+                            'Your delivery location is %.2f km away, which is outside this restaurant\'s delivery range (max %d km).',
+                            $distance,
+                            $radiusLimit
+                        )],
+                    ]);
+                }
+            }
+
             // Generate Unique Order Number e.g. DSTK-2026-XXXX
             $orderNumber = 'DSTK-' . date('Ymd') . '-' . strtoupper(Str::random(5));
 
