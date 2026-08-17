@@ -45,7 +45,23 @@ export const LocationProvider = ({ children }) => {
     setLoading(true)
     try {
       const res = await customerApi.getAddresses()
-      const list = res.data || []
+      const rawList = res.data?.data || res.data || []
+      const list = rawList.map((a) => {
+        const fullAddr =
+          a.address ||
+          [a.address_line1, a.address_line2, a.city, a.pincode]
+            .filter(Boolean)
+            .join(', ') ||
+          'Lalganj, Azamgarh 276202'
+        return {
+          ...a,
+          customer_name: a.contact_name || a.customer_name || a.name || 'Valued Customer',
+          customer_phone: a.contact_mobile || a.customer_phone || a.phone || '',
+          address: fullAddr,
+          landmark: a.landmark || '',
+          type: (a.type?.value || a.type || 'Home').toString(),
+        }
+      })
       setAddresses(list)
       const def = list.find((a) => a.is_default) || list[0]
       if (def) {

@@ -21,7 +21,6 @@ import {
   ChevronRight,
   TrendingUp,
   X,
-  Sparkles,
 } from 'lucide-react'
 import deliveryApi from '../../api/delivery.api'
 import { formatCurrency, formatDateTime, formatTime } from '../../utils/formatters'

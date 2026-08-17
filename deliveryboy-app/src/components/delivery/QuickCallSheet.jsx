@@ -8,7 +8,6 @@ import {
   User,
   Store,
   Navigation,
-  Sparkles,
 } from 'lucide-react'
 import Modal from '../common/Modal'
 import Button from '../common/Button'

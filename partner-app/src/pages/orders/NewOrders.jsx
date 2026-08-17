@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Flame, RefreshCw, Clock, CheckCircle2, Sparkles, Inbox } from 'lucide-react'
+import { Flame, RefreshCw, Clock, CheckCircle2, Inbox } from 'lucide-react'
 import { useOrderPolling } from '../../hooks/useOrderPolling'
 import { useToast } from '../../context/ToastContext'
 import ordersApi from '../../api/orders.api'

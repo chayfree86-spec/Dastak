@@ -38,8 +38,13 @@ export const CheckoutPage = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  React.useEffect(() => {
+    if (items.length === 0) {
+      navigate('/cart', { replace: true })
+    }
+  }, [items.length, navigate])
+
   if (items.length === 0) {
-    navigate('/cart')
     return null
   }
 
@@ -81,16 +86,23 @@ export const CheckoutPage = () => {
       }
 
       const res = await customerApi.checkout(payload)
-      const order = res.data?.order || res.data || {}
+      const order = res.data?.data || res.data?.order || res.data || {}
+      const orderNumber = order.order_number || order.data?.order_number || 'New'
 
       toast.success(
         'Order Placed Successfully!',
-        `Order #${order.order_number || 'New'} is being sent to kitchen.`
+        `Order #${orderNumber} is being sent to kitchen.`
       )
       clearCart()
-      navigate(`/orders/${order.order_number}`)
+      navigate(`/orders/${orderNumber}/confirmation`)
     } catch (err) {
-      setError(err.message || 'Failed to place order. Please try again.')
+      const msg =
+        err.response?.data?.message ||
+        (err.response?.data?.errors
+          ? Object.values(err.response.data.errors).flat().join(', ')
+          : err.message) ||
+        'Failed to place order. Please try again.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -110,7 +122,7 @@ export const CheckoutPage = () => {
 
       <form onSubmit={handlePlaceOrder} className="space-y-4">
         {/* 1. Delivery Address Selection Card */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-[#F97316]" />
@@ -142,7 +154,7 @@ export const CheckoutPage = () => {
         </div>
 
         {/* 2. Delivery Instructions */}
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
           <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-slate-400" />
             <span>Delivery Instructions (Optional)</span>
@@ -234,11 +246,11 @@ export const CheckoutPage = () => {
         {/* 5. Place Order Button */}
         <Button
           type="submit"
-          variant="accent"
+          variant="primary"
           size="xl"
           icon={CheckCircle2}
           loading={loading}
-          className="w-full shadow-xl shadow-orange-500/30 text-base font-black"
+          className="w-full shadow-xl shadow-orange-500/35 text-base sm:text-lg font-black py-4 rounded-2xl cursor-pointer"
         >
           {loading ? t.placingOrder : `${t.placeOrder} • ${formatCurrency(grandTotal)}`}
         </Button>

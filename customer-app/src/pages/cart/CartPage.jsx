@@ -11,7 +11,6 @@ import {
   Tag,
   Receipt,
   Bike,
-  Sparkles,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useCart } from '../../context/CartContext'
@@ -151,11 +150,11 @@ export const CartPage = () => {
                     {/* Right Controls: Stepper, Item Total & Dedicated Delete Button */}
                     <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                       {/* Quantity Stepper */}
-                      <div className="py-1 px-2 rounded-xl bg-[#2845D6] dark:bg-blue-600 text-white font-black text-xs sm:text-sm shadow-md flex items-center justify-between gap-1 select-none min-h-[34px] sm:min-h-[38px]">
+                      <div className="py-1 px-2 rounded-xl bg-[#FF5200] dark:bg-orange-600 text-white font-black text-xs sm:text-sm shadow-md flex items-center justify-between gap-1 select-none min-h-[34px] sm:min-h-[38px]">
                         <button
                           type="button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-6 h-6 flex items-center justify-center hover:bg-blue-700 rounded-md active:scale-90 transition-transform cursor-pointer"
+                          className="w-6 h-6 flex items-center justify-center hover:bg-[#E04800] rounded-md active:scale-90 transition-transform cursor-pointer"
                           title="Decrease quantity"
                         >
                           <Minus className="w-3.5 h-3.5 stroke-[3]" />
@@ -166,7 +165,7 @@ export const CartPage = () => {
                         <button
                           type="button"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-6 h-6 flex items-center justify-center hover:bg-blue-700 rounded-md active:scale-90 transition-transform cursor-pointer"
+                          className="w-6 h-6 flex items-center justify-center hover:bg-[#E04800] rounded-md active:scale-90 transition-transform cursor-pointer"
                           title="Increase quantity"
                         >
                           <Plus className="w-3.5 h-3.5 stroke-[3]" />
@@ -258,7 +257,7 @@ export const CartPage = () => {
                 <span className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100">
                   {t.grandTotal}
                 </span>
-                <span className="text-xl sm:text-2xl font-black text-[#2845D6] dark:text-blue-400">
+                <span className="text-xl sm:text-2xl font-black text-[#FF5200] dark:text-orange-400">
                   {formatCurrency(grandTotal)}
                 </span>
               </div>
@@ -269,7 +268,7 @@ export const CartPage = () => {
               size="lg"
               icon={ArrowRight}
               onClick={() => navigate('/checkout')}
-              className="w-full py-3.5 shadow-xl shadow-blue-600/30 text-sm sm:text-base font-black mt-2"
+              className="w-full py-3.5 shadow-xl shadow-orange-500/30 text-sm sm:text-base font-black mt-2"
             >
               {t.proceedToCheckout}
             </Button>

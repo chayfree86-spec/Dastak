@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import {
   Search,
   Mic,
-  Sparkles,
   Flame,
   Store,
   ChevronRight,
@@ -174,39 +173,14 @@ export const HomePage = () => {
   })
 
   return (
-    <div className="space-y-5 pb-8">
+    <div className="space-y-5 pb-16">
       {/* 1. Active Order Banner in Header Area */}
       {activeOrder && <ActiveOrderBanner order={activeOrder} />}
 
-      {/* 2. Top Prominent Search Bar with Voice */}
-      <div
-        onClick={() => navigate('/search')}
-        className="p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-[#2845D6] dark:hover:border-blue-500 transition-all flex items-center justify-between gap-3 cursor-pointer group"
-      >
-        <div className="flex items-center gap-2.5 min-w-0 flex-1 ml-1">
-          <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 group-hover:scale-110 transition-transform shrink-0" />
-          <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 truncate">
-            {t.searchPlaceholder || 'What do you want to eat? Search biryani, chai...'}
-          </span>
-        </div>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            setVoiceModalOpen(true)
-          }}
-          className="p-2 rounded-xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-          title="Search with Voice"
-        >
-          <Mic className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* 3. Hero Promo Banner Carousel */}
+      {/* 2. Hero Promo Banner Carousel */}
       <div className="relative overflow-hidden rounded-3xl shadow-xl">
         <div
-          className={`relative p-6 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between min-h-[180px] sm:min-h-[220px] overflow-hidden transition-all duration-500`}
+          className={`relative p-5 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between min-h-[160px] sm:min-h-[220px] overflow-hidden transition-all duration-500`}
         >
           {/* Background Photo with soft overlay */}
           <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5 overflow-hidden opacity-30 sm:opacity-40 mix-blend-luminosity pointer-events-none">
@@ -217,17 +191,17 @@ export const HomePage = () => {
             />
           </div>
 
-          <div className="relative z-10 space-y-2 max-w-lg">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
+          <div className="relative z-10 space-y-1.5 sm:space-y-2 max-w-lg">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-xl bg-white/20 backdrop-blur-md text-[10px] sm:text-xs font-black uppercase tracking-wider">
+              <Flame className="w-3 sm:w-3.5 h-3 sm:h-3.5 fill-amber-300 text-amber-300" />
               <span>{promoBanners[activeBannerIndex].badge}</span>
             </span>
 
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight drop-shadow-sm">
+            <h3 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight drop-shadow-sm">
               {promoBanners[activeBannerIndex].title}
             </h3>
 
-            <p className="text-xs sm:text-sm text-white/90 font-medium">
+            <p className="text-xs sm:text-sm text-white/90 font-medium line-clamp-2">
               {promoBanners[activeBannerIndex].subtitle}
             </p>
           </div>
@@ -268,22 +242,22 @@ export const HomePage = () => {
           <span>{t.categories}</span>
         </div>
 
-        {/* Categories Track with Left & Right Centered Arrows */}
+        {/* Categories Track with Left & Right Centered Arrows (Desktop Only) */}
         <div className="relative">
-          {/* Left Arrow - Centered on Card Image */}
+          {/* Left Arrow - Desktop Only */}
           <button
             type="button"
             onClick={() => scrollCategories(-240)}
-            className="absolute -left-2 sm:-left-3.5 top-9 sm:top-11 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent flex items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
+            className="hidden sm:flex absolute sm:-left-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
             title="Previous Categories"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+            <ChevronLeft className="w-4.5 h-4.5 stroke-[2.5]" />
           </button>
 
-          {/* Horizontal category track with hidden scrollbars */}
+          {/* Horizontal category track with hidden scrollbars & native touch swipe on mobile */}
           <div
             ref={categoriesRef}
-            className="flex items-center gap-4 sm:gap-6 overflow-x-auto py-2 px-6 sm:px-8 -my-1 scrollbar-none no-scrollbar scroll-smooth"
+            className="flex items-center gap-3 sm:gap-6 overflow-x-auto py-2 px-1 sm:px-8 -my-1 scrollbar-none no-scrollbar scroll-smooth"
           >
             {categories.map((cat) => (
               <button
@@ -307,20 +281,20 @@ export const HomePage = () => {
             ))}
           </div>
 
-          {/* Right Arrow - Centered on Card Image */}
+          {/* Right Arrow - Desktop Only */}
           <button
             type="button"
             onClick={() => scrollCategories(240)}
-            className="absolute -right-2 sm:-right-3.5 top-9 sm:top-11 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent flex items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
+            className="hidden sm:flex absolute sm:-right-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
             title="Next Categories"
           >
-            <ChevronRight className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+            <ChevronRight className="w-4.5 h-4.5 stroke-[2.5]" />
           </button>
         </div>
       </div>
 
-      {/* 5. Quick Filters Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto py-1 px-0.5 -my-0.5 scrollbar-none text-xs font-black">
+      {/* 5. Quick Filters Bar (Ergonomic Touch Height: min 40px - 44px) */}
+      <div className="flex items-center gap-2.5 overflow-x-auto py-1.5 px-0.5 -my-0.5 scrollbar-none no-scrollbar text-xs sm:text-sm font-black">
         {[
           { id: 'all', label: t.filterAll || 'All Items' },
           { id: 'rating', label: t.filterRating || '★ 4.0+ Rating' },
@@ -331,10 +305,10 @@ export const HomePage = () => {
             key={flt.id}
             type="button"
             onClick={() => setActiveFilter(flt.id)}
-            className={`px-3.5 py-1.5 rounded-2xl transition-all shrink-0 cursor-pointer ${
+            className={`px-4 py-2.5 min-h-[40px] sm:min-h-[44px] rounded-2xl transition-all shrink-0 cursor-pointer shadow-sm active:scale-95 flex items-center justify-center select-none ${
               activeFilter === flt.id
-                ? 'bg-[#2845D6] text-white shadow-md shadow-blue-600/25'
-                : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                ? 'bg-[#FF5200] text-white shadow-md shadow-orange-500/30'
+                : 'bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-[#FF5200]'
             }`}
           >
             {flt.label}
@@ -408,6 +382,48 @@ export const HomePage = () => {
             No restaurants found matching this filter.
           </div>
         )}
+      </div>
+
+      {/* 8. Floating Sticky Search Bar + Popular Dishes Near Footer Navigation */}
+      <div className="fixed bottom-16 sm:bottom-20 inset-x-3 sm:inset-x-6 max-w-lg mx-auto z-30 drop-shadow-2xl space-y-1.5 animate-in slide-in-from-bottom-4 duration-300">
+        {/* Popular Dishes Quick Tags Horizontal Scroll */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1 px-1 scrollbar-none no-scrollbar">
+          {['Chai', 'Samosa', 'Burger', 'Biryani', 'Pizza', 'Jalebi', 'Paneer Butter Masala'].map((dish) => (
+            <button
+              key={dish}
+              type="button"
+              onClick={() => navigate(`/search?q=${encodeURIComponent(dish)}`)}
+              className="px-3 py-1 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-200 shadow-md hover:border-[#2845D6] dark:hover:border-blue-500 shrink-0 transition-all active:scale-95 cursor-pointer"
+            >
+              {dish}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Bar Input */}
+        <div
+          onClick={() => navigate('/search')}
+          className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-2 border-slate-200/90 dark:border-slate-800 shadow-2xl hover:border-[#FF5200] dark:hover:border-orange-500 transition-all flex items-center justify-between gap-3 cursor-pointer group"
+        >
+          <div className="flex items-center gap-2.5 min-w-0 flex-1 ml-1.5">
+            <Search className="w-4 h-4 text-[#FF5200] dark:text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-300 truncate">
+              {t.searchPlaceholder || 'What do you want to eat? Search biryani, chai...'}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setVoiceModalOpen(true)
+            }}
+            className="p-2 rounded-xl bg-gradient-to-tr from-[#FF5200] to-amber-500 text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+            title="Search with Voice"
+          >
+            <Mic className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Voice Search Modal */}

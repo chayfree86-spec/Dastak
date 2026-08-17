@@ -55,7 +55,8 @@ export const Login = () => {
           <img
             src="/logo-horizontal.svg"
             alt="Dastak"
-            className="h-12 w-auto object-contain"
+            className="h-12 max-h-12 w-auto object-contain"
+            style={{ height: '48px', maxHeight: '48px', width: 'auto' }}
             onError={(e) => {
               e.target.onerror = null
               e.target.src = '/logo-horizontal.png'

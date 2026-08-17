@@ -57,10 +57,7 @@ class RestaurantPublicController extends Controller
     public function getMenu(string $slug): JsonResponse
     {
         $restaurant = $this->restaurantService->getRestaurantBySlug($slug);
-        
-        $menu = \Illuminate\Support\Facades\Cache::remember("public_menu_{$restaurant->id}", 300, function () use ($restaurant) {
-            return $this->menuService->getPublicRestaurantMenu($restaurant);
-        });
+        $menu = $this->menuService->getPublicRestaurantMenu($restaurant);
 
         return ApiResponse::success(
             MenuCategoryResource::collection($menu),

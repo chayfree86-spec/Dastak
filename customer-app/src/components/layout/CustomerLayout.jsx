@@ -13,7 +13,6 @@ import {
   Sun,
   Globe,
   Bike,
-  Sparkles,
   UtensilsCrossed,
   Receipt,
   FileText,
@@ -89,10 +88,10 @@ export const CustomerLayout = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-[#2845D6] selection:text-white">
       {/* 1. Header (Full Width Web Header) */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs h-14 sm:h-16 flex items-center">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex items-center justify-between gap-2.5 sm:gap-4">
           {/* Logo & Delivery Location */}
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
             <div
               onClick={() => navigate('/')}
               className="flex items-center gap-2 cursor-pointer select-none shrink-0"
@@ -100,7 +99,8 @@ export const CustomerLayout = () => {
               <img
                 src="/logo-horizontal.svg"
                 alt="Dastak Logo"
-                className="h-8 sm:h-9 w-auto object-contain shrink-0"
+                className="h-8 sm:h-9 max-h-9 w-auto max-w-[130px] sm:max-w-[170px] object-contain shrink-0"
+                style={{ height: '32px', maxHeight: '36px', width: 'auto' }}
                 onError={(e) => {
                   e.target.onerror = null
                   e.target.src = '/logo-horizontal.png'
@@ -113,14 +113,14 @@ export const CustomerLayout = () => {
               <button
                 type="button"
                 onClick={() => setLocationModalOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors text-left min-w-0 max-w-[170px] sm:max-w-xs cursor-pointer border border-slate-200/60 dark:border-slate-700/60"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-left min-w-0 max-w-[130px] xs:max-w-[165px] sm:max-w-xs cursor-pointer border border-slate-200/60 dark:border-slate-700/60 shrink"
               >
-                <MapPin className="w-4 h-4 text-[#F97316] shrink-0" />
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F97316] shrink-0" />
                 <div className="min-w-0 truncate flex-1">
-                  <span className="text-[9px] font-black uppercase text-slate-400 block tracking-wider leading-none">
+                  <span className="text-[8px] sm:text-[9px] font-black uppercase text-slate-400 block tracking-wider leading-none">
                     {t.deliveringTo}
                   </span>
-                  <span className="text-xs font-black text-slate-900 dark:text-slate-100 truncate block leading-tight">
+                  <span className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-slate-100 truncate block leading-tight">
                     {activeAddress?.address || 'Civil Lines, Kanpur'}
                   </span>
                 </div>
@@ -129,13 +129,13 @@ export const CustomerLayout = () => {
             )}
           </div>
 
-          {/* Right Header Utilities: Language Switcher, Theme Toggle, Cart */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Right Header Utilities: Language Switcher, Theme Toggle */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Language Switcher Button [English / हिंदी] */}
             <button
               type="button"
               onClick={toggleLanguage}
-              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer"
               title="Toggle English / हिंदी"
             >
               <Globe className="w-3.5 h-3.5 text-[#2845D6]" />
@@ -146,7 +146,7 @@ export const CustomerLayout = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
               title="Toggle Theme"
             >
               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
@@ -156,7 +156,7 @@ export const CustomerLayout = () => {
       </header>
 
       {/* 2. Main Page Content (Full Width Max-W-7xl Web Container) */}
-      <main className={`flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 ${isAuthPage ? 'pb-8 flex flex-col justify-center' : 'pb-28 sm:pb-32'}`}>
+      <main className={`flex-1 max-w-7xl w-full mx-auto px-3 py-4 sm:p-6 ${isAuthPage ? 'pb-8 flex flex-col justify-center' : 'pb-28 sm:pb-32'}`}>
         <Outlet />
       </main>
 
@@ -185,8 +185,8 @@ export const CustomerLayout = () => {
                         <div
                           className={`w-12 h-12 sm:w-13 sm:h-13 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-active:scale-95 ring-4 ring-white dark:ring-slate-900 shadow-lg ${
                             isActive
-                              ? 'bg-gradient-to-tr from-[#2845D6] via-blue-600 to-[#F97316] text-white shadow-blue-600/40'
-                              : 'bg-gradient-to-tr from-[#2845D6] to-[#1E3A8A] text-white shadow-blue-600/30'
+                              ? 'bg-gradient-to-tr from-[#FF5200] via-[#F97316] to-amber-500 text-white shadow-orange-500/40'
+                              : 'bg-gradient-to-tr from-[#FF5200] to-[#EA580C] text-white shadow-orange-500/30'
                           }`}
                         >
                           <Icon className="w-5.5 h-5.5 sm:w-6 sm:h-6 text-white stroke-[2.2] drop-shadow-xs" />
@@ -196,8 +196,8 @@ export const CustomerLayout = () => {
                         <span
                           className={`text-[11px] font-bold mt-1.5 transition-colors leading-tight text-center ${
                             isActive
-                              ? 'text-[#2845D6] dark:text-blue-400 font-extrabold'
-                              : 'text-slate-700 dark:text-slate-300 group-hover:text-[#2845D6]'
+                              ? 'text-[#FF5200] dark:text-orange-400 font-extrabold'
+                              : 'text-slate-700 dark:text-slate-300 group-hover:text-[#FF5200]'
                           }`}
                         >
                           {item.label}
@@ -216,7 +216,7 @@ export const CustomerLayout = () => {
                   className={({ isActive }) =>
                     `flex flex-col items-center justify-center pt-2 pb-1 px-1 rounded-xl transition-colors duration-150 select-none w-full gap-1 ${
                       isActive
-                        ? 'text-[#2845D6] dark:text-blue-400 font-extrabold'
+                        ? 'text-[#FF5200] dark:text-orange-400 font-extrabold'
                         : 'text-slate-500 dark:text-slate-400 font-semibold hover:text-slate-900 dark:hover:text-slate-200'
                     }`
                   }
@@ -230,7 +230,7 @@ export const CustomerLayout = () => {
                           }`}
                         />
                         {item.badge > 0 && (
-                          <span className="absolute -top-1.5 -right-2.5 px-1.5 py-0.2 min-w-[17px] h-[17px] rounded-full bg-[#F97316] text-white text-[10px] font-black flex items-center justify-center shadow-xs ring-2 ring-white dark:ring-slate-900 leading-none">
+                          <span className="absolute -top-1.5 -right-2.5 px-1.5 py-0.2 min-w-[17px] h-[17px] rounded-full bg-[#FF5200] text-white text-[10px] font-black flex items-center justify-center shadow-xs ring-2 ring-white dark:ring-slate-900 leading-none">
                             {item.badge}
                           </span>
                         )}
@@ -241,7 +241,7 @@ export const CustomerLayout = () => {
                       <span
                         className={`text-[11px] text-center truncate max-w-full leading-tight ${
                           isActive
-                            ? 'font-bold text-[#2845D6] dark:text-blue-400'
+                            ? 'font-bold text-[#FF5200] dark:text-orange-400'
                             : 'font-medium text-slate-600 dark:text-slate-400'
                         }`}
                       >

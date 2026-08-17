@@ -25,13 +25,13 @@ export const Button = ({
 
   const variantClasses = {
     primary:
-      'bg-[#2845D6] hover:bg-[#1E3A8A] text-white shadow-md shadow-blue-600/20 focus:ring-[#2845D6]',
+      'bg-[#FF5200] hover:bg-[#E04800] text-white shadow-md shadow-orange-500/25 focus:ring-[#FF5200]',
     accent:
-      'bg-[#F97316] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 focus:ring-[#F97316]',
+      'bg-[#2845D6] hover:bg-[#1E3A8A] text-white shadow-md shadow-blue-600/20 focus:ring-[#2845D6]',
     secondary:
       'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 focus:ring-slate-400',
     outline:
-      'border-2 border-slate-200 dark:border-slate-700 hover:border-[#2845D6] text-slate-700 dark:text-slate-200 hover:text-[#2845D6] bg-transparent focus:ring-[#2845D6]',
+      'border-2 border-slate-200 dark:border-slate-700 hover:border-[#FF5200] text-slate-700 dark:text-slate-200 hover:text-[#FF5200] bg-transparent focus:ring-[#FF5200]',
     danger:
       'bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 focus:ring-rose-500',
     success:

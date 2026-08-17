@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Phone, Lock, Eye, EyeOff, LogIn, AlertCircle, Sparkles, ShieldCheck } from 'lucide-react'
+import { Phone, Lock, Eye, EyeOff, LogIn, AlertCircle, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -54,7 +54,8 @@ export const LoginPage = () => {
             <img
               src="/logo-horizontal.svg"
               alt="Dastak Logo"
-              className="h-10 sm:h-12 w-auto object-contain"
+              className="h-10 sm:h-12 max-h-12 w-auto object-contain"
+              style={{ height: '48px', maxHeight: '48px', width: 'auto' }}
               onError={(e) => {
                 e.target.onerror = null
                 e.target.src = '/logo-horizontal.png'
@@ -70,7 +71,7 @@ export const LoginPage = () => {
         </div>
 
         {/* Login Card */}
-        <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-4">
+        <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-4">
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Mobile Number with +91 Country Badge */}
             <div className="space-y-1.5">

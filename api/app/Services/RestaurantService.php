@@ -74,9 +74,31 @@ class RestaurantService
 
     public function getRestaurantBySlug(string $slug): Restaurant
     {
-        return Restaurant::with(['zone', 'operatingHours', 'owner'])
+        // 1. Try exact slug match
+        $restaurant = Restaurant::with(['zone', 'operatingHours', 'owner'])
             ->where('slug', $slug)
-            ->firstOrFail();
+            ->first();
+
+        // 2. Try prefix or partial slug match if not found
+        if (!$restaurant) {
+            $parts = explode('-', $slug);
+            $prefix = count($parts) > 1 ? implode('-', array_slice($parts, 0, -1)) : $slug;
+            $restaurant = Restaurant::with(['zone', 'operatingHours', 'owner'])
+                ->where('slug', 'LIKE', "{$prefix}%")
+                ->orWhere('name', 'LIKE', "%{$prefix}%")
+                ->first();
+        }
+
+        // 3. Fallback by ID if slug is numeric
+        if (!$restaurant && is_numeric($slug)) {
+            $restaurant = Restaurant::with(['zone', 'operatingHours', 'owner'])->find($slug);
+        }
+
+        if (!$restaurant) {
+            abort(404, 'Restaurant not found.');
+        }
+
+        return $restaurant;
     }
 
     public function createRestaurant(User $owner, array $data): Restaurant

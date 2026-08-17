@@ -36,10 +36,30 @@ class CustomerOrderController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $orders = $this->orderService->listOrders(
-            filters: ['customer_id' => $request->user()->id],
-            perPage: (int) $request->input('per_page', 10)
-        );
+        $userId = $request->user()?->id;
+        $query = Order::query()
+            ->with(['items.addons', 'restaurant', 'deliveryBoy.deliveryProfile', 'statusHistories'])
+            ->latest('id');
+
+        if ($userId) {
+            $query->where('customer_id', $userId);
+        }
+
+        if ($request->filled('status')) {
+            $status = $request->input('status');
+            if ($status === 'active') {
+                $query->whereNotIn('status', [
+                    \App\Enums\OrderStatus::DELIVERED->value,
+                    \App\Enums\OrderStatus::CANCELLED->value,
+                    \App\Enums\OrderStatus::REJECTED->value,
+                    \App\Enums\OrderStatus::FAILED->value,
+                ]);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        $orders = $query->paginate((int) $request->input('per_page', 10));
 
         return ApiResponse::paginated(
             paginator: $orders,

@@ -8,7 +8,6 @@ import {
   RotateCcw,
   Bike,
   Receipt,
-  Sparkles,
   Star,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
@@ -130,10 +129,10 @@ export const OrdersPage = () => {
           <button
             type="button"
             onClick={() => setActiveTab('all')}
-            className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+            className={`px-4 py-2 min-h-[38px] rounded-xl transition-all cursor-pointer select-none font-black ${
               activeTab === 'all'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                ? 'bg-[#FF5200] text-white shadow-md shadow-orange-500/25'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             {lang === 'hi' ? 'सभी' : 'All'} ({orders.length})
@@ -141,10 +140,10 @@ export const OrdersPage = () => {
           <button
             type="button"
             onClick={() => setActiveTab('active')}
-            className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+            className={`px-4 py-2 min-h-[38px] rounded-xl transition-all cursor-pointer select-none font-black ${
               activeTab === 'active'
-                ? 'bg-[#2845D6] text-white shadow-xs'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                ? 'bg-[#FF5200] text-white shadow-md shadow-orange-500/25'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             {lang === 'hi' ? 'सक्रिय' : 'Active'} ({activeOrders.length})
@@ -152,10 +151,10 @@ export const OrdersPage = () => {
           <button
             type="button"
             onClick={() => setActiveTab('completed')}
-            className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+            className={`px-4 py-2 min-h-[38px] rounded-xl transition-all cursor-pointer select-none font-black ${
               activeTab === 'completed'
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-xs'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
+                ? 'bg-[#FF5200] text-white shadow-md shadow-orange-500/25'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             {lang === 'hi' ? 'पुराने' : 'Past'} ({pastOrders.length})
@@ -280,11 +279,11 @@ export const OrdersPage = () => {
                           </button>
                         )}
                         <Button
-                          variant="accent"
+                          variant="primary"
                           size="sm"
                           icon={RotateCcw}
                           onClick={() => handleReorder(order)}
-                          className="font-bold text-xs"
+                          className="font-black text-xs"
                         >
                           {t.orderAgain}
                         </Button>

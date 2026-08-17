@@ -11,7 +11,6 @@ import {
   Check,
   Star,
   Navigation,
-  Sparkles,
   Building,
   AlertTriangle,
   User,
@@ -312,7 +311,7 @@ export const SavedAddressesPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleSetDefault(e, addr)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300 hover:text-amber-700 font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-amber-700 font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                         title="Make this your default delivery address"
                       >
                         <Star className="w-3.5 h-3.5 text-amber-500" />

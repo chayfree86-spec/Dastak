@@ -103,10 +103,10 @@ export const RestaurantsPage = () => {
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id)}
-            className={`px-3.5 py-1.5 rounded-xl transition-all shrink-0 cursor-pointer ${
+            className={`px-4 py-2.5 min-h-[40px] sm:min-h-[44px] rounded-2xl transition-all shrink-0 cursor-pointer shadow-sm active:scale-95 flex items-center justify-center select-none ${
               filter === item.id
-                ? 'bg-[#2845D6] text-white shadow-md shadow-blue-600/25'
-                : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300'
+                ? 'bg-[#FF5200] text-white shadow-md shadow-orange-500/30'
+                : 'bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:border-[#FF5200]'
             }`}
           >
             {item.label}

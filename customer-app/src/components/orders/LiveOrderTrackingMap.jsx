@@ -10,7 +10,6 @@ import {
   Compass,
   Phone,
   Crosshair,
-  Sparkles,
   ShieldCheck,
   Radio,
 } from 'lucide-react'

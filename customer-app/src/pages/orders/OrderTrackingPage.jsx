@@ -12,8 +12,11 @@ import {
   User,
   MapPin,
   XCircle,
-  Sparkles,
   Star,
+  FastForward,
+  UtensilsCrossed,
+  Banknote,
+  CreditCard,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useToast } from '../../context/ToastContext'
@@ -38,14 +41,23 @@ export const OrderTrackingPage = () => {
   const [cancelReason, setCancelReason] = useState('Placed by mistake')
   const [cancelling, setCancelling] = useState(false)
   const [secondsRemaining, setSecondsRemaining] = useState(null)
+  const [countdownSkipped, setCountdownSkipped] = useState(false)
   const [liveTelemetry, setLiveTelemetry] = useState({ distanceKm: 1.4, etaMins: 6 })
   const [ratingModalOpen, setRatingModalOpen] = useState(false)
   const [reviewed, setReviewed] = useState(false)
 
+  const cancelReasons = [
+    { id: 'mistake', label: 'Ordered by mistake' },
+    { id: 'address', label: 'Incorrect delivery address selected' },
+    { id: 'items', label: 'Need to change items or quantity' },
+    { id: 'delay', label: 'Expected delivery time is too long' },
+    { id: 'other', label: 'Other reason' },
+  ]
+
   const fetchOrder = useCallback(async () => {
     try {
       const res = await customerApi.getOrder(orderNumber)
-      const data = res.data || {}
+      const data = res.data?.data || res.data || {}
       setOrder(data)
 
       if (data.reviews?.length > 0 || data.review || data.is_reviewed) {
@@ -53,9 +65,11 @@ export const OrderTrackingPage = () => {
       }
 
       // Calculate 5-minute cancellation window from placed_at
+      const windowSecs =
+        data.cancel_window_seconds ||
+        (data.cancel_window_minutes ? data.cancel_window_minutes * 60 : 300)
       const placedTime = new Date(data.timelines?.placed_at || data.placed_at || data.created_at).getTime()
-      const fiveMinsAfter = placedTime + 5 * 60 * 1000
-      const diffSecs = Math.max(0, Math.floor((fiveMinsAfter - Date.now()) / 1000))
+      const diffSecs = Math.max(0, Math.floor((placedTime + windowSecs * 1000 - Date.now()) / 1000))
       setSecondsRemaining(diffSecs)
     } catch (e) {
       console.warn('Failed to load order:', e)
@@ -74,7 +88,13 @@ export const OrderTrackingPage = () => {
   useEffect(() => {
     if (secondsRemaining === null || secondsRemaining <= 0) return
     const timer = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0))
+      setSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return prev - 1
+      })
     }, 1000)
     return () => clearInterval(timer)
   }, [secondsRemaining])
@@ -93,6 +113,11 @@ export const OrderTrackingPage = () => {
     }
   }
 
+  const handleSkipTimer = () => {
+    setCountdownSkipped(true)
+    toast.success('Order Finalized!', `Order #${orderNumber} sent to kitchen.`)
+  }
+
   if (loading) {
     return <LoadingSkeleton count={3} />
   }
@@ -107,7 +132,301 @@ export const OrderTrackingPage = () => {
 
   const isCancelled = order.status === 'CANCELLED' || order.status === 'REJECTED'
   const isDelivered = order.status === 'DELIVERED'
-  const canCancel = !isCancelled && !isDelivered && (secondsRemaining > 0 || order.can_cancel)
+  const isPendingGrace =
+    !isCancelled &&
+    !isDelivered &&
+    !countdownSkipped &&
+    secondsRemaining > 0 &&
+    (order.status === 'PENDING' || order.status === 'PLACED')
+
+  const deliveryBoy = order.delivery_boy || {}
+  const restaurant = order.restaurant || {}
+  const items = order.items || []
+  const bill = order.bill || {}
+
+  // Format MM:SS
+  const formatCountdown = (secs) => {
+    const m = Math.floor(secs / 60)
+    const s = secs % 60
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+
+  const strokeDashoffset =
+    300 > 0 ? ((300 - (secondsRemaining || 0)) / 300) * 283 : 0
+
+  // =========================================================================
+  // VIEW 1: FULL PAGE COUNTDOWN & CANCELLATION SCREEN (During 5-min Grace Window)
+  // =========================================================================
+  if (isPendingGrace) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-5 sm:space-y-6 pb-24 animate-in fade-in duration-300">
+        {/* Top Header Navigation */}
+        <button
+          type="button"
+          onClick={() => navigate('/orders')}
+          className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#FF5200] transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>{lang === 'hi' ? 'ऑर्डर्स पर वापस जाएं' : 'Back to Orders'}</span>
+        </button>
+
+        {/* 1. Header Success Banner */}
+        <div className="text-center space-y-2 pt-1 sm:pt-3">
+          <div className="relative inline-flex items-center justify-center">
+            <span className="absolute w-20 h-20 rounded-full bg-emerald-500/20 animate-ping" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center shadow-xl shadow-emerald-500/30">
+              <CheckCircle2 className="w-9 h-9 sm:w-11 sm:h-11 stroke-[2.5]" />
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+              Order Placed Successfully!
+            </h2>
+            <p className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">
+              Order ID: <span className="text-[#FF5200] font-black">#{order.order_number}</span> •{' '}
+              {formatDateTime(order.created_at || order.placed_at)}
+            </p>
+          </div>
+        </div>
+
+        {/* 2. Cancellation Grace Window & Live Countdown Timer Card */}
+        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-orange-50/80 via-white to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 border-2 border-orange-200/80 dark:border-orange-950/60 shadow-xl shadow-orange-500/10 text-center space-y-6 relative overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#FF5200] via-amber-400 to-[#FF5200]" />
+
+          {/* Spacious Circular Progress & Digital Countdown */}
+          <div className="relative inline-flex items-center justify-center my-1">
+            <svg className="w-44 h-44 sm:w-48 sm:h-48 transform -rotate-90" viewBox="0 0 160 160">
+              <circle
+                cx="80"
+                cy="80"
+                r="70"
+                className="text-slate-100 dark:text-slate-800"
+                strokeWidth="8"
+                stroke="currentColor"
+                fill="transparent"
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r="70"
+                className="text-[#FF5200] transition-all duration-1000 ease-linear"
+                strokeWidth="8"
+                strokeDasharray="440"
+                strokeDashoffset={((300 - Math.min(300, secondsRemaining || 0)) / 300) * 440}
+                strokeLinecap="round"
+                stroke="currentColor"
+                fill="transparent"
+              />
+            </svg>
+
+            {/* Clean Center Digital Time (Zero Overlap) */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+              <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-950/60 text-[#FF5200] flex items-center justify-center mb-1">
+                <Clock className="w-3.5 h-3.5 animate-pulse" />
+              </div>
+              <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight font-mono leading-tight">
+                {formatCountdown(secondsRemaining)}
+              </span>
+              <span className="text-[10px] font-black uppercase text-[#FF5200] dark:text-orange-400 bg-orange-100/80 dark:bg-orange-950/80 px-2.5 py-0.5 rounded-full mt-1.5 tracking-wider">
+                Grace Window
+              </span>
+            </div>
+          </div>
+
+          {/* Informative Guidance Text */}
+          <div className="max-w-md mx-auto space-y-1">
+            <h4 className="text-sm sm:text-base font-black text-slate-800 dark:text-slate-200">
+              Order is in grace period
+            </h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+              You can cancel or modify your order in this window. When the timer hits 00:00, it will automatically lock and go directly to {restaurant.name || 'the kitchen'}.
+            </p>
+          </div>
+
+          {/* Primary Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Button
+              variant="primary"
+              size="lg"
+              icon={FastForward}
+              onClick={handleSkipTimer}
+              className="w-full sm:w-auto px-6 py-3.5 shadow-lg shadow-orange-500/30 text-xs sm:text-sm font-black uppercase tracking-wider whitespace-nowrap inline-flex items-center justify-center"
+            >
+              Send to {((restaurant.name || order.restaurant?.name || 'Kitchen').length > 14 ? (restaurant.name || order.restaurant?.name).slice(0, 14).trim() + '…' : (restaurant.name || order.restaurant?.name || 'Kitchen'))} Now →
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => setCancelModalOpen(true)}
+              className="w-full sm:w-auto px-5 py-3 rounded-2xl border-2 border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs sm:text-sm font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none active:scale-95 shadow-xs"
+            >
+              <XCircle className="w-4 h-4" />
+              <span>Cancel Order</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Order Summary & Bill Breakdown Card */}
+        <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-black text-sm">
+              <UtensilsCrossed className="w-4 h-4 text-[#FF5200]" />
+              <span>Order Summary</span>
+            </div>
+            <span className="text-xs font-bold text-slate-400">
+              {items.length} {items.length === 1 ? 'Item' : 'Items'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60">
+            <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-[#FF5200] flex items-center justify-center shrink-0">
+              <Store className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h5 className="text-sm font-black text-slate-900 dark:text-slate-100 truncate">
+                {restaurant.name || 'Dastak Partner Kitchen'}
+              </h5>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                {restaurant.address || 'Fast kitchen outlet'}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-2 divide-y divide-slate-100 dark:divide-slate-800/60">
+            {items.map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between pt-2 first:pt-0 text-xs sm:text-sm">
+                <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
+                  <span className="w-5 h-5 rounded-md bg-orange-50 dark:bg-slate-800 text-[#FF5200] font-black text-[11px] flex items-center justify-center shrink-0">
+                    {item.quantity}x
+                  </span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
+                    {item.name || item.item_name || item.menu_item?.name}
+                  </span>
+                </div>
+                <span className="font-black text-slate-900 dark:text-slate-100 shrink-0">
+                  {formatCurrency(Number(item.price || item.unit_price) * item.quantity)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-3 border-t-2 border-dashed border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <div>
+              <span className="text-[10px] font-black uppercase text-slate-400 block">Total Amount</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                {order.payment_mode === 'COD' ? (
+                  <>
+                    <Banknote className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Cash on Delivery</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-3.5 h-3.5 text-[#FF5200]" />
+                    <span>Online Paid</span>
+                  </>
+                )}
+              </span>
+            </div>
+            <span className="text-xl sm:text-2xl font-black text-[#FF5200] dark:text-orange-400">
+              {formatCurrency(bill.total_amount || order.total_amount || 0)}
+            </span>
+          </div>
+
+          {order.delivery_address && (
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300">
+              <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <span className="font-black text-slate-800 dark:text-slate-200 block">
+                  Delivery Address:
+                </span>
+                <p className="line-clamp-2 text-slate-500 dark:text-slate-400">
+                  {typeof order.delivery_address === 'string'
+                    ? order.delivery_address
+                    : `${order.delivery_address.address_line1 || order.delivery_address.flat_or_building || ''}, ${
+                        order.delivery_address.city || ''
+                      }`}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Cancellation Modal */}
+        <Modal
+          isOpen={cancelModalOpen}
+          onClose={() => setCancelModalOpen(false)}
+          title="Cancel Order Confirmation"
+          maxWidth="max-w-md"
+        >
+          <div className="space-y-4 py-2">
+            <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <div className="text-xs text-rose-800 dark:text-rose-300 space-y-0.5">
+                <span className="font-black block">Are you sure you want to cancel?</span>
+                <p>
+                  This order #{orderNumber} will be cancelled immediately and refunded if paid online.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-700 dark:text-slate-300 block">
+                Please select reason for cancellation:
+              </label>
+              <div className="space-y-1.5">
+                {cancelReasons.map((r) => (
+                  <label
+                    key={r.id}
+                    onClick={() => setCancelReason(r.label)}
+                    className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-all cursor-pointer select-none text-xs font-bold ${
+                      cancelReason === r.label
+                        ? 'border-[#FF5200] bg-orange-50/60 dark:bg-slate-800 text-[#FF5200] dark:text-orange-400'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 text-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="cancelReason"
+                      checked={cancelReason === r.label}
+                      onChange={() => setCancelReason(r.label)}
+                      className="accent-[#FF5200] w-4 h-4"
+                    />
+                    <span>{r.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => setCancelModalOpen(false)}
+                disabled={cancelling}
+              >
+                Keep Order
+              </Button>
+              <Button
+                variant="danger"
+                size="md"
+                icon={XCircle}
+                loading={cancelling}
+                onClick={handleCancelOrder}
+                className="font-black shadow-lg shadow-rose-600/25"
+              >
+                Confirm Cancel
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      </div>
+    )
+  }
+
+  // =========================================================================
+  // VIEW 2: FULL LIVE ORDER TRACKING SCREEN (Map, Rider, OTP, Timeline)
+  // =========================================================================
 
   // Timeline Steps with i18n
   const steps = [
@@ -161,11 +480,6 @@ export const OrderTrackingPage = () => {
     },
   ]
 
-  const deliveryBoy = order.delivery_boy || {}
-  const restaurant = order.restaurant || {}
-  const items = order.items || []
-  const bill = order.bill || {}
-
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* 1. Top Navigation */}
@@ -183,7 +497,7 @@ export const OrderTrackingPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider bg-[#2845D6] text-white px-2.5 py-0.5 rounded-lg">
+              <span className="text-[10px] font-black uppercase tracking-wider bg-[#FF5200] text-white px-2.5 py-0.5 rounded-lg">
                 #{order.order_number}
               </span>
               <span className="text-xs text-slate-400">
@@ -197,10 +511,10 @@ export const OrderTrackingPage = () => {
 
           {/* Estimated Time Badge - Live Updating */}
           {!isDelivered && !isCancelled && (
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-tr from-blue-50 to-indigo-50/80 dark:from-slate-900 dark:to-slate-800 border-2 border-blue-200 dark:border-blue-800/80 text-center shrink-0 min-w-[130px] shadow-xs">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-tr from-orange-50 to-amber-50/80 dark:from-slate-900 dark:to-slate-800 border-2 border-orange-200 dark:border-orange-900/60 text-center shrink-0 min-w-[130px] shadow-xs">
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#FF5200]">
                   {order.status === 'OUT_FOR_DELIVERY'
                     ? lang === 'hi' ? 'लाइव आगमन' : 'LIVE ARRIVAL'
                     : t.estimatedArrival}
@@ -221,27 +535,6 @@ export const OrderTrackingPage = () => {
             </div>
           )}
         </div>
-
-        {/* 5-Minute Cancellation Notice Banner */}
-        {canCancel && (
-          <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 min-w-0">
-              <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-              <span className="truncate">
-                {t.cancelAllowedNotice} ({Math.floor(secondsRemaining / 60)}:
-                {String(secondsRemaining % 60).padStart(2, '0')}{' '}
-                {lang === 'hi' ? 'शेष' : 'left'})
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setCancelModalOpen(true)}
-              className="text-xs font-black text-rose-600 hover:underline shrink-0 cursor-pointer"
-            >
-              {t.cancelOrder || (lang === 'hi' ? 'ऑर्डर कैंसिल करें' : 'Cancel Order')}
-            </button>
-          </div>
-        )}
 
         {/* Delivered Experience & Rating Banner */}
         {isDelivered && (
@@ -420,7 +713,7 @@ export const OrderTrackingPage = () => {
           <MapPin className="w-3.5 h-3.5 text-[#F97316]" />
           <span>{lang === 'hi' ? 'डिलीवरी का पता' : 'DELIVERY ADDRESS'}</span>
         </div>
-        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 space-y-1">
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 space-y-1">
           <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
             {order.address?.customer_name || (lang === 'hi' ? 'डिलीवरी गंतव्य' : 'Delivery Destination')}
           </h5>

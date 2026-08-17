@@ -7,7 +7,6 @@ import {
   Building,
   Home,
   Briefcase,
-  Sparkles,
   X,
   Loader2,
   Navigation,
@@ -140,7 +139,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
           type="button"
           onClick={handleDetectGPS}
           disabled={detecting}
-          className="w-full p-4 rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-850 dark:to-slate-800 border-2 border-dashed border-[#2845D6] dark:border-blue-500 text-[#2845D6] dark:text-blue-400 font-black flex items-center justify-between gap-3 hover:bg-blue-100/70 active:scale-[0.99] transition-all cursor-pointer shadow-xs"
+          className="w-full p-4 rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 border-2 border-dashed border-[#2845D6] dark:border-blue-500 text-[#2845D6] dark:text-blue-400 font-black flex items-center justify-between gap-3 hover:bg-blue-100/70 active:scale-[0.99] transition-all cursor-pointer shadow-xs"
         >
           <div className="flex items-center gap-3 text-left">
             <div className="w-10 h-10 rounded-2xl bg-[#2845D6] text-white flex items-center justify-center shrink-0 shadow-md">
@@ -225,7 +224,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
 
         {/* 3. Selected Location Preview & Confirmation */}
         {selectedPlace && (
-          <div className="p-4 rounded-3xl bg-blue-50/70 dark:bg-slate-850 border-2 border-[#2845D6] dark:border-blue-500 shadow-md space-y-3 animate-in slide-in-from-bottom-2">
+          <div className="p-4 rounded-3xl bg-blue-50/70 dark:bg-slate-900 border-2 border-[#2845D6] dark:border-blue-500 shadow-md space-y-3 animate-in slide-in-from-bottom-2">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-[#2845D6] text-white flex items-center justify-center shrink-0">
                 <MapPin className="w-5 h-5" />
@@ -244,7 +243,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
             </div>
 
             {/* Optional Flat / Floor and Landmark */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-blue-200/60 dark:border-slate-750">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-blue-200/60 dark:border-slate-800">
               <input
                 type="text"
                 value={flatNumber}
@@ -279,49 +278,89 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
             <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider">
               {t.savedAddresses}
             </span>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {addresses.map((addr) => {
                 const isSelected =
                   activeAddress?.id === addr.id ||
                   activeAddress?.address === addr.address
 
+                const typeText = (addr.type?.value || addr.type || 'HOME').toUpperCase()
+                const fullAddressStr =
+                  addr.address ||
+                  [addr.address_line1, addr.address_line2, addr.landmark, addr.city, addr.pincode]
+                    .filter(Boolean)
+                    .join(', ') ||
+                  'Lalganj, Azamgarh 276202'
+
+                const contactNameStr =
+                  addr.customer_name || addr.contact_name || addr.name || ''
+
                 return (
                   <div
                     key={addr.id}
                     onClick={() => {
-                      selectAddress(addr)
-                      toast.success('Address Selected', addr.address)
+                      const completeAddr = {
+                        ...addr,
+                        address: fullAddressStr,
+                        customer_name: contactNameStr || 'Valued Customer',
+                        type: typeText,
+                      }
+                      selectAddress(completeAddr)
+                      toast.success('Address Selected', fullAddressStr)
                       onClose()
                     }}
-                    className={`p-3.5 rounded-2xl border transition-all flex items-start justify-between gap-3 cursor-pointer ${
+                    className={`p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer ${
                       isSelected
-                        ? 'bg-blue-50/70 dark:bg-slate-800 border-[#2845D6] ring-2 ring-blue-500/15'
+                        ? 'bg-orange-50/70 dark:bg-slate-800/90 border-2 border-[#FF5200] shadow-sm'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
                     }`}
                   >
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
-                        {addr.type === 'Work' ? (
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                          isSelected
+                            ? 'bg-[#FF5200] text-white shadow-md shadow-orange-500/25'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        {typeText === 'WORK' ? (
                           <Briefcase className="w-4 h-4" />
                         ) : (
                           <Home className="w-4 h-4" />
                         )}
                       </div>
-                      <div className="min-w-0 space-y-0.5">
-                        <h5 className="font-bold text-slate-900 dark:text-slate-100 truncate">
-                          {addr.customer_name || addr.type || 'Saved Address'}
-                        </h5>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                          {addr.address}
+
+                      <div className="min-w-0 space-y-0.5 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                            {typeText}
+                          </span>
+                          {contactNameStr && (
+                            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate">
+                              • {contactNameStr}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 font-medium line-clamp-1 leading-normal">
+                          {fullAddressStr}
                         </p>
+                        {addr.landmark && (
+                          <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 line-clamp-1">
+                            🚩 {addr.landmark}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    {isSelected && (
-                      <div className="w-6 h-6 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
-                        <Check className="w-3.5 h-3.5" />
-                      </div>
-                    )}
+                    <div className="shrink-0">
+                      {isSelected ? (
+                        <div className="w-6 h-6 rounded-full bg-[#FF5200] text-white flex items-center justify-center shadow-md shadow-orange-500/30">
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        </div>
+                      ) : (
+                        <div className="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-700" />
+                      )}
+                    </div>
                   </div>
                 )
               })}

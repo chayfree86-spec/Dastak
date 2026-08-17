@@ -1,0 +1,22 @@
+{
+  "short_name": "Dastak",
+  "name": "Dastak - Fast Food Delivery",
+  "icons": [
+    {
+      "src": "/logo-horizontal.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512"
+    },
+    {
+      "src": "/logo-horizontal.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FF5200",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/"
+}

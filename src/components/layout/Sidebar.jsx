@@ -66,7 +66,8 @@ export const Sidebar = ({
             <img
               src="/logo-horizontal.svg"
               alt="Dastak Logo"
-              className="h-8 w-auto object-contain shrink-0"
+              className="h-8 max-h-8 w-auto object-contain shrink-0"
+              style={{ height: '32px', maxHeight: '32px', width: 'auto' }}
               onError={(e) => {
                 e.target.onerror = null
                 e.target.src = '/logo-horizontal.png'

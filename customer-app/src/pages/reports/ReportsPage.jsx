@@ -8,7 +8,6 @@ import {
   Receipt,
   Download,
   Calendar,
-  Sparkles,
   PieChart,
   DollarSign,
   Utensils,
@@ -309,7 +308,7 @@ export const ReportsPage = () => {
                               <button
                                 type="button"
                                 onClick={() => handleReorder(o)}
-                                className="px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-[#2845D6] dark:text-blue-400 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer"
+                                className="px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#2845D6] dark:text-blue-400 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer"
                               >
                                 <RotateCcw className="w-3.5 h-3.5" />
                                 <span>{t.orderAgain || (lang === 'hi' ? 'फिर से ऑर्डर करें' : 'Re-Order')}</span>

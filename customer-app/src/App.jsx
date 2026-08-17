@@ -15,6 +15,7 @@ import RestaurantPage from './pages/restaurant/RestaurantPage'
 import CartPage from './pages/cart/CartPage'
 import CheckoutPage from './pages/checkout/CheckoutPage'
 import OrdersPage from './pages/orders/OrdersPage'
+import OrderConfirmationPage from './pages/orders/OrderConfirmationPage'
 import OrderTrackingPage from './pages/orders/OrderTrackingPage'
 import ReportsPage from './pages/reports/ReportsPage'
 import SettingsPage from './pages/settings/SettingsPage'
@@ -41,6 +42,7 @@ export function App() {
                       <Route path="/cart" element={<CartPage />} />
                       <Route path="/checkout" element={<CheckoutPage />} />
                       <Route path="/orders" element={<OrdersPage />} />
+                      <Route path="/orders/:orderNumber/confirmation" element={<OrderConfirmationPage />} />
                       <Route path="/orders/:orderNumber" element={<OrderTrackingPage />} />
                       <Route path="/reports" element={<ReportsPage />} />
                       <Route path="/settings" element={<SettingsPage />} />

@@ -16,7 +16,12 @@ class CheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'delivery_address_id' => ['nullable', 'exists:addresses,id'],
+            'delivery_address_id' => ['nullable'],
+            'delivery_address_json' => ['nullable', 'array'],
+            'restaurant_id' => ['nullable', 'integer'],
+            'items' => ['nullable', 'array'],
+            'items.*.menu_item_id' => ['nullable', 'integer'],
+            'items.*.quantity' => ['nullable', 'integer', 'min:1'],
             'payment_mode' => ['required', new Enum(PaymentMode::class)],
             'special_instructions' => ['nullable', 'string', 'max:255'],
         ];

@@ -11,7 +11,6 @@ import {
   ChevronRight,
   ShieldCheck,
   Phone,
-  Sparkles,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'

@@ -8,15 +8,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        slate: {
-          750: '#253248',
-          850: '#141E33',
-        },
         dastak: {
-          primary: '#2845D6',
-          'primary-dark': '#1E3A8A',
-          accent: '#F97316',
-          'accent-hover': '#EA580C',
+          primary: '#FF5200',
+          'primary-dark': '#E04800',
+          accent: '#2845D6',
+          'accent-hover': '#1E3A8A',
           dark: '#0F172A',
           'card-dark': '#1E293B',
           'border-dark': '#334155',
@@ -29,8 +25,8 @@ export default {
       },
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-        'glow': '0 0 25px -5px rgba(40, 69, 214, 0.35)',
-        'glow-accent': '0 0 25px -5px rgba(249, 115, 22, 0.35)',
+        'glow': '0 0 25px -5px rgba(255, 82, 0, 0.35)',
+        'glow-blue': '0 0 25px -5px rgba(40, 69, 214, 0.35)',
       },
     },
   },

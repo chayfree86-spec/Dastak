@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Star, Clock, MapPin, Sparkles, Store, ShieldCheck, Tag } from 'lucide-react'
+import { Star, Clock, MapPin, Store, ShieldCheck, Tag } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 
 const getRestaurantBanner = (restaurant) => {

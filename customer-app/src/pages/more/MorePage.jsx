@@ -14,7 +14,6 @@ import {
   User,
   Phone,
   ShieldCheck,
-  Sparkles,
   Menu,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'

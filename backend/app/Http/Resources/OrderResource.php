@@ -20,6 +20,8 @@ class OrderResource extends JsonResource
             'status_label' => $this->status?->label() ?? 'Unknown',
             'is_final' => $this->status?->isFinal() ?? false,
             'can_cancel' => $this->canBeCancelledByCustomer(),
+            'cancel_window_minutes' => (int) config('dastak.orders.cancel_window_minutes', 5),
+            'cancel_window_seconds' => (int) config('dastak.orders.cancel_window_minutes', 5) * 60,
             'payment_status' => $this->payment_status?->value ?? (string) $this->payment_status,
             'payment_mode' => $this->payment_mode?->value ?? (string) $this->payment_mode,
 

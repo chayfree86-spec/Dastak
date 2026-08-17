@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { CheckCircle2, ShieldCheck, Banknote, AlertCircle, KeyRound, Sparkles } from 'lucide-react'
+import { CheckCircle2, ShieldCheck, Banknote, AlertCircle, KeyRound } from 'lucide-react'
 import { formatCurrency } from '../../utils/formatters'
 import Modal from '../common/Modal'
 import Button from '../common/Button'
