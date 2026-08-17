@@ -1,0 +1,119 @@
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Star, Clock, MapPin, Sparkles, Store, ShieldCheck, Tag } from 'lucide-react'
+import { useLanguage } from '../../context/LanguageContext'
+
+const getRestaurantBanner = (restaurant) => {
+  if (restaurant.banner && !restaurant.banner.includes('placeholder')) {
+    return restaurant.banner
+  }
+  const name = (restaurant.name || '').toLowerCase()
+  if (name.includes('biryani')) {
+    return 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=600&auto=format&fit=crop&q=80'
+  }
+  if (name.includes('chai') || name.includes('chaupal') || name.includes('tea')) {
+    return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&auto=format&fit=crop&q=80'
+  }
+  if (name.includes('burger') || name.includes('fast food')) {
+    return 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop&q=80'
+  }
+  return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80'
+}
+
+export const RestaurantCard = ({ restaurant }) => {
+  const navigate = useNavigate()
+  const { t } = useLanguage()
+
+  if (!restaurant) return null
+
+  const isOpen = restaurant.is_open !== false
+  const rating = Number(restaurant.rating) || 4.8
+  const timeMin = restaurant.preparation_time_minutes || 25
+  const isPureVeg = Boolean(restaurant.is_pure_veg)
+  const bannerUrl = getRestaurantBanner(restaurant)
+
+  return (
+    <div
+      onClick={() => navigate(`/restaurant/${restaurant.slug || restaurant.id}`)}
+      className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs hover:shadow-2xl hover:border-blue-500/30 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+    >
+      {/* Banner Hero */}
+      <div className="relative h-44 sm:h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+        <img
+          src={bannerUrl}
+          alt={restaurant.name}
+          className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
+          loading="lazy"
+          onError={(e) => {
+            e.target.onerror = null
+            e.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80'
+          }}
+        />
+
+        {/* Gradient Shadow Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+          {/* Status Badge: Open / Closed */}
+          <span
+            className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md ${
+              isOpen
+                ? 'bg-emerald-600/90 text-white'
+                : 'bg-rose-600/90 text-white'
+            }`}
+          >
+            {isOpen ? t.openNow : t.closedNow}
+          </span>
+
+          {/* Pure Veg Tag */}
+          {isPureVeg && (
+            <span className="px-3 py-1 rounded-xl bg-emerald-600 text-white text-[10px] font-black uppercase shadow-md flex items-center gap-1">
+              <span>🌱</span>
+              <span>{t.vegOnly}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Bottom Banner Info: Discount offer & Rating */}
+        <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
+          <div className="flex items-center gap-1.5 bg-[#2845D6]/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl text-[11px] font-black shadow-md">
+            <Tag className="w-3 h-3" />
+            <span>50% OFF UP TO ₹100</span>
+          </div>
+
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1 rounded-xl border border-slate-200/60 dark:border-slate-700 shadow-md flex items-center gap-1 text-xs font-black text-slate-900 dark:text-slate-100">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span>{rating.toFixed(1)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Details Footer */}
+      <div className="p-4 space-y-2.5">
+        <div>
+          <h4 className="text-base font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors truncate">
+            {restaurant.name}
+          </h4>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
+            {restaurant.description || restaurant.address_line1 || 'Civil Lines, Kanpur'}
+          </p>
+        </div>
+
+        {/* Meta Footer: Delivery Time & Location */}
+        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
+          <div className="flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400" />
+            <span>{timeMin}-{timeMin + 10} min</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-[#F97316]" />
+            <span>{restaurant.city || 'Kanpur'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default RestaurantCard

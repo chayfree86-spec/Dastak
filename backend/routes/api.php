@@ -76,6 +76,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/zones', [RestaurantPublicController::class, 'getZones']);
     Route::get('/coupons', [CouponPublicController::class, 'index']);
     
+    // Intelligent NLP Search & Suggestions
+    Route::get('/search', [\App\Http\Controllers\Api\V1\Public\SearchController::class, 'search']);
+    Route::get('/search/suggestions', [\App\Http\Controllers\Api\V1\Public\SearchController::class, 'suggestions']);
+    
     // Gateway Webhook
     Route::post('/payments/webhook', [PaymentWebhookController::class, 'handle']);
 
