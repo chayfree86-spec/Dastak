@@ -9,13 +9,18 @@ import {
   XCircle,
   TrendingUp,
   RefreshCw,
-  FileSpreadsheet,
+  Printer,
+  ArrowUpRight,
+  Utensils,
+  Wallet,
+  Clock,
 } from 'lucide-react'
 import { useApi } from '../../hooks/useApi'
 import reportsApi from '../../api/reports.api'
 import { formatCurrency, formatDateTime } from '../../utils/formatters'
 import StatCard from '../../components/common/StatCard'
 import Button from '../../components/common/Button'
+import DatePicker from '../../components/common/DatePicker'
 import EmptyState from '../../components/common/EmptyState'
 import ErrorState from '../../components/common/ErrorState'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
@@ -43,41 +48,71 @@ export const ReportsPage = () => {
   const ranges = [
     { id: 'today', label: 'Today' },
     { id: 'yesterday', label: 'Yesterday' },
-    { id: 'this_week', label: 'This Week' },
+    { id: 'this_week', label: 'This Week (7D)' },
     { id: 'this_month', label: 'This Month' },
-    { id: 'custom', label: 'Custom' },
+    { id: 'custom', label: 'Custom Date' },
   ]
 
+  const handlePrint = () => {
+    window.print()
+  }
+
+  const grossSales = Number(summary.gross_sales || summary.total_sales || 0)
+  const deliveredOrders = Number(summary.delivered_orders || summary.total_orders || 0)
+  const netPayout = Number(summary.net_payout || (grossSales * 0.85))
+  const commission = Number(summary.commission_amount || (grossSales * 0.15))
+  const aov = deliveredOrders > 0 ? (grossSales / deliveredOrders) : 0
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+    <div className="space-y-6 w-full print:p-0">
+      {/* 1. Header with Title and Actions */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-[#2845D6]" />
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#2845D6]/10 text-[#2845D6] dark:text-blue-400 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5" />
+            </div>
             <span>Sales & Revenue Reports</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5 font-medium">
-            Financial breakdown, platform commission deductions, and net restaurant earnings.
+          <p className="text-xs text-slate-400 dark:text-slate-400 mt-1 font-medium">
+            Financial breakdown, platform commission deductions, and net restaurant payouts.
           </p>
         </div>
 
-        <Button variant="outline" size="sm" icon={RefreshCw} onClick={() => retry()}>
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2.5 w-full sm:w-auto print:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Printer}
+            onClick={handlePrint}
+            className="flex-1 sm:flex-none"
+          >
+            Print / Save PDF
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={RefreshCw}
+            onClick={() => retry()}
+            className="flex-1 sm:flex-none shadow-sm"
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      {/* Date Range Selector */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5 overflow-x-auto select-none">
+      {/* 2. Date Range Filter Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs print:hidden">
+        <div className="flex items-center gap-1.5 overflow-x-auto select-none no-scrollbar">
           {ranges.map((r) => (
             <button
               key={r.id}
+              type="button"
               onClick={() => setActiveRange(r.id)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeRange === r.id
-                  ? 'bg-[#2845D6] text-white shadow-md shadow-blue-500/20'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
+                  ? 'bg-[#2845D6] text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-500/20'
+                  : 'bg-slate-50 dark:bg-slate-750 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               {r.label}
@@ -86,123 +121,183 @@ export const ReportsPage = () => {
         </div>
 
         {activeRange === 'custom' && (
-          <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-xs">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="text-xs font-bold text-slate-700 bg-transparent p-1 focus:outline-none"
-            />
+          <div className="flex items-center gap-2">
+            <div className="w-36">
+              <DatePicker
+                value={startDate}
+                onChange={setStartDate}
+                placeholder="From Date"
+                size="sm"
+              />
+            </div>
             <span className="text-xs text-slate-400 font-bold">to</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="text-xs font-bold text-slate-700 bg-transparent p-1 focus:outline-none"
-            />
+            <div className="w-36">
+              <DatePicker
+                value={endDate}
+                onChange={setEndDate}
+                placeholder="To Date"
+                size="sm"
+              />
+            </div>
           </div>
         )}
       </div>
 
-      {loading && <LoadingSkeleton count={3} />}
+      {loading && <LoadingSkeleton count={4} />}
       {error && <ErrorState title="Unable to load reports" message={error} onRetry={() => retry()} />}
 
       {!loading && !error && (
         <>
-          {/* Summary KPI Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* 3. Summary Bento Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              title="Gross Sales"
-              value={formatCurrency(summary.gross_sales)}
-              subtitle={`${summary.delivered_orders || 0} Delivered orders`}
-              icon={TrendingUp}
+              title="Gross Sales (GMV)"
+              value={formatCurrency(grossSales)}
+              change={`${deliveredOrders} delivered orders`}
+              icon={ShoppingBag}
+              trend="up"
               color="blue"
             />
             <StatCard
               title="Net Restaurant Payout"
-              value={formatCurrency(summary.net_restaurant_payout)}
-              subtitle="Payable amount to your bank"
-              icon={DollarSign}
+              value={formatCurrency(netPayout)}
+              change="Payable directly to bank"
+              icon={Wallet}
+              trend="up"
               color="green"
             />
             <StatCard
-              title="Platform Commission"
-              value={formatCurrency(summary.platform_commission)}
-              subtitle="Dastak service fee"
+              title="Dastak Commission"
+              value={formatCurrency(commission)}
+              change="Platform service fee"
               icon={Percent}
+              trend="neutral"
               color="orange"
             />
             <StatCard
-              title="Avg Order Value (AOV)"
-              value={formatCurrency(summary.average_order_value)}
-              subtitle="Per delivered order"
-              icon={ShoppingBag}
+              title="Avg. Order Value (AOV)"
+              value={formatCurrency(aov)}
+              change="Per completed basket"
+              icon={TrendingUp}
+              trend="up"
               color="purple"
             />
           </div>
 
-          {/* Detailed Statistics Breakdown Table */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* Top Best Selling Items in Range */}
-            <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
-                Top Selling Food Items
-              </h3>
-              {topItems.length === 0 ? (
-                <p className="text-xs text-slate-400 py-6 text-center">No item sales in this period.</p>
-              ) : (
-                <div className="space-y-3">
-                  {topItems.map((it, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-md bg-blue-50 text-[#2845D6] font-bold flex items-center justify-center text-[10px]">
-                          #{idx + 1}
-                        </span>
-                        <span className="font-bold text-slate-800">{it.name}</span>
-                      </div>
-                      <div className="text-right font-mono">
-                        <span className="font-bold text-slate-900 block">{formatCurrency(it.amount)}</span>
-                        <span className="text-[10px] text-slate-400">{it.quantity} sold</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+          {/* 4. Two-Column Insights: Daily Breakdown Table + Top Selling Items */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Daily Settlement & Breakdown Table (Takes 2 Columns) */}
+            <div className="lg:col-span-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 flex items-center gap-2">
+                  <Calendar className="w-3.5 h-3.5 text-[#2845D6]" />
+                  <span>Daily Sales Breakdown</span>
+                </h3>
+                <span className="text-[11px] font-bold text-slate-400">
+                  {daily.length} record{daily.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
+                {daily.length === 0 ? (
+                  <div className="p-10 text-center text-slate-400">
+                    <BarChart3 className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                    <p className="text-xs font-bold">No orders recorded in this date range.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 dark:bg-slate-750 text-slate-500 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                        <tr>
+                          <th className="py-3 px-4">Date</th>
+                          <th className="py-3 px-4">Orders</th>
+                          <th className="py-3 px-4">Gross Sales</th>
+                          <th className="py-3 px-4">Commission</th>
+                          <th className="py-3 px-4 text-right">Net Payout</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 font-semibold text-slate-800 dark:text-slate-200">
+                        {daily.map((d, idx) => (
+                          <tr
+                            key={idx}
+                            className="hover:bg-slate-50/70 dark:hover:bg-slate-750/70 transition-colors"
+                          >
+                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-100">
+                              {d.date || d.day || 'Today'}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                                {d.order_count || d.orders || 0} orders
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 font-bold">
+                              {formatCurrency(d.gross_sales || d.sales || 0)}
+                            </td>
+                            <td className="py-3 px-4 text-slate-400">
+                              {formatCurrency(d.commission || (d.gross_sales * 0.15) || 0)}
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                              {formatCurrency(d.net_payout || ((d.gross_sales || d.sales || 0) * 0.85))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Daily Breakdown Table */}
-            <div className="lg:col-span-2 p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-4">
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
-                Daily Sales & Payout Breakdown
-              </h3>
-              {daily.length === 0 ? (
-                <p className="text-xs text-slate-400 py-6 text-center">No daily records found in this range.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                        <th className="py-2.5">Date</th>
-                        <th className="py-2.5 text-center">Orders</th>
-                        <th className="py-2.5 text-right">Gross Sales</th>
-                        <th className="py-2.5 text-right">Commission</th>
-                        <th className="py-2.5 text-right">Net Payout</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-mono">
-                      {daily.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/60">
-                          <td className="py-3 font-sans font-bold text-slate-800">{row.date}</td>
-                          <td className="py-3 text-center text-slate-600 font-sans">{row.orders_count}</td>
-                          <td className="py-3 text-right font-bold text-slate-800">{formatCurrency(row.sales)}</td>
-                          <td className="py-3 text-right text-orange-600">-{formatCurrency(row.commission)}</td>
-                          <td className="py-3 text-right font-bold text-emerald-600">{formatCurrency(row.payout)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {/* Top Selling Food Items Column (Takes 1 Column) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 flex items-center gap-2">
+                  <Utensils className="w-3.5 h-3.5 text-[#F97316]" />
+                  <span>Top Selling Items</span>
+                </h3>
+              </div>
+
+              <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
+                {topItems.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400">
+                    <p className="text-xs font-bold">Sales data will rank items automatically.</p>
+                  </div>
+                ) : (
+                  topItems.map((item, idx) => (
+                    <div key={idx} className="p-3.5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-black flex items-center justify-center shrink-0">
+                          #{idx + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                            {item.name}
+                          </h4>
+                          <span className="text-[10px] text-slate-400">
+                            {item.quantity_sold || item.units || 1} units sold
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                          {formatCurrency(item.total_revenue || item.revenue || 0)}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Payout Schedule Information Banner */}
+              <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <Clock className="w-4 h-4 text-[#2845D6] dark:text-blue-400" />
+                  <span>Settlement Cycle</span>
                 </div>
-              )}
+                <p className="text-[11px] text-blue-800/80 dark:text-blue-300 leading-relaxed">
+                  Net payouts are automatically settled to your verified bank account on a weekly basis every Monday.
+                </p>
+              </div>
             </div>
           </div>
         </>

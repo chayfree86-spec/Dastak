@@ -58,3 +58,15 @@ export const formatElapsedTime = (dateStr) => {
   if (diffHr < 24) return `${diffHr} hr ${diffMin % 60}m ago`
   return `${Math.floor(diffHr / 24)} days ago`
 }
+
+export const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+

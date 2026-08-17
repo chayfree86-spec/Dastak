@@ -355,7 +355,7 @@ export const MenuPage = () => {
                     {formatCurrency(item.discount_price || item.price)}
                   </span>
                   {item.discount_price && Number(item.discount_price) < Number(item.price) && (
-                    <span className="text-[10px] text-slate-400 line-through block font-mono">
+                    <span className="text-[10px] text-slate-400 line-through block">
                       {formatCurrency(item.price)}
                     </span>
                   )}

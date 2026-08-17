@@ -24,6 +24,7 @@ import { useOrderPolling } from '../../hooks/useOrderPolling'
 import restaurantApi from '../../api/restaurant.api'
 import Modal from '../common/Modal'
 import Button from '../common/Button'
+import CustomSelect from '../common/CustomSelect'
 
 export const PartnerLayout = () => {
   const { user, restaurant, logout, updateRestaurant } = useAuth()
@@ -343,24 +344,18 @@ export const PartnerLayout = () => {
         maxWidth="max-w-md"
       >
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
-              Reason for Pausing
-            </label>
-            <select
-              value={offlineReason}
-              onChange={(e) => setOfflineReason(e.target.value)}
-              className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:border-[#2845D6]"
-            >
-              <option value="Kitchen Peak Hours / Prep Delay">
-                Kitchen Peak Hours / Prep Delay
-              </option>
-              <option value="Ingredients / Stock Shortage">Ingredients / Stock Shortage</option>
-              <option value="Staff Shortage">Staff Shortage</option>
-              <option value="Power / Equipment Issue">Power / Equipment Issue</option>
-              <option value="Store Closed for Today">Store Closed for Today</option>
-            </select>
-          </div>
+          <CustomSelect
+            label="Reason for Pausing"
+            value={offlineReason}
+            onChange={setOfflineReason}
+            options={[
+              { value: 'Kitchen Peak Hours / Prep Delay', label: 'Kitchen Peak Hours / Prep Delay' },
+              { value: 'Ingredients / Stock Shortage', label: 'Ingredients / Stock Shortage' },
+              { value: 'Staff Shortage', label: 'Staff Shortage' },
+              { value: 'Power / Equipment Issue', label: 'Power / Equipment Issue' },
+              { value: 'Store Closed for Today', label: 'Store Closed for Today' },
+            ]}
+          />
 
           <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-xs text-amber-800 dark:text-amber-300">
             <strong>Note:</strong> Ongoing orders that you have already accepted will still need to

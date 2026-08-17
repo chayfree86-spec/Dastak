@@ -63,7 +63,7 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
             </div>
             <div>
               <span className="text-slate-400 block">Contact Phone</span>
-              <span className="font-bold text-slate-800 font-mono">
+              <span className="font-bold text-slate-800">
                 {formatPhone(order.customer?.mobile)}
               </span>
             </div>
@@ -109,7 +109,7 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
                     )}
                   </div>
                 </div>
-                <span className="font-mono font-bold text-slate-800 shrink-0">
+                <span className="font-bold text-slate-800 shrink-0">
                   {formatCurrency(it.total_price || it.price * (it.quantity || 1))}
                 </span>
               </div>
@@ -121,28 +121,28 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs">
           <div className="flex justify-between text-slate-500">
             <span>Items Subtotal:</span>
-            <span className="font-mono font-bold text-slate-800">{formatCurrency(bill.subtotal || order.subtotal)}</span>
+            <span className="font-bold text-slate-800">{formatCurrency(bill.subtotal || order.subtotal)}</span>
           </div>
           {Number(bill.discount_amount) > 0 && (
             <div className="flex justify-between text-emerald-600 font-semibold">
               <span>Merchant Discount:</span>
-              <span className="font-mono">-{formatCurrency(bill.discount_amount)}</span>
+              <span>-{formatCurrency(bill.discount_amount)}</span>
             </div>
           )}
           {Number(bill.tax_amount) > 0 && (
             <div className="flex justify-between text-slate-500">
               <span>Taxes:</span>
-              <span className="font-mono">{formatCurrency(bill.tax_amount)}</span>
+              <span>{formatCurrency(bill.tax_amount)}</span>
             </div>
           )}
           <div className="pt-2 border-t border-slate-200 flex justify-between text-sm font-black text-slate-900">
             <span>Total Amount:</span>
-            <span className="font-mono">{formatCurrency(bill.total_amount || order.total_amount)}</span>
+            <span>{formatCurrency(bill.total_amount || order.total_amount)}</span>
           </div>
           {Number(bill.restaurant_payout_amount) > 0 && (
             <div className="pt-1 text-[11px] flex justify-between text-emerald-700 font-bold border-t border-dashed border-slate-200">
               <span>Estimated Net Restaurant Payout:</span>
-              <span className="font-mono">{formatCurrency(bill.restaurant_payout_amount)}</span>
+              <span>{formatCurrency(bill.restaurant_payout_amount)}</span>
             </div>
           )}
         </div>
@@ -186,7 +186,7 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
                     <span className="font-bold text-slate-800">{h.status || h.status_label}</span>
                     {h.comment && <span className="text-slate-400 text-[11px]">({h.comment})</span>}
                   </div>
-                  <span className="text-[11px] font-mono text-slate-400">{formatTime(h.created_at)}</span>
+                  <span className="text-[11px] text-slate-400">{formatTime(h.created_at)}</span>
                 </div>
               ))}
             </div>

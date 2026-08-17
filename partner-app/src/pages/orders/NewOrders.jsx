@@ -55,27 +55,29 @@ export const NewOrders = () => {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 w-full">
       {/* Screen Header Bar */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
-              <Flame className="w-6 h-6 text-[#F97316]" />
-              <span>New Orders</span>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#F97316] flex items-center justify-center">
+                <Flame className="w-5 h-5" />
+              </div>
+              <span>New Incoming Orders</span>
             </h2>
             <span
-              className={`px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase border ${
+              className={`px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase border select-none ${
                 count > 0
-                  ? 'bg-rose-500 text-white border-rose-500 animate-pulse shadow-md shadow-rose-500/25'
-                  : 'bg-slate-100 text-slate-500 border-slate-200'
+                  ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/30 animate-pulse'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600'
               }`}
             >
               {count} {count === 1 ? 'Pending' : 'Pending'}
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5 font-medium">
-            Incoming orders appear here automatically with real-time chime alerts.
+          <p className="text-xs text-slate-400 dark:text-slate-400 mt-1 font-medium">
+            Incoming orders appear here automatically with real-time audio chime alerts.
           </p>
         </div>
 
@@ -84,13 +86,14 @@ export const NewOrders = () => {
           size="sm"
           icon={RefreshCw}
           onClick={() => refresh().catch(() => {})}
+          className="shrink-0"
         >
           Check Now
         </Button>
       </div>
 
       {/* Loading State */}
-      {loading && newOrders.length === 0 && <LoadingSkeleton count={3} />}
+      {loading && newOrders.length === 0 && <LoadingSkeleton count={2} />}
 
       {/* Error State */}
       {error && newOrders.length === 0 && (

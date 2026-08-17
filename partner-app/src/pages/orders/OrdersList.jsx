@@ -44,7 +44,11 @@ export const OrdersList = () => {
     [activeStatus, searchQuery]
   )
 
-  const orders = ordersData || []
+  const orders = Array.isArray(ordersData?.data)
+    ? ordersData.data
+    : Array.isArray(ordersData)
+    ? ordersData
+    : []
 
   const tabs = [
     { id: 'ALL', label: 'All Orders' },
@@ -116,7 +120,7 @@ export const OrdersList = () => {
             placeholder="Search by Order # or Customer..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#2845D6] focus:ring-2 focus:ring-blue-500/20 shadow-xs"
+            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-[#2845D6] focus:ring-2 focus:ring-blue-500/20 shadow-xs"
           />
         </div>
 
@@ -136,7 +140,7 @@ export const OrdersList = () => {
               className={`px-3.5 py-2 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
                 isActive
                   ? 'bg-[#2845D6] text-white shadow-md shadow-blue-500/20'
-                  : 'bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
               {tab.label}

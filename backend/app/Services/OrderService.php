@@ -256,6 +256,42 @@ class OrderService
         return $updatedOrder;
     }
 
+    public function confirmOrder(Order $order, ?User $actor, int $prepTimeMinutes = 15): Order
+    {
+        $order->estimated_delivery_minutes = $prepTimeMinutes;
+        $order->save();
+
+        return $this->transitionStatus(
+            order: $order,
+            targetStatus: OrderStatus::CONFIRMED,
+            actor: $actor,
+            actorType: ActorType::RESTAURANT,
+            comment: "Order accepted by restaurant. Estimated cooking time: {$prepTimeMinutes} mins."
+        );
+    }
+
+    public function updateStatus(Order $order, OrderStatus $newStatus, ?User $actor, ?string $notes = null): Order
+    {
+        return $this->transitionStatus(
+            order: $order,
+            targetStatus: $newStatus,
+            actor: $actor,
+            actorType: ActorType::RESTAURANT,
+            comment: $notes
+        );
+    }
+
+    public function markReadyForPickup(Order $order, ?User $actor): Order
+    {
+        return $this->transitionStatus(
+            order: $order,
+            targetStatus: OrderStatus::READY_FOR_PICKUP,
+            actor: $actor,
+            actorType: ActorType::RESTAURANT,
+            comment: 'Food is packed and ready for delivery rider pickup.'
+        );
+    }
+
     public function cancelOrder(Order $order, User $actor, string $reason, string $cancelledBy): Order
     {
         if ($order->status->isFinal()) {
