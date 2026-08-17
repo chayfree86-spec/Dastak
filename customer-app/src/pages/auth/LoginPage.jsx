@@ -57,7 +57,7 @@ export const LoginPage = () => {
               className="h-10 sm:h-12 w-auto object-contain"
               onError={(e) => {
                 e.target.onerror = null
-                e.target.src = '/logo-light.png'
+                e.target.src = '/logo-horizontal.png'
               }}
             />
           </div>
@@ -149,7 +149,7 @@ export const LoginPage = () => {
               <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider">
                 Demo Customer Account
               </span>
-              <span className="text-xs font-mono font-bold text-slate-800 dark:text-slate-200 block truncate">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate">
                 9666600001 • password123
               </span>
             </div>

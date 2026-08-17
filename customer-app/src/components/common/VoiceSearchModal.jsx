@@ -41,7 +41,7 @@ export const VoiceSearchModal = ({ isOpen, onClose, onSearch, onTypeInstead }) =
 
     if (!listener.isSupported()) {
       setStatus('unsupported')
-      setErrorMessage('Voice search is not supported in this browser. Please type your search.')
+      setErrorMessage(lang === 'hi' ? 'इस ब्राउज़र में वॉयस सर्च उपलब्ध नहीं है। कृपया टाइप करके खोजें।' : 'Voice search is not supported in this browser. Please type your search.')
       return
     }
 
@@ -50,7 +50,7 @@ export const VoiceSearchModal = ({ isOpen, onClose, onSearch, onTypeInstead }) =
     return () => {
       listener.stop()
     }
-  }, [isOpen, onSearch, onClose, t])
+  }, [isOpen, onSearch, onClose, t, lang])
 
   const handleRetry = () => {
     setStatus('listening')
@@ -100,7 +100,7 @@ export const VoiceSearchModal = ({ isOpen, onClose, onSearch, onTypeInstead }) =
             {status === 'listening' ? t.voiceListening : errorMessage || t.voiceNotHeard}
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            {status === 'listening' ? t.voiceHint : 'Tap retry to speak again'}
+            {status === 'listening' ? t.voiceHint : (lang === 'hi' ? 'दोबारा बोलने के लिए पुनः प्रयास पर टैप करें' : 'Tap retry to speak again')}
           </p>
         </div>
 

@@ -36,23 +36,25 @@ export const AccountPage = () => {
         <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
           {t.myProfile}
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Manage your account, addresses, and app preferences
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          {lang === 'hi'
+            ? 'अपना खाता, पते और ऐप प्राथमिकताएं प्रबंधित करें'
+            : 'Manage your account, addresses, and app preferences'}
         </p>
       </div>
 
       {/* User Info Card */}
-      <div className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
             {user?.name ? user.name[0].toUpperCase() : 'C'}
           </div>
           <div className="min-w-0 space-y-0.5">
             <h3 className="text-base font-black text-slate-900 dark:text-slate-100 truncate">
-              {user?.name || (isAuthenticated ? 'Valued Customer' : 'Guest Customer')}
+              {user?.name || (isAuthenticated ? (lang === 'hi' ? 'प्रिय ग्राहक' : 'Valued Customer') : (lang === 'hi' ? 'अतिथि ग्राहक' : 'Guest Customer'))}
             </h3>
-            <p className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
-              {user?.mobile ? `+91 ${user.mobile}` : 'Sign in to sync your orders'}
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              {user?.mobile ? `+91 ${user.mobile}` : (lang === 'hi' ? 'ऑर्डर सिंक करने के लिए साइन इन करें' : 'Sign in to sync your orders')}
             </p>
           </div>
         </div>
@@ -71,7 +73,7 @@ export const AccountPage = () => {
       </div>
 
       {/* Navigation Options List */}
-      <div className="p-2 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+      <div className="p-2 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm divide-y divide-slate-100 dark:divide-slate-800 text-xs">
         {/* Saved Addresses */}
         <div
           onClick={() => navigate('/addresses')}
@@ -85,8 +87,8 @@ export const AccountPage = () => {
               <h5 className="font-black text-slate-900 dark:text-slate-100">
                 {t.savedAddresses}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                {activeAddress?.address || 'Manage home and work addresses'}
+              <p className="text-slate-400 text-[11px] font-medium">
+                {activeAddress?.address || (lang === 'hi' ? 'घर और ऑफिस के पते प्रबंधित करें' : 'Manage home and work addresses')}
               </p>
             </div>
           </div>
@@ -106,7 +108,9 @@ export const AccountPage = () => {
               <h5 className="font-black text-slate-900 dark:text-slate-100">
                 {t.orderHistory}
               </h5>
-              <p className="text-slate-400 text-[11px]">Past food deliveries and receipts</p>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'पुराने फूड ऑर्डर्स और रसीदें' : 'Past food deliveries and receipts'}
+              </p>
             </div>
           </div>
           <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -125,8 +129,8 @@ export const AccountPage = () => {
               <h5 className="font-black text-slate-900 dark:text-slate-100">
                 {t.language}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                Current: <strong>{lang === 'en' ? 'English' : 'हिंदी'}</strong> (Tap to change)
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'वर्तमान:' : 'Current:'} <strong>{lang === 'en' ? 'English' : 'हिंदी'}</strong> ({lang === 'hi' ? 'बदलने के लिए टैप करें' : 'Tap to change'})
               </p>
             </div>
           </div>
@@ -148,7 +152,9 @@ export const AccountPage = () => {
               <h5 className="font-black text-slate-900 dark:text-slate-100">
                 {t.helpSupport}
               </h5>
-              <p className="text-slate-400 text-[11px]">Toll-Free Customer Support: 1800-123-456</p>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'टोल-फ्री ग्राहक सेवा: 1800-123-456' : 'Toll-Free Customer Support: 1800-123-456'}
+              </p>
             </div>
           </div>
           <Phone className="w-4 h-4 text-emerald-600" />

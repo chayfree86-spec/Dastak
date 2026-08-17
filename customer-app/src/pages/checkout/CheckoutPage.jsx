@@ -25,7 +25,7 @@ import LocationPickerModal from '../../components/common/LocationPickerModal'
 
 export const CheckoutPage = () => {
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const toast = useToast()
   const { items, restaurant, subtotal, deliveryFee, taxAmount, grandTotal, clearCart } =
     useCart()
@@ -151,13 +151,13 @@ export const CheckoutPage = () => {
             type="text"
             value={specialInstructions}
             onChange={(e) => setSpecialInstructions(e.target.value)}
-            placeholder="e.g. Ring doorbell, leave at gate, keep extra napkins"
+            placeholder={lang === 'hi' ? 'उदा. डोरबेल बजाएं, गेट पर रखें, एक्स्ट्रा नैपकिन रखें' : 'e.g. Ring doorbell, leave at gate, keep extra napkins'}
             className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
           />
         </div>
 
         {/* 3. Payment Method Selection */}
-        <div className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+        <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
           <span className="text-[10px] font-black uppercase text-slate-400 block">
             {t.paymentMethod}
           </span>
@@ -179,7 +179,9 @@ export const CheckoutPage = () => {
                 <h5 className="font-black text-slate-900 dark:text-slate-100">
                   {t.cashOnDelivery}
                 </h5>
-                <p className="text-[11px] text-slate-400">Pay cash upon delivery</p>
+                <p className="text-[11px] text-slate-400">
+                  {lang === 'hi' ? 'डिलीवरी के समय नकद भुगतान करें' : 'Pay cash upon delivery'}
+                </p>
               </div>
             </div>
 
@@ -199,7 +201,9 @@ export const CheckoutPage = () => {
                 <h5 className="font-black text-slate-900 dark:text-slate-100">
                   {t.onlinePayment}
                 </h5>
-                <p className="text-[11px] text-slate-400">UPI, Cards, Netbanking</p>
+                <p className="text-[11px] text-slate-400">
+                  {lang === 'hi' ? 'UPI, डेबिट/क्रेडिट कार्ड, नेटबैंकिंग' : 'UPI, Cards, Netbanking'}
+                </p>
               </div>
             </div>
           </div>
@@ -209,14 +213,14 @@ export const CheckoutPage = () => {
         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
           <div>
             <span className="text-[10px] font-black uppercase text-slate-400 block">
-              TOTAL TO PAY
+              {lang === 'hi' ? 'कुल देय राशि' : 'TOTAL TO PAY'}
             </span>
             <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
               {formatCurrency(grandTotal)}
             </div>
           </div>
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-            {items.length} {items.length === 1 ? 'Dish' : 'Dishes'}
+            {items.length} {lang === 'hi' ? 'व्यंजन' : items.length === 1 ? 'Dish' : 'Dishes'}
           </span>
         </div>
 

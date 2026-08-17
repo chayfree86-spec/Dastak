@@ -2,6 +2,7 @@ import React from 'react'
 import { Plus, Minus, Star, Flame, Sparkles, Utensils } from 'lucide-react'
 import { formatCurrency } from '../../utils/formatters'
 import { useCart } from '../../context/CartContext'
+import { useLanguage } from '../../context/LanguageContext'
 
 // Fallback high quality food photography placeholders based on food name
 const getFoodImage = (product) => {
@@ -34,6 +35,7 @@ const getFoodImage = (product) => {
 }
 
 export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
+  const { t } = useLanguage()
   const { getItemQuantity, addItem, updateQuantity } = useCart()
 
   if (!product) return null
@@ -71,7 +73,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
   return (
     <div
       onClick={onSelect}
-      className={`group relative p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-xl hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between gap-3 ${
+      className={`group relative p-4 pb-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-xl hover:border-blue-500/40 transition-all duration-300 flex flex-col justify-between gap-3 ${
         onSelect ? 'cursor-pointer' : ''
       }`}
     >
@@ -100,7 +102,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
             {product.is_featured ? (
               <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                 <Flame className="w-3 h-3 fill-amber-500 text-amber-500" />
-                <span>Bestseller</span>
+                <span>{t.bestseller || 'Bestseller'}</span>
               </span>
             ) : restaurantName ? (
               <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 truncate max-w-[140px]">
@@ -116,16 +118,16 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
 
           {/* Price & Discount */}
           <div className="flex items-baseline gap-2 pt-0.5">
-            <span className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100 font-mono">
+            <span className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100">
               {formatCurrency(price)}
             </span>
             {discountPercent && (
               <>
-                <span className="text-xs text-slate-400 line-through font-mono">
+                <span className="text-xs text-slate-400 line-through font-medium">
                   {formatCurrency(originalPrice)}
                 </span>
                 <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded-md">
-                  {discountPercent}% OFF
+                  {discountPercent}% {t.offUpTo || 'OFF'}
                 </span>
               </>
             )}
@@ -158,7 +160,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
           <div className="absolute -bottom-3.5 inset-x-0 xs:inset-x-1">
             {!isAvailable ? (
               <span className="w-full py-1 px-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase text-center block shadow-xs">
-                Sold Out
+                {t.soldOut || 'Sold Out'}
               </span>
             ) : currentQty === 0 ? (
               <button
@@ -167,7 +169,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
                 className="w-full min-h-[34px] py-1.5 px-2 rounded-2xl bg-white dark:bg-slate-900 border-2 border-[#2845D6] dark:border-blue-500 text-[#2845D6] dark:text-blue-400 hover:bg-[#2845D6] hover:text-white dark:hover:bg-[#2845D6] dark:hover:text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                <span>ADD</span>
+                <span>{t.add || 'ADD'}</span>
               </button>
             ) : (
               <div className="w-full min-h-[34px] py-1 px-1 rounded-2xl bg-gradient-to-r from-[#2845D6] to-blue-700 text-white font-black text-xs shadow-xl shadow-blue-600/30 flex items-center justify-between gap-0.5 select-none">
@@ -179,7 +181,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
                 >
                   <Minus className="w-3.5 h-3.5 stroke-[3]" />
                 </button>
-                <span className="font-mono text-xs sm:text-sm font-black px-1 min-w-[16px] text-center">
+                <span className="text-xs sm:text-sm font-black px-1 min-w-[16px] text-center">
                   {currentQty}
                 </span>
                 <button

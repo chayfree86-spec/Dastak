@@ -54,10 +54,10 @@ export const RestaurantCard = ({ restaurant }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
         {/* Top Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
           {/* Status Badge: Open / Closed */}
           <span
-            className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md ${
+            className={`px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-md whitespace-nowrap ${
               isOpen
                 ? 'bg-emerald-600/90 text-white'
                 : 'bg-rose-600/90 text-white'
@@ -68,7 +68,7 @@ export const RestaurantCard = ({ restaurant }) => {
 
           {/* Pure Veg Tag */}
           {isPureVeg && (
-            <span className="px-3 py-1 rounded-xl bg-emerald-600 text-white text-[10px] font-black uppercase shadow-md flex items-center gap-1">
+            <span className="px-2.5 py-1 rounded-xl bg-emerald-600 text-white text-[10px] font-black uppercase shadow-md flex items-center gap-1 whitespace-nowrap">
               <span>🌱</span>
               <span>{t.vegOnly}</span>
             </span>
@@ -76,22 +76,22 @@ export const RestaurantCard = ({ restaurant }) => {
         </div>
 
         {/* Bottom Banner Info: Discount offer & Rating */}
-        <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
-          <div className="flex items-center gap-1.5 bg-[#2845D6]/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl text-[11px] font-black shadow-md">
-            <Tag className="w-3 h-3" />
-            <span>50% OFF UP TO ₹100</span>
+        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
+          <div className="flex items-center gap-1 bg-[#2845D6]/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black shadow-md whitespace-nowrap">
+            <Tag className="w-3 h-3 shrink-0" />
+            <span>50% {t.offUpTo || 'OFF UP TO'} ₹100</span>
           </div>
 
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1 rounded-xl border border-slate-200/60 dark:border-slate-700 shadow-md flex items-center gap-1 text-xs font-black text-slate-900 dark:text-slate-100">
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1 rounded-xl border border-slate-200/60 dark:border-slate-700 shadow-md flex items-center gap-1 text-xs font-black text-slate-900 dark:text-slate-100 shrink-0 whitespace-nowrap">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
             <span>{rating.toFixed(1)}</span>
           </div>
         </div>
       </div>
 
       {/* Details Footer */}
-      <div className="p-4 space-y-2.5">
-        <div>
+      <div className="p-3.5 sm:p-4 space-y-2">
+        <div className="min-w-0">
           <h4 className="text-base font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors truncate">
             {restaurant.name}
           </h4>
@@ -101,14 +101,14 @@ export const RestaurantCard = ({ restaurant }) => {
         </div>
 
         {/* Meta Footer: Delivery Time & Location */}
-        <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400" />
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold gap-2">
+          <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+            <Clock className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400 shrink-0" />
             <span>{timeMin}-{timeMin + 10} min</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-[#F97316]" />
-            <span>{restaurant.city || 'Kanpur'}</span>
+          <div className="flex items-center gap-1.5 min-w-0 truncate justify-end">
+            <MapPin className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
+            <span className="truncate">{restaurant.city || 'Kanpur'}</span>
           </div>
         </div>
       </div>

@@ -41,10 +41,12 @@ export const MorePage = () => {
       <div>
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
           <Menu className="w-7 h-7 text-[#2845D6] dark:text-blue-400" />
-          <span>More Options</span>
+          <span>{lang === 'hi' ? 'अन्य विकल्प' : 'More Options'}</span>
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Access spending reports, app settings, preferences, and support
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+          {lang === 'hi'
+            ? 'खर्च रिपोर्ट, ऐप सेटिंग्स, प्राथमिकताएं और सहायता प्राप्त करें'
+            : 'Access spending reports, app settings, preferences, and support'}
         </p>
       </div>
 
@@ -56,10 +58,10 @@ export const MorePage = () => {
           </div>
           <div className="min-w-0 space-y-0.5">
             <h3 className="text-base font-black text-slate-900 dark:text-slate-100 truncate">
-              {user?.name || (isAuthenticated ? 'Valued Customer' : 'Guest Customer')}
+              {user?.name || (isAuthenticated ? (lang === 'hi' ? 'प्रिय ग्राहक' : 'Valued Customer') : (lang === 'hi' ? 'अतिथि ग्राहक' : 'Guest Customer'))}
             </h3>
-            <p className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
-              {user?.mobile ? `+91 ${user.mobile}` : 'Sign in to access all features'}
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              {user?.mobile ? `+91 ${user.mobile}` : (lang === 'hi' ? 'सभी सुविधाएं एक्सेस करने के लिए साइन इन करें' : 'Sign in to access all features')}
             </p>
           </div>
         </div>
@@ -76,7 +78,7 @@ export const MorePage = () => {
           </Button>
         ) : (
           <span className="text-[11px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 rounded-xl">
-            Active
+            {lang === 'hi' ? 'सक्रिय' : 'Active'}
           </span>
         )}
       </div>
@@ -86,7 +88,7 @@ export const MorePage = () => {
         {/* 1. Report & Activity */}
         <div
           onClick={() => navigate('/reports')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer group"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer group"
         >
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 group-hover:scale-110 transition-transform">
@@ -94,10 +96,10 @@ export const MorePage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Spending & Activity Reports
+                {lang === 'hi' ? 'खर्च और गतिविधि रिपोर्ट' : 'Spending & Activity Reports'}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                Monthly expenses, billing history, and order breakdown
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'मासिक खर्च, बिलिंग इतिहास और ऑर्डर का सारांश' : 'Monthly expenses, billing history, and order breakdown'}
               </p>
             </div>
           </div>
@@ -107,7 +109,7 @@ export const MorePage = () => {
         {/* 2. Settings */}
         <div
           onClick={() => navigate('/settings')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer group"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer group"
         >
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-slate-800 text-purple-600 group-hover:scale-110 transition-transform">
@@ -115,10 +117,10 @@ export const MorePage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                App Settings & Preferences (सेटिंग)
+                {lang === 'hi' ? 'ऐप सेटिंग्स और प्राथमिकताएं' : 'App Settings & Preferences (सेटिंग)'}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                Profile, delivery addresses, and account controls
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'प्रोफ़ाइल, डिलीवरी पते और खाता नियंत्रण' : 'Profile, delivery addresses, and account controls'}
               </p>
             </div>
           </div>
@@ -128,7 +130,7 @@ export const MorePage = () => {
         {/* 3. Saved Addresses */}
         <div
           onClick={() => navigate('/addresses')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer group"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer group"
         >
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-slate-800 text-[#F97316] group-hover:scale-110 transition-transform">
@@ -136,10 +138,10 @@ export const MorePage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Saved Delivery Addresses
+                {t.savedAddresses || (lang === 'hi' ? 'सहेजे गए डिलीवरी पते' : 'Saved Delivery Addresses')}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                {activeAddress?.address || 'Manage home and work addresses'}
+              <p className="text-slate-400 text-[11px] font-medium">
+                {activeAddress?.address || (lang === 'hi' ? 'घर और ऑफिस के पते प्रबंधित करें' : 'Manage home and work addresses')}
               </p>
             </div>
           </div>
@@ -149,7 +151,7 @@ export const MorePage = () => {
         {/* 4. Language Switcher */}
         <div
           onClick={toggleLanguage}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-slate-800 text-emerald-600">
@@ -157,10 +159,10 @@ export const MorePage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Language (भाषा)
+                {lang === 'hi' ? 'भाषा (Language)' : 'Language (भाषा)'}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                Current: <strong>{lang === 'en' ? 'English' : 'हिंदी'}</strong>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'वर्तमान:' : 'Current:'} <strong>{lang === 'en' ? 'English' : 'हिंदी'}</strong>
               </p>
             </div>
           </div>
@@ -172,7 +174,7 @@ export const MorePage = () => {
         {/* 5. Theme Switcher */}
         <div
           onClick={toggleTheme}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-slate-800 text-amber-600">
@@ -180,22 +182,22 @@ export const MorePage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Appearance
+                {lang === 'hi' ? 'थीम और रंगरूप' : 'Appearance'}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                Current: <strong>{isDark ? 'Dark Mode' : 'Light Mode'}</strong>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'वर्तमान:' : 'Current:'} <strong>{isDark ? (lang === 'hi' ? 'डार्क मोड' : 'Dark Mode') : (lang === 'hi' ? 'लाइट मोड' : 'Light Mode')}</strong>
               </p>
             </div>
           </div>
           <span className="text-xs font-black text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
-            Toggle
+            {lang === 'hi' ? 'बदलें' : 'Toggle'}
           </span>
         </div>
 
         {/* 6. Support Helpline */}
         <div
           onClick={() => window.open('tel:1800123456', '_blank')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3.5">
             <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#2845D6]">
@@ -203,9 +205,11 @@ export const MorePage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                24x7 Customer Support
+                {lang === 'hi' ? '24x7 ग्राहक सहायता' : '24x7 Customer Support'}
               </h5>
-              <p className="text-slate-400 text-[11px]">Toll-Free Helpline: 1800-123-456</p>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'टोल-फ्री हेल्पलाइन: 1800-123-456' : 'Toll-Free Helpline: 1800-123-456'}
+              </p>
             </div>
           </div>
           <Phone className="w-4 h-4 text-emerald-600" />
@@ -220,7 +224,7 @@ export const MorePage = () => {
           className="w-full p-4 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-black flex items-center justify-center gap-2 hover:bg-rose-100 transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
-          <span>Sign Out</span>
+          <span>{t.logout || (lang === 'hi' ? 'लॉग आउट करें' : 'Sign Out')}</span>
         </button>
       )}
     </div>

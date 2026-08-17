@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Search,
@@ -7,6 +7,7 @@ import {
   Flame,
   Store,
   ChevronRight,
+  ChevronLeft,
   UtensilsCrossed,
   Coffee,
   Pizza,
@@ -34,6 +35,7 @@ export const HomePage = () => {
   const navigate = useNavigate()
   const { t } = useLanguage()
   const { isAuthenticated } = useAuth()
+  const categoriesRef = useRef(null)
 
   const [restaurants, setRestaurants] = useState([])
   const [popularDishes, setPopularDishes] = useState([])
@@ -43,34 +45,57 @@ export const HomePage = () => {
   const [activeFilter, setActiveFilter] = useState('all') // 'all' | 'rating' | 'veg' | 'fast'
   const [activeBannerIndex, setActiveBannerIndex] = useState(0)
 
-  // Curated Promo Banners
+  const scrollCategories = (offset) => {
+    if (!categoriesRef.current) return
+    const el = categoriesRef.current
+    const start = el.scrollLeft
+    const duration = 450
+    const startTime = performance.now()
+
+    // Smooth kinetic easing curve (out-quart fluid velocity)
+    const easeOutQuart = (x) => 1 - Math.pow(1 - x, 4)
+
+    const animateScroll = (currentTime) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const ease = easeOutQuart(progress)
+      el.scrollLeft = start + offset * ease
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll)
+      }
+    }
+    requestAnimationFrame(animateScroll)
+  }
+
+  // Curated Promo Banners with full English and Hindi translation support
   const promoBanners = [
     {
       id: 1,
-      title: 'FLAT 50% OFF',
-      subtitle: 'On your first 3 food orders',
+      title: t.banner1Title || 'FLAT 50% OFF',
+      subtitle: t.banner1Subtitle || 'On your first 3 food orders',
       code: 'WELCOME50',
-      badge: 'LIMITED OFFER',
+      badge: t.banner1Badge || 'LIMITED OFFER',
       gradient: 'from-[#2845D6] via-indigo-600 to-blue-800',
       bgImage: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
       query: 'biryani',
     },
     {
       id: 2,
-      title: 'CHAI & SNACKS FEST',
-      subtitle: 'Fresh hot cutting chai & crunchy samosas',
-      code: 'CHAY20',
-      badge: 'CHAY SPECIAL',
-      gradient: 'from-[#F97316] via-orange-600 to-amber-700',
+      title: t.banner2Title || 'CHAI & SNACKS FEST',
+      subtitle: t.banner2Subtitle || 'Evening special with up to 40% OFF',
+      code: 'CHAI40',
+      badge: t.banner2Badge || 'POPULAR',
+      gradient: 'from-amber-600 via-orange-600 to-rose-700',
       bgImage: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80',
       query: 'chai',
     },
     {
       id: 3,
-      title: 'SUPER FAST DELIVERY',
-      subtitle: 'Hot & fresh food delivered under 30 minutes',
+      title: t.banner3Title || 'FREE EXPRESS DELIVERY',
+      subtitle: t.banner3Subtitle || 'On orders above ₹199 from top rated kitchens',
       code: 'FASTFREE',
-      badge: 'LIGHTNING FAST',
+      badge: t.banner3Badge || 'LIGHTNING FAST',
       gradient: 'from-emerald-600 via-teal-700 to-slate-900',
       bgImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80',
       query: 'burger',
@@ -85,14 +110,14 @@ export const HomePage = () => {
     return () => clearInterval(timer)
   }, [promoBanners.length])
 
-  // Food Categories list
+  // Food Categories list with i18n
   const categories = [
-    { id: 'all', name: 'All Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&auto=format&fit=crop&q=80', query: 'food' },
-    { id: 'biryani', name: 'Biryani', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200&auto=format&fit=crop&q=80', query: 'biryani' },
-    { id: 'tea', name: 'Chai & Snacks', image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=200&auto=format&fit=crop&q=80', query: 'chai' },
-    { id: 'burger', name: 'Burgers & Rolls', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&auto=format&fit=crop&q=80', query: 'burger' },
-    { id: 'veg', name: 'Pure Veg', image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=200&auto=format&fit=crop&q=80', query: 'paneer' },
-    { id: 'sweets', name: 'Desserts & Sweets', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=200&auto=format&fit=crop&q=80', query: 'jalebi' },
+    { id: 'all', name: t.catAllFood || 'All Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&auto=format&fit=crop&q=80', query: 'food' },
+    { id: 'biryani', name: t.catBiryani || 'Biryani', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300&auto=format&fit=crop&q=80', query: 'biryani' },
+    { id: 'tea', name: t.catChai || 'Chai & Snacks', image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=300&auto=format&fit=crop&q=80', query: 'chai' },
+    { id: 'burger', name: t.catBurger || 'Burgers & Rolls', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop&q=80', query: 'burger' },
+    { id: 'veg', name: t.catVeg || 'Pure Veg', image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&auto=format&fit=crop&q=80', query: 'paneer' },
+    { id: 'sweets', name: t.catSweets || 'Desserts & Sweets', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=300&auto=format&fit=crop&q=80', query: 'jalebi' },
   ]
 
   useEffect(() => {
@@ -149,14 +174,39 @@ export const HomePage = () => {
   })
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-5 pb-8">
       {/* 1. Active Order Banner in Header Area */}
       {activeOrder && <ActiveOrderBanner order={activeOrder} />}
 
-      {/* 2. Hero Promo Banner Carousel */}
+      {/* 2. Top Prominent Search Bar with Voice */}
+      <div
+        onClick={() => navigate('/search')}
+        className="p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 shadow-sm hover:border-[#2845D6] dark:hover:border-blue-500 transition-all flex items-center justify-between gap-3 cursor-pointer group"
+      >
+        <div className="flex items-center gap-2.5 min-w-0 flex-1 ml-1">
+          <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 group-hover:scale-110 transition-transform shrink-0" />
+          <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 truncate">
+            {t.searchPlaceholder || 'What do you want to eat? Search biryani, chai...'}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setVoiceModalOpen(true)
+          }}
+          className="p-2 rounded-xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+          title="Search with Voice"
+        >
+          <Mic className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* 3. Hero Promo Banner Carousel */}
       <div className="relative overflow-hidden rounded-3xl shadow-xl">
         <div
-          className={`relative p-6 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between min-h-[170px] sm:min-h-[200px] overflow-hidden transition-all duration-500`}
+          className={`relative p-6 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between min-h-[180px] sm:min-h-[220px] overflow-hidden transition-all duration-500`}
         >
           {/* Background Photo with soft overlay */}
           <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5 overflow-hidden opacity-30 sm:opacity-40 mix-blend-luminosity pointer-events-none">
@@ -167,13 +217,13 @@ export const HomePage = () => {
             />
           </div>
 
-          <div className="relative z-10 space-y-2 max-w-md">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/20 backdrop-blur-md text-[10px] font-black uppercase tracking-wider">
+          <div className="relative z-10 space-y-2 max-w-lg">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/20 backdrop-blur-md text-xs font-black uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{promoBanners[activeBannerIndex].badge}</span>
             </span>
 
-            <h3 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight drop-shadow-sm">
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight drop-shadow-sm">
               {promoBanners[activeBannerIndex].title}
             </h3>
 
@@ -183,16 +233,16 @@ export const HomePage = () => {
           </div>
 
           {/* Banner Action CTA */}
-          <div className="relative z-10 pt-3 flex items-center justify-between gap-3">
+          <div className="relative z-10 pt-4 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={() =>
                 navigate(`/search?q=${encodeURIComponent(promoBanners[activeBannerIndex].query)}`)
               }
-              className="px-4 py-2 rounded-2xl bg-white text-slate-900 font-black text-xs shadow-lg hover:bg-slate-100 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-2xl bg-white text-slate-900 font-black text-xs sm:text-sm shadow-lg hover:bg-slate-100 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              <span>Order Now</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#2845D6]" />
+              <span>{t.orderNow || 'Order Now'}</span>
+              <ArrowRight className="w-4 h-4 text-[#2845D6]" />
             </button>
 
             {/* Carousel Dots */}
@@ -213,42 +263,69 @@ export const HomePage = () => {
       </div>
 
       {/* 4. Food Mood / Category Circular Strip */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-400 px-0.5">
           <span>{t.categories}</span>
         </div>
 
-        <div className="flex items-center gap-4 overflow-x-auto py-2.5 px-1.5 -my-1 scrollbar-none">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => navigate(`/search?q=${encodeURIComponent(cat.query)}`)}
-              className="flex flex-col items-center gap-2 shrink-0 cursor-pointer group select-none text-center"
-            >
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 p-1 group-hover:border-[#2845D6] group-hover:scale-105 transition-all duration-300 shadow-xs group-hover:shadow-md group-hover:shadow-blue-500/15">
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-full h-full object-cover rounded-2xl"
-                  loading="lazy"
-                />
-              </div>
-              <span className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
-                {cat.name}
-              </span>
-            </button>
-          ))}
+        {/* Categories Track with Left & Right Centered Arrows */}
+        <div className="relative">
+          {/* Left Arrow - Centered on Card Image */}
+          <button
+            type="button"
+            onClick={() => scrollCategories(-240)}
+            className="absolute -left-2 sm:-left-3.5 top-9 sm:top-11 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent flex items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
+            title="Previous Categories"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+          </button>
+
+          {/* Horizontal category track with hidden scrollbars */}
+          <div
+            ref={categoriesRef}
+            className="flex items-center gap-4 sm:gap-6 overflow-x-auto py-2 px-6 sm:px-8 -my-1 scrollbar-none no-scrollbar scroll-smooth"
+          >
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => navigate(`/search?q=${encodeURIComponent(cat.query)}`)}
+                className="flex flex-col items-center gap-2 shrink-0 cursor-pointer group select-none text-center"
+              >
+                <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 p-1.5 group-hover:border-[#2845D6] group-hover:scale-105 transition-all duration-300 shadow-xs group-hover:shadow-lg group-hover:shadow-blue-500/15 shrink-0">
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover rounded-2xl"
+                    loading="lazy"
+                  />
+                </div>
+                <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+                  {cat.name}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Right Arrow - Centered on Card Image */}
+          <button
+            type="button"
+            onClick={() => scrollCategories(240)}
+            className="absolute -right-2 sm:-right-3.5 top-9 sm:top-11 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent flex items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
+            title="Next Categories"
+          >
+            <ChevronRight className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-[2.5]" />
+          </button>
         </div>
       </div>
 
       {/* 5. Quick Filters Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 -my-1 scrollbar-none text-xs font-black">
+      <div className="flex items-center gap-2 overflow-x-auto py-1 px-0.5 -my-0.5 scrollbar-none text-xs font-black">
         {[
-          { id: 'all', label: 'All Items' },
-          { id: 'rating', label: '★ 4.0+ Rating' },
-          { id: 'veg', label: '🌱 Pure Veg' },
-          { id: 'fast', label: '⚡ Under 30 Mins' },
+          { id: 'all', label: t.filterAll || 'All Items' },
+          { id: 'rating', label: t.filterRating || '★ 4.0+ Rating' },
+          { id: 'veg', label: t.filterVeg || '🌱 Pure Veg' },
+          { id: 'fast', label: t.filterFast || '⚡ Under 30 Mins' },
         ].map((flt) => (
           <button
             key={flt.id}
@@ -279,7 +356,7 @@ export const HomePage = () => {
             onClick={() => navigate('/search')}
             className="text-xs font-bold text-[#2845D6] dark:text-blue-400 hover:underline flex items-center gap-0.5 cursor-pointer"
           >
-            <span>See All</span>
+            <span>{t.seeAll || 'See All'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -287,7 +364,7 @@ export const HomePage = () => {
         {loading ? (
           <LoadingSkeleton count={4} />
         ) : filteredDishes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredDishes.slice(0, 8).map((dish) => (
               <ProductCard
                 key={dish.id}
@@ -321,7 +398,7 @@ export const HomePage = () => {
         {loading ? (
           <LoadingSkeleton count={2} />
         ) : filteredRestaurants.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filteredRestaurants.map((rest) => (
               <RestaurantCard key={rest.id} restaurant={rest} />
             ))}
@@ -331,33 +408,6 @@ export const HomePage = () => {
             No restaurants found matching this filter.
           </div>
         )}
-      </div>
-
-      {/* 5. Sticky Floating Fast Search Bar in Footer Zone */}
-      <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-30">
-        <div
-          onClick={() => navigate('/search')}
-          className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-slate-200/90 dark:border-slate-800 shadow-xl hover:border-[#2845D6] transition-all flex items-center justify-between gap-3 cursor-pointer group"
-        >
-          <div className="flex items-center gap-2.5 min-w-0 flex-1 ml-1.5">
-            <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 group-hover:scale-110 transition-transform shrink-0" />
-            <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 truncate">
-              {t.searchPlaceholder}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setVoiceModalOpen(true)
-            }}
-            className="p-2 rounded-xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-            title="Search with Voice"
-          >
-            <Mic className="w-3.5 h-3.5" />
-          </button>
-        </div>
       </div>
 
       {/* Voice Search Modal */}

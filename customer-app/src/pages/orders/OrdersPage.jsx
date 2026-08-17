@@ -9,6 +9,7 @@ import {
   Bike,
   Receipt,
   Sparkles,
+  Star,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useAuth } from '../../context/AuthContext'
@@ -19,6 +20,7 @@ import { formatCurrency, formatDateTime, getOrderStatusText } from '../../utils/
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import EmptyState from '../../components/common/EmptyState'
 import Button from '../../components/common/Button'
+import RatingModal from '../../components/common/RatingModal'
 
 export const OrdersPage = () => {
   const navigate = useNavigate()
@@ -30,6 +32,7 @@ export const OrdersPage = () => {
   const [orders, setOrders] = useState([])
   const [activeTab, setActiveTab] = useState('all') // 'all' | 'active' | 'completed'
   const [loading, setLoading] = useState(true)
+  const [selectedOrderForRating, setSelectedOrderForRating] = useState(null)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -123,7 +126,7 @@ export const OrdersPage = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-black self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-black self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setActiveTab('all')}
@@ -133,7 +136,7 @@ export const OrdersPage = () => {
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            All ({orders.length})
+            {lang === 'hi' ? 'सभी' : 'All'} ({orders.length})
           </button>
           <button
             type="button"
@@ -144,7 +147,7 @@ export const OrdersPage = () => {
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            Active ({activeOrders.length})
+            {lang === 'hi' ? 'सक्रिय' : 'Active'} ({activeOrders.length})
           </button>
           <button
             type="button"
@@ -155,7 +158,7 @@ export const OrdersPage = () => {
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            Past ({pastOrders.length})
+            {lang === 'hi' ? 'पुराने' : 'Past'} ({pastOrders.length})
           </button>
         </div>
       </div>
@@ -166,8 +169,8 @@ export const OrdersPage = () => {
       ) : filteredOrders.length === 0 ? (
         <EmptyState
           icon={Receipt}
-          title="No Orders Found"
-          description="You have not placed any orders matching this filter."
+          title={lang === 'hi' ? 'कोई ऑर्डर नहीं मिला' : 'No Orders Found'}
+          description={lang === 'hi' ? 'इस फ़िल्टर से मेल खाता हुआ कोई ऑर्डर नहीं है।' : 'You have not placed any orders matching this filter.'}
           actionLabel={t.browseRestaurants}
           onAction={() => navigate('/')}
         />
@@ -185,7 +188,7 @@ export const OrdersPage = () => {
             return (
               <div
                 key={order.id || order.order_number}
-                className={`rounded-3xl bg-white dark:bg-slate-850 border shadow-xs hover:shadow-md transition-all overflow-hidden ${
+                className={`rounded-3xl bg-white dark:bg-slate-900 border shadow-xs hover:shadow-md transition-all overflow-hidden ${
                   isActive
                     ? 'border-[#2845D6]/40 ring-2 ring-blue-500/10'
                     : 'border-slate-200/80 dark:border-slate-800'
@@ -220,7 +223,9 @@ export const OrdersPage = () => {
                       {formatCurrency(total)}
                     </div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase">
-                      {order.payment_mode === 'COD' ? 'Cash on Delivery' : 'Online Paid'}
+                      {order.payment_mode === 'COD'
+                        ? lang === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery'
+                        : lang === 'hi' ? 'ऑनलाइन भुगतान' : 'Online Paid'}
                     </span>
                   </div>
                 </div>
@@ -234,7 +239,7 @@ export const OrdersPage = () => {
                         <Store className="w-3.5 h-3.5 text-[#2845D6]" />
                         <span>{rest.name || 'Dastak Partner Kitchen'}</span>
                       </h4>
-                      <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
+                      <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                         {items
                           .map((it) => `${it.quantity || 1}x ${it.item_name || it.name}`)
                           .join(', ')}
@@ -262,8 +267,18 @@ export const OrdersPage = () => {
                           onClick={() => navigate(`/orders/${order.order_number}`)}
                           className="font-bold text-xs"
                         >
-                          View Details
+                          {lang === 'hi' ? 'विवरण देखें' : 'View Details'}
                         </Button>
+                        {order.status === 'DELIVERED' && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedOrderForRating(order)}
+                            className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 font-black text-xs flex items-center gap-1.5 border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shadow-xs"
+                          >
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            <span>{t.rateOrder || (lang === 'hi' ? 'रेटिंग दें' : 'Rate')}</span>
+                          </button>
+                        )}
                         <Button
                           variant="accent"
                           size="sm"
@@ -282,6 +297,21 @@ export const OrdersPage = () => {
           })}
         </div>
       )}
+
+      {/* Rating Modal */}
+      <RatingModal
+        isOpen={Boolean(selectedOrderForRating)}
+        onClose={() => setSelectedOrderForRating(null)}
+        order={selectedOrderForRating}
+        onReviewSuccess={() => {
+          // Refresh orders to reflect review status
+          if (isAuthenticated) {
+            customerApi.getOrders({ per_page: 30 }).then((res) => {
+              setOrders(res.data?.data || res.data || [])
+            })
+          }
+        }}
+      />
     </div>
   )
 }

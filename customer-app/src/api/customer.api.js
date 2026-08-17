@@ -105,6 +105,11 @@ export const customerApi = {
     const res = await apiClient.post('/customer/reviews', reviewPayload)
     return res.data
   },
+
+  getReviews: async (params = {}) => {
+    const res = await apiClient.get('/customer/reviews', { params })
+    return res.data
+  },
 }
 
 export default customerApi

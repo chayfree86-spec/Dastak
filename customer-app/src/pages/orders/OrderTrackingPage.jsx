@@ -13,6 +13,7 @@ import {
   MapPin,
   XCircle,
   Sparkles,
+  Star,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useToast } from '../../context/ToastContext'
@@ -22,6 +23,7 @@ import { makePhoneCall } from '../../utils/geo'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import Button from '../../components/common/Button'
 import Modal from '../../components/common/Modal'
+import RatingModal from '../../components/common/RatingModal'
 import LiveOrderTrackingMap from '../../components/orders/LiveOrderTrackingMap'
 
 export const OrderTrackingPage = () => {
@@ -37,12 +39,18 @@ export const OrderTrackingPage = () => {
   const [cancelling, setCancelling] = useState(false)
   const [secondsRemaining, setSecondsRemaining] = useState(null)
   const [liveTelemetry, setLiveTelemetry] = useState({ distanceKm: 1.4, etaMins: 6 })
+  const [ratingModalOpen, setRatingModalOpen] = useState(false)
+  const [reviewed, setReviewed] = useState(false)
 
   const fetchOrder = useCallback(async () => {
     try {
       const res = await customerApi.getOrder(orderNumber)
       const data = res.data || {}
       setOrder(data)
+
+      if (data.reviews?.length > 0 || data.review || data.is_reviewed) {
+        setReviewed(true)
+      }
 
       // Calculate 5-minute cancellation window from placed_at
       const placedTime = new Date(data.timelines?.placed_at || data.placed_at || data.created_at).getTime()
@@ -101,19 +109,19 @@ export const OrderTrackingPage = () => {
   const isDelivered = order.status === 'DELIVERED'
   const canCancel = !isCancelled && !isDelivered && (secondsRemaining > 0 || order.can_cancel)
 
-  // Timeline Steps
+  // Timeline Steps with i18n
   const steps = [
     {
       id: 'PLACED',
-      label: 'Order Placed',
-      desc: 'Order received and sent to restaurant',
+      label: lang === 'hi' ? 'ऑर्डर दर्ज हुआ' : 'Order Placed',
+      desc: lang === 'hi' ? 'ऑर्डर प्राप्त हुआ और रेस्टोरेंट को भेजा गया' : 'Order received and sent to restaurant',
       isDone: true,
       time: order.timelines?.placed_at,
     },
     {
       id: 'CONFIRMED',
-      label: 'Restaurant Accepted',
-      desc: 'Restaurant accepted your order',
+      label: lang === 'hi' ? 'रेस्टोरेंट ने स्वीकार किया' : 'Restaurant Accepted',
+      desc: lang === 'hi' ? 'रेस्टोरेंट ने आपका ऑर्डर स्वीकार कर लिया है' : 'Restaurant accepted your order',
       isDone: [
         'CONFIRMED',
         'PREPARING',
@@ -126,8 +134,8 @@ export const OrderTrackingPage = () => {
     },
     {
       id: 'PREPARING',
-      label: 'Kitchen Preparing Food',
-      desc: 'Fresh ingredients being cooked',
+      label: lang === 'hi' ? 'खाना तैयार हो रहा है' : 'Kitchen Preparing Food',
+      desc: lang === 'hi' ? 'ताज़ा सामग्री से भोजन पकाया जा रहा है' : 'Fresh ingredients being cooked',
       isDone: [
         'PREPARING',
         'READY_FOR_PICKUP',
@@ -139,15 +147,15 @@ export const OrderTrackingPage = () => {
     },
     {
       id: 'OUT_FOR_DELIVERY',
-      label: 'Picked Up & On the Way',
-      desc: 'Delivery partner on the way to your location',
+      label: lang === 'hi' ? 'पिकअप हुआ और रास्ते में है' : 'Picked Up & On the Way',
+      desc: lang === 'hi' ? 'डिलीवरी पार्टनर आपकी लोकेशन की ओर निकल चुका है' : 'Delivery partner on the way to your location',
       isDone: ['OUT_FOR_DELIVERY', 'DELIVERED'].includes(order.status),
       time: order.timelines?.dispatched_at,
     },
     {
       id: 'DELIVERED',
-      label: 'Delivered',
-      desc: 'Package delivered to your address',
+      label: lang === 'hi' ? 'सफलतापूर्वक पहुँच गया' : 'Delivered',
+      desc: lang === 'hi' ? 'ऑर्डर आपके पते पर डिलीवर हो गया' : 'Package delivered to your address',
       isDone: order.status === 'DELIVERED',
       time: order.timelines?.delivered_at,
     },
@@ -167,16 +175,16 @@ export const OrderTrackingPage = () => {
         className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2845D6] dark:hover:text-blue-400 transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>Back to Orders</span>
+        <span>{lang === 'hi' ? 'ऑर्डर्स पर वापस जाएं' : 'Back to Orders'}</span>
       </button>
 
       {/* 2. Main Live Status Card */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-md space-y-4">
+      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-[#2845D6] text-white px-2.5 py-0.5 rounded-lg">
-                ORDER #{order.order_number}
+                #{order.order_number}
               </span>
               <span className="text-xs text-slate-400">
                 {formatDateTime(order.placed_at || order.created_at)}
@@ -193,19 +201,21 @@ export const OrderTrackingPage = () => {
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                 <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
-                  {order.status === 'OUT_FOR_DELIVERY' ? 'LIVE ARRIVAL' : t.estimatedArrival}
+                  {order.status === 'OUT_FOR_DELIVERY'
+                    ? lang === 'hi' ? 'लाइव आगमन' : 'LIVE ARRIVAL'
+                    : t.estimatedArrival}
                 </span>
               </div>
-              <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 font-mono leading-tight">
+              <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 leading-tight">
                 {order.status === 'OUT_FOR_DELIVERY'
                   ? liveTelemetry.etaMins <= 1
-                    ? 'Arriving Now!'
-                    : `~${liveTelemetry.etaMins} Mins`
-                  : `~${order.estimated_delivery_minutes || 25} Mins`}
+                    ? lang === 'hi' ? 'बस पहुँचने वाला है!' : 'Arriving Now!'
+                    : `~${liveTelemetry.etaMins} ${lang === 'hi' ? 'मिनट' : 'Mins'}`
+                  : `~${order.estimated_delivery_minutes || 25} ${lang === 'hi' ? 'मिनट' : 'Mins'}`}
               </div>
               {order.status === 'OUT_FOR_DELIVERY' && (
                 <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 block mt-0.5">
-                  {liveTelemetry.distanceKm} km away
+                  {liveTelemetry.distanceKm} {lang === 'hi' ? 'किमी दूर' : 'km away'}
                 </span>
               )}
             </div>
@@ -219,7 +229,8 @@ export const OrderTrackingPage = () => {
               <Clock className="w-4 h-4 text-amber-600 shrink-0" />
               <span className="truncate">
                 {t.cancelAllowedNotice} ({Math.floor(secondsRemaining / 60)}:
-                {String(secondsRemaining % 60).padStart(2, '0')} left)
+                {String(secondsRemaining % 60).padStart(2, '0')}{' '}
+                {lang === 'hi' ? 'शेष' : 'left'})
               </span>
             </div>
             <button
@@ -227,8 +238,50 @@ export const OrderTrackingPage = () => {
               onClick={() => setCancelModalOpen(true)}
               className="text-xs font-black text-rose-600 hover:underline shrink-0 cursor-pointer"
             >
-              Cancel Order
+              {t.cancelOrder || (lang === 'hi' ? 'ऑर्डर कैंसिल करें' : 'Cancel Order')}
             </button>
+          </div>
+        )}
+
+        {/* Delivered Experience & Rating Banner */}
+        {isDelivered && (
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/10 via-blue-500/10 to-indigo-500/10 border-2 border-amber-300/80 dark:border-amber-700/60 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/25">
+                <Star className="w-6 h-6 fill-white" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 block tracking-wider">
+                  {lang === 'hi' ? 'भोजन व डिलीवरी अनुभव' : 'MEAL & DELIVERY EXPERIENCE'}
+                </span>
+                <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 truncate">
+                  {reviewed
+                    ? (lang === 'hi' ? 'रेटिंग दर्ज हो चुकी है' : 'Rating Submitted for this Order')
+                    : (t.rateFoodAndDelivery || 'Rate Restaurant & Delivery Rider')}
+                </h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {reviewed
+                    ? (lang === 'hi' ? 'फीडबैक देने के लिए बहुत-बहुत धन्यवाद!' : 'Thank you for sharing your feedback!')
+                    : (t.rateExperienceSubtitle || 'Share your feedback for restaurant and rider')}
+                </p>
+              </div>
+            </div>
+
+            {!reviewed ? (
+              <button
+                type="button"
+                onClick={() => setRatingModalOpen(true)}
+                className="px-5 py-2.5 rounded-2xl bg-[#2845D6] hover:bg-blue-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
+                <span>{t.rateOrder || (lang === 'hi' ? 'रेटिंग दें' : 'Rate Order')}</span>
+              </button>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-xs font-black shrink-0">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>{t.alreadyReviewed || (lang === 'hi' ? 'रेटिंग पूर्ण' : 'Reviewed')}</span>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -240,9 +293,9 @@ export const OrderTrackingPage = () => {
 
       {/* 4. Visual Step-by-Step Timeline */}
       {!isCancelled && (
-        <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+        <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
-            DELIVERY PROGRESS
+            {lang === 'hi' ? 'डिलीवरी प्रगति' : 'DELIVERY PROGRESS'}
           </h4>
 
           <div className="space-y-6 relative before:absolute before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
@@ -274,12 +327,12 @@ export const OrderTrackingPage = () => {
                       {step.label}
                     </h5>
                     {step.time && (
-                      <span className="text-[11px] font-mono text-slate-400">
+                      <span className="text-[11px] text-slate-400">
                         {formatTime(step.time)}
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
                     {step.desc}
                   </p>
                 </div>
@@ -293,7 +346,7 @@ export const OrderTrackingPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
         {/* Delivery Partner */}
         {deliveryBoy.name ? (
-          <div className="p-4 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+          <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0">
                 <Bike className="w-5 h-5" />
@@ -305,7 +358,9 @@ export const OrderTrackingPage = () => {
                 <h5 className="font-black text-slate-900 dark:text-slate-100 truncate">
                   {deliveryBoy.name}
                 </h5>
-                <p className="text-[11px] text-slate-500">On the way to deliver</p>
+                <p className="text-[11px] text-slate-500 font-medium">
+                  {lang === 'hi' ? 'डिलीवरी के लिए रास्ते में है' : 'On the way to deliver'}
+                </p>
               </div>
             </div>
 
@@ -321,26 +376,26 @@ export const OrderTrackingPage = () => {
             )}
           </div>
         ) : (
-          <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center gap-3 text-slate-400">
+          <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center gap-3 text-slate-400 font-medium">
             <Bike className="w-5 h-5" />
-            <span>Delivery partner being assigned...</span>
+            <span>{lang === 'hi' ? 'डिलीवरी पार्टनर नियुक्त हो रहा है...' : 'Delivery partner being assigned...'}</span>
           </div>
         )}
 
         {/* Kitchen Outlet */}
-        <div className="p-4 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+        <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-slate-800 text-[#F97316] flex items-center justify-center shrink-0">
               <Store className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <span className="text-[10px] font-black uppercase text-slate-400 block">
-                Kitchen
+                {lang === 'hi' ? 'किचन / आउटलेट' : 'Kitchen'}
               </span>
               <h5 className="font-black text-slate-900 dark:text-slate-100 truncate">
                 {restaurant.name || 'Dastak Kitchen'}
               </h5>
-              <p className="text-[11px] text-slate-500 truncate">
+              <p className="text-[11px] text-slate-500 truncate font-medium">
                 {restaurant.address || 'Civil Lines, Kanpur'}
               </p>
             </div>
@@ -353,38 +408,38 @@ export const OrderTrackingPage = () => {
               className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 cursor-pointer shrink-0"
             >
               <Phone className="w-3.5 h-3.5 text-[#2845D6]" />
-              <span>{t.callKitchen}</span>
+              <span>{t.callKitchen || (lang === 'hi' ? 'किचन को कॉल करें' : 'Call Kitchen')}</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* 5. Delivery Address Card (Multi-line full address without truncation) */}
-      <div className="p-4 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2 text-xs">
+      {/* 5. Delivery Address Card */}
+      <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2 text-xs">
         <div className="flex items-center gap-1.5 text-slate-400 font-black uppercase tracking-wider text-[10px]">
           <MapPin className="w-3.5 h-3.5 text-[#F97316]" />
-          <span>DELIVERY ADDRESS</span>
+          <span>{lang === 'hi' ? 'डिलीवरी का पता' : 'DELIVERY ADDRESS'}</span>
         </div>
-        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 space-y-1">
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 space-y-1">
           <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-            {order.address?.customer_name || 'Delivery Destination'}
+            {order.address?.customer_name || (lang === 'hi' ? 'डिलीवरी गंतव्य' : 'Delivery Destination')}
           </h5>
-          <p className="text-slate-600 dark:text-slate-300 leading-relaxed break-words">
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed break-words font-medium">
             {order.address?.address || 'Civil Lines, Kanpur'}
           </p>
           {order.address?.landmark && (
             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">
-              🚩 Landmark: {order.address.landmark}
+              🚩 {lang === 'hi' ? 'लैंडमार्क:' : 'Landmark:'} {order.address.landmark}
             </span>
           )}
         </div>
       </div>
 
       {/* 6. Itemized Order Bill Receipt */}
-      <div className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 text-xs">
+      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 text-xs">
         <div className="flex items-center gap-1.5 text-slate-400 font-black uppercase tracking-wider text-[10px]">
           <Receipt className="w-3.5 h-3.5" />
-          <span>ORDER ITEMS & RECEIPT</span>
+          <span>{lang === 'hi' ? 'ऑर्डर विवरण व रसीद' : 'ORDER ITEMS & RECEIPT'}</span>
         </div>
 
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -393,7 +448,7 @@ export const OrderTrackingPage = () => {
               <span className="text-slate-800 dark:text-slate-200 font-medium">
                 {it.quantity}x {it.item_name || it.name}
               </span>
-              <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+              <span className="font-bold text-slate-900 dark:text-slate-100">
                 {formatCurrency(it.total_price || it.unit_price * it.quantity)}
               </span>
             </div>
@@ -402,20 +457,20 @@ export const OrderTrackingPage = () => {
 
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
           <div className="flex justify-between">
-            <span>Subtotal</span>
+            <span>{t.itemTotal || (lang === 'hi' ? 'आइटम का मूल्य' : 'Subtotal')}</span>
             <span>{formatCurrency(bill.subtotal || order.subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Delivery Fee</span>
+            <span>{t.deliveryFee || (lang === 'hi' ? 'डिलीवरी शुल्क' : 'Delivery Fee')}</span>
             <span>{formatCurrency(bill.delivery_fee || order.delivery_fee)}</span>
           </div>
           <div className="flex justify-between">
-            <span>Taxes</span>
+            <span>{t.taxes || (lang === 'hi' ? 'टैक्स व शुल्क' : 'Taxes')}</span>
             <span>{formatCurrency(bill.tax_amount || order.tax_amount)}</span>
           </div>
           <div className="flex justify-between items-center text-sm font-black text-slate-900 dark:text-slate-100 pt-1.5 border-t border-slate-100 dark:border-slate-800">
-            <span>Total ({order.payment_mode === 'COD' ? 'Cash on Delivery' : 'Online Paid'})</span>
-            <span className="font-mono text-base text-[#2845D6] dark:text-blue-400">
+            <span>{t.grandTotal} ({order.payment_mode === 'COD' ? (lang === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery') : (lang === 'hi' ? 'ऑनलाइन भुगतान' : 'Online Paid')})</span>
+            <span className="text-base text-[#2845D6] dark:text-blue-400">
               {formatCurrency(bill.total_amount || order.total_amount)}
             </span>
           </div>
@@ -426,38 +481,43 @@ export const OrderTrackingPage = () => {
       <Modal
         isOpen={cancelModalOpen}
         onClose={() => setCancelModalOpen(false)}
-        title="Cancel Order?"
-        subtitle={`Order #${order.order_number}`}
+        title={lang === 'hi' ? 'ऑर्डर कैंसिल करें?' : 'Cancel Order?'}
+        subtitle={lang === 'hi' ? `ऑर्डर #${order.order_number}` : `Order #${order.order_number}`}
         maxWidth="max-w-sm"
       >
         <div className="space-y-4 text-xs">
-          <p className="text-slate-600 dark:text-slate-300">
-            Are you sure you want to cancel this order? Please tell us the reason:
+          <p className="text-slate-600 dark:text-slate-300 font-medium">
+            {lang === 'hi'
+              ? 'क्या आप वाकई इस ऑर्डर को कैंसिल करना चाहते हैं? कृपया कारण चुनें:'
+              : 'Are you sure you want to cancel this order? Please tell us the reason:'}
           </p>
 
           <div className="space-y-2">
             {[
-              'Placed by mistake',
-              'Need to change delivery address',
-              'Food preparation taking too long',
-              'Ordered wrong items',
-            ].map((reason, i) => (
-              <label
-                key={i}
-                className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name="cancelReason"
-                  checked={cancelReason === reason}
-                  onChange={() => setCancelReason(reason)}
-                  className="text-rose-600 focus:ring-rose-500"
-                />
-                <span className="font-medium text-slate-800 dark:text-slate-200">
-                  {reason}
-                </span>
-              </label>
-            ))}
+              { en: 'Placed by mistake', hi: 'गलती से ऑर्डर हो गया' },
+              { en: 'Need to change delivery address', hi: 'डिलीवरी का पता बदलना है' },
+              { en: 'Food preparation taking too long', hi: 'तैयारी में बहुत अधिक समय लग रहा है' },
+              { en: 'Ordered wrong items', hi: 'गलत आइटम ऑर्डर हो गया' },
+            ].map((reasonObj, i) => {
+              const reasonText = lang === 'hi' ? reasonObj.hi : reasonObj.en
+              return (
+                <label
+                  key={i}
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="cancelReason"
+                    checked={cancelReason === reasonObj.en || cancelReason === reasonObj.hi}
+                    onChange={() => setCancelReason(reasonText)}
+                    className="text-rose-600 focus:ring-rose-500"
+                  />
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                    {reasonText}
+                  </span>
+                </label>
+              )
+            })}
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -466,7 +526,7 @@ export const OrderTrackingPage = () => {
               size="sm"
               onClick={() => setCancelModalOpen(false)}
             >
-              No, Keep Order
+              {lang === 'hi' ? 'नहीं, ऑर्डर रखें' : 'No, Keep Order'}
             </Button>
             <Button
               variant="danger"
@@ -474,11 +534,22 @@ export const OrderTrackingPage = () => {
               loading={cancelling}
               onClick={handleCancelOrder}
             >
-              Yes, Cancel Order
+              {lang === 'hi' ? 'हाँ, कैंसिल करें' : 'Yes, Cancel Order'}
             </Button>
           </div>
         </div>
       </Modal>
+
+      {/* Rating and Review Modal */}
+      <RatingModal
+        isOpen={ratingModalOpen}
+        onClose={() => setRatingModalOpen(false)}
+        order={order}
+        onReviewSuccess={() => {
+          setReviewed(true)
+          fetchOrder()
+        }}
+      />
     </div>
   )
 }

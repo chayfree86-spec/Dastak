@@ -69,7 +69,7 @@ export const Sidebar = ({
               className="h-8 w-auto object-contain shrink-0"
               onError={(e) => {
                 e.target.onerror = null
-                e.target.src = '/logo-light.png'
+                e.target.src = '/logo-horizontal.png'
               }}
             />
           </div>

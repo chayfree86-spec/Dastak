@@ -58,7 +58,7 @@ export const Login = () => {
             className="h-12 w-auto object-contain"
             onError={(e) => {
               e.target.onerror = null
-              e.target.src = '/logo-light.png'
+              e.target.src = '/logo-horizontal.png'
             }}
           />
         </div>

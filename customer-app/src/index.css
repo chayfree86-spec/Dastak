@@ -22,7 +22,7 @@
     @apply text-slate-900 dark:text-slate-100;
   }
 
-  /* When Hindi language is selected, apply Google Rubik font across entire app */
+  /* Clean, refined Devanagari typography (Poppins + Hind) */
   html[lang="hi"],
   html.lang-hi,
   html[lang="hi"] body,
@@ -30,7 +30,37 @@
   html[lang="hi"] *,
   html.lang-hi *,
   .font-hindi {
-    font-family: 'Rubik', sans-serif !important;
+    font-family: 'Poppins', 'Hind', 'Noto Sans Devanagari', system-ui, sans-serif !important;
+    letter-spacing: normal !important;
+  }
+
+  /* Reset any negative letter tracking in Hindi so matras and ligatures never detach */
+  html[lang="hi"] [class*="tracking-"],
+  html.lang-hi [class*="tracking-"] {
+    letter-spacing: normal !important;
+  }
+
+  /* Normalize heavy font-black/extrabold down to clean, readable medium-semibold in Hindi */
+  html[lang="hi"] .font-black,
+  html.lang-hi .font-black,
+  html[lang="hi"] .font-extrabold,
+  html.lang-hi .font-extrabold,
+  html[lang="hi"] .font-bold,
+  html.lang-hi .font-bold,
+  html[lang="hi"] h1,
+  html[lang="hi"] h2,
+  html[lang="hi"] h3,
+  html[lang="hi"] h4,
+  html[lang="hi"] h5,
+  html[lang="hi"] strong,
+  html.lang-hi h1,
+  html.lang-hi h2,
+  html.lang-hi h3,
+  html.lang-hi h4,
+  html.lang-hi h5,
+  html.lang-hi strong {
+    font-weight: 600 !important;
+    letter-spacing: normal !important;
   }
 }
 
@@ -47,6 +77,19 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400 dark:bg-slate-600;
+}
+
+/* Utilities to completely hide scrollbars */
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 /* Hide number spinner arrows */

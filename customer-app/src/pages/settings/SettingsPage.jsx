@@ -39,10 +39,12 @@ export const SettingsPage = () => {
       <div>
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
           <SettingsIcon className="w-7 h-7 text-[#2845D6] dark:text-blue-400" />
-          <span>App Settings & Preferences</span>
+          <span>{lang === 'hi' ? 'ऐप सेटिंग्स और प्राथमिकताएं' : 'App Settings & Preferences'}</span>
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Customize your app language, theme, delivery addresses, and account
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+          {lang === 'hi'
+            ? 'ऐप भाषा, थीम, डिलीवरी पते और खाता अनुकूलित करें'
+            : 'Customize your app language, theme, delivery addresses, and account'}
         </p>
       </div>
 
@@ -54,10 +56,10 @@ export const SettingsPage = () => {
           </div>
           <div className="min-w-0 space-y-0.5">
             <h3 className="text-base font-black text-slate-900 dark:text-slate-100 truncate">
-              {user?.name || (isAuthenticated ? 'Valued Customer' : 'Guest Customer')}
+              {user?.name || (isAuthenticated ? (lang === 'hi' ? 'प्रिय ग्राहक' : 'Valued Customer') : (lang === 'hi' ? 'अतिथि ग्राहक' : 'Guest Customer'))}
             </h3>
-            <p className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
-              {user?.mobile ? `+91 ${user.mobile}` : 'Sign in to access all preferences'}
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              {user?.mobile ? `+91 ${user.mobile}` : (lang === 'hi' ? 'सभी प्राथमिकताएं एक्सेस करने के लिए साइन इन करें' : 'Sign in to access all preferences')}
             </p>
           </div>
         </div>
@@ -74,7 +76,7 @@ export const SettingsPage = () => {
           </Button>
         ) : (
           <span className="text-[11px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 rounded-xl">
-            Logged In
+            {lang === 'hi' ? 'लॉग इन हैं' : 'Logged In'}
           </span>
         )}
       </div>
@@ -84,7 +86,7 @@ export const SettingsPage = () => {
         {/* Language Switcher */}
         <div
           onClick={toggleLanguage}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-slate-800 text-emerald-600">
@@ -92,10 +94,10 @@ export const SettingsPage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                App Language (भाषा)
+                {lang === 'hi' ? 'ऐप भाषा (Language)' : 'App Language (भाषा)'}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                Currently: <strong>{lang === 'en' ? 'English' : 'हिंदी'}</strong>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'वर्तमान में:' : 'Currently:'} <strong>{lang === 'en' ? 'English' : 'हिंदी'}</strong>
               </p>
             </div>
           </div>
@@ -107,7 +109,7 @@ export const SettingsPage = () => {
         {/* Theme Switcher */}
         <div
           onClick={toggleTheme}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-slate-800 text-purple-600">
@@ -115,22 +117,22 @@ export const SettingsPage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Dark / Light Theme
+                {lang === 'hi' ? 'डार्क / लाइट थीम' : 'Dark / Light Theme'}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                Current Mode: <strong>{isDark ? 'Dark Mode' : 'Light Mode'}</strong>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? 'वर्तमान मोड:' : 'Current Mode:'} <strong>{isDark ? (lang === 'hi' ? 'डार्क मोड' : 'Dark Mode') : (lang === 'hi' ? 'लाइट मोड' : 'Light Mode')}</strong>
               </p>
             </div>
           </div>
           <span className="text-xs font-black text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
-            Toggle
+            {lang === 'hi' ? 'बदलें' : 'Toggle'}
           </span>
         </div>
 
         {/* Saved Addresses */}
         <div
           onClick={() => navigate('/addresses')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-slate-800 text-[#F97316]">
@@ -138,10 +140,10 @@ export const SettingsPage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Saved Delivery Addresses
+                {t.savedAddresses || (lang === 'hi' ? 'सहेजे गए डिलीवरी पते' : 'Saved Delivery Addresses')}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                {activeAddress?.address || 'Manage home, work, and village addresses'}
+              <p className="text-slate-400 text-[11px] font-medium">
+                {activeAddress?.address || (lang === 'hi' ? 'घर और ऑफिस के पते प्रबंधित करें' : 'Manage home, work, and village addresses')}
               </p>
             </div>
           </div>
@@ -151,7 +153,7 @@ export const SettingsPage = () => {
         {/* Support & Helpline */}
         <div
           onClick={() => window.open('tel:1800123456', '_blank')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl transition-colors cursor-pointer"
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#2845D6]">
@@ -159,10 +161,10 @@ export const SettingsPage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Customer Support Helpline
+                {lang === 'hi' ? 'ग्राहक सहायता हेल्पलाइन' : 'Customer Support Helpline'}
               </h5>
-              <p className="text-slate-400 text-[11px]">
-                24x7 Toll-Free: <strong>1800-123-456</strong>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {lang === 'hi' ? '24x7 टोल-फ्री:' : '24x7 Toll-Free:'} <strong>1800-123-456</strong>
               </p>
             </div>
           </div>
@@ -178,7 +180,7 @@ export const SettingsPage = () => {
           className="w-full p-4 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-black flex items-center justify-center gap-2 hover:bg-rose-100 transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
-          <span>Sign Out of Account</span>
+          <span>{t.logout || (lang === 'hi' ? 'खाते से लॉग आउट करें' : 'Sign Out of Account')}</span>
         </button>
       )}
     </div>

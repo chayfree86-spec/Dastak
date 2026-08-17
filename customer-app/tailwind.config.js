@@ -8,6 +8,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        slate: {
+          750: '#253248',
+          850: '#141E33',
+        },
         dastak: {
           primary: '#2845D6',
           'primary-dark': '#1E3A8A',
@@ -21,7 +25,7 @@ export default {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
         english: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        hindi: ['"Rubik"', 'sans-serif'],
+        hindi: ['"Rubik"', '"Poppins"', '"Mukta"', '"Noto Sans Devanagari"', '"Hind"', 'sans-serif'],
       },
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',

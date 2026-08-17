@@ -19,7 +19,7 @@ import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import EmptyState from '../../components/common/EmptyState'
 
 export const RestaurantsPage = () => {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -58,31 +58,52 @@ export const RestaurantsPage = () => {
   })
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5 pb-20">
+    <div className="space-y-4 pb-16">
       {/* Header */}
       <div>
         <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
           <Store className="w-6 h-6 text-[#2845D6] dark:text-blue-400" />
-          <span>All Partner Restaurants</span>
+          <span>{t.allPartnerRestaurants || (lang === 'hi' ? 'सभी पार्टनर रेस्टोरेंट' : 'All Partner Restaurants')}</span>
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Explore verified cloud kitchens, dhabas, and top dining outlets in your city
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+          {t.restaurantsSub || (lang === 'hi' ? 'सत्यापित क्लाउड किचन, ढाबे और लोकप्रिय डाइनिंग आउटलेट्स' : 'Explore verified cloud kitchens, dhabas, and top dining outlets')}
         </p>
       </div>
 
+      {/* Top In-Flow Search Input Bar */}
+      <div className="p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center gap-2">
+        <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 ml-1 shrink-0" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={lang === 'hi' ? 'रेस्टोरेंट या व्यंजन के नाम से खोजें...' : 'Search by restaurant name or cuisine...'}
+          className="w-full py-1 text-xs sm:text-sm font-bold bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery('')}
+            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
       {/* Filter Tabs Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 -my-1 scrollbar-none text-xs font-black">
+      <div className="flex items-center gap-2 overflow-x-auto py-1 px-0.5 -my-0.5 scrollbar-none text-xs font-black">
         {[
-          { id: 'all', label: `All Kitchens (${restaurants.length})` },
-          { id: 'rating', label: '★ 4.5+ Top Rated' },
-          { id: 'veg', label: '🌱 Pure Veg Only' },
-          { id: 'fast', label: '⚡ Fast Delivery (< 25 min)' },
+          { id: 'all', label: `${t.filterAll || 'All'} (${restaurants.length})` },
+          { id: 'rating', label: t.filterRating || '★ 4.5+ Rating' },
+          { id: 'veg', label: t.filterVeg || '🌱 Pure Veg' },
+          { id: 'fast', label: t.filterFast || '⚡ Fast Delivery' },
         ].map((item) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id)}
-            className={`px-4 py-2 rounded-2xl transition-all shrink-0 cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-xl transition-all shrink-0 cursor-pointer ${
               filter === item.id
                 ? 'bg-[#2845D6] text-white shadow-md shadow-blue-600/25'
                 : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-slate-300'
@@ -97,7 +118,7 @@ export const RestaurantsPage = () => {
       {loading ? (
         <LoadingSkeleton count={3} />
       ) : filteredRestaurants.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredRestaurants.map((rest) => (
             <RestaurantCard key={rest.id} restaurant={rest} />
           ))}
@@ -105,33 +126,10 @@ export const RestaurantsPage = () => {
       ) : (
         <EmptyState
           icon={Store}
-          title="No Restaurants Found"
-          description="Try changing your search keywords or filter selection."
+          title={lang === 'hi' ? 'कोई रेस्टोरेंट नहीं मिला' : 'No Restaurants Found'}
+          description={lang === 'hi' ? 'कृपया अन्य कीवर्ड या फ़िल्टर बदलकर खोजें।' : 'Try changing your search keywords or filter selection.'}
         />
       )}
-
-      {/* Sticky Floating Search Bar in Footer Zone */}
-      <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-30">
-        <div className="p-2 sm:p-2.5 rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-[#2845D6] dark:border-blue-500 shadow-2xl flex items-center gap-2">
-          <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 ml-2 shrink-0" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by restaurant name or cuisine..."
-            className="w-full py-1 text-xs sm:text-sm font-bold bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery('')}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-      </div>
     </div>
   )
 }

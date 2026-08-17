@@ -43,7 +43,7 @@ const getRestaurantBanner = (restaurant) => {
 export const RestaurantPage = () => {
   const { slug } = useParams()
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const { itemCount, grandTotal } = useCart()
 
   const [restaurant, setRestaurant] = useState(null)
@@ -109,7 +109,7 @@ export const RestaurantPage = () => {
   const bannerUrl = getRestaurantBanner(restaurant)
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-20">
+    <div className="space-y-6 max-w-6xl mx-auto pb-20">
       {/* 1. Back Navigation */}
       <button
         type="button"
@@ -122,7 +122,7 @@ export const RestaurantPage = () => {
 
       {/* 2. Restaurant Hero Header Banner */}
       <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <div className="relative h-48 sm:h-60 w-full overflow-hidden">
+        <div className="relative h-48 sm:h-64 w-full overflow-hidden">
           <img
             src={bannerUrl}
             alt={restaurant.name}
@@ -152,7 +152,7 @@ export const RestaurantPage = () => {
 
           {/* Restaurant Title inside Banner */}
           <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight drop-shadow-md">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight drop-shadow-md">
               {restaurant.name}
             </h2>
             <p className="text-xs sm:text-sm text-white/85 font-medium flex items-center gap-1.5">
@@ -170,10 +170,10 @@ export const RestaurantPage = () => {
                 <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
               </div>
               <div>
-                <span className="block font-black text-sm text-slate-900 dark:text-slate-100 font-mono">
+                <span className="block font-black text-sm text-slate-900 dark:text-slate-100">
                   {(Number(restaurant.rating) || 4.8).toFixed(1)}
                 </span>
-                <span className="text-[10px] text-slate-400 uppercase">Rating</span>
+                <span className="text-[10px] text-slate-400 uppercase">{lang === 'hi' ? 'रेटिंग' : 'Rating'}</span>
               </div>
             </div>
 
@@ -182,10 +182,10 @@ export const RestaurantPage = () => {
                 <Clock className="w-4 h-4 text-[#2845D6] dark:text-blue-400" />
               </div>
               <div>
-                <span className="block font-black text-sm text-slate-900 dark:text-slate-100 font-mono">
-                  {restaurant.preparation_time_minutes || 25} Mins
+                <span className="block font-black text-sm text-slate-900 dark:text-slate-100">
+                  {restaurant.preparation_time_minutes || 25} {lang === 'hi' ? 'मिनट' : 'Mins'}
                 </span>
-                <span className="text-[10px] text-slate-400 uppercase">Delivery</span>
+                <span className="text-[10px] text-slate-400 uppercase">{lang === 'hi' ? 'डिलीवरी' : 'Delivery'}</span>
               </div>
             </div>
 
@@ -195,9 +195,9 @@ export const RestaurantPage = () => {
               </div>
               <div>
                 <span className="block font-black text-sm text-slate-900 dark:text-slate-100">
-                  FSSAI Verified
+                  {t.fssaiVerified || (lang === 'hi' ? 'FSSAI प्रमाणित' : 'FSSAI Verified')}
                 </span>
-                <span className="text-[10px] text-slate-400 uppercase">Safety Certified</span>
+                <span className="text-[10px] text-slate-400 uppercase">{t.safetyCertified || (lang === 'hi' ? 'सुरक्षा सत्यापित' : 'Safety Certified')}</span>
               </div>
             </div>
           </div>
@@ -209,7 +209,7 @@ export const RestaurantPage = () => {
               className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 font-black text-xs flex items-center gap-1.5 cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5 text-[#2845D6]" />
-              <span>Call Kitchen</span>
+              <span>{t.callKitchen || (lang === 'hi' ? 'किचन को कॉल करें' : 'Call Kitchen')}</span>
             </button>
           )}
         </div>
@@ -241,7 +241,7 @@ export const RestaurantPage = () => {
           <span className="w-3 h-3 rounded-full border border-emerald-600 flex items-center justify-center">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
           </span>
-          <span>Veg Only</span>
+          <span>{t.vegOnly || 'Veg Only'}</span>
         </button>
       </div>
 
@@ -256,7 +256,7 @@ export const RestaurantPage = () => {
               : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800'
           }`}
         >
-          All Items ({allItems.length})
+          {t.allMenuCount || (lang === 'hi' ? 'सभी आइटम' : 'All Items')} ({allItems.length})
         </button>
 
         {categories.map((cat) => (
@@ -278,7 +278,7 @@ export const RestaurantPage = () => {
       {/* 5. Menu Items Grid */}
       <div className="space-y-4">
         {filteredItems.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredItems.map((item) => (
               <ProductCard
                 key={item.id}
@@ -296,7 +296,7 @@ export const RestaurantPage = () => {
 
       {/* 6. Sticky Floating Cart Bar */}
       {itemCount > 0 && (
-        <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-40">
+        <div className="fixed bottom-20 inset-x-4 max-w-lg mx-auto z-40">
           <div
             onClick={() => navigate('/cart')}
             className="p-4 rounded-3xl bg-gradient-to-r from-[#2845D6] to-[#F97316] text-white shadow-2xl shadow-blue-600/40 flex items-center justify-between gap-3 cursor-pointer hover:opacity-95 transition-all"
@@ -309,7 +309,7 @@ export const RestaurantPage = () => {
                 <span className="text-[10px] font-black uppercase text-white/90 block">
                   {itemCount} {itemCount === 1 ? 'ITEM' : 'ITEMS'} ADDED
                 </span>
-                <div className="text-base font-black font-mono">
+                <div className="text-base font-black">
                   {formatCurrency(grandTotal)}
                 </div>
               </div>

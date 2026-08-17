@@ -27,7 +27,7 @@ import EmptyState from '../../components/common/EmptyState'
 
 export const SavedAddressesPage = () => {
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const toast = useToast()
   const {
     addresses,
@@ -71,7 +71,7 @@ export const SavedAddressesPage = () => {
     if (!editingAddress) return
 
     await updateAddressItem(editingAddress.id, editingAddress)
-    toast.success('Address Updated', 'Delivery location details saved successfully.')
+    toast.success(lang === 'hi' ? 'पता अपडेट हुआ' : 'Address Updated', lang === 'hi' ? 'डिलीवरी लोकेशन विवरण सहेजा गया।' : 'Delivery location details saved successfully.')
     setEditModalOpen(false)
     setEditingAddress(null)
   }
@@ -79,7 +79,7 @@ export const SavedAddressesPage = () => {
   const handleSetDefault = async (e, addr) => {
     e.stopPropagation()
     await makeDefaultAddress(addr.id)
-    toast.success('Default Address Updated', `${addr.address} is now your default address.`)
+    toast.success(lang === 'hi' ? 'डिफ़ॉल्ट पता अपडेट हुआ' : 'Default Address Updated', `${addr.address} ${lang === 'hi' ? 'अब आपका डिफ़ॉल्ट पता है।' : 'is now your default address.'}`)
   }
 
   const handleDeletePrompt = (e, addr) => {
@@ -94,7 +94,7 @@ export const SavedAddressesPage = () => {
   const handleConfirmDelete = async () => {
     if (deleteConfirmModal.addressId) {
       await removeAddress(deleteConfirmModal.addressId)
-      toast.success('Address Deleted', 'The address has been removed.')
+      toast.success(lang === 'hi' ? 'पता हटा दिया गया' : 'Address Deleted', lang === 'hi' ? 'पता सूची से हटा दिया गया है।' : 'The address has been removed.')
     }
     setDeleteConfirmModal({ isOpen: false, addressId: null, addressName: '' })
   }
@@ -109,7 +109,7 @@ export const SavedAddressesPage = () => {
           className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2845D6] dark:hover:text-blue-400 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back</span>
+          <span>{lang === 'hi' ? 'वापस' : 'Back'}</span>
         </button>
 
         <Button
@@ -119,7 +119,7 @@ export const SavedAddressesPage = () => {
           onClick={() => setLocationModalOpen(true)}
           className="font-bold text-xs shadow-md shadow-blue-600/20"
         >
-          Add Address
+          {t.addAddress || (lang === 'hi' ? 'नया पता जोड़ें' : 'Add Address')}
         </Button>
       </div>
 
@@ -129,8 +129,10 @@ export const SavedAddressesPage = () => {
           <MapPin className="w-7 h-7 text-[#F97316]" />
           <span>{t.savedAddresses}</span>
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Set default address, edit apartment/landmark details, or delete locations
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+          {lang === 'hi'
+            ? 'डिफ़ॉल्ट पता सेट करें, फ्लैट/लैंडमार्क विवरण अपडेट करें या हटाएं'
+            : 'Set default address, edit apartment/landmark details, or delete locations'}
         </p>
       </div>
 
@@ -145,16 +147,16 @@ export const SavedAddressesPage = () => {
               <div className="space-y-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] font-black uppercase tracking-wider bg-[#2845D6] text-white px-2.5 py-0.5 rounded-md">
-                    ACTIVE DELIVERY LOCATION
+                    {lang === 'hi' ? 'सक्रिय डिलीवरी लोकेशन' : 'ACTIVE DELIVERY LOCATION'}
                   </span>
                   {activeAddress.is_default && (
                     <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
                       <Star className="w-3 h-3 fill-white" />
-                      <span>Default</span>
+                      <span>{lang === 'hi' ? 'डिफ़ॉल्ट' : 'Default'}</span>
                     </span>
                   )}
                   <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm truncate">
-                    {activeAddress.customer_name || 'My Delivery Address'}
+                    {activeAddress.customer_name || (lang === 'hi' ? 'डिलीवरी का पता' : 'My Delivery Address')}
                   </h4>
                 </div>
                 <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
@@ -162,18 +164,18 @@ export const SavedAddressesPage = () => {
                 </p>
                 {activeAddress.landmark && (
                   <span className="text-amber-700 dark:text-amber-300 font-bold block text-[11px]">
-                    🚩 Landmark: {activeAddress.landmark}
+                    🚩 {lang === 'hi' ? 'लैंडमार्क:' : 'Landmark:'} {activeAddress.landmark}
                   </span>
                 )}
                 {activeAddress.latitude && activeAddress.longitude && (
-                  <span className="text-[10px] font-mono text-slate-400 block pt-0.5">
+                  <span className="text-[10px] text-slate-400 block pt-0.5">
                     GPS: {Number(activeAddress.latitude).toFixed(4)}, {Number(activeAddress.longitude).toFixed(4)}
                   </span>
                 )}
               </div>
             </div>
             <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-xl shrink-0 border border-emerald-200 dark:border-emerald-800">
-              ✓ In Use
+              {lang === 'hi' ? '✓ सक्रिय' : '✓ In Use'}
             </span>
           </div>
 
@@ -186,7 +188,7 @@ export const SavedAddressesPage = () => {
                 className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
                 <Edit3 className="w-3.5 h-3.5 text-[#2845D6]" />
-                <span>Edit Details</span>
+                <span>{lang === 'hi' ? 'संपादित करें' : 'Edit Details'}</span>
               </button>
 
               {!activeAddress.is_default && (
@@ -196,7 +198,7 @@ export const SavedAddressesPage = () => {
                   className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-amber-700 dark:text-amber-400 font-bold border border-amber-300 dark:border-amber-700/60 flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                  <span>Set Default</span>
+                  <span>{lang === 'hi' ? 'डिफ़ॉल्ट बनाएं' : 'Set Default'}</span>
                 </button>
               )}
             </div>
