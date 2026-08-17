@@ -149,38 +149,11 @@ export const HomePage = () => {
   })
 
   return (
-    <div className="space-y-7">
-      {/* 1. Large Search Bar with Voice Microphone */}
-      <div className="relative">
-        <div
-          onClick={() => navigate('/search')}
-          className="p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 shadow-md hover:border-[#2845D6] hover:shadow-xl transition-all duration-300 flex items-center justify-between gap-3 cursor-pointer group"
-        >
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <Search className="w-5 h-5 text-[#2845D6] dark:text-blue-400 group-hover:scale-110 transition-transform shrink-0" />
-            <span className="text-sm font-medium text-slate-400 dark:text-slate-500 truncate">
-              {t.searchPlaceholder}
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setVoiceModalOpen(true)
-            }}
-            className="p-2.5 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white shadow-md hover:scale-108 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-            title="Search with Voice"
-          >
-            <Mic className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* 2. Active Order Banner (if live trip in progress) */}
+    <div className="space-y-6 pb-16">
+      {/* 1. Active Order Banner in Header Area */}
       {activeOrder && <ActiveOrderBanner order={activeOrder} />}
 
-      {/* 3. Hero Promo Banner Carousel */}
+      {/* 2. Hero Promo Banner Carousel */}
       <div className="relative overflow-hidden rounded-3xl shadow-xl">
         <div
           className={`relative p-6 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between min-h-[170px] sm:min-h-[200px] overflow-hidden transition-all duration-500`}
@@ -358,6 +331,33 @@ export const HomePage = () => {
             No restaurants found matching this filter.
           </div>
         )}
+      </div>
+
+      {/* 5. Sticky Floating Fast Search Bar in Footer Zone */}
+      <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-30">
+        <div
+          onClick={() => navigate('/search')}
+          className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-slate-200/90 dark:border-slate-800 shadow-xl hover:border-[#2845D6] transition-all flex items-center justify-between gap-3 cursor-pointer group"
+        >
+          <div className="flex items-center gap-2.5 min-w-0 flex-1 ml-1.5">
+            <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 group-hover:scale-110 transition-transform shrink-0" />
+            <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 truncate">
+              {t.searchPlaceholder}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setVoiceModalOpen(true)
+            }}
+            className="p-2 rounded-xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
+            title="Search with Voice"
+          >
+            <Mic className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Voice Search Modal */}

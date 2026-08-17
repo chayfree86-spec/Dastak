@@ -23,16 +23,16 @@ export const Modal = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3.5 sm:p-4 animate-in fade-in duration-200">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal Card / Bottom Sheet */}
+      {/* Modal Card */}
       <div
-        className={`relative w-full ${maxWidth} bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 z-10 overflow-hidden max-h-[90vh] flex flex-col animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200`}
+        className={`relative w-full ${maxWidth} bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 z-10 overflow-hidden max-h-[88vh] flex flex-col animate-in zoom-in-95 duration-200`}
       >
         {/* Header */}
         {(title || onClose) && (
@@ -63,7 +63,12 @@ export const Modal = ({
         )}
 
         {/* Body Content */}
-        <div className="p-5 overflow-y-auto flex-1">{children}</div>
+        <div
+          className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain"
+          style={{ paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom, 0px))' }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   )

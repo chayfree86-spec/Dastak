@@ -15,6 +15,9 @@ import {
   Bike,
   Sparkles,
   UtensilsCrossed,
+  Receipt,
+  FileText,
+  Settings,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useLocationContext } from '../../context/LocationContext'
@@ -22,6 +25,7 @@ import { useCart } from '../../context/CartContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useAuth } from '../../context/AuthContext'
 import LocationPickerModal from '../common/LocationPickerModal'
+import ActiveOrderBanner from '../common/ActiveOrderBanner'
 import customerApi from '../../api/customer.api'
 
 export const CustomerLayout = () => {
@@ -59,16 +63,11 @@ export const CustomerLayout = () => {
     return () => clearInterval(interval)
   }, [isAuthenticated, location.pathname])
 
-  // Center Home icon layout:
-  // 1. Restaurants | 2. Orders | 3. HOME (Center Animated) | 4. Cart | 5. More
+  // 5 Footer Navigation Tabs:
+  // 1. Restaurants | 2. Report | 3. HOME (Center) | 4. Cart | 5. Setting
   const navItems = [
     { to: '/restaurants', label: t.navRestaurants || 'Restaurants', icon: Store },
-    {
-      to: '/orders',
-      label: t.navOrders || 'Orders',
-      icon: Clock,
-      hasActiveBadge: Boolean(activeOrder),
-    },
+    { to: '/reports', label: t.navReports || 'Report', icon: Receipt },
     {
       to: '/',
       label: t.navHome || 'Home',
@@ -80,8 +79,9 @@ export const CustomerLayout = () => {
       label: t.navCart || 'Cart',
       icon: ShoppingBag,
       badge: itemCount,
+      hasActiveBadge: Boolean(activeOrder),
     },
-    { to: '/more', label: t.navMore || 'More', icon: Menu },
+    { to: '/settings', label: t.navSettings || 'Setting', icon: Settings },
   ]
 
   const isAuthPage = location.pathname === '/login'
@@ -116,15 +116,15 @@ export const CustomerLayout = () => {
           <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shadow-xs">
             <div className="px-3.5 py-2.5 flex items-center justify-between gap-2">
               {/* Logo & Delivery Location */}
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 xs:gap-2 min-w-0 flex-1">
                 <div
                   onClick={() => navigate('/')}
-                  className="flex items-center gap-1.5 cursor-pointer select-none shrink-0"
+                  className="flex items-center gap-1 cursor-pointer select-none shrink-0"
                 >
                   <img
                     src="/logo-horizontal.svg"
                     alt="Dastak Logo"
-                    className="h-7 sm:h-8 w-auto object-contain shrink-0"
+                    className="h-6 sm:h-7.5 w-auto object-contain shrink-0"
                     onError={(e) => {
                       e.target.onerror = null
                       e.target.src = '/logo-light.png'
@@ -136,18 +136,18 @@ export const CustomerLayout = () => {
                 <button
                   type="button"
                   onClick={() => setLocationModalOpen(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors text-left min-w-0 max-w-[130px] sm:max-w-[160px] cursor-pointer"
+                  className="flex items-center gap-1 xs:gap-1.5 px-2 py-1 xs:px-2.5 xs:py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 transition-colors text-left min-w-0 flex-1 max-w-[130px] xs:max-w-[160px] cursor-pointer"
                 >
-                  <MapPin className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
-                  <div className="min-w-0 truncate">
+                  <MapPin className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-[#F97316] shrink-0" />
+                  <div className="min-w-0 truncate flex-1">
                     <span className="text-[8px] font-black uppercase text-slate-400 block tracking-wider leading-none">
                       {t.deliveringTo}
                     </span>
-                    <span className="text-[11px] font-black text-slate-900 dark:text-slate-100 truncate block leading-tight">
+                    <span className="text-[10px] xs:text-[11px] font-black text-slate-900 dark:text-slate-100 truncate block leading-tight">
                       {activeAddress?.address || 'Civil Lines, Kanpur'}
                     </span>
                   </div>
-                  <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+                  <ChevronDown className="w-2.5 h-2.5 xs:w-3 xs:h-3 text-slate-400 shrink-0" />
                 </button>
               </div>
 
@@ -193,38 +193,16 @@ export const CustomerLayout = () => {
         )}
 
         {/* 2. Main Page Content */}
-        <main className={`flex-1 w-full px-3.5 py-3 ${isAuthPage ? 'pb-8 flex flex-col justify-center' : 'pb-28'}`}>
+        <main className={`flex-1 w-full px-3.5 py-3 ${isAuthPage ? 'pb-8 flex flex-col justify-center' : 'pb-24'}`}>
           <Outlet />
         </main>
 
-        {/* 3. Floating Bottom Active Order Alert Bar (if active order in progress and not auth page) */}
-        {!isAuthPage && activeOrder && location.pathname !== `/orders/${activeOrder.order_number}` && (
-          <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-40">
-            <div
-              onClick={() => navigate(`/orders/${activeOrder.order_number}`)}
-              className="p-3 rounded-2xl bg-gradient-to-r from-[#2845D6] to-[#F97316] text-white shadow-2xl shadow-blue-600/40 flex items-center justify-between gap-3 animate-bounce duration-1000 cursor-pointer"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
-                <div className="min-w-0">
-                  <span className="text-[9px] font-black uppercase tracking-wider block">
-                    ORDER ON THE WAY
-                  </span>
-                  <span className="text-xs font-black truncate block">
-                    #{activeOrder.order_number} • {activeOrder.restaurant?.name || 'Kitchen'}
-                  </span>
-                </div>
-              </div>
-              <span className="text-[10px] font-black bg-white/20 px-2.5 py-1 rounded-xl shrink-0">
-                {t.trackOrder} →
-              </span>
-            </div>
-          </div>
-        )}
-
         {/* 4. Universal Bottom Footer Navigation Bar (Only for non-auth pages) */}
         {!isAuthPage && (
-          <nav className="fixed bottom-0 inset-x-0 max-w-md mx-auto z-50 bg-white dark:bg-slate-900 border-t border-slate-200/90 dark:border-slate-800 shadow-2xl py-1.5 px-3">
+          <nav
+            className="fixed bottom-0 inset-x-0 max-w-md mx-auto z-50 bg-white dark:bg-slate-900 border-t border-slate-200/90 dark:border-slate-800 shadow-2xl pt-1.5 px-2.5 xs:px-3"
+            style={{ paddingBottom: 'max(0.45rem, env(safe-area-inset-bottom, 0px))' }}
+          >
             <div className="grid grid-cols-5 items-end justify-items-center">
               {navItems.map((item) => {
                 const Icon = item.icon

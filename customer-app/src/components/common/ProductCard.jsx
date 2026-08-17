@@ -141,7 +141,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
 
         {/* Right Thumbnail & ADD / Quantity Controller */}
         <div className="relative flex flex-col items-center shrink-0">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden shadow-inner relative group-hover:scale-102 transition-transform duration-300">
+          <div className="w-20 h-20 xs:w-24 xs:h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden shadow-inner relative group-hover:scale-102 transition-transform duration-300">
             <img
               src={imageUrl}
               alt={product.name}
@@ -154,38 +154,38 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
             />
           </div>
 
-          {/* Tactile Add / Quantity Pill */}
-          <div className="absolute -bottom-3 inset-x-1 sm:inset-x-2">
+          {/* Tactile Add / Quantity Pill (Min 34px Touch Target) */}
+          <div className="absolute -bottom-3.5 inset-x-0 xs:inset-x-1">
             {!isAvailable ? (
-              <span className="w-full py-1.5 px-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase text-center block shadow-xs">
+              <span className="w-full py-1 px-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase text-center block shadow-xs">
                 Sold Out
               </span>
             ) : currentQty === 0 ? (
               <button
                 type="button"
                 onClick={handleAdd}
-                className="w-full py-2 px-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-[#2845D6] dark:border-blue-500 text-[#2845D6] dark:text-blue-400 hover:bg-[#2845D6] hover:text-white dark:hover:bg-[#2845D6] dark:hover:text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full min-h-[34px] py-1.5 px-2 rounded-2xl bg-white dark:bg-slate-900 border-2 border-[#2845D6] dark:border-blue-500 text-[#2845D6] dark:text-blue-400 hover:bg-[#2845D6] hover:text-white dark:hover:bg-[#2845D6] dark:hover:text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
                 <span>ADD</span>
               </button>
             ) : (
-              <div className="w-full py-1.5 px-2 rounded-2xl bg-gradient-to-r from-[#2845D6] to-blue-700 text-white font-black text-xs shadow-xl shadow-blue-600/30 flex items-center justify-between gap-1 select-none">
+              <div className="w-full min-h-[34px] py-1 px-1 rounded-2xl bg-gradient-to-r from-[#2845D6] to-blue-700 text-white font-black text-xs shadow-xl shadow-blue-600/30 flex items-center justify-between gap-0.5 select-none">
                 <button
                   type="button"
                   onClick={handleDecrement}
-                  className="p-1 hover:bg-white/20 rounded-lg active:scale-90 transition-transform cursor-pointer"
+                  className="w-7 h-7 flex items-center justify-center hover:bg-white/25 rounded-lg active:scale-90 transition-transform cursor-pointer"
                   title="Decrease"
                 >
                   <Minus className="w-3.5 h-3.5 stroke-[3]" />
                 </button>
-                <span className="font-mono text-sm font-black px-1.5">
+                <span className="font-mono text-xs sm:text-sm font-black px-1 min-w-[16px] text-center">
                   {currentQty}
                 </span>
                 <button
                   type="button"
                   onClick={handleIncrement}
-                  className="p-1 hover:bg-white/20 rounded-lg active:scale-90 transition-transform cursor-pointer"
+                  className="w-7 h-7 flex items-center justify-center hover:bg-white/25 rounded-lg active:scale-90 transition-transform cursor-pointer"
                   title="Increase"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[3]" />

@@ -93,81 +93,62 @@ export const SearchPage = () => {
   const restaurants = results.restaurants || []
 
   return (
-    <div className="space-y-5">
-      {/* 1. Search Input Bar */}
-      <div className="relative">
-        <div className="p-2 sm:p-2.5 rounded-3xl bg-white dark:bg-slate-850 border-2 border-[#2845D6] dark:border-blue-500 shadow-md flex items-center gap-2">
-          <Search className="w-5 h-5 text-[#2845D6] dark:text-blue-400 ml-2 shrink-0" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t.searchPlaceholder}
-            autoFocus
-            className="w-full py-1 text-sm sm:text-base font-bold bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
-          />
-
-          {query && (
-            <button
-              type="button"
-              onClick={() => {
-                setQuery('')
-                setSearchParams({})
-                setResults({ intent: null, dishes: [], restaurants: [], suggestions: [] })
-              }}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setVoiceModalOpen(true)}
-            className="p-2.5 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0 cursor-pointer"
-            title="Voice Search"
-          >
-            <Mic className="w-4 h-4" />
-          </button>
+    <div className="space-y-4 pb-24">
+      {/* 1. Page Header & Popular Suggestions (Top Content) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
+              <Search className="w-5 h-5 text-[#2845D6] dark:text-blue-400" />
+              <span>Search Food & Kitchens</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Find fresh dishes, snacks, meals, and top local restaurants
+            </p>
+          </div>
         </div>
+
+        {/* 2. Recognized Intent Banner (e.g. 2x Chai Intent) */}
+        {intent && intent.has_quantity_intent && (
+          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-800/80 border border-blue-200 dark:border-blue-800/60 text-xs text-blue-900 dark:text-blue-200 flex items-center justify-between gap-2 animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#2845D6] dark:text-blue-400 shrink-0" />
+              <span>
+                Searching for: <strong className="capitalize">{intent.clean_query}</strong> (Quantity: {intent.quantity}x)
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* 3. Quick Suggestions Chips (Popular Dishes) */}
+        {quickSuggestions.length > 0 && (
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center gap-1.5 text-xs font-black uppercase text-slate-400">
+              <TrendingUp className="w-3.5 h-3.5 text-[#2845D6]" />
+              <span>{t.suggestedDishes || 'POPULAR DISHES'}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {quickSuggestions.map((item, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setQuery(item)
+                    performSearch(item)
+                  }}
+                  className={`px-3.5 py-2 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
+                    query.toLowerCase() === item.toLowerCase()
+                      ? 'bg-[#2845D6] text-white border-[#2845D6] shadow-sm'
+                      : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-800 hover:border-[#2845D6] text-slate-700 dark:text-slate-200 shadow-xs'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* 2. Recognized Intent Banner (e.g. 2x Chai Intent) */}
-      {intent && intent.has_quantity_intent && (
-        <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-800/80 border border-blue-200 dark:border-blue-800/60 text-xs text-blue-900 dark:text-blue-200 flex items-center justify-between gap-2 animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#2845D6] dark:text-blue-400 shrink-0" />
-            <span>
-              Searching for: <strong className="capitalize">{intent.clean_query}</strong> (Quantity: {intent.quantity}x)
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* 3. Quick Suggestions Chips (if empty or active) */}
-      {!query && quickSuggestions.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-xs font-black uppercase text-slate-400">
-            <TrendingUp className="w-3.5 h-3.5 text-[#2845D6]" />
-            <span>{t.suggestedDishes}</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {quickSuggestions.map((item, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  setQuery(item)
-                  performSearch(item)
-                }}
-                className="px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 hover:border-[#2845D6] text-xs font-bold text-slate-700 dark:text-slate-200 shadow-xs hover:shadow-sm transition-all cursor-pointer"
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* 4. Tab Selector (Dishes vs Restaurants) */}
       {query && (
@@ -258,6 +239,44 @@ export const SearchPage = () => {
           />
         )
       ) : null}
+
+      {/* 6. Sticky Floating Search Input Bar Fixed at the Footer */}
+      <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-40">
+        <div className="p-2 sm:p-2.5 rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-2 border-[#2845D6] dark:border-blue-500 shadow-2xl flex items-center gap-2">
+          <Search className="w-5 h-5 text-[#2845D6] dark:text-blue-400 ml-2 shrink-0" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t.searchPlaceholder}
+            autoFocus
+            className="w-full py-1 text-sm sm:text-base font-bold bg-transparent text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
+          />
+
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('')
+                setSearchParams({})
+                setResults({ intent: null, dishes: [], restaurants: [], suggestions: [] })
+              }}
+              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setVoiceModalOpen(true)}
+            className="p-2.5 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0 cursor-pointer"
+            title="Voice Search"
+          >
+            <Mic className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
       {/* Voice Search Modal */}
       <VoiceSearchModal

@@ -22,6 +22,7 @@ import { makePhoneCall } from '../../utils/geo'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import Button from '../../components/common/Button'
 import Modal from '../../components/common/Modal'
+import LiveOrderTrackingMap from '../../components/orders/LiveOrderTrackingMap'
 
 export const OrderTrackingPage = () => {
   const { orderNumber } = useParams()
@@ -35,6 +36,7 @@ export const OrderTrackingPage = () => {
   const [cancelReason, setCancelReason] = useState('Placed by mistake')
   const [cancelling, setCancelling] = useState(false)
   const [secondsRemaining, setSecondsRemaining] = useState(null)
+  const [liveTelemetry, setLiveTelemetry] = useState({ distanceKm: 1.4, etaMins: 6 })
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -185,15 +187,27 @@ export const OrderTrackingPage = () => {
             </h3>
           </div>
 
-          {/* Estimated Time Badge */}
+          {/* Estimated Time Badge - Live Updating */}
           {!isDelivered && !isCancelled && (
-            <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-blue-800/60 text-center shrink-0">
-              <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-                {t.estimatedArrival}
-              </span>
-              <span className="text-base font-black text-slate-900 dark:text-slate-100">
-                ~{order.estimated_delivery_minutes || 25} Mins
-              </span>
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-tr from-blue-50 to-indigo-50/80 dark:from-slate-900 dark:to-slate-800 border-2 border-blue-200 dark:border-blue-800/80 text-center shrink-0 min-w-[130px] shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  {order.status === 'OUT_FOR_DELIVERY' ? 'LIVE ARRIVAL' : t.estimatedArrival}
+                </span>
+              </div>
+              <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 font-mono leading-tight">
+                {order.status === 'OUT_FOR_DELIVERY'
+                  ? liveTelemetry.etaMins <= 1
+                    ? 'Arriving Now!'
+                    : `~${liveTelemetry.etaMins} Mins`
+                  : `~${order.estimated_delivery_minutes || 25} Mins`}
+              </div>
+              {order.status === 'OUT_FOR_DELIVERY' && (
+                <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 block mt-0.5">
+                  {liveTelemetry.distanceKm} km away
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -219,7 +233,12 @@ export const OrderTrackingPage = () => {
         )}
       </div>
 
-      {/* 3. Visual Step-by-Step Timeline */}
+      {/* 3. Live Interactive Delivery Route Map (Live Rider with Bike Marker) */}
+      {!isCancelled && (
+        <LiveOrderTrackingMap order={order} onEtaChange={setLiveTelemetry} />
+      )}
+
+      {/* 4. Visual Step-by-Step Timeline */}
       {!isCancelled && (
         <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">
@@ -340,7 +359,28 @@ export const OrderTrackingPage = () => {
         </div>
       </div>
 
-      {/* 5. Itemized Order Bill Receipt */}
+      {/* 5. Delivery Address Card (Multi-line full address without truncation) */}
+      <div className="p-4 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2 text-xs">
+        <div className="flex items-center gap-1.5 text-slate-400 font-black uppercase tracking-wider text-[10px]">
+          <MapPin className="w-3.5 h-3.5 text-[#F97316]" />
+          <span>DELIVERY ADDRESS</span>
+        </div>
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 space-y-1">
+          <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+            {order.address?.customer_name || 'Delivery Destination'}
+          </h5>
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed break-words">
+            {order.address?.address || 'Civil Lines, Kanpur'}
+          </p>
+          {order.address?.landmark && (
+            <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">
+              🚩 Landmark: {order.address.landmark}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* 6. Itemized Order Bill Receipt */}
       <div className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 text-xs">
         <div className="flex items-center gap-1.5 text-slate-400 font-black uppercase tracking-wider text-[10px]">
           <Receipt className="w-3.5 h-3.5" />

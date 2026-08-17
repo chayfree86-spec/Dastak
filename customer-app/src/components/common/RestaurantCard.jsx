@@ -37,8 +37,8 @@ export const RestaurantCard = ({ restaurant }) => {
       onClick={() => navigate(`/restaurant/${restaurant.slug || restaurant.id}`)}
       className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs hover:shadow-2xl hover:border-blue-500/30 transition-all duration-300 cursor-pointer flex flex-col justify-between"
     >
-      {/* Banner Hero */}
-      <div className="relative h-44 sm:h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
+      {/* Banner Hero with Aspect Ratio */}
+      <div className="relative aspect-[16/9] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
         <img
           src={bannerUrl}
           alt={restaurant.name}

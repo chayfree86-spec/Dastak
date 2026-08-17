@@ -11,6 +11,14 @@ export const LanguageProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem('dastak_customer_lang', lang)
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang
+      if (lang === 'hi') {
+        document.documentElement.classList.add('lang-hi')
+      } else {
+        document.documentElement.classList.remove('lang-hi')
+      }
+    }
   }, [lang])
 
   const toggleLanguage = () => {

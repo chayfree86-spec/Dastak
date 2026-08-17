@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ShoppingBag,
@@ -10,16 +10,22 @@ import {
   ShieldCheck,
   Tag,
   Receipt,
+  Bike,
+  Sparkles,
 } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 import { useCart } from '../../context/CartContext'
+import { useAuth } from '../../context/AuthContext'
+import customerApi from '../../api/customer.api'
 import { formatCurrency } from '../../utils/formatters'
 import Button from '../../components/common/Button'
 import EmptyState from '../../components/common/EmptyState'
+import ActiveOrderBanner from '../../components/common/ActiveOrderBanner'
 
 export const CartPage = () => {
   const navigate = useNavigate()
   const { t } = useLanguage()
+  const { isAuthenticated } = useAuth()
   const {
     items,
     restaurant,
@@ -33,9 +39,40 @@ export const CartPage = () => {
     clearCart,
   } = useCart()
 
+  const [activeOrder, setActiveOrder] = useState(null)
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    const loadActiveOrder = async () => {
+      try {
+        const res = await customerApi.getOrders({ status: 'active' })
+        const list = res.data?.data || res.data || []
+        const active = list.find(
+          (o) =>
+            o.status !== 'DELIVERED' &&
+            o.status !== 'CANCELLED' &&
+            o.status !== 'REJECTED'
+        )
+        setActiveOrder(active || null)
+      } catch (e) {}
+    }
+    loadActiveOrder()
+  }, [isAuthenticated])
+
   if (items.length === 0) {
     return (
-      <div className="py-8">
+      <div className="max-w-3xl mx-auto space-y-6 py-4">
+        {/* Active Order Card in Cart */}
+        {activeOrder && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-400">
+              <Bike className="w-3.5 h-3.5 text-[#2845D6]" />
+              <span>LIVE ACTIVE ORDER</span>
+            </div>
+            <ActiveOrderBanner order={activeOrder} />
+          </div>
+        )}
+
         <EmptyState
           icon={ShoppingBag}
           title={t.cartEmpty}
@@ -49,6 +86,16 @@ export const CartPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {/* Active Order Card in Cart (if order is in progress) */}
+      {activeOrder && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-slate-400">
+            <Bike className="w-3.5 h-3.5 text-[#2845D6]" />
+            <span>LIVE ACTIVE ORDER</span>
+          </div>
+          <ActiveOrderBanner order={activeOrder} />
+        </div>
+      )}
       {/* 1. Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -82,40 +129,40 @@ export const CartPage = () => {
           >
             {/* Item Info */}
             <div className="space-y-0.5 min-w-0 flex-1">
-              <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm truncate">
+              <h4 className="font-black text-slate-900 dark:text-slate-100 text-xs sm:text-sm break-words leading-tight">
                 {item.name}
               </h4>
-              <p className="font-mono font-bold text-slate-500 dark:text-slate-400">
+              <p className="font-mono font-bold text-slate-500 dark:text-slate-400 text-[11px]">
                 {formatCurrency(item.price)} each
               </p>
             </div>
 
             {/* Quantity Pill Control */}
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="py-1 px-2 rounded-xl bg-[#2845D6] text-white font-black text-xs shadow-md flex items-center justify-between gap-1 select-none">
+            <div className="flex items-center gap-2 xs:gap-3 shrink-0">
+              <div className="py-1 px-1.5 rounded-xl bg-[#2845D6] text-white font-black text-xs shadow-md flex items-center justify-between gap-0.5 select-none min-h-[32px]">
                 <button
                   type="button"
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                  className="p-1 hover:bg-blue-700 rounded-md active:scale-90 transition-transform cursor-pointer"
+                  className="w-6 h-6 flex items-center justify-center hover:bg-blue-700 rounded-md active:scale-90 transition-transform cursor-pointer"
                   title="Decrease"
                 >
-                  <Minus className="w-3.5 h-3.5 stroke-[3]" />
+                  <Minus className="w-3 h-3 stroke-[3]" />
                 </button>
-                <span className="font-mono text-sm font-black px-1.5">
+                <span className="font-mono text-xs sm:text-sm font-black px-1 min-w-[14px] text-center">
                   {item.quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  className="p-1 hover:bg-blue-700 rounded-md active:scale-90 transition-transform cursor-pointer"
+                  className="w-6 h-6 flex items-center justify-center hover:bg-blue-700 rounded-md active:scale-90 transition-transform cursor-pointer"
                   title="Increase"
                 >
-                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  <Plus className="w-3 h-3 stroke-[3]" />
                 </button>
               </div>
 
               {/* Total for this line item */}
-              <span className="font-mono text-sm font-black text-slate-900 dark:text-slate-100 w-16 text-right">
+              <span className="font-mono text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 min-w-[50px] text-right">
                 {formatCurrency(item.price * item.quantity)}
               </span>
             </div>

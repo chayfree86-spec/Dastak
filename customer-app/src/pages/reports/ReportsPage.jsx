@@ -13,22 +13,33 @@ import {
   DollarSign,
   Utensils,
   ChevronRight,
+  RotateCcw,
+  Store,
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
+  Filter,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
+import { useCart } from '../../context/CartContext'
+import { useToast } from '../../context/ToastContext'
 import customerApi from '../../api/customer.api'
-import { formatCurrency, formatDateTime } from '../../utils/formatters'
+import { formatCurrency, formatDateTime, getOrderStatusText } from '../../utils/formatters'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import EmptyState from '../../components/common/EmptyState'
+import Button from '../../components/common/Button'
 
 export const ReportsPage = () => {
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  const toast = useToast()
   const { isAuthenticated, user } = useAuth()
+  const { addItem } = useCart()
 
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedMonth, setSelectedMonth] = useState('all')
+  const [filterTab, setFilterTab] = useState('all') // 'all' | 'delivered' | 'cancelled'
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -51,13 +62,35 @@ export const ReportsPage = () => {
     loadData()
   }, [isAuthenticated])
 
+  const handleReorder = (order) => {
+    const items = order.items || []
+    if (items.length === 0) return
+
+    items.forEach((it) => {
+      addItem(
+        {
+          id: it.menu_item_id || it.id,
+          name: it.item_name || it.name,
+          base_price: it.unit_price || it.price,
+          food_type: it.food_type,
+          restaurant: order.restaurant,
+        },
+        it.quantity || 1,
+        order.restaurant
+      )
+    })
+
+    toast.success('Items Added to Cart', 'Previous order items loaded into your cart.')
+    navigate('/cart')
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="py-10 max-w-xl mx-auto">
         <EmptyState
           icon={Receipt}
-          title="Sign in to View Your Reports"
-          description="Log in with your customer account to view your spending report and order receipts."
+          title="Sign in to View Your Reports & Orders"
+          description="Log in with your customer account to view your past orders, spending summary, and billing receipts."
           actionLabel="Sign In"
           onAction={() => navigate('/login?redirect=/reports')}
         />
@@ -74,16 +107,22 @@ export const ReportsPage = () => {
   const avgOrderValue =
     deliveredOrders.length > 0 ? Math.round(totalSpent / deliveredOrders.length) : 0
 
+  const filteredOrders = orders.filter((o) => {
+    if (filterTab === 'delivered') return o.status === 'DELIVERED'
+    if (filterTab === 'cancelled') return o.status === 'CANCELLED' || o.status === 'REJECTED'
+    return true
+  })
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20">
       {/* Header */}
       <div>
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
-          <Receipt className="w-7 h-7 text-[#2845D6] dark:text-blue-400" />
-          <span>Customer Spending & Activity Report</span>
+        <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
+          <Receipt className="w-6 h-6 text-[#2845D6] dark:text-blue-400" />
+          <span>Past Orders & Spending Report</span>
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Detailed summary of your food orders, expenses, and billing history
+          Complete history of your previous meals, spending metrics, and tax invoices
         </p>
       </div>
 
@@ -92,114 +131,185 @@ export const ReportsPage = () => {
       ) : (
         <>
           {/* 1. Bento KPI Stats Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* Total Spent */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-600/20 space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-blue-200 block">
+            <div className="p-4 rounded-3xl bg-gradient-to-br from-[#2845D6] to-indigo-700 text-white shadow-lg shadow-blue-600/20 space-y-1">
+              <span className="text-[9px] font-black uppercase tracking-wider text-blue-200 block">
                 TOTAL SPENT
               </span>
-              <div className="text-xl sm:text-2xl font-black font-mono">
+              <div className="text-xl font-black font-mono">
                 {formatCurrency(totalSpent)}
               </div>
-              <span className="text-[11px] text-blue-100 font-medium block">
-                Across all orders
+              <span className="text-[10px] text-blue-100 font-medium block">
+                {deliveredOrders.length} Completed
               </span>
             </div>
 
             {/* Total Orders */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+            <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
+              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">
                 TOTAL ORDERS
               </span>
-              <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">
+              <div className="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">
                 {orders.length}
               </div>
-              <span className="text-[11px] text-emerald-600 font-bold block">
+              <span className="text-[10px] text-emerald-600 font-bold block">
                 {deliveredOrders.length} Delivered
               </span>
             </div>
 
             {/* Average Order Value */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+            <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
+              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">
                 AVG ORDER VALUE
               </span>
-              <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">
+              <div className="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">
                 {formatCurrency(avgOrderValue)}
               </div>
-              <span className="text-[11px] text-slate-400 font-medium block">
+              <span className="text-[10px] text-slate-400 font-medium block">
                 Per meal ticket
               </span>
             </div>
 
-            {/* Success Rate */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+            {/* Delivery Rate */}
+            <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-1">
+              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">
                 DELIVERY RATE
               </span>
-              <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">
+              <div className="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">
                 {orders.length > 0
                   ? `${Math.round((deliveredOrders.length / orders.length) * 100)}%`
                   : '100%'}
               </div>
-              <span className="text-[11px] text-emerald-600 font-bold block">
-                On-time delivery
+              <span className="text-[10px] text-emerald-600 font-bold block">
+                Order fulfillment
               </span>
             </div>
           </div>
 
-          {/* 2. Order History Ledger */}
-          <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
-                Order Billing Ledger
+          {/* 2. Past Orders List with Re-order and Receipts */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <h3 className="text-base font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#2845D6]" />
+                <span>Past Orders History</span>
               </h3>
-              <span className="text-xs text-slate-400 font-bold">
-                {orders.length} Records
-              </span>
+
+              {/* Filter Tabs */}
+              <div className="flex items-center gap-1.5 text-xs font-black">
+                {[
+                  { id: 'all', label: `All (${orders.length})` },
+                  { id: 'delivered', label: `Delivered (${deliveredOrders.length})` },
+                  { id: 'cancelled', label: 'Cancelled' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setFilterTab(tab.id)}
+                    className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                      filterTab === tab.id
+                        ? 'bg-[#2845D6] text-white shadow-xs'
+                        : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {orders.length === 0 ? (
-              <div className="p-6 text-center text-xs text-slate-400">
-                No billing history found.
-              </div>
+            {filteredOrders.length === 0 ? (
+              <EmptyState
+                icon={Receipt}
+                title="No Past Orders Found"
+                description="Your previous meal orders and invoices will appear here."
+              />
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                {orders.map((o) => {
+              <div className="space-y-3.5">
+                {filteredOrders.map((o) => {
                   const billTotal = o.bill?.total_amount || o.total_amount || 0
+                  const isDelivered = o.status === 'DELIVERED'
+                  const isCancelled = o.status === 'CANCELLED' || o.status === 'REJECTED'
+                  const items = o.items || []
+
                   return (
                     <div
                       key={o.id || o.order_number}
-                      onClick={() => navigate(`/orders/${o.order_number}`)}
-                      className="py-3.5 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-850 p-2 rounded-2xl transition-colors cursor-pointer"
+                      className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3 hover:shadow-md transition-shadow"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0">
-                          <Receipt className="w-5 h-5" />
+                      {/* Order Top Bar */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+                            <Store className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100 truncate">
+                              {o.restaurant?.name || 'Dastak Partner Kitchen'}
+                            </h4>
+                            <p className="text-[11px] text-slate-400 font-mono">
+                              #{o.order_number} • {formatDateTime(o.placed_at || o.created_at)}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <h5 className="font-black text-slate-900 dark:text-slate-100 truncate">
-                            #{o.order_number} • {o.restaurant?.name || 'Partner Kitchen'}
-                          </h5>
-                          <p className="text-[11px] text-slate-400">
-                            {formatDateTime(o.placed_at || o.created_at)}
-                          </p>
-                        </div>
-                      </div>
 
-                      <div className="text-right shrink-0">
-                        <div className="font-mono font-black text-sm text-slate-900 dark:text-slate-100">
-                          {formatCurrency(billTotal)}
-                        </div>
+                        {/* Status Badge */}
                         <span
-                          className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
-                            o.status === 'DELIVERED'
+                          className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-xl shrink-0 ${
+                            isDelivered
                               ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                              : isCancelled
+                              ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
                               : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
                           }`}
                         >
-                          {o.status}
+                          {getOrderStatusText(o.status, lang)}
                         </span>
+                      </div>
+
+                      {/* Items Summary Snippet */}
+                      {items.length > 0 && (
+                        <div className="py-2 border-y border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1.5 flex-wrap">
+                          {items.map((it, idx) => (
+                            <span key={idx} className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg text-[11px] font-bold">
+                              {it.quantity}x {it.item_name || it.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Order Footer & Actions */}
+                      <div className="flex items-center justify-between gap-3 pt-1">
+                        <div>
+                          <span className="text-[10px] font-black uppercase text-slate-400 block">
+                            Total Bill
+                          </span>
+                          <span className="font-mono font-black text-base text-slate-900 dark:text-slate-100">
+                            {formatCurrency(billTotal)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {isDelivered && (
+                            <button
+                              type="button"
+                              onClick={() => handleReorder(o)}
+                              className="px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-750 text-[#2845D6] dark:text-blue-400 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>{t.orderAgain || 'Re-Order'}</span>
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/orders/${o.order_number}`)}
+                            className="px-4 py-2 rounded-2xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white text-xs font-black shadow-md shadow-blue-600/20 flex items-center gap-1 transition-all cursor-pointer"
+                          >
+                            <span>Receipt</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )
