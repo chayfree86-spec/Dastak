@@ -27,7 +27,7 @@ import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import ErrorState from '../../components/common/ErrorState'
 
 export const SettingsPage = () => {
-  const { user, restaurant: cachedRest, refreshProfile, updateStoreState } = useAuth()
+  const { user, restaurant: cachedRest, refreshProfile, updateStoreState, updateRestaurant } = useAuth()
   const { soundEnabled, toggleSound, playChime } = useSound()
   const toast = useToast()
 
@@ -40,6 +40,8 @@ export const SettingsPage = () => {
     error: loadError,
     retry,
   } = useApi(() => restaurantApi.getRestaurant(), [])
+
+  const parseBool = (v) => v === true || v === 1 || v === '1' || v === 'true'
 
   // Store Online State
   const [isOpen, setIsOpen] = useState(false)
@@ -86,12 +88,12 @@ export const SettingsPage = () => {
     const data = liveRestData || cachedRest
     if (!data) return
 
-    setIsOpen(!!data.is_open)
+    setIsOpen(parseBool(data.is_open))
     setName(data.name || '')
     setEmail(data.email || '')
     setPhone(data.phone || data.mobile || user?.mobile || '')
     setAddress(data.address_line1 || data.address || '')
-    setIsPureVeg(!!data.is_pure_veg)
+    setIsPureVeg(parseBool(data.is_pure_veg))
     setAvgPrepTime(String(data.preparation_time_minutes || data.avg_prep_time_minutes || 15))
 
     if (data.bank_account) {
@@ -153,7 +155,27 @@ export const SettingsPage = () => {
     }
   }
 
-  // 2. Save Profile
+  // 2. Live Toggle Pure Veg Switch
+  const handleTogglePureVeg = async (val) => {
+    setIsPureVeg(val)
+    try {
+      await restaurantApi.updateProfile({
+        name: name.trim() || 'Chay Chaupal',
+        is_pure_veg: val,
+      })
+      if (updateRestaurant) updateRestaurant({ is_pure_veg: val })
+      if (refreshProfile) await refreshProfile()
+      toast.success(
+        val ? 'Pure Veg Mode Enabled' : 'Standard Menu Mode Enabled',
+        val ? '100% Pure Veg badge is now active for your outlet.' : 'Pure veg outlet badge removed.'
+      )
+    } catch (err) {
+      toast.error('Failed', err.message || 'Unable to update pure veg status.')
+      setIsPureVeg(!val)
+    }
+  }
+
+  // 3. Save Profile
   const handleSaveProfile = async (e) => {
     e?.preventDefault()
     if (!name.trim()) {
@@ -162,14 +184,19 @@ export const SettingsPage = () => {
     }
     setProfileLoading(true)
     try {
-      await restaurantApi.updateProfile({
+      const res = await restaurantApi.updateProfile({
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
         address: address.trim(),
-        is_pure_veg: isPureVeg,
+        is_pure_veg: !!isPureVeg,
         avg_prep_time_minutes: Number(avgPrepTime) || 15,
       })
+      const updated = res.data?.data || res.data
+      if (updated) {
+        setIsPureVeg(parseBool(updated.is_pure_veg))
+        if (updateRestaurant) updateRestaurant(updated)
+      }
       if (refreshProfile) await refreshProfile()
       toast.success('Profile Saved', 'Restaurant profile details updated in database.')
       retry()
@@ -415,7 +442,7 @@ export const SettingsPage = () => {
                       onChange={(e) => setAvgPrepTime(e.target.value)}
                     />
 
-                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                       <div className="space-y-0.5">
                         <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
                           100% Pure Vegetarian Outlet
@@ -424,7 +451,7 @@ export const SettingsPage = () => {
                           Highlights pure-veg badge on customer app
                         </p>
                       </div>
-                      <Switch checked={isPureVeg} onChange={setIsPureVeg} />
+                      <Switch checked={isPureVeg} onChange={handleTogglePureVeg} />
                     </div>
                   </div>
 
@@ -685,7 +712,7 @@ export const SettingsPage = () => {
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-750 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
                 <div className="space-y-0.5">
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
                     Order Arrival Audio Alert

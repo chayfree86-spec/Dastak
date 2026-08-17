@@ -21,17 +21,17 @@ export const Button = ({
     primary:
       'bg-[#2845D6] hover:bg-[#F97316] text-white shadow-sm hover:shadow-md hover:shadow-orange-500/20',
     secondary:
-      'bg-slate-100 hover:bg-[#F97316] text-slate-800 hover:text-white',
+      'bg-slate-100 dark:bg-slate-700 hover:bg-[#F97316] dark:hover:bg-[#F97316] text-slate-800 dark:text-slate-200 hover:text-white',
     outline:
-      'bg-white text-slate-700 border border-slate-200 hover:text-white hover:border-[#F97316] shadow-xs',
+      'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:text-white hover:border-[#F97316] dark:hover:border-[#F97316] shadow-xs',
     success:
       'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow-md hover:shadow-emerald-500/20',
     danger:
       'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
     dangerOutline:
-      'bg-rose-50 text-rose-700 border border-rose-200 hover:text-white hover:border-rose-600',
+      'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50 hover:text-white hover:border-rose-600',
     ghost:
-      'bg-transparent hover:bg-[#F97316] text-slate-600 hover:text-white',
+      'bg-transparent hover:bg-[#F97316] text-slate-600 dark:text-slate-300 hover:text-white',
     accent:
       'bg-[#F97316] hover:bg-[#2845D6] text-white shadow-sm hover:shadow-md hover:shadow-blue-500/20',
   }
@@ -82,13 +82,9 @@ export const Button = ({
           </>
         ) : (
           <>
-            {Icon && iconPosition === 'left' && (
-              <Icon className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
-            )}
+            {Icon && iconPosition === 'left' && <Icon className="w-4 h-4 shrink-0" />}
             <span>{children}</span>
-            {Icon && iconPosition === 'right' && (
-              <Icon className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
-            )}
+            {Icon && iconPosition === 'right' && <Icon className="w-4 h-4 shrink-0" />}
           </>
         )}
       </span>

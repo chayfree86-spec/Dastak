@@ -16,6 +16,10 @@ export default {
           light: '#F8FAFC',
           border: '#E2E8F0',
         },
+        slate: {
+          750: '#1e293b',
+          850: '#0f172a',
+        },
         success: '#16A34A',
         warning: '#F59E0B',
         danger: '#DC2626',

@@ -29,25 +29,25 @@ export const Modal = ({
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-200"
+        className="fixed inset-0 bg-slate-900/70 backdrop-blur-xs transition-opacity duration-200"
       />
 
       {/* Modal Dialog / Bottom Sheet Card */}
       <div
-        className={`relative w-full ${maxWidth} bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 transform transition-all duration-200 max-h-[90vh] flex flex-col z-10 animate-in slide-in-from-bottom-4 sm:zoom-in-95`}
+        className={`relative w-full ${maxWidth} bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 transform transition-all duration-200 max-h-[90vh] flex flex-col z-10 animate-in slide-in-from-bottom-4 sm:zoom-in-95`}
       >
         {/* Header */}
         {(title || showClose) && (
-          <div className="p-4 sm:p-5 border-b border-slate-100 flex items-start justify-between gap-3 shrink-0">
+          <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700 flex items-start justify-between gap-3 shrink-0">
             <div>
-              {title && <h3 className="text-base font-black text-slate-900 leading-tight">{title}</h3>}
-              {subtitle && <p className="text-xs text-slate-400 mt-0.5 leading-snug">{subtitle}</p>}
+              {title && <h3 className="text-base font-black text-slate-900 dark:text-slate-100 leading-tight">{title}</h3>}
+              {subtitle && <p className="text-xs text-slate-400 dark:text-slate-400 mt-0.5 leading-snug">{subtitle}</p>}
             </div>
             {showClose && (
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -56,7 +56,7 @@ export const Modal = ({
         )}
 
         {/* Content Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1">{children}</div>
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1 text-slate-800 dark:text-slate-200">{children}</div>
       </div>
     </div>
   )

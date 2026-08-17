@@ -86,9 +86,14 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const updateStoreState = (updatedRestaurant) => {
-    setRestaurant(updatedRestaurant)
+  const updateRestaurant = (partial) => {
+    setRestaurant((prev) => {
+      if (typeof partial === 'function') return partial(prev)
+      return prev ? { ...prev, ...partial } : partial
+    })
   }
+
+  const updateStoreState = updateRestaurant
 
   return (
     <AuthContext.Provider
@@ -102,6 +107,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         refreshProfile: fetchRestaurantProfile,
         updateStoreState,
+        updateRestaurant,
       }}
     >
       {children}

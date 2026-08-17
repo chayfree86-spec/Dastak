@@ -55,7 +55,7 @@ export const OrderCard = ({
       }`}
     >
       {/* 1. Header Bar: Order ID, Status, Elapsed Time & Price */}
-      <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/70 bg-slate-50/70 dark:bg-slate-750/50">
+      <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700/80 bg-slate-50/80 dark:bg-slate-900/60">
         <div className="flex items-start justify-between gap-3">
           {/* Left: Order number & Time */}
           <div className="space-y-1">
@@ -207,7 +207,7 @@ export const OrderCard = ({
       </div>
 
       {/* 3. Action Buttons Footer Bar */}
-      <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-slate-700/70 bg-slate-50/40 dark:bg-slate-750/30 flex items-center justify-between gap-2.5 flex-wrap">
+      <div className="p-3.5 sm:p-4 border-t border-slate-100 dark:border-slate-700/70 bg-slate-50/60 dark:bg-slate-900/60 flex items-center justify-between gap-2.5 flex-wrap">
         {onViewDetails && (
           <Button
             variant="outline"

@@ -61,6 +61,10 @@ class RestaurantPartnerController extends Controller
             'description', 'fssai_license_number', 'gst_number'
         ]);
 
+        if ($request->has('is_pure_veg')) {
+            $data['is_pure_veg'] = $request->boolean('is_pure_veg');
+        }
+
         if (isset($data['address']) && !isset($data['address_line1'])) {
             $data['address_line1'] = $data['address'];
         }

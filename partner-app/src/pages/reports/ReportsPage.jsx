@@ -112,7 +112,7 @@ export const ReportsPage = () => {
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeRange === r.id
                   ? 'bg-[#2845D6] text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-500/20'
-                  : 'bg-slate-50 dark:bg-slate-750 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                  : 'bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               {r.label}
@@ -207,7 +207,7 @@ export const ReportsPage = () => {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 dark:bg-slate-750 text-slate-500 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                      <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
                         <tr>
                           <th className="py-3 px-4">Date</th>
                           <th className="py-3 px-4">Orders</th>
@@ -220,7 +220,7 @@ export const ReportsPage = () => {
                         {daily.map((d, idx) => (
                           <tr
                             key={idx}
-                            className="hover:bg-slate-50/70 dark:hover:bg-slate-750/70 transition-colors"
+                            className="hover:bg-slate-50/70 dark:hover:bg-slate-700/40 transition-colors"
                           >
                             <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-100">
                               {d.date || d.day || 'Today'}

@@ -44,11 +44,11 @@ export const RejectReasonModal = ({ isOpen, onClose, order, onConfirm, loading }
       maxWidth="max-w-md"
     >
       <div className="space-y-4">
-        <div className="p-3.5 rounded-2xl bg-rose-50/80 border border-rose-200 text-xs text-rose-900 flex items-start gap-2.5">
-          <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+        <div className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/40 text-xs text-rose-900 dark:text-rose-200 flex items-start gap-2.5">
+          <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
           <div>
             <p className="font-extrabold">Rejection Reason is Mandatory</p>
-            <p className="text-[11px] text-rose-800/80 mt-0.5">
+            <p className="text-[11px] text-rose-800/80 dark:text-rose-300/80 mt-0.5">
               The customer will be notified with this reason and any online paid amount will be automatically refunded.
             </p>
           </div>
@@ -67,14 +67,14 @@ export const RejectReasonModal = ({ isOpen, onClose, order, onConfirm, loading }
                 }}
                 className={`p-3 rounded-2xl border text-xs font-bold flex items-center justify-between cursor-pointer transition-all ${
                   isSelected
-                    ? 'border-rose-400 bg-rose-50/40 text-rose-950 ring-1 ring-rose-400'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                    ? 'border-rose-400 dark:border-rose-500 bg-rose-50/40 dark:bg-rose-950/40 text-rose-950 dark:text-rose-200 ring-1 ring-rose-400 dark:ring-rose-500'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
                 <span>{reason}</span>
                 <div
                   className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                    isSelected ? 'border-rose-600 bg-rose-600' : 'border-slate-300 bg-white'
+                    isSelected ? 'border-rose-600 bg-rose-600' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700'
                   }`}
                 >
                   {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -98,22 +98,18 @@ export const RejectReasonModal = ({ isOpen, onClose, order, onConfirm, loading }
           </div>
         )}
 
-        {error && selectedReason !== 'Other reason' && (
-          <p className="text-xs font-bold text-rose-600">{error}</p>
-        )}
-
-        {/* Action Buttons */}
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+        {/* Action buttons */}
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-700">
           <Button variant="outline" size="md" onClick={onClose} disabled={loading}>
-            Back
+            Cancel
           </Button>
           <Button
             variant="danger"
             size="md"
             icon={XCircle}
-            loading={loading}
             onClick={handleConfirm}
-            className="flex-1 shadow-md shadow-rose-500/20"
+            loading={loading}
+            className="shadow-sm font-bold"
           >
             Confirm Rejection
           </Button>

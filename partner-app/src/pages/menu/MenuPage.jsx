@@ -314,7 +314,7 @@ export const MenuPage = () => {
           {filteredItems.map((item) => (
             <div
               key={item.id}
-              className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-50/60 dark:hover:bg-slate-750 transition-colors"
+              className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-colors"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Thumb src={item.image} veg={item.is_veg} />
@@ -798,7 +798,7 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
               autoComplete="off"
             />
             {lang === 'HI' && suggestions.length > 0 && (
-              <div className="mt-1.5 flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-750 border border-slate-100 dark:border-slate-700 shadow-xs">
+              <div className="mt-1.5 flex flex-wrap items-center gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-100 dark:border-slate-700 shadow-xs">
                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider mr-1 select-none">
                   Suggestions:
                 </span>
@@ -894,7 +894,7 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
               className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all ${
                 isVeg
                   ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-600/20'
-                  : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-400'
+                  : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
               <span className="w-3.5 h-3.5 rounded-xs border-2 border-emerald-600 flex items-center justify-center shrink-0">
@@ -908,7 +908,7 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
               className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all ${
                 !isVeg
                   ? 'border-rose-600 bg-rose-50/60 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 ring-2 ring-rose-600/20'
-                  : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-600 dark:text-slate-400'
+                  : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
               }`}
             >
               <span className="w-3.5 h-3.5 rounded-xs border-2 border-rose-600 flex items-center justify-center shrink-0">

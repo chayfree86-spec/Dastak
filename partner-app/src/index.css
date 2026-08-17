@@ -64,6 +64,25 @@
   background: #94a3b8;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Modern text and UI selection styling for Light & Dark Mode */
+::selection {
+  background-color: #2845D6;
+  color: #ffffff;
+}
+
+.dark ::selection {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
 /* Mobile viewport bottom safe area */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 16px);

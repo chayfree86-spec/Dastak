@@ -16,14 +16,14 @@ export const Input = ({
   return (
     <div className="space-y-1 w-full text-left">
       {label && (
-        <label className="block text-xs font-bold text-slate-700 select-none">
+        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 select-none">
           {label}
           {required && <span className="text-rose-500 ml-1">*</span>}
         </label>
       )}
       <div className="relative rounded-xl shadow-xs">
         {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-400">
             <Icon className="w-4 h-4" />
           </div>
         )}
@@ -34,9 +34,9 @@ export const Input = ({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
-          className={`w-full bg-white border rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/20 focus:border-[#2845D6] disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed ${
+          className={`w-full bg-white dark:bg-slate-900/90 border rounded-xl px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/20 focus:border-[#2845D6] dark:focus:border-blue-500 disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed ${
             Icon ? 'pl-10' : ''
-          } ${error ? 'border-rose-300 ring-1 ring-rose-300' : 'border-slate-200'} ${className}`}
+          } ${error ? 'border-rose-300 dark:border-rose-500 ring-1 ring-rose-300 dark:ring-rose-500' : 'border-slate-200 dark:border-slate-700'} ${className}`}
           {...props}
         />
       </div>
