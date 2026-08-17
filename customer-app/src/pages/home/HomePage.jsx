@@ -240,12 +240,12 @@ export const HomePage = () => {
       </div>
 
       {/* 4. Food Mood / Category Circular Strip */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-400">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-400 px-0.5">
           <span>{t.categories}</span>
         </div>
 
-        <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-4 overflow-x-auto py-2.5 px-1.5 -my-1 scrollbar-none">
           {categories.map((cat) => (
             <button
               key={cat.id}
@@ -253,7 +253,7 @@ export const HomePage = () => {
               onClick={() => navigate(`/search?q=${encodeURIComponent(cat.query)}`)}
               className="flex flex-col items-center gap-2 shrink-0 cursor-pointer group select-none text-center"
             >
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 p-1 group-hover:border-[#2845D6] group-hover:scale-105 transition-all duration-300 shadow-xs">
+              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 p-1 group-hover:border-[#2845D6] group-hover:scale-105 transition-all duration-300 shadow-xs group-hover:shadow-md group-hover:shadow-blue-500/15">
                 <img
                   src={cat.image}
                   alt={cat.name}
@@ -270,7 +270,7 @@ export const HomePage = () => {
       </div>
 
       {/* 5. Quick Filters Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs font-black">
+      <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 -my-1 scrollbar-none text-xs font-black">
         {[
           { id: 'all', label: 'All Items' },
           { id: 'rating', label: '★ 4.0+ Rating' },

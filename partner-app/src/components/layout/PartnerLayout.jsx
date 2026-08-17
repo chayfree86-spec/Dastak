@@ -85,17 +85,15 @@ export const PartnerLayout = () => {
         {/* Brand Header */}
         <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-[#2845D6] text-white flex items-center justify-center font-black text-lg shadow-md shadow-blue-500/20 shrink-0">
-              D
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-base font-black text-slate-900 dark:text-slate-100 leading-tight">
-                Dastak Partner
-              </h2>
-              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 truncate max-w-[140px]">
-                {restaurant?.name || 'Kitchen POS'}
-              </p>
-            </div>
+            <img
+              src="/logo-horizontal.svg"
+              alt="Dastak Partner"
+              className="h-8 w-auto object-contain shrink-0"
+              onError={(e) => {
+                e.target.onerror = null
+                e.target.src = '/logo-light.png'
+              }}
+            />
           </div>
         </div>
 

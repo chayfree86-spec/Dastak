@@ -53,11 +53,12 @@ export const Login = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
         <div className="flex justify-center mb-4">
           <img
-            src={isDark ? '/logo-dark.png' : '/logo-light.png'}
+            src="/logo-horizontal.svg"
             alt="Dastak"
             className="h-12 w-auto object-contain"
             onError={(e) => {
-              e.target.style.display = 'none'
+              e.target.onerror = null
+              e.target.src = '/logo-light.png'
             }}
           />
         </div>

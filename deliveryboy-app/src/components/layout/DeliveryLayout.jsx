@@ -124,17 +124,15 @@ export const DeliveryLayout = () => {
         {/* Brand Logo Header */}
         <div className="p-5 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-500/20 shrink-0">
-              <Bike className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-base font-black text-slate-900 dark:text-slate-100 leading-tight">
-                DASTAK <span className="text-[#2845D6] dark:text-blue-400">RIDER</span>
-              </h2>
-              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 truncate">
-                Delivery Fleet Portal
-              </p>
-            </div>
+            <img
+              src="/logo-horizontal.svg"
+              alt="Dastak Rider"
+              className="h-8 w-auto object-contain shrink-0"
+              onError={(e) => {
+                e.target.onerror = null
+                e.target.src = '/logo-light.png'
+              }}
+            />
           </div>
         </div>
 

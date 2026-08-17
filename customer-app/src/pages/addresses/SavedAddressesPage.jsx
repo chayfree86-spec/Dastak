@@ -119,7 +119,7 @@ export const SavedAddressesPage = () => {
           onClick={() => setLocationModalOpen(true)}
           className="font-bold text-xs shadow-md shadow-blue-600/20"
         >
-          Add New Location (GPS / Map)
+          Add Address
         </Button>
       </div>
 

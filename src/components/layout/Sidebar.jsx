@@ -64,24 +64,14 @@ export const Sidebar = ({
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-3 overflow-hidden">
             <img
-              src={isDark ? '/logo-dark.png' : '/logo-light.png'}
+              src="/logo-horizontal.svg"
               alt="Dastak Logo"
-              className="h-9 w-auto object-contain shrink-0"
+              className="h-8 w-auto object-contain shrink-0"
               onError={(e) => {
-                // Fallback icon if logo image fails to load
-                e.target.style.display = 'none'
+                e.target.onerror = null
+                e.target.src = '/logo-light.png'
               }}
             />
-            {!collapsed && (
-              <div className="flex flex-col min-w-0">
-                <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-slate-100 leading-tight">
-                  Dastak
-                </span>
-                <span className="text-[10px] font-semibold text-[#F97316] uppercase tracking-wider">
-                  Admin Panel
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Mobile close button */}

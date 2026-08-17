@@ -10,6 +10,18 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
+    watch: {
+      usePolling: true,
+      interval: 1000,
+      ignored: [
+        '**/customer-app/**',
+        '**/partner-app/**',
+        '**/deliveryboy-app/**',
+        '**/backend/**',
+        '**/api/**',
+        '**/dist/**',
+      ],
+    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

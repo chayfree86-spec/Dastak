@@ -246,7 +246,7 @@ export const RestaurantPage = () => {
       </div>
 
       {/* 4. Category Pills Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 -my-1 scrollbar-none">
         <button
           type="button"
           onClick={() => setSelectedCategory('all')}
@@ -296,7 +296,7 @@ export const RestaurantPage = () => {
 
       {/* 6. Sticky Floating Cart Bar */}
       {itemCount > 0 && (
-        <div className="fixed bottom-18 sm:bottom-6 inset-x-4 max-w-lg mx-auto z-40">
+        <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-40">
           <div
             onClick={() => navigate('/cart')}
             className="p-4 rounded-3xl bg-gradient-to-r from-[#2845D6] to-[#F97316] text-white shadow-2xl shadow-blue-600/40 flex items-center justify-between gap-3 cursor-pointer hover:opacity-95 transition-all"

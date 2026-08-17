@@ -94,7 +94,7 @@ export const MorePage = () => {
             </div>
             <div>
               <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                Spending & Activity Report (रिपोर्ट)
+                Spending & Activity Reports
               </h5>
               <p className="text-slate-400 text-[11px]">
                 Monthly expenses, billing history, and order breakdown

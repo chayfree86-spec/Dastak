@@ -7,6 +7,11 @@ export default defineConfig({
   server: {
     port: 5176,
     host: true,
+    watch: {
+      usePolling: true,
+      interval: 1000,
+      ignored: ['**/dist/**', '**/.git/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

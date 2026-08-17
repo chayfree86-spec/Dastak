@@ -84,7 +84,7 @@ export const RestaurantsPage = () => {
       </div>
 
       {/* Filter Tabs Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs font-black">
+      <div className="flex items-center gap-2 overflow-x-auto py-2 px-1 -my-1 scrollbar-none text-xs font-black">
         {[
           { id: 'all', label: `All Kitchens (${restaurants.length})` },
           { id: 'rating', label: '★ 4.5+ Top Rated' },
