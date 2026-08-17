@@ -16,6 +16,8 @@ export const DeliveryBoyFormModal = ({ isOpen, onClose, rider, onSaveSuccess }) 
   const [name, setName] = useState('')
   const [mobile, setMobile] = useState('')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loginPin, setLoginPin] = useState('')
   const [vehicleType, setVehicleType] = useState('MOTORCYCLE')
   const [vehicleNumber, setVehicleNumber] = useState('')
   const [licenseNumber, setLicenseNumber] = useState('')
@@ -37,6 +39,8 @@ export const DeliveryBoyFormModal = ({ isOpen, onClose, rider, onSaveSuccess }) 
       setName(rider.name || '')
       setMobile(rider.mobile || '')
       setEmail(rider.email || '')
+      setPassword('')
+      setLoginPin('')
       setVehicleType(rider.vehicle_type || 'MOTORCYCLE')
       setVehicleNumber(rider.vehicle_number || '')
       setLicenseNumber(rider.license_number || '')
@@ -53,6 +57,8 @@ export const DeliveryBoyFormModal = ({ isOpen, onClose, rider, onSaveSuccess }) 
       setName('')
       setMobile('')
       setEmail('')
+      setPassword('')
+      setLoginPin('')
       setVehicleType('MOTORCYCLE')
       setVehicleNumber('')
       setLicenseNumber('')
@@ -104,6 +110,9 @@ export const DeliveryBoyFormModal = ({ isOpen, onClose, rider, onSaveSuccess }) 
     if (aadharNumber && aadharNumber.length !== 12) newErrors.aadharNumber = 'Aadhaar must be exactly 12 digits.'
     if (panNumber && panNumber.length !== 10) newErrors.panNumber = 'PAN number must be exactly 10 characters.'
 
+    if (loginPin && !/^\d{4,6}$/.test(loginPin)) newErrors.loginPin = 'PIN must be 4 to 6 numeric digits.'
+    if (password && password.length < 6) newErrors.password = 'Password must be at least 6 characters.'
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       toast.error('Validation Error', 'Please check highlighted fields.')
@@ -129,6 +138,8 @@ export const DeliveryBoyFormModal = ({ isOpen, onClose, rider, onSaveSuccess }) 
         bank_ifsc: bankIfsc || null,
         bank_upi_id: bankUpiId || null,
       }
+      if (password.trim()) payload.password = password.trim()
+      if (loginPin.trim()) payload.login_pin = loginPin.trim()
 
       if (rider?.id) {
         await deliveryBoysApi.updateDeliveryBoy(rider.id, payload)
@@ -201,7 +212,7 @@ export const DeliveryBoyFormModal = ({ isOpen, onClose, rider, onSaveSuccess }) 
                 error={errors.name}
               />
               <Input
-                label="Mobile Number"
+                label="Mobile Number (Login ID)"
                 required
                 placeholder="e.g. 9876543210"
                 value={mobile}
@@ -210,12 +221,38 @@ export const DeliveryBoyFormModal = ({ isOpen, onClose, rider, onSaveSuccess }) 
               />
             </div>
             <Input
-              label="Email Address"
+              label="Email Address (Login ID)"
               type="email"
               placeholder="e.g. ramesh@dastak.in"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+          </div>
+
+          {/* Section 1.5: Login Credentials */}
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-slate-700/60 pb-1.5 flex items-center justify-between">
+              <span>App Login Credentials</span>
+              <span className="text-[9px] font-normal text-slate-400 lowercase">(email + password / mobile + 4-6 digit pin)</span>
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label={rider ? "New Password" : "Email Login Password"}
+                type="password"
+                placeholder={rider ? "•••••••• (leave blank to keep current)" : "Min 6 characters"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={errors.password}
+              />
+              <Input
+                label={rider ? "Mobile Login PIN" : "Mobile Login PIN (4-6 digits)"}
+                type="password"
+                placeholder={rider ? "e.g. 1234 (leave blank to keep current)" : "4 to 6 numeric digits"}
+                value={loginPin}
+                onChange={(e) => setLoginPin(e.target.value)}
+                error={errors.loginPin}
+              />
+            </div>
           </div>
 
           {/* Section 2: Vehicle details */}

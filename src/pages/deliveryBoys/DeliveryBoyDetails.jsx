@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -18,6 +18,10 @@ import {
   Edit,
   Trash2,
   Download,
+  Key,
+  Lock,
+  Mail,
+  ShieldCheck,
 } from 'lucide-react'
 import deliveryBoysApi from '../../api/deliveryBoys.api'
 import { useApi } from '../../hooks/useApi'
@@ -26,6 +30,8 @@ import Tabs from '../../components/common/Tabs'
 import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
 import DataTable from '../../components/common/DataTable'
+import Input from '../../components/common/Input'
+import Switch from '../../components/common/Switch'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
 import LiveMapTracker from '../../components/common/LiveMapTracker'
 import { useToast } from '../../context/ToastContext'
@@ -41,6 +47,14 @@ export const DeliveryBoyDetails = () => {
   const [formModalOpen, setFormModalOpen] = useState(false)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [downloadLoading, setDownloadLoading] = useState(false)
+
+  // Login Credentials & Security State
+  const [credEmail, setCredEmail] = useState('')
+  const [credMobile, setCredMobile] = useState('')
+  const [credPassword, setCredPassword] = useState('')
+  const [credPin, setCredPin] = useState('')
+  const [credLoginActive, setCredLoginActive] = useState(true)
+  const [saveCredLoading, setSaveCredLoading] = useState(false)
 
   const { data: rider, loading, error, retry } = useApi(
     () => deliveryBoysApi.getDeliveryBoyDetails(id),
@@ -142,6 +156,59 @@ export const DeliveryBoyDetails = () => {
     }
   }
 
+  useEffect(() => {
+    if (rider) {
+      setCredEmail(rider.email || '')
+      setCredMobile(rider.mobile || '')
+      setCredLoginActive(rider.status === 'ACTIVE')
+      setCredPassword('')
+      setCredPin('')
+    }
+  }, [rider])
+
+  const handleSaveCredentials = async (e) => {
+    e?.preventDefault()
+    if (!credEmail.trim()) {
+      toast.warning('Email Required', 'Please enter a valid login email address.')
+      return
+    }
+    if (!credMobile.trim()) {
+      toast.warning('Mobile Required', 'Please enter a valid login mobile number.')
+      return
+    }
+    if (credPin.trim() && !/^\d{4,6}$/.test(credPin.trim())) {
+      toast.warning('Invalid PIN', 'Mobile login PIN must be between 4 and 6 numeric digits.')
+      return
+    }
+    if (credPassword.trim() && credPassword.trim().length < 6) {
+      toast.warning('Password Too Short', 'Password must be at least 6 characters.')
+      return
+    }
+    setSaveCredLoading(true)
+    try {
+      const payload = {
+        email: credEmail.trim(),
+        mobile: credMobile.trim(),
+        status: credLoginActive ? 'ACTIVE' : 'SUSPENDED',
+      }
+      if (credPassword.trim()) {
+        payload.password = credPassword.trim()
+      }
+      if (credPin.trim()) {
+        payload.login_pin = credPin.trim()
+      }
+      await deliveryBoysApi.updateDeliveryBoy(id, payload)
+      toast.success('Credentials Updated', 'Delivery partner login credentials updated successfully.')
+      setCredPassword('')
+      setCredPin('')
+      retry()
+    } catch (err) {
+      toast.error('Update Failed', err.message || 'Unable to update login credentials.')
+    } finally {
+      setSaveCredLoading(false)
+    }
+  }
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Bike },
     { id: 'location', label: 'Live Location', icon: MapPin },
@@ -149,6 +216,7 @@ export const DeliveryBoyDetails = () => {
     { id: 'history', label: 'Order History', icon: ShoppingBag },
     { id: 'cod', label: 'COD Reconciliation', icon: Wallet },
     { id: 'profile', label: 'KYC & Vehicle', icon: FileText },
+    { id: 'settings', label: 'Login & Security', icon: Key },
   ]
 
   return (
@@ -210,6 +278,15 @@ export const DeliveryBoyDetails = () => {
             onClick={() => navigate(`/delivery-boys/${id}/id-card`)}
           >
             ID Card
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Key}
+            onClick={() => setActiveTab('settings')}
+          >
+            Login Access
           </Button>
 
           <Button
@@ -529,6 +606,159 @@ export const DeliveryBoyDetails = () => {
                 <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
                   {rider?.vehicle_number || 'Not Provided'}
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* App Login Credentials Summary Card */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4 md:col-span-2">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-2">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Key className="w-4 h-4 text-[#2845D6]" />
+                <span>App Login Credentials</span>
+              </h3>
+              <Button
+                variant="outline"
+                size="xs"
+                icon={Edit}
+                onClick={() => setActiveTab('settings')}
+              >
+                Manage Credentials
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div>
+                <span className="text-slate-400 block mb-0.5">Registered Email</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
+                  {rider?.email || 'Not Provided'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 block mb-0.5">Registered Mobile</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {formatPhone(rider?.mobile)}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 block mb-0.5">App Access Status</span>
+                <span className="inline-block mt-0.5">
+                  <StatusBadge status={rider?.status} size="xs" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 7: Login & Security */}
+      {activeTab === 'settings' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Card 1: Login Credentials Form */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4 lg:col-span-2">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Key className="w-4 h-4 text-[#2845D6]" />
+                <span>Delivery Partner App Login Credentials</span>
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Delivery boys can log in using either their registered Email & Password, or Mobile Number & Security PIN.
+              </p>
+            </div>
+
+            <form onSubmit={handleSaveCredentials} className="space-y-4">
+              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
+                <Switch
+                  checked={credLoginActive}
+                  onChange={setCredLoginActive}
+                  label="Allow Delivery Partner App Access (Active)"
+                  description="When turned off, the delivery boy is suspended from logging in or receiving new orders."
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3 p-4 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-white dark:bg-slate-800/60">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700 pb-1.5">
+                    <Mail className="w-3.5 h-3.5 text-[#2845D6]" />
+                    <span>Email Login Method</span>
+                  </div>
+                  <Input
+                    label="Login Email"
+                    type="email"
+                    required
+                    placeholder="e.g. rider@dastakfleet.in"
+                    value={credEmail}
+                    onChange={(e) => setCredEmail(e.target.value)}
+                  />
+                  <Input
+                    label="New Password"
+                    type="password"
+                    placeholder="•••••••• (leave blank to keep current)"
+                    value={credPassword}
+                    onChange={(e) => setCredPassword(e.target.value)}
+                  />
+                  <span className="text-[10px] text-slate-400 block">Min 6 characters. Leave blank if unchanged.</span>
+                </div>
+
+                <div className="space-y-3 p-4 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-white dark:bg-slate-800/60">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700 pb-1.5">
+                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Mobile Login Method</span>
+                  </div>
+                  <Input
+                    label="Login Mobile Number"
+                    type="text"
+                    required
+                    placeholder="e.g. 9876543210"
+                    value={credMobile}
+                    onChange={(e) => setCredMobile(e.target.value)}
+                  />
+                  <Input
+                    label="Mobile Security PIN"
+                    type="password"
+                    placeholder="e.g. 1234 (leave blank to keep current)"
+                    value={credPin}
+                    onChange={(e) => setCredPin(e.target.value)}
+                  />
+                  <span className="text-[10px] text-slate-400 block">4 to 6 numeric digits for quick mobile login.</span>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex justify-end gap-2">
+                <Button type="submit" variant="primary" size="sm" loading={saveCredLoading} icon={Key}>
+                  Save Login Credentials
+                </Button>
+              </div>
+            </form>
+          </div>
+
+          {/* Card 2: Security Guidelines */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4 h-fit">
+            <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Authentication Guide</span>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300">
+              <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 space-y-1">
+                <p className="font-bold text-[#2845D6] dark:text-blue-400">Two Login Methods Supported</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Riders can enter either their registered Email & Password, or their 10-digit Mobile Number & Security PIN in the Dastak Rider App.
+                </p>
+              </div>
+
+              <div className="space-y-2 text-[11px]">
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <p><strong>Mobile Login:</strong> Recommended for daily on-field quick dispatch check-ins.</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                  <p><strong>Email Login:</strong> Standard authentication for secure dashboard & backup access.</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                  <p><strong>Access Control:</strong> Instantly toggle the app switch to suspend access in case of device loss.</p>
+                </div>
               </div>
             </div>
           </div>

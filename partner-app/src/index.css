@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-blue: #2845D6;
+    --brand-orange: #F97316;
+    --brand-dark: #102A43;
+    --brand-secondary: #64748B;
+    --brand-light: #F8FAFC;
+    --brand-border: #E2E8F0;
+    
+    --success: #16A34A;
+    --warning: #F59E0B;
+    --danger: #DC2626;
+
+    color-scheme: light;
+  }
+
+  html {
+    background-color: #F8FAFC;
+    color: #102A43;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: #F8FAFC;
+    color: #102A43;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Remove number input spinners */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* Custom modern scrollbar matching Admin */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile viewport bottom safe area */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
