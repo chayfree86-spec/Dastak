@@ -1,0 +1,69 @@
+import React from 'react'
+import { NavLink } from 'react-router-dom'
+import { Home, Package, DollarSign, MoreHorizontal, Bike } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+
+export const BottomNav = () => {
+  const { activeOrder } = useAuth()
+
+  const navItems = [
+    { to: '/', label: 'Home', icon: Home, exact: true },
+    {
+      to: '/deliveries',
+      label: 'Deliveries',
+      icon: Package,
+      badge: activeOrder ? '1' : null,
+    },
+    { to: '/earnings', label: 'Earnings', icon: DollarSign },
+    { to: '/more', label: 'More', icon: MoreHorizontal },
+  ]
+
+  return (
+    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800 pb-safe sm:hidden">
+      <div className="flex items-center justify-around px-2 py-1.5">
+        {navItems.map((item) => {
+          const Icon = item.icon
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.exact}
+              className={({ isActive }) =>
+                `relative flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all ${
+                  isActive
+                    ? 'text-[#2845D6] dark:text-blue-400 font-black'
+                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-semibold'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className="relative">
+                    <Icon
+                      className={`w-5 h-5 transition-transform ${
+                        isActive ? 'scale-110 stroke-[2.5]' : 'stroke-2'
+                      }`}
+                    />
+                    {item.badge && (
+                      <span className="absolute -top-1 -right-2 px-1.5 py-0.2 rounded-full bg-[#F97316] text-white text-[9px] font-black animate-pulse shadow-xs">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] tracking-tight mt-1">
+                    {item.label}
+                  </span>
+                  {isActive && (
+                    <span className="w-1 h-1 rounded-full bg-[#2845D6] dark:bg-blue-400 mt-0.5" />
+                  )}
+                </>
+              )}
+            </NavLink>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
+
+export default BottomNav

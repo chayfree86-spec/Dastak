@@ -14,7 +14,8 @@ class VerifyDeliveryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'otp' => ['required', 'string', 'min:4', 'max:6'],
+            'otp' => ['nullable', 'string', 'max:6'],
+            'cash_collected' => ['nullable', 'boolean'],
         ];
     }
 }

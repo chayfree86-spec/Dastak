@@ -320,7 +320,7 @@ class OrderService
         );
     }
 
-    public function verifyDelivery(Order $order, string $otp, User $rider): Order
+    public function verifyDelivery(Order $order, ?string $otp, User $rider): Order
     {
         if ($order->status !== OrderStatus::OUT_FOR_DELIVERY) {
             throw ValidationException::withMessages([
@@ -328,18 +328,25 @@ class OrderService
             ]);
         }
 
-        if (trim($order->delivery_otp) !== trim($otp)) {
-            throw ValidationException::withMessages([
-                'delivery_otp' => ['Invalid 4-digit verification code provided.'],
-            ]);
+        // Only enforce OTP verification for Online Paid orders
+        if ($order->payment_mode !== PaymentMode::COD) {
+            if (empty($otp) || trim($order->delivery_otp) !== trim($otp)) {
+                throw ValidationException::withMessages([
+                    'delivery_otp' => ['Invalid 4-digit verification OTP provided for online paid order.'],
+                ]);
+            }
         }
+
+        $comment = $order->payment_mode === PaymentMode::COD
+            ? 'COD cash collection verified and order marked delivered.'
+            : 'Online order verified with 4-digit customer OTP and marked delivered.';
 
         return $this->transitionStatus(
             order: $order,
             targetStatus: OrderStatus::DELIVERED,
             actor: $rider,
             actorType: ActorType::DELIVERY_BOY,
-            comment: 'Order successfully delivered with OTP verification.'
+            comment: $comment
         );
     }
 
