@@ -10,6 +10,7 @@ import Button from '../../components/common/Button'
 import CustomSelect from '../../components/common/CustomSelect'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
 import { useToast } from '../../context/ToastContext'
+import DeliveryBoyFormModal from './DeliveryBoyFormModal'
 
 export const DeliveryBoyList = () => {
   const navigate = useNavigate()
@@ -21,6 +22,7 @@ export const DeliveryBoyList = () => {
 
   const [statusConfirmRider, setStatusConfirmRider] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [formModalOpen, setFormModalOpen] = useState(false)
 
   const { data, loading, error, meta, retry } = useApi(
     () =>
@@ -229,6 +231,14 @@ export const DeliveryBoyList = () => {
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={retry}>
             Refresh Fleet
           </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            icon={PlusCircle}
+            onClick={() => setFormModalOpen(true)}
+          >
+            Add Delivery Boy
+          </Button>
         </div>
       </div>
 
@@ -306,6 +316,13 @@ export const DeliveryBoyList = () => {
             : `Are you sure you want to activate ${statusConfirmRider?.name}? They will be able to go online and receive order assignments.`
         }
         confirmText={statusConfirmRider?.status === 'ACTIVE' ? 'Yes, Suspend' : 'Yes, Activate'}
+      />
+
+      {/* Form Modal */}
+      <DeliveryBoyFormModal
+        isOpen={formModalOpen}
+        onClose={() => setFormModalOpen(false)}
+        onSaveSuccess={retry}
       />
     </div>
   )

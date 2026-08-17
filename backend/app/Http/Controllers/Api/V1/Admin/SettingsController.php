@@ -75,9 +75,14 @@ class SettingsController extends Controller
 
     public function getServiceAreas(): JsonResponse
     {
-        $areas = Zone::orderBy('name')->get()->map(fn ($z) => [
+        $areas = Zone::withCount('restaurants')->orderBy('name')->get()->map(fn ($z) => [
             'id' => $z->id,
             'name' => $z->name,
+            'city' => $z->city,
+            'center_latitude' => $z->center_latitude !== null ? (float) $z->center_latitude : null,
+            'center_longitude' => $z->center_longitude !== null ? (float) $z->center_longitude : null,
+            'radius_km' => (float) $z->radius_km,
+            'restaurants_count' => (int) $z->restaurants_count,
             'is_active' => (bool) $z->is_active,
         ])->values();
 
@@ -88,32 +93,90 @@ class SettingsController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:150'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'center_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'center_longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'radius_km' => ['nullable', 'numeric', 'min:0.5', 'max:100'],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
+        $name = trim($data['name']);
+        $city = trim($data['city'] ?? 'Kanpur');
+
+        $exists = Zone::whereRaw('LOWER(name) = ?', [strtolower($name)])
+            ->whereRaw('LOWER(city) = ?', [strtolower($city)])
+            ->exists();
+
+        if ($exists) {
+            return ApiResponse::error("A service area with the name '{$name}' in '{$city}' already exists.", null, 422);
+        }
+
         $zone = Zone::create([
-            'name' => $data['name'],
-            'city' => $request->input('city', 'Kanpur'),
-            'center_latitude' => $request->input('latitude', 26.4499),
-            'center_longitude' => $request->input('longitude', 80.3319),
-            'radius_km' => $request->input('radius_km', (int) config('dastak.delivery.max_radius_km', 12)),
+            'name' => $name,
+            'city' => $city,
+            'center_latitude' => $data['center_latitude'] ?? 26.4499,
+            'center_longitude' => $data['center_longitude'] ?? 80.3319,
+            'radius_km' => $data['radius_km'] ?? (float) config('dastak.delivery.max_radius_km', 12),
             'is_active' => $data['is_active'] ?? true,
         ]);
 
-        return ApiResponse::success(['id' => $zone->id, 'name' => $zone->name, 'is_active' => (bool) $zone->is_active], 'Service area created.', 201);
+        return ApiResponse::success([
+            'id' => $zone->id,
+            'name' => $zone->name,
+            'city' => $zone->city,
+            'center_latitude' => $zone->center_latitude !== null ? (float) $zone->center_latitude : null,
+            'center_longitude' => $zone->center_longitude !== null ? (float) $zone->center_longitude : null,
+            'radius_km' => (float) $zone->radius_km,
+            'restaurants_count' => 0,
+            'is_active' => (bool) $zone->is_active,
+        ], 'Service area created.', 201);
     }
 
     public function updateServiceArea(Request $request, int $id): JsonResponse
     {
-        $zone = Zone::findOrFail($id);
-        $zone->update($request->only(['name', 'is_active', 'city', 'radius_km']));
+        $data = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:150'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'center_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'center_longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'radius_km' => ['nullable', 'numeric', 'min:0.5', 'max:100'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
 
-        return ApiResponse::success(['id' => $zone->id, 'name' => $zone->name, 'is_active' => (bool) $zone->is_active], 'Service area updated.');
+        $zone = Zone::findOrFail($id);
+
+        if (!empty($data['name'])) {
+            $name = trim($data['name']);
+            $city = trim($data['city'] ?? $zone->city);
+
+            $exists = Zone::where('id', '!=', $id)
+                ->whereRaw('LOWER(name) = ?', [strtolower($name)])
+                ->whereRaw('LOWER(city) = ?', [strtolower($city)])
+                ->exists();
+
+            if ($exists) {
+                return ApiResponse::error("A service area with the name '{$name}' in '{$city}' already exists.", null, 422);
+            }
+        }
+
+        $zone->update($data);
+
+        return ApiResponse::success([
+            'id' => $zone->id,
+            'name' => $zone->name,
+            'city' => $zone->city,
+            'center_latitude' => $zone->center_latitude !== null ? (float) $zone->center_latitude : null,
+            'center_longitude' => $zone->center_longitude !== null ? (float) $zone->center_longitude : null,
+            'radius_km' => (float) $zone->radius_km,
+            'restaurants_count' => (int) $zone->restaurants()->count(),
+            'is_active' => (bool) $zone->is_active,
+        ], 'Service area updated.');
     }
 
     public function deleteServiceArea(int $id): JsonResponse
     {
-        Zone::findOrFail($id)->delete();
+        $zone = Zone::findOrFail($id);
+        $zone->delete();
 
         return ApiResponse::success(null, 'Service area deleted.');
     }

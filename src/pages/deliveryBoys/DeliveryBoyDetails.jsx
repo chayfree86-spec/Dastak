@@ -15,6 +15,9 @@ import {
   FileText,
   UserCheck,
   Ban,
+  Edit,
+  Trash2,
+  Download,
 } from 'lucide-react'
 import deliveryBoysApi from '../../api/deliveryBoys.api'
 import { useApi } from '../../hooks/useApi'
@@ -26,6 +29,7 @@ import DataTable from '../../components/common/DataTable'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
 import LiveMapTracker from '../../components/common/LiveMapTracker'
 import { useToast } from '../../context/ToastContext'
+import DeliveryBoyFormModal from './DeliveryBoyFormModal'
 
 export const DeliveryBoyDetails = () => {
   const { id } = useParams()
@@ -34,6 +38,9 @@ export const DeliveryBoyDetails = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [reconcileModalOpen, setReconcileModalOpen] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [formModalOpen, setFormModalOpen] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [downloadLoading, setDownloadLoading] = useState(false)
 
   const { data: rider, loading, error, retry } = useApi(
     () => deliveryBoysApi.getDeliveryBoyDetails(id),
@@ -101,6 +108,40 @@ export const DeliveryBoyDetails = () => {
     }
   }
 
+  const handleDeleteRider = async () => {
+    setActionLoading(true)
+    try {
+      await deliveryBoysApi.deleteDeliveryBoy(id)
+      toast.success('Rider Deleted', 'Rider deleted successfully from the platform.')
+      setDeleteConfirmOpen(false)
+      navigate('/delivery-boys')
+    } catch (err) {
+      toast.error('Failed', err.message || 'Unable to delete rider.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDownloadIdCard = async () => {
+    setDownloadLoading(true)
+    try {
+      const response = await deliveryBoysApi.downloadIdCard(id)
+      const blob = new Blob([response.data], { type: 'text/html' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `id_card_${rider?.name || id}.html`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode.removeChild(link)
+      toast.success('ID Card Downloaded', 'Open the downloaded file to print.')
+    } catch (err) {
+      toast.error('Download Failed', 'Unable to generate ID Card.')
+    } finally {
+      setDownloadLoading(false)
+    }
+  }
+
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Bike },
     { id: 'location', label: 'Live Location', icon: MapPin },
@@ -150,7 +191,7 @@ export const DeliveryBoyDetails = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
           {rider?.cod_collected_pending > 0 && (
             <Button
               variant="accent"
@@ -161,6 +202,33 @@ export const DeliveryBoyDetails = () => {
               Reconcile COD ({formatCurrency(rider?.cod_collected_pending)})
             </Button>
           )}
+          
+          <Button
+            variant="outline"
+            size="sm"
+            icon={FileText}
+            onClick={() => navigate(`/delivery-boys/${id}/id-card`)}
+          >
+            ID Card
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Edit}
+            onClick={() => setFormModalOpen(true)}
+          >
+            Edit
+          </Button>
+
+          <Button
+            variant="danger"
+            size="sm"
+            icon={Trash2}
+            onClick={() => setDeleteConfirmOpen(true)}
+          >
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -306,6 +374,167 @@ export const DeliveryBoyDetails = () => {
         </div>
       )}
 
+      {/* Tab: COD Ledger */}
+      {activeTab === 'cod' && (
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700 pb-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-amber-500" />
+                <span>Cash on Delivery (COD) Ledger</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Verify cash collected from customer orders and settle dues.
+              </p>
+            </div>
+            {rider?.cod_collected_pending > 0 && (
+              <Button
+                variant="success"
+                size="sm"
+                icon={CheckCircle2}
+                onClick={() => setReconcileModalOpen(true)}
+              >
+                Reconcile & Settle {formatCurrency(rider?.cod_collected_pending)}
+              </Button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+              <span className="text-slate-400 block mb-0.5">Total Cash Collected (Pending Deposit)</span>
+              <span className="text-2xl font-black text-amber-600 dark:text-amber-400">
+                {formatCurrency(rider?.cod_collected_pending || 0)}
+              </span>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+              <span className="text-slate-400 block mb-0.5">Lifetime Delivered Value</span>
+              <span className="text-2xl font-black text-slate-900 dark:text-slate-100">
+                {formatCurrency(rider?.lifetime_earnings * 10 || 0)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: KYC & Vehicle Details */}
+      {activeTab === 'profile' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* KYC Details */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-2">
+              <FileText className="w-4 h-4 text-[#2845D6]" />
+              <span>Government Identity Proofs</span>
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="text-slate-400 block mb-0.5">Aadhaar Card Number</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {rider?.aadhar_number ? rider.aadhar_number.replace(/(\d{4})/g, '$1 ').trim() : 'Not Provided'}
+                </span>
+                {rider?.aadhar_url && (
+                  <a
+                    href={rider.aadhar_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#2845D6] hover:underline text-[10px] font-bold block mt-1"
+                  >
+                    View Hardcopy ➜
+                  </a>
+                )}
+              </div>
+              <div>
+                <span className="text-slate-400 block mb-0.5">PAN Card Number</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {rider?.pan_number || 'Not Provided'}
+                </span>
+                {rider?.pan_url && (
+                  <a
+                    href={rider.pan_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#2845D6] hover:underline text-[10px] font-bold block mt-1"
+                  >
+                    View Hardcopy ➜
+                  </a>
+                )}
+              </div>
+              <div className="col-span-2">
+                <span className="text-slate-400 block mb-0.5">Driving License Number</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {rider?.license_number || 'Not Provided'}
+                </span>
+                {rider?.license_url && (
+                  <a
+                    href={rider.license_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#2845D6] hover:underline text-[10px] font-bold block mt-1"
+                  >
+                    View Hardcopy ➜
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Bank Details */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-2">
+              <Wallet className="w-4 h-4 text-emerald-600" />
+              <span>Payout Bank Details</span>
+            </h3>
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="text-slate-400 block mb-0.5">Account Holder Name</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
+                  {rider?.bank_account_name || 'Not Provided'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 block mb-0.5">Bank Account Number</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {rider?.bank_account_number || 'Not Provided'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 block mb-0.5">Bank IFSC Code</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {rider?.bank_ifsc || 'Not Provided'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 block mb-0.5">UPI ID</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {rider?.bank_upi_id || 'Not Provided'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Vehicle Details */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4 md:col-span-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-2">
+              <Bike className="w-4 h-4 text-[#F97316]" />
+              <span>Vehicle Credentials</span>
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <span className="text-slate-400 block">Vehicle Category</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm capitalize">
+                  {rider?.vehicle_type?.replace('_', ' ').toLowerCase() || 'Not Provided'}
+                </span>
+              </div>
+              <div>
+                <span className="text-slate-400 block">Vehicle Number Plate</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                  {rider?.vehicle_number || 'Not Provided'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Reconcile Dialog */}
       <ConfirmDialog
         isOpen={reconcileModalOpen}
@@ -316,6 +545,26 @@ export const DeliveryBoyDetails = () => {
         title="Reconcile Cash Collection?"
         message={`Mark ${formatCurrency(rider?.cod_collected_pending)} cash as received and deposited from ${rider?.name}.`}
         confirmText="Confirm Deposit"
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteRider}
+        loading={actionLoading}
+        type="danger"
+        title="Delete Delivery Partner?"
+        message={`Are you sure you want to permanently delete ${rider?.name}? This action is irreversible and will delete their entire dispatch history and profile.`}
+        confirmText="Yes, Delete Rider"
+      />
+
+      {/* Edit Form Modal */}
+      <DeliveryBoyFormModal
+        isOpen={formModalOpen}
+        onClose={() => setFormModalOpen(false)}
+        rider={rider}
+        onSaveSuccess={retry}
       />
     </div>
   )

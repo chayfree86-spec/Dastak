@@ -76,6 +76,18 @@ class DeliveryBoyAdminController extends Controller
             'vehicle_type' => $p?->vehicle_type?->value,
             'vehicle_number' => $p?->vehicle_number,
             'license_number' => $p?->driving_license_number,
+            'aadhar_number' => $p?->aadhar_number,
+            'pan_number' => $p?->pan_number,
+            'aadhar_path' => $p?->aadhar_path,
+            'pan_path' => $p?->pan_path,
+            'license_path' => $p?->license_path,
+            'aadhar_url' => $p?->aadhar_path ? asset('storage/' . $p->aadhar_path) : null,
+            'pan_url' => $p?->pan_path ? asset('storage/' . $p->pan_path) : null,
+            'license_url' => $p?->license_path ? asset('storage/' . $p->license_path) : null,
+            'bank_account_name' => $p?->bank_account_name,
+            'bank_account_number' => $p?->bank_account_number,
+            'bank_ifsc' => $p?->bank_ifsc,
+            'bank_upi_id' => $p?->bank_upi_id,
             'latitude' => $p?->current_latitude ? (float) $p->current_latitude : null,
             'longitude' => $p?->current_longitude ? (float) $p->current_longitude : null,
             'speed' => null,
@@ -101,7 +113,16 @@ class DeliveryBoyAdminController extends Controller
             'email' => ['nullable', 'email', 'max:150'],
             'vehicle_type' => ['nullable', 'string', 'max:30'],
             'vehicle_number' => ['nullable', 'string', 'max:30'],
-            'license_number' => ['nullable', 'string', 'max:50'],
+            'license_number' => ['required', 'string', 'max:50'],
+            'aadhar_number' => ['nullable', 'string', 'max:20'],
+            'pan_number' => ['nullable', 'string', 'max:20'],
+            'aadhar_path' => ['nullable', 'string', 'max:255'],
+            'pan_path' => ['nullable', 'string', 'max:255'],
+            'license_path' => ['nullable', 'string', 'max:255'],
+            'bank_account_name' => ['nullable', 'string', 'max:150'],
+            'bank_account_number' => ['nullable', 'string', 'max:50'],
+            'bank_ifsc' => ['nullable', 'string', 'max:20'],
+            'bank_upi_id' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'string'],
         ]);
 
@@ -119,6 +140,15 @@ class DeliveryBoyAdminController extends Controller
             'vehicle_type' => strtoupper($data['vehicle_type'] ?? 'MOTORCYCLE'),
             'vehicle_number' => $data['vehicle_number'] ?? null,
             'driving_license_number' => $data['license_number'] ?? null,
+            'aadhar_number' => $data['aadhar_number'] ?? null,
+            'pan_number' => $data['pan_number'] ?? null,
+            'aadhar_path' => $data['aadhar_path'] ?? null,
+            'pan_path' => $data['pan_path'] ?? null,
+            'license_path' => $data['license_path'] ?? null,
+            'bank_account_name' => $data['bank_account_name'] ?? null,
+            'bank_account_number' => $data['bank_account_number'] ?? null,
+            'bank_ifsc' => $data['bank_ifsc'] ?? null,
+            'bank_upi_id' => $data['bank_upi_id'] ?? null,
             'is_online' => false,
         ]);
 
@@ -133,7 +163,16 @@ class DeliveryBoyAdminController extends Controller
             'email' => ['nullable', 'email', 'max:150'],
             'vehicle_type' => ['nullable', 'string', 'max:30'],
             'vehicle_number' => ['nullable', 'string', 'max:30'],
-            'license_number' => ['nullable', 'string', 'max:50'],
+            'license_number' => ['required', 'string', 'max:50'],
+            'aadhar_number' => ['nullable', 'string', 'max:20'],
+            'pan_number' => ['nullable', 'string', 'max:20'],
+            'aadhar_path' => ['nullable', 'string', 'max:255'],
+            'pan_path' => ['nullable', 'string', 'max:255'],
+            'license_path' => ['nullable', 'string', 'max:255'],
+            'bank_account_name' => ['nullable', 'string', 'max:150'],
+            'bank_account_number' => ['nullable', 'string', 'max:50'],
+            'bank_ifsc' => ['nullable', 'string', 'max:20'],
+            'bank_upi_id' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'string'],
         ]);
 
@@ -142,7 +181,7 @@ class DeliveryBoyAdminController extends Controller
         $userUpdate = [];
         if (array_key_exists('name', $data)) $userUpdate['name'] = $data['name'];
         if (array_key_exists('mobile', $data)) $userUpdate['mobile'] = $data['mobile'];
-        if (! empty($data['email'])) $userUpdate['email'] = $data['email'];
+        if (array_key_exists('email', $data)) $userUpdate['email'] = $data['email'];
         if (! empty($data['status'])) {
             $userUpdate['status'] = strtoupper($data['status']) === 'ACTIVE' ? AccountStatus::ACTIVE : AccountStatus::SUSPENDED;
         }
@@ -154,6 +193,16 @@ class DeliveryBoyAdminController extends Controller
         if (! empty($data['vehicle_type'])) $profileUpdate['vehicle_type'] = strtoupper($data['vehicle_type']);
         if (array_key_exists('vehicle_number', $data)) $profileUpdate['vehicle_number'] = $data['vehicle_number'];
         if (array_key_exists('license_number', $data)) $profileUpdate['driving_license_number'] = $data['license_number'];
+        if (array_key_exists('aadhar_number', $data)) $profileUpdate['aadhar_number'] = $data['aadhar_number'];
+        if (array_key_exists('pan_number', $data)) $profileUpdate['pan_number'] = $data['pan_number'];
+        if (array_key_exists('aadhar_path', $data)) $profileUpdate['aadhar_path'] = $data['aadhar_path'];
+        if (array_key_exists('pan_path', $data)) $profileUpdate['pan_path'] = $data['pan_path'];
+        if (array_key_exists('license_path', $data)) $profileUpdate['license_path'] = $data['license_path'];
+        if (array_key_exists('bank_account_name', $data)) $profileUpdate['bank_account_name'] = $data['bank_account_name'];
+        if (array_key_exists('bank_account_number', $data)) $profileUpdate['bank_account_number'] = $data['bank_account_number'];
+        if (array_key_exists('bank_ifsc', $data)) $profileUpdate['bank_ifsc'] = $data['bank_ifsc'];
+        if (array_key_exists('bank_upi_id', $data)) $profileUpdate['bank_upi_id'] = $data['bank_upi_id'];
+        
         if ($profileUpdate) {
             $rider->deliveryProfile()->updateOrCreate(['user_id' => $rider->id], $profileUpdate);
         }
@@ -309,5 +358,107 @@ class DeliveryBoyAdminController extends Controller
     protected function statusLabel(User $u): string
     {
         return $u->status === AccountStatus::ACTIVE ? 'ACTIVE' : 'SUSPENDED';
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $rider = User::findOrFail($id);
+        $rider->deliveryProfile()?->delete();
+        $rider->delete();
+
+        return ApiResponse::success(null, 'Delivery boy deleted successfully.');
+    }
+
+    public function downloadIdCard(int $id)
+    {
+        $rider = User::with('deliveryProfile')->findOrFail($id);
+        $profile = $rider->deliveryProfile;
+
+        return response()->streamDownload(function () use ($rider, $profile) {
+            echo <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ID Card - {$rider->name}</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f1f5f9; }
+        .card { width: 320px; height: 480px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; display: flex; flex-direction: column; border: 1px solid #e2e8f0; }
+        .header { background: #2845D6; color: white; padding: 25px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+        .header p { margin: 5px 0 0 0; font-size: 10px; text-transform: uppercase; opacity: 0.8; letter-spacing: 1.5px; }
+        .body { flex: 1; padding: 25px 20px; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .avatar { width: 90px; height: 90px; border-radius: 50%; background: #2845D6; color: white; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; box-shadow: 0 4px 10px rgba(40, 69, 214, 0.2); margin-bottom: 20px; text-transform: uppercase; }
+        .name { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 5px; text-align: center; }
+        .role { font-size: 11px; font-weight: 700; color: #2845D6; text-transform: uppercase; letter-spacing: 1px; background: rgba(40, 69, 214, 0.1); padding: 4px 12px; border-radius: 9999px; margin-bottom: 25px; }
+        .details { width: 100%; display: flex; flex-direction: column; gap: 10px; font-size: 12px; color: #475569; }
+        .detail-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #e2e8f0; padding-bottom: 6px; }
+        .detail-row span:first-child { font-weight: 600; color: #94a3b8; }
+        .detail-row span:last-child { font-weight: 700; color: #334155; }
+        .footer { background: #0f172a; color: white; padding: 12px; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: 0.5px; }
+        @media print {
+            body { background: white; }
+            .card { box-shadow: none; border: 1px solid #000; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h1>DASTAK</h1>
+            <p>Delivery Partner</p>
+        </div>
+        <div class="body">
+            <div class="avatar">{$rider->name[0]}</div>
+            <div class="name">{$rider->name}</div>
+            <div class="role">RIDER</div>
+            <div class="details">
+                <div class="detail-row">
+                    <span>Rider ID</span>
+                    <span>#R-{$rider->id}</span>
+                </div>
+                <div class="detail-row">
+                    <span>Phone</span>
+                    <span>{$rider->mobile}</span>
+                </div>
+                <div class="detail-row">
+                    <span>Vehicle No</span>
+                    <span>{$profile?->vehicle_number}</span>
+                </div>
+                <div class="detail-row">
+                    <span>Aadhaar No</span>
+                    <span>{$profile?->aadhar_number}</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            DASTAK LOGISTICS
+        </div>
+    </div>
+    <script>window.onload = function() { window.print(); }</script>
+</body>
+</html>
+HTML;
+        }, "id_card_{$rider->id}.html", [
+            'Content-Type' => 'text/html',
+        ]);
+    }
+
+    public function uploadDocument(Request $request): JsonResponse
+    {
+        $request->validate([
+            'document' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf,webp', 'max:5120'],
+        ]);
+
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $path = $file->store('uploads/documents', 'public');
+            
+            return ApiResponse::success([
+                'path' => $path,
+                'url' => asset('storage/' . $path)
+            ], 'Document uploaded successfully.');
+        }
+
+        return ApiResponse::error('No file uploaded.', 400);
     }
 }

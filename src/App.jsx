@@ -14,6 +14,7 @@ import RestaurantDetails from './pages/restaurants/RestaurantDetails'
 import OrderList from './pages/orders/OrderList'
 import DeliveryBoyList from './pages/deliveryBoys/DeliveryBoyList'
 import DeliveryBoyDetails from './pages/deliveryBoys/DeliveryBoyDetails'
+import DeliveryBoyIdCard from './pages/deliveryBoys/DeliveryBoyIdCard'
 import CustomerList from './pages/customers/CustomerList'
 import CustomerDetails from './pages/customers/CustomerDetails'
 import FinanceDashboard from './pages/finance/FinanceDashboard'
@@ -51,6 +52,7 @@ export const App = () => {
                 <Route path="restaurants/:id" element={<RestaurantDetails />} />
                 <Route path="delivery-boys" element={<DeliveryBoyList />} />
                 <Route path="delivery-boys/:id" element={<DeliveryBoyDetails />} />
+                <Route path="delivery-boys/:id/id-card" element={<DeliveryBoyIdCard />} />
                 <Route path="customers" element={<CustomerList />} />
                 <Route path="customers/:id" element={<CustomerDetails />} />
                 <Route path="finance" element={<FinanceDashboard />} />

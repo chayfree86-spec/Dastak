@@ -2,8 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 
 export const useApi = (apiFn, params = null, options = {}) => {
   const { immediate = true, initialData = null, onSuccess, onError } = options
-  const [data, setData] = useState(initialData)
-  const [loading, setLoading] = useState(immediate && !initialData)
+  // NOTE: initialData is treated as a placeholder/type hint ONLY — it is never
+  // rendered. Data starts empty and `loading` is true so pages show a proper
+  // loading/empty state and then REAL data, instead of flashing demo/mock data.
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(immediate)
   const [error, setError] = useState(null)
   const [meta, setMeta] = useState(null)
 
@@ -20,8 +23,8 @@ export const useApi = (apiFn, params = null, options = {}) => {
   const paramsKey = JSON.stringify(params)
 
   const execute = useCallback(async (overrideParams) => {
-    // Only show loading if we don't have existing data
-    if (!optionsRef.current.initialData && !data) {
+    // Show loading while we have no data yet (keeps current data visible on refetch).
+    if (!data) {
       setLoading(true)
     }
     setError(null)
@@ -44,13 +47,8 @@ export const useApi = (apiFn, params = null, options = {}) => {
       return response
     } catch (err) {
       if (isMounted.current) {
-        // If initialData was provided, gracefully keep initialData without breaking table UI
-        if (optionsRef.current.initialData) {
-          setData(optionsRef.current.initialData)
-          setError(null)
-        } else {
-          setError(err)
-        }
+        // Never fall back to mock/placeholder data — surface a real error state.
+        setError(err)
         if (optionsRef.current.onError) {
           optionsRef.current.onError(err)
         }

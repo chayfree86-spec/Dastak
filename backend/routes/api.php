@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\Admin\SupportAdminController;
 use App\Http\Controllers\Api\V1\Admin\UserManagementController;
 use App\Http\Controllers\Api\V1\Admin\ZoneAdminController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\GeocodeController;
 use App\Http\Controllers\Api\V1\Customer\CartController;
 use App\Http\Controllers\Api\V1\Customer\CustomerOrderController;
 use App\Http\Controllers\Api\V1\Customer\CustomerPaymentController;
@@ -77,6 +78,11 @@ Route::prefix('v1')->group(function () {
     
     // Gateway Webhook
     Route::post('/payments/webhook', [PaymentWebhookController::class, 'handle']);
+
+    // Geolocation & Address Resolution Services
+    Route::get('/geocode/reverse', [GeocodeController::class, 'reverse']);
+    Route::get('/geocode/forward', [GeocodeController::class, 'forward']);
+    Route::get('/geocode/detect-ip', [GeocodeController::class, 'detectIpLocation']);
 
     // 2. Protected Routes (Sanctum Authenticated + Active Account Validation)
     Route::middleware(['auth:sanctum', CheckAccountStatus::class])->group(function () {
@@ -275,9 +281,12 @@ Route::prefix('v1')->group(function () {
 
                 // Delivery Fleet Management
                 Route::get('/delivery-boys', [DeliveryBoyAdminController::class, 'index']);
+                Route::post('/delivery-boys/upload-document', [DeliveryBoyAdminController::class, 'uploadDocument']);
                 Route::post('/delivery-boys', [DeliveryBoyAdminController::class, 'store']);
                 Route::get('/delivery-boys/{id}', [DeliveryBoyAdminController::class, 'show']);
                 Route::put('/delivery-boys/{id}', [DeliveryBoyAdminController::class, 'update']);
+                Route::delete('/delivery-boys/{id}', [DeliveryBoyAdminController::class, 'destroy']);
+                Route::get('/delivery-boys/{id}/id-card', [DeliveryBoyAdminController::class, 'downloadIdCard']);
                 Route::patch('/delivery-boys/{id}/status', [DeliveryBoyAdminController::class, 'updateStatus']);
                 Route::get('/delivery-boys/{id}/active-deliveries', [DeliveryBoyAdminController::class, 'activeDeliveries']);
                 Route::get('/delivery-boys/{id}/orders', [DeliveryBoyAdminController::class, 'orderHistory']);

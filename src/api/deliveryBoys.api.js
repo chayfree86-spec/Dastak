@@ -5,6 +5,13 @@ export const deliveryBoysApi = {
   getDeliveryBoyDetails: (id) => apiClient.get(`/admin/delivery-boys/${id}`),
   createDeliveryBoy: (data) => apiClient.post('/admin/delivery-boys', data),
   updateDeliveryBoy: (id, data) => apiClient.put(`/admin/delivery-boys/${id}`, data),
+  deleteDeliveryBoy: (id) => apiClient.delete(`/admin/delivery-boys/${id}`),
+  downloadIdCard: (id) => apiClient.get(`/admin/delivery-boys/${id}/id-card`, { responseType: 'blob' }),
+  uploadDocument: (formData) => apiClient.post('/admin/delivery-boys/upload-document', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
   toggleStatus: (id, statusData) => apiClient.patch(`/admin/delivery-boys/${id}/status`, statusData),
   getActiveDeliveries: (id) => apiClient.get(`/admin/delivery-boys/${id}/active-deliveries`),
   getOrderHistory: (id, params) => apiClient.get(`/admin/delivery-boys/${id}/orders`, { params }),

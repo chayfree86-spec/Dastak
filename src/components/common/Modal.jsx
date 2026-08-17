@@ -38,11 +38,11 @@ export const Modal = ({
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidth} bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-200`}
+        className={`relative w-full ${maxWidth} bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-visible z-10 animate-in fade-in zoom-in-95 duration-200`}
       >
         {/* Header */}
         {(title || showClose) && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/60">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/60 rounded-t-2xl">
             <div>
               {title && <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{title}</h3>}
               {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}

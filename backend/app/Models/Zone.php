@@ -34,7 +34,14 @@ class Zone extends Model
     {
         static::creating(function ($zone) {
             if (empty($zone->slug)) {
-                $zone->slug = Str::slug($zone->name);
+                $base = Str::slug($zone->name ?: 'zone');
+                $slug = $base;
+                $i = 1;
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = "{$base}-{$i}";
+                    $i++;
+                }
+                $zone->slug = $slug;
             }
         });
     }

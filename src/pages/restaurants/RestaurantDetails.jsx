@@ -23,6 +23,11 @@ import {
   ToggleLeft,
   ToggleRight,
   Edit2,
+  Search,
+  Box,
+  RotateCw,
+  RotateCcw,
+  Layers,
 } from 'lucide-react'
 import restaurantsApi from '../../api/restaurants.api'
 import { useApi } from '../../hooks/useApi'
@@ -33,11 +38,13 @@ import Button from '../../components/common/Button'
 import DataTable from '../../components/common/DataTable'
 import Switch from '../../components/common/Switch'
 import Input from '../../components/common/Input'
-import AmountInput from '../../components/common/AmountInput'
-import CustomSelect from '../../components/common/CustomSelect'
+import Modal from '../../components/common/Modal'
+import AddressAutocomplete from '../../components/common/AddressAutocomplete'
 import RestaurantFormModal from './RestaurantFormModal'
 import MenuManager from './MenuManager'
 import { useToast } from '../../context/ToastContext'
+import { reverseGeocodeCoordinates, forwardGeocodeAddress, detectCurrentLocationWithFallback } from '../../utils/geocoding'
+import { loadGoogleMaps } from '../../utils/googleMapsLoader'
 
 export const RestaurantDetails = () => {
   const { id } = useParams()
@@ -45,6 +52,11 @@ export const RestaurantDetails = () => {
   const toast = useToast()
   const [activeTab, setActiveTab] = useState('overview')
   const [editModalOpen, setEditModalOpen] = useState(false)
+  const [addressModalOpen, setAddressModalOpen] = useState(false)
+  const [editAddressText, setEditAddressText] = useState('')
+  const [editCityText, setEditCityText] = useState('Kanpur')
+  const [editRadiusText, setEditRadiusText] = useState('10')
+  const [addressSaving, setAddressSaving] = useState(false)
 
   const { data: settlements, loading: settlementsLoading, retry: retrySettlements } = useApi(
     () => restaurantsApi.getRestaurantSettlements(id),
@@ -52,34 +64,10 @@ export const RestaurantDetails = () => {
     { initialData: [] }
   )
 
-  const { data: restaurant, loading, error, retry } = useApi(
+  const { data: restaurant, loading, error, retry, setData: setRestaurantData } = useApi(
     () => restaurantsApi.getRestaurantDetails(id),
     [id],
-    {
-      initialData: {
-        id: id || '1',
-        name: 'Biryani Central',
-        owner_name: 'Rajesh Sharma',
-        mobile: '9876543210',
-        email: 'contact@biryanicentral.in',
-        address: 'Plot 42, Sector 18, Commercial Belt, Near Metro Station',
-        city: 'Delhi NCR',
-        rating: 4.6,
-        total_reviews: 320,
-        status: 'ACTIVE',
-        is_online: true,
-        commission: 15,
-        settlement_cycle: 'WEEKLY',
-        min_order: 150.00,
-        delivery_radius_km: 8,
-        timing: '11:00 AM - 11:30 PM',
-        weekly_off: 'None (Open All Days)',
-        is_veg_only: false,
-        total_orders: 1420,
-        lifetime_sales: 789400.00,
-        pending_settlement: 24500.00,
-      },
-    }
+    { initialData: null }
   )
 
   const { data: menuData, loading: menuLoading } = useApi(
@@ -143,10 +131,12 @@ export const RestaurantDetails = () => {
   const [saveHoursLoading, setSaveHoursLoading] = useState(false)
   const [saveLoginLoading, setSaveLoginLoading] = useState(false)
 
-  // Map States
+  // Coordinate and map state
   const [mapRadius, setMapRadius] = useState(7)
   const [mapLat, setMapLat] = useState(26.8467)
   const [mapLng, setMapLng] = useState(80.9462)
+  const [mapDetectedAddress, setMapDetectedAddress] = useState('')
+  const [mapDetectedCity, setMapDetectedCity] = useState('')
   const [mapModified, setMapModified] = useState(false)
   const [mapSaveLoading, setMapSaveLoading] = useState(false)
 
@@ -161,21 +151,38 @@ export const RestaurantDetails = () => {
       setMapRadius(restaurant.delivery_radius_km ?? 7)
       setMapLat(Number(restaurant.latitude) || 26.8467)
       setMapLng(Number(restaurant.longitude) || 80.9462)
+      setMapDetectedAddress('')
+      setMapDetectedCity('')
     }
   }, [restaurant])
 
   // Fit the map to EXACTLY the delivery radius circle (no extra surrounding map),
-  // and lock panning/zoom-out so only the coverage area stays visible.
+  // and lock zoom-out so only the coverage area stays visible (zoom IN still free).
   const fitToCircle = () => {
     const map = mapRef.current
     const circle = circleRef.current
-    if (!map || !circle) return
-    const bounds = circle.getBounds()
-    map.setMinZoom(1)
-    map.setMaxBounds(null)
-    map.fitBounds(bounds, { padding: [8, 8] })
-    map.setMaxBounds(bounds.pad(0.2))
-    map.setMinZoom(map.getBoundsZoom(bounds))
+    const gmaps = window.google?.maps
+    if (!map || !circle || !gmaps) return
+    try {
+      const bounds = circle.getBounds()
+      if (!bounds) return
+
+      map.setOptions({ minZoom: null, restriction: null })
+      map.fitBounds(bounds)
+
+      gmaps.event.addListenerOnce(map, 'idle', () => {
+        const fitZoom = map.getZoom()
+        if (Number.isFinite(fitZoom)) {
+          map.setOptions({
+            minZoom: Math.max(2, Math.min(fitZoom, 18)),
+            maxZoom: 20,
+            restriction: { latLngBounds: bounds, strictBounds: false },
+          })
+        }
+      })
+    } catch (e) {
+      // Never let a map-fit error blank the page.
+    }
   }
 
   // Synchronize radius changes from range slider
@@ -199,20 +206,26 @@ export const RestaurantDetails = () => {
     }
     setGeoLoading(true)
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`)
-      const data = await res.json()
-      if (!data || data.length === 0) {
+      const data = await forwardGeocodeAddress(query)
+      if (!data) {
         toast.warning('Not Found', 'Could not locate that address on the map.')
         return
       }
-      const lat = Number(data[0].lat)
-      const lng = Number(data[0].lon)
+      const lat = data.latitude
+      const lng = data.longitude
       setMapLat(lat)
       setMapLng(lng)
       setMapModified(true)
-      if (markerRef.current) markerRef.current.setLatLng([lat, lng])
-      if (circleRef.current) circleRef.current.setLatLng([lat, lng])
+      if (markerRef.current) markerRef.current.setPosition({ lat, lng })
+      if (circleRef.current) circleRef.current.setCenter({ lat, lng })
       fitToCircle()
+
+      // Reverse geocode to get clean address
+      const geo = await reverseGeocodeCoordinates(lat, lng)
+      if (geo && geo.formattedAddress) {
+        setMapDetectedAddress(geo.formattedAddress)
+        setMapDetectedCity(geo.city)
+      }
       toast.success('Location Fetched', 'Pin moved to the address location.')
     } catch (err) {
       toast.error('Failed', 'Geocoding service is unreachable right now.')
@@ -221,33 +234,105 @@ export const RestaurantDetails = () => {
     }
   }
 
-  // Auto-detect the device's current GPS location and drop the pin there.
+  // Auto-detect the device's current GPS location and reverse-geocode address
   const [locating, setLocating] = useState(false)
-  const detectCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast.warning('Not Supported', 'Location detection is not available in this browser.')
-      return
-    }
-    setLocating(true)
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude
-        const lng = pos.coords.longitude
-        setMapLat(lat)
-        setMapLng(lng)
+  const [pinResolving, setPinResolving] = useState(false)
+
+  // Resolve address directly from current map pin coordinates
+  const resolveAddressFromMapPin = async (customLat, customLng) => {
+    const lat = customLat ?? mapLat
+    const lng = customLng ?? mapLng
+    setPinResolving(true)
+    try {
+      const geo = await reverseGeocodeCoordinates(lat, lng)
+      if (geo && geo.formattedAddress) {
+        setMapDetectedAddress(geo.formattedAddress)
+        setMapDetectedCity(geo.city)
         setMapModified(true)
-        if (markerRef.current) markerRef.current.setLatLng([lat, lng])
-        if (circleRef.current) circleRef.current.setLatLng([lat, lng])
+        toast.success('Address Resolved from Pin', `${geo.formattedAddress} (${geo.city})`)
+      } else {
+        toast.warning('Unable to Resolve', 'Could not get postal address for these coordinates.')
+      }
+    } catch (err) {
+      toast.error('Resolution Error', 'Unable to resolve address.')
+    } finally {
+      setPinResolving(false)
+    }
+  }
+
+  const detectCurrentLocation = async () => {
+    setLocating(true)
+    try {
+      const loc = await detectCurrentLocationWithFallback({ gpsOnly: true })
+      if (loc && loc.latitude && loc.longitude) {
+        setMapLat(loc.latitude)
+        setMapLng(loc.longitude)
+        setMapModified(true)
+        if (markerRef.current) markerRef.current.setPosition({ lat: loc.latitude, lng: loc.longitude })
+        if (circleRef.current) circleRef.current.setCenter({ lat: loc.latitude, lng: loc.longitude })
         fitToCircle()
-        toast.success('Location Detected', 'Pin moved to your current location.')
-        setLocating(false)
-      },
-      (err) => {
-        toast.error('Failed', err.code === 1 ? 'Location permission denied. Please allow location access.' : 'Could not detect current location.')
-        setLocating(false)
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    )
+
+        setMapDetectedAddress(loc.formattedAddress)
+        setMapDetectedCity(loc.city)
+        toast.success(
+          'GPS Location Detected',
+          `${loc.formattedAddress} (${loc.city})`
+        )
+      } else {
+        toast.warning('Unable to Detect', 'Could not detect GPS position. You can drag the pin on map.')
+      }
+    } catch (err) {
+      console.error('Detection error:', err)
+      toast.error('GPS Error', err?.message || 'Unable to auto-detect GPS location.')
+    } finally {
+      setLocating(false)
+    }
+  }
+
+  const handleMapSearchSelect = (item) => {
+    if (!item) return
+    const lat = item.latitude
+    const lng = item.longitude
+    setMapLat(lat)
+    setMapLng(lng)
+    setMapModified(true)
+    if (markerRef.current) markerRef.current.setPosition({ lat, lng })
+    if (circleRef.current) circleRef.current.setCenter({ lat, lng })
+    fitToCircle()
+
+    setMapDetectedAddress(item.formattedAddress || item.displayName)
+    if (item.city) setMapDetectedCity(item.city)
+    toast.success('Location Selected', `Pin moved to ${item.formattedAddress || item.displayName}`)
+  }
+
+  // 3D Map View State & Controls
+  const [is3DMode, setIs3DMode] = useState(false)
+  const [mapHeading, setMapHeading] = useState(0)
+
+  const toggle3DMode = () => {
+    if (!mapRef.current) return
+    const nextState = !is3DMode
+    setIs3DMode(nextState)
+
+    if (nextState) {
+      mapRef.current.setMapTypeId('hybrid')
+      mapRef.current.setTilt(45)
+      mapRef.current.setHeading(mapHeading)
+      toast.success('3D View Enabled', '3D Satellite & Building perspective active.')
+    } else {
+      mapRef.current.setMapTypeId('roadmap')
+      mapRef.current.setTilt(0)
+      mapRef.current.setHeading(0)
+      setMapHeading(0)
+      toast.success('2D View Enabled', 'Standard roadmap view active.')
+    }
+  }
+
+  const rotate3D = (direction = 1) => {
+    if (!mapRef.current) return
+    const newHeading = (mapHeading + direction * 45 + 360) % 360
+    setMapHeading(newHeading)
+    mapRef.current.setHeading(newHeading)
   }
 
   // Fullscreen view of the coverage map.
@@ -263,12 +348,15 @@ export const RestaurantDetails = () => {
     }
   }
 
-  // On entering/leaving fullscreen, let Leaflet recompute its size and re-fit the circle.
+  // On entering/leaving fullscreen, let Google Maps recompute its size and re-fit the circle.
   useEffect(() => {
     const onFsChange = () => {
       setTimeout(() => {
-        if (mapRef.current) {
-          mapRef.current.invalidateSize()
+        if (mapRef.current && window.google?.maps) {
+          window.google.maps.event.trigger(mapRef.current, 'resize')
+          if (circleRef.current) {
+            mapRef.current.setCenter(circleRef.current.getCenter())
+          }
           fitToCircle()
         }
       }, 180)
@@ -281,17 +369,127 @@ export const RestaurantDetails = () => {
     }
   }, [])
 
-  // Save map settings
+  // Open address modal with fresh data
+  const handleOpenAddressModal = () => {
+    setEditAddressText(restaurant?.address && restaurant?.address !== 'N/A' ? restaurant.address : '')
+    setEditCityText(restaurant?.city || 'Kanpur')
+    setEditRadiusText(String(restaurant?.delivery_radius_km || 10))
+    setAddressModalOpen(true)
+  }
+
+  const [addressLocating, setAddressLocating] = useState(false)
+  const handleLocateAddressInModal = async () => {
+    if (!editAddressText.trim()) return
+    setAddressLocating(true)
+    try {
+      const query = [editAddressText, editCityText].filter(Boolean).join(', ')
+      const data = await forwardGeocodeAddress(query)
+      if (data && data.latitude && data.longitude) {
+        setMapLat(data.latitude)
+        setMapLng(data.longitude)
+        setMapModified(true)
+        if (data.city) setEditCityText(data.city)
+        if (data.formattedAddress) setEditAddressText(data.formattedAddress)
+        if (markerRef.current) markerRef.current.setPosition({ lat: data.latitude, lng: data.longitude })
+        if (circleRef.current) circleRef.current.setCenter({ lat: data.latitude, lng: data.longitude })
+        toast.success('Address Located on Map', `${data.formattedAddress || query}`)
+      } else {
+        toast.warning('Not Found', 'Could not find coordinates for this address on map.')
+      }
+    } catch (e) {
+      toast.error('Search Error', 'Unable to geocode address on map.')
+    } finally {
+      setAddressLocating(false)
+    }
+  }
+
+  // Populate address modal fields directly from current map pin
+  const handleAutoPopulateFromPin = async () => {
+    setPinResolving(true)
+    try {
+      const geo = await reverseGeocodeCoordinates(mapLat, mapLng)
+      if (geo && geo.formattedAddress) {
+        setEditAddressText(geo.formattedAddress)
+        if (geo.city) setEditCityText(geo.city)
+        toast.success('Address Resolved from Pin', `${geo.formattedAddress} (${geo.city})`)
+      } else {
+        toast.warning('Unable to Resolve', 'Could not get postal address for these coordinates.')
+      }
+    } catch (err) {
+      toast.error('Resolution Error', 'Unable to resolve address.')
+    } finally {
+      setPinResolving(false)
+    }
+  }
+
+  // Save address from dedicated modal
+  const handleSaveAddressModal = async (e) => {
+    if (e) e.preventDefault()
+    if (!editAddressText.trim()) {
+      toast.warning('Address Required', 'Please enter restaurant full address.')
+      return
+    }
+    setAddressSaving(true)
+    try {
+      const payload = {
+        address: editAddressText.trim(),
+        city: editCityText.trim() || 'Kanpur',
+        delivery_radius_km: Number(editRadiusText) || 10,
+        latitude: mapLat,
+        longitude: mapLng,
+      }
+      const res = await restaurantsApi.updateRestaurant(id, payload)
+      const updated = res?.data || res
+      if (updated) {
+        setRestaurantData(updated)
+      }
+      toast.success('Operating Specs Updated', 'Address and location updated successfully.')
+      setAddressModalOpen(false)
+      retry()
+    } catch (err) {
+      toast.error('Update Failed', err.message || 'Unable to update address.')
+    } finally {
+      setAddressSaving(false)
+    }
+  }
+
+  // Save map settings and auto-detected address
   const handleSaveMapSettings = async () => {
     setMapSaveLoading(true)
     try {
-      await restaurantsApi.updateRestaurant(id, {
+      let finalAddress = mapDetectedAddress
+      let finalCity = mapDetectedCity
+
+      // If user moved the pin or has pin coordinates, auto-resolve address if not already resolved!
+      if (!finalAddress) {
+        const geo = await reverseGeocodeCoordinates(mapLat, mapLng)
+        if (geo && geo.formattedAddress) {
+          finalAddress = geo.formattedAddress
+          finalCity = geo.city
+        }
+      }
+
+      const payload = {
         latitude: mapLat,
         longitude: mapLng,
-        delivery_radius_km: mapRadius
-      })
-      toast.success('Delivery Area Updated', 'Restaurant location and delivery radius saved successfully.')
+        delivery_radius_km: mapRadius,
+      }
+      if (finalAddress) {
+        payload.address = finalAddress
+      }
+      if (finalCity) {
+        payload.city = finalCity
+      }
+
+      const res = await restaurantsApi.updateRestaurant(id, payload)
+      const updated = res?.data || res
+      if (updated) {
+        setRestaurantData(updated)
+      }
+      toast.success('Operating Specs & Address Updated', `Saved address: ${finalAddress || restaurant?.address}`)
       setMapModified(false)
+      setMapDetectedAddress('')
+      setMapDetectedCity('')
       retry()
     } catch (err) {
       toast.error('Failed', err.message || 'Unable to save delivery area.')
@@ -300,101 +498,103 @@ export const RestaurantDetails = () => {
     }
   }
 
-  // Leaflet map initialization
+  // Google Maps initialization
+  const [mapLoadError, setMapLoadError] = useState(null)
+
   useEffect(() => {
     if (activeTab !== 'overview' || !restaurant) return
 
     let isMounted = true
+    let dragListener = null
 
-    const initMap = () => {
-      if (!window.L) return
+    const initMap = async () => {
+      let gmaps
+      try {
+        gmaps = await loadGoogleMaps()
+      } catch (err) {
+        if (isMounted) setMapLoadError(err.message || 'Failed to load Google Maps.')
+        return
+      }
+      if (!isMounted) return
+      setMapLoadError(null)
 
       const lat = Number(restaurant.latitude) || 26.8467
       const lng = Number(restaurant.longitude) || 80.9462
       const radiusKm = restaurant.delivery_radius_km ?? 7
 
       if (mapRef.current) {
-        mapRef.current.setView([lat, lng], 12)
-        if (markerRef.current) {
-          markerRef.current.setLatLng([lat, lng])
-        }
+        mapRef.current.setCenter({ lat, lng })
+        if (markerRef.current) markerRef.current.setPosition({ lat, lng })
         if (circleRef.current) {
-          circleRef.current.setLatLng([lat, lng])
+          circleRef.current.setCenter({ lat, lng })
           circleRef.current.setRadius(radiusKm * 1000)
         }
         fitToCircle()
         return
       }
 
-      const map = window.L.map('delivery-map').setView([lat, lng], 12)
+      const mapDiv = document.getElementById('delivery-map')
+      if (!mapDiv) return
+
+      const map = new gmaps.Map(mapDiv, {
+        center: { lat, lng },
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false, // custom fullscreen button is used instead
+        clickableIcons: false,
+      })
       mapRef.current = map
 
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map)
-
-      const customIcon = window.L.divIcon({
-        html: `
-          <div class="flex items-center justify-center w-8 h-8 rounded-full bg-[#2845D6]/20 border-2 border-[#2845D6] shadow-lg animate-pulse">
-            <div class="w-3.5 h-3.5 rounded-full bg-[#2845D6] border-2 border-white"></div>
-          </div>
-        `,
-        className: 'custom-div-icon',
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
+      const marker = new gmaps.Marker({
+        position: { lat, lng },
+        map,
+        draggable: true,
       })
-
-      const marker = window.L.marker([lat, lng], { draggable: true, icon: customIcon }).addTo(map)
       markerRef.current = marker
 
-      const circle = window.L.circle([lat, lng], {
-        color: '#2845D6',
+      const circle = new gmaps.Circle({
+        center: { lat, lng },
+        radius: radiusKm * 1000,
+        map,
+        strokeColor: '#2845D6',
+        strokeWeight: 2,
         fillColor: '#2845D6',
-        fillOpacity: 0.12,
-        radius: radiusKm * 1000
-      }).addTo(map)
+        fillOpacity: 0.15,
+      })
       circleRef.current = circle
 
-      // Show only the coverage circle — no extra map around it.
-      fitToCircle()
+      gmaps.event.addListenerOnce(map, 'idle', () => fitToCircle())
 
-      marker.on('dragend', () => {
-        const position = marker.getLatLng()
-        setMapLat(position.lat)
-        setMapLng(position.lng)
-        circle.setLatLng(position)
+      dragListener = marker.addListener('dragend', async () => {
+        const position = marker.getPosition()
+        const newLat = position.lat()
+        const newLng = position.lng()
+        setMapLat(newLat)
+        setMapLng(newLng)
+        circle.setCenter({ lat: newLat, lng: newLng })
         setMapModified(true)
         fitToCircle()
+
+        // Auto reverse-geocode on pin drag
+        const geo = await reverseGeocodeCoordinates(newLat, newLng)
+        if (geo && geo.formattedAddress) {
+          setMapDetectedAddress(geo.formattedAddress)
+          setMapDetectedCity(geo.city)
+          toast.success('Address Detected for Pin', `${geo.formattedAddress} (${geo.city})`)
+        }
       })
     }
 
-    if (!window.L) {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-      document.head.appendChild(link)
-
-      const script = document.createElement('script')
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-      script.onload = () => {
-        if (isMounted) initMap()
-      }
-      document.body.appendChild(script)
-    } else {
-      const timer = setTimeout(() => {
-        if (isMounted) initMap()
-      }, 100)
-      return () => clearTimeout(timer)
-    }
+    initMap()
 
     return () => {
       isMounted = false
-      if (mapRef.current) {
-        mapRef.current.remove()
-        mapRef.current = null
-        markerRef.current = null
-        circleRef.current = null
-      }
+      if (dragListener) window.google?.maps?.event?.removeListener(dragListener)
+      // Null the refs so re-mounting the tab creates a fresh map against the new DOM node.
+      mapRef.current = null
+      markerRef.current = null
+      circleRef.current = null
     }
   }, [activeTab, restaurant])
 
@@ -539,6 +739,15 @@ export const RestaurantDetails = () => {
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ]
 
+  if (loading && !restaurant) {
+    return (
+      <div className="py-24 flex flex-col items-center justify-center space-y-3">
+        <div className="w-10 h-10 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin" />
+        <p className="text-xs font-semibold text-slate-500">Loading restaurant details...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Back button */}
@@ -636,11 +845,25 @@ export const RestaurantDetails = () => {
             </div>
 
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Operating Specs</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Operating Specs</h4>
+                <button
+                  type="button"
+                  onClick={handleOpenAddressModal}
+                  className="flex items-center gap-1 text-[11px] font-bold text-[#2845D6] dark:text-blue-400 hover:underline cursor-pointer"
+                >
+                  <Edit2 className="w-3 h-3" />
+                  <span>Edit Address</span>
+                </button>
+              </div>
               <div className="space-y-2.5 text-xs">
                 <div>
                   <span className="text-slate-400 block">Address:</span>
-                  <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{restaurant?.address}</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{restaurant?.address || 'Address not set'}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">City:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{restaurant?.city || 'Kanpur'}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Operating Hours:</span>
@@ -674,14 +897,23 @@ export const RestaurantDetails = () => {
 
           {/* Delivery Area Map */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#2845D6]" />
-                Delivery Area Coverage Map
-              </h3>
-              <p className="text-[11px] text-slate-400">
-                Shows where this restaurant can deliver. Adjust the radius slider or drag the marker to set custom location.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-[#2845D6]" />
+                  Delivery Area Coverage Map
+                </h3>
+                <p className="text-[11px] text-slate-400">
+                  Shows where this restaurant can deliver. Adjust the radius slider or drag the marker to set custom location.
+                </p>
+              </div>
+              <div className="w-full sm:w-72">
+                <AddressAutocomplete
+                  placeholder="Search location to move pin..."
+                  onSelect={handleMapSearchSelect}
+                  className="!py-1.5 text-xs"
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
@@ -720,32 +952,51 @@ export const RestaurantDetails = () => {
                         <span className="font-bold text-slate-850 dark:text-slate-200">{mapLng.toFixed(6)}</span>
                       </div>
                     </div>
+                    {mapDetectedAddress && (
+                      <div className="p-2.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900 text-[11px] space-y-1">
+                        <span className="text-[10px] font-bold text-[#2845D6] dark:text-blue-400 uppercase tracking-wider block">Auto-Detected Address</span>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{mapDetectedAddress}</p>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 block">{mapDetectedCity}</span>
+                      </div>
+                    )}
                     <span className="text-[10px] text-slate-400 leading-normal block">
-                      *Drag the glowing blue marker to adjust restaurant's physical center coordinate.
+                      *Drag the marker or click auto-detect to adjust location & reverse-geocode address.
                     </span>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    icon={MapPin}
-                    className="w-full"
-                    onClick={fetchLocationFromAddress}
-                    loading={geoLoading}
-                  >
-                    {geoLoading ? 'Locating…' : 'Fetch from Address'}
-                  </Button>
+                  <div className="space-y-2 pt-1">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={Navigation}
+                      className="w-full bg-[#2845D6] hover:bg-[#1f37b0] text-white font-bold"
+                      onClick={detectCurrentLocation}
+                      loading={locating}
+                    >
+                      {locating ? 'Detecting GPS…' : 'Auto-Detect Current GPS'}
+                    </Button>
 
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    icon={Navigation}
-                    className="w-full"
-                    onClick={detectCurrentLocation}
-                    loading={locating}
-                  >
-                    {locating ? 'Detecting…' : 'Auto-Detect Current Location'}
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      icon={MapPin}
+                      className="w-full border-blue-200 text-[#2845D6] hover:bg-blue-50 dark:hover:bg-blue-950 font-bold"
+                      onClick={() => resolveAddressFromMapPin(mapLat, mapLng)}
+                      loading={pinResolving}
+                    >
+                      {pinResolving ? 'Resolving…' : 'Detect Address from Map Pin'}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-slate-600 dark:text-slate-300"
+                      onClick={fetchLocationFromAddress}
+                      loading={geoLoading}
+                    >
+                      {geoLoading ? 'Locating…' : 'Find Pin from Saved Address'}
+                    </Button>
+                  </div>
                 </div>
 
                 {mapModified && (
@@ -753,10 +1004,10 @@ export const RestaurantDetails = () => {
                     onClick={handleSaveMapSettings}
                     variant="primary"
                     size="sm"
-                    className="w-full"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md animate-bounce"
                     loading={mapSaveLoading}
                   >
-                    Save Delivery Area
+                    Save Delivery Area & Address
                   </Button>
                 )}
               </div>
@@ -767,14 +1018,60 @@ export const RestaurantDetails = () => {
                 className="lg:col-span-3 h-[320px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 relative bg-slate-50 dark:bg-slate-900"
               >
                 <div id="delivery-map" className="w-full h-full z-0" />
-                <button
-                  type="button"
-                  onClick={toggleFullscreen}
-                  title="View map in fullscreen"
-                  className="absolute top-2 right-2 z-[1000] p-2 rounded-lg bg-white/95 dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-200 hover:text-[#2845D6] hover:bg-white transition-colors"
-                >
-                  <Maximize2 className="w-4 h-4" />
-                </button>
+                {mapLoadError && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-slate-50 dark:bg-slate-900 text-center p-4">
+                    <MapPin className="w-6 h-6 text-slate-300" />
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Map failed to load</p>
+                    <p className="text-[11px] text-slate-400 max-w-xs">{mapLoadError}</p>
+                  </div>
+                )}
+                {/* Map Overlay Controls */}
+                <div className="absolute top-2 right-2 z-[1000] flex items-center gap-1.5 select-none">
+                  {is3DMode && (
+                    <div className="flex items-center gap-1 bg-white/95 dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 rounded-lg p-0.5 shadow-md">
+                      <button
+                        type="button"
+                        onClick={() => rotate3D(-1)}
+                        title="Rotate View Left (-45°)"
+                        className="p-1.5 rounded-md text-slate-600 dark:text-slate-200 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="text-[10px] font-mono font-bold px-1 text-slate-500">{mapHeading}°</span>
+                      <button
+                        type="button"
+                        onClick={() => rotate3D(1)}
+                        title="Rotate View Right (+45°)"
+                        className="p-1.5 rounded-md text-slate-600 dark:text-slate-200 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                      >
+                        <RotateCw className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={toggle3DMode}
+                    title={is3DMode ? "Switch to 2D Roadmap View" : "Enable 3D Aerial Satellite View"}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border shadow-md font-bold text-xs transition-all cursor-pointer ${
+                      is3DMode
+                        ? 'bg-[#2845D6] text-white border-[#2845D6] ring-2 ring-[#2845D6]/30 shadow-blue-500/20'
+                        : 'bg-white/95 dark:bg-slate-800/95 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2845D6] hover:bg-white'
+                    }`}
+                  >
+                    <Box className={`w-3.5 h-3.5 ${is3DMode ? 'animate-pulse' : ''}`} />
+                    <span>{is3DMode ? '3D Active' : '3D View'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    title="View map in fullscreen"
+                    className="p-2 rounded-lg bg-white/95 dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-200 hover:text-[#2845D6] hover:bg-white transition-colors cursor-pointer"
+                  >
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1145,13 +1442,112 @@ export const RestaurantDetails = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
+      {/* Edit Full Profile Modal */}
       <RestaurantFormModal
         isOpen={editModalOpen}
         restaurant={restaurant}
         onClose={() => setEditModalOpen(false)}
         onSaved={retry}
       />
+
+      {/* Quick Edit Operating Address & Specs Modal */}
+      <Modal
+        isOpen={addressModalOpen}
+        onClose={() => setAddressModalOpen(false)}
+        title="Update Operating Address & Specs"
+        subtitle="Manage restaurant physical address, operating city, and delivery radius."
+        maxWidth="max-w-lg"
+      >
+        <form onSubmit={handleSaveAddressModal} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+              Full Physical Address
+            </label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleLocateAddressInModal}
+                disabled={addressLocating || !editAddressText.trim()}
+                className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+              >
+                <Search className={`w-3 h-3 ${addressLocating ? 'animate-spin' : ''}`} />
+                <span>{addressLocating ? 'Locating...' : 'Locate on Map'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleAutoPopulateFromPin}
+                disabled={pinResolving}
+                className="text-[11px] font-bold text-[#2845D6] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+              >
+                <Navigation className={`w-3 h-3 ${pinResolving ? 'animate-spin' : ''}`} />
+                <span>{pinResolving ? 'Resolving...' : 'Auto-Fill from Map Pin'}</span>
+              </button>
+            </div>
+          </div>
+
+          <AddressAutocomplete
+            placeholder="Type address or landmark to auto-suggest (e.g. Swaroop Nagar, Kanpur)"
+            value={editAddressText}
+            onChange={(e) => setEditAddressText(e.target.value)}
+            onSelect={(item) => {
+              if (!item) return
+              setEditAddressText(item.formattedAddress || item.displayName)
+              if (item.city) setEditCityText(item.city)
+              if (item.latitude && item.longitude) {
+                setMapLat(item.latitude)
+                setMapLng(item.longitude)
+                setMapModified(true)
+                if (markerRef.current) markerRef.current.setPosition({ lat: item.latitude, lng: item.longitude })
+                if (circleRef.current) circleRef.current.setCenter({ lat: item.latitude, lng: item.longitude })
+              }
+            }}
+            required
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="City"
+              placeholder="e.g. Lalganj"
+              value={editCityText}
+              onChange={(e) => setEditCityText(e.target.value)}
+              required
+            />
+            <Input
+              label="Delivery Radius (KM)"
+              type="number"
+              min="1"
+              max="50"
+              placeholder="10"
+              value={editRadiusText}
+              onChange={(e) => setEditRadiusText(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] text-slate-500 font-mono flex items-center justify-between">
+            <span>Center Coordinates:</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200">{mapLat.toFixed(6)}, {mapLng.toFixed(6)}</span>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setAddressModalOpen(false)}
+              disabled={addressSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={addressSaving}
+            >
+              Save Address & Specs
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }
