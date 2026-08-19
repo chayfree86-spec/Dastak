@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, HelpCircle, RefreshCw, Eye, MessageSquare, AlertCircle } from 'lucide-react'
 import supportApi from '../../api/support.api'
 import { useApi } from '../../hooks/useApi'
@@ -15,44 +15,17 @@ export const SupportTickets = () => {
   const [search, setSearch] = useState('')
   const [selectedTicket, setSelectedTicket] = useState(null)
 
-  const { data, loading, error, retry } = useApi(
+  const { data, loading, error, retry, silentRefresh } = useApi(
     () => supportApi.getTickets({ status: statusFilter !== 'ALL' ? statusFilter : undefined, search }),
-    [statusFilter, search],
-    {
-      initialData: [
-        {
-          id: 'TCK-201',
-          customer_name: 'Aarav Sharma',
-          order_id: 'D4829',
-          subject: 'Item Missing in Delivered Package',
-          message: 'I ordered 2 Hyderabadi Dum Biryanis, but the package only had 1 container.',
-          status: 'OPEN',
-          created_at: new Date(Date.now() - 45 * 60000).toISOString(),
-          admin_reply: null,
-        },
-        {
-          id: 'TCK-200',
-          customer_name: 'Pooja Verma',
-          order_id: 'D4810',
-          subject: 'Delayed Delivery & Cold Food',
-          message: 'The delivery rider arrived 40 minutes late.',
-          status: 'IN_PROGRESS',
-          created_at: new Date(Date.now() - 120 * 60000).toISOString(),
-          admin_reply: 'We have initiated a coupon credit to compensate for the delay.',
-        },
-        {
-          id: 'TCK-198',
-          customer_name: 'Rohit Gupta',
-          order_id: null,
-          subject: 'App Location Pinning Issue',
-          message: 'The delivery map is unable to detect my exact society tower.',
-          status: 'RESOLVED',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          admin_reply: 'Geo-coordinates updated for your building tower.',
-        },
-      ],
-    }
+    [statusFilter, search]
   )
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      silentRefresh()
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [silentRefresh])
 
   const tabs = [
     { id: 'ALL', label: 'All Tickets' },
@@ -116,33 +89,30 @@ export const SupportTickets = () => {
             e.stopPropagation()
             setSelectedTicket(row)
           }}
-        >
-          Reply
-        </Button>
+          title="Reply to Ticket"
+          className="w-8 h-8 p-0 flex items-center justify-center"
+        />
       ),
     },
   ]
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Customer Support & Grievances
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Resolve customer complaints, order discrepancies, and partner queries.
-          </p>
-        </div>
-
-        <Button variant="outline" size="sm" icon={RefreshCw} onClick={retry}>
-          Refresh Queue
-        </Button>
+    <div className="space-y-4 sm:space-y-5">
+      {/* Header */}
+      <div>
+        <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+          Customer Support & Grievances
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Resolve complaints, order discrepancies & customer queries.
+        </p>
       </div>
 
+      {/* Tabs */}
       <Tabs tabs={tabs} activeTab={statusFilter} onChange={setStatusFilter} />
 
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-3">
+      {/* Search Input */}
+      <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -155,16 +125,88 @@ export const SupportTickets = () => {
         </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={data || []}
-        loading={loading}
-        error={error}
-        onRetry={retry}
-        emptyTitle="No support tickets"
-        emptyDescription="All customer inquiries and complaints have been resolved."
-        onRowClick={(row) => setSelectedTicket(row)}
-      />
+      {/* Desktop Table View */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data || []}
+          loading={loading}
+          error={error}
+          onRetry={retry}
+          emptyTitle="No support tickets"
+          emptyDescription="All customer inquiries and complaints have been resolved."
+          onRowClick={(row) => setSelectedTicket(row)}
+        />
+      </div>
+
+      {/* Mobile Support Ticket Cards */}
+      <div className="md:hidden space-y-2.5">
+        {loading ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-xs text-slate-400 font-medium">Loading support tickets...</p>
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+            No support tickets found.
+          </div>
+        ) : (
+          data.map((ticket) => (
+            <div
+              key={ticket.id}
+              onClick={() => setSelectedTicket(ticket)}
+              className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-2.5 text-xs active:bg-slate-50 dark:active:bg-slate-900/60 cursor-pointer"
+            >
+              {/* Header: ID, Customer & Status */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                  <span>#{ticket.id}</span>
+                  <span className="font-sans font-bold text-slate-900 dark:text-slate-100">
+                    &bull; {ticket.customer_name}
+                  </span>
+                </div>
+                <StatusBadge status={ticket.status} size="xs" />
+              </div>
+
+              {/* Issue Details */}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-bold text-slate-900 dark:text-slate-100 text-xs">
+                    {ticket.subject}
+                  </span>
+                  {ticket.order_id && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 font-mono text-[10px] font-semibold text-slate-700 dark:text-slate-300">
+                      Order #{ticket.order_id}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                  {ticket.message}
+                </p>
+              </div>
+
+              {/* Footer: Date & Reply Button */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                <span className="text-[10px] text-slate-400">
+                  {formatDateTime(ticket.created_at)}
+                </span>
+
+                <Button
+                  variant="outline"
+                  size="md"
+                  icon={MessageSquare}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedTicket(ticket)
+                  }}
+                  className="w-10 h-10 sm:w-8 sm:h-8 p-0 flex items-center justify-center rounded-xl"
+                  title="Reply to Ticket"
+                />
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       {selectedTicket && (
         <TicketDetailsModal

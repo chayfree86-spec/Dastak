@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { PlusCircle, Search, Tag, Calendar, Percent, RefreshCw, Trash2, Edit2, CheckCircle2 } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { PlusCircle, Search, Tag, Calendar, Percent, Trash2, Edit2, CheckCircle2, Ban, AlertCircle } from 'lucide-react'
 import marketingApi from '../../api/marketing.api'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatDate } from '../../utils/formatters'
@@ -11,6 +11,7 @@ import AmountInput from '../../components/common/AmountInput'
 import CustomSelect from '../../components/common/CustomSelect'
 import Switch from '../../components/common/Switch'
 import Modal from '../../components/common/Modal'
+import ConfirmDialog from '../../components/common/ConfirmDialog'
 import { useToast } from '../../context/ToastContext'
 
 export const CouponList = () => {
@@ -18,6 +19,7 @@ export const CouponList = () => {
   const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingCoupon, setEditingCoupon] = useState(null)
+  const [deleteConfirmCoupon, setDeleteConfirmCoupon] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
 
   // Form fields
@@ -32,53 +34,17 @@ export const CouponList = () => {
   const [userLimit, setUserLimit] = useState('1')
   const [isActive, setIsActive] = useState(true)
 
-  const { data, loading, error, retry } = useApi(
+  const { data, loading, error, retry, silentRefresh } = useApi(
     () => marketingApi.getCoupons({ search: search || undefined }),
-    [search],
-    {
-      initialData: [
-        {
-          id: 1,
-          code: 'DASTAK50',
-          discount_type: 'PERCENTAGE',
-          discount_value: 50,
-          min_order: 199.00,
-          max_discount: 100.00,
-          start_date: '2026-02-01',
-          end_date: '2026-02-28',
-          usage_limit: 1000,
-          used_count: 342,
-          is_active: true,
-        },
-        {
-          id: 2,
-          code: 'WELCOME100',
-          discount_type: 'FLAT',
-          discount_value: 100,
-          min_order: 399.00,
-          max_discount: 100.00,
-          start_date: '2026-01-01',
-          end_date: '2026-12-31',
-          usage_limit: 5000,
-          used_count: 1240,
-          is_active: true,
-        },
-        {
-          id: 3,
-          code: 'FEAST20',
-          discount_type: 'PERCENTAGE',
-          discount_value: 20,
-          min_order: 499.00,
-          max_discount: 150.00,
-          start_date: '2026-02-10',
-          end_date: '2026-02-15',
-          usage_limit: 200,
-          used_count: 200,
-          is_active: false,
-        },
-      ],
-    }
+    [search]
   )
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      silentRefresh()
+    }, 12000)
+    return () => clearInterval(interval)
+  }, [silentRefresh])
 
   const handleOpenCreate = () => {
     setEditingCoupon(null)
@@ -93,6 +59,51 @@ export const CouponList = () => {
     setUserLimit('1')
     setIsActive(true)
     setIsModalOpen(true)
+  }
+
+  const handleOpenEdit = (coupon) => {
+    setEditingCoupon(coupon)
+    setCode(coupon.code || '')
+    setDiscountType(coupon.discount_type || 'PERCENTAGE')
+    setDiscountValue(String(coupon.discount_value || ''))
+    setMinOrder(String(coupon.min_order || ''))
+    setMaxDiscount(String(coupon.max_discount || ''))
+    setStartDate(coupon.start_date || '')
+    setEndDate(coupon.end_date || '')
+    setUsageLimit(String(coupon.usage_limit || ''))
+    setUserLimit(String(coupon.user_limit || '1'))
+    setIsActive(Boolean(coupon.is_active))
+    setIsModalOpen(true)
+  }
+
+  const handleToggleStatus = async (coupon) => {
+    setActionLoading(true)
+    const newStatus = !coupon.is_active
+    try {
+      await marketingApi.toggleCouponStatus(coupon.id, newStatus)
+      toast.success('Status Updated', `Coupon ${coupon.code} is now ${newStatus ? 'Active' : 'Inactive'}.`)
+      retry()
+    } catch (err) {
+      toast.error('Failed', err.message || 'Unable to update status.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeleteCoupon = async () => {
+    if (!deleteConfirmCoupon) return
+    setActionLoading(true)
+    try {
+      await marketingApi.deleteCoupon(deleteConfirmCoupon.id)
+      toast.success('Coupon Deleted', `Coupon ${deleteConfirmCoupon.code} has been deleted.`)
+      setDeleteConfirmCoupon(null)
+      if (isModalOpen) setIsModalOpen(false)
+      retry()
+    } catch (err) {
+      toast.error('Delete Failed', err.message || 'Unable to delete coupon.')
+    } finally {
+      setActionLoading(false)
+    }
   }
 
   const handleSaveCoupon = async (e) => {
@@ -184,33 +195,80 @@ export const CouponList = () => {
     {
       key: 'is_active',
       header: 'Status',
-      render: (row) => <StatusBadge status={row.is_active ? 'ACTIVE' : 'INACTIVE'} size="xs" />,
+      render: (row) => (
+        <button
+          type="button"
+          onClick={() => handleToggleStatus(row)}
+          className="cursor-pointer hover:opacity-80 transition-opacity"
+          title="Click to toggle status"
+        >
+          <StatusBadge status={row.is_active ? 'ACTIVE' : 'INACTIVE'} size="xs" />
+        </button>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Action',
+      align: 'right',
+      render: (row) => (
+        <div className="flex items-center justify-end gap-1.5">
+          <Button
+            variant={row.is_active ? 'outline' : 'success'}
+            size="sm"
+            icon={row.is_active ? Ban : CheckCircle2}
+            onClick={() => handleToggleStatus(row)}
+            title={row.is_active ? 'Deactivate Coupon' : 'Activate Coupon'}
+            className="w-8 h-8 p-0 flex items-center justify-center"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            icon={Edit2}
+            onClick={() => handleOpenEdit(row)}
+            title="Edit Coupon"
+            className="w-8 h-8 p-0 flex items-center justify-center"
+          />
+          <Button
+            variant="danger"
+            size="sm"
+            icon={Trash2}
+            onClick={() => setDeleteConfirmCoupon(row)}
+            title="Delete Coupon"
+            className="w-8 h-8 p-0 flex items-center justify-center"
+          />
+        </div>
+      ),
     },
   ]
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Coupons & Marketing Campaigns
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Configure discount promo codes, usage caps, and minimum order rules.
+            Configure discount promo codes, usage caps & order rules.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" icon={RefreshCw} onClick={retry}>
-            Refresh
-          </Button>
-          <Button variant="primary" size="sm" icon={PlusCircle} onClick={handleOpenCreate}>
+          <Button
+            variant="primary"
+            size="md"
+            icon={PlusCircle}
+            onClick={handleOpenCreate}
+            className="h-11 sm:h-9 text-xs font-bold w-full sm:w-auto"
+          >
             Create Coupon
           </Button>
         </div>
       </div>
 
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-3">
+      {/* Search Bar */}
+      <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -218,20 +276,122 @@ export const CouponList = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search coupons by promo code..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full pl-9 pr-4 h-11 sm:h-10 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
           />
         </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={data || []}
-        loading={loading}
-        error={error}
-        onRetry={retry}
-        emptyTitle="No coupons created"
-        emptyDescription="Create your first promotional discount coupon to boost customer orders."
-      />
+      {/* Desktop Table View */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data || []}
+          loading={loading}
+          error={error}
+          onRetry={retry}
+          emptyTitle="No coupons created"
+          emptyDescription="Create your first promotional discount coupon to boost customer orders."
+        />
+      </div>
+
+      {/* Mobile Coupon Cards */}
+      <div className="md:hidden space-y-2.5">
+        {loading ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-xs text-slate-400 font-medium">Loading coupons...</p>
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+            No coupons found.
+          </div>
+        ) : (
+          data.map((coupon) => (
+            <div
+              key={coupon.id}
+              className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-3 text-xs"
+            >
+              {/* Header: Code & Quick Status Toggle */}
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-black text-sm px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950/50 text-[#F97316] border border-orange-200 dark:border-orange-900/50 inline-block">
+                  {coupon.code}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleToggleStatus(coupon)}
+                  className="cursor-pointer hover:opacity-80 transition-opacity"
+                  title="Click to toggle status"
+                >
+                  <StatusBadge status={coupon.is_active ? 'ACTIVE' : 'INACTIVE'} size="xs" />
+                </button>
+              </div>
+
+              {/* Discount Offer & Rules */}
+              <div className="flex items-baseline justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Discount</span>
+                  <span className="text-base font-black text-slate-900 dark:text-slate-100">
+                    {coupon.discount_type === 'PERCENTAGE' ? `${coupon.discount_value}% OFF` : `₹ ${coupon.discount_value} FLAT`}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Min Order</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">
+                    {formatCurrency(coupon.min_order)}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Max Cap</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300 text-xs">
+                    {formatCurrency(coupon.max_discount)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Validity, Redemptions & Icon-Only Action Buttons */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 gap-2">
+                <div className="space-y-0.5 min-w-0 flex-1">
+                  <span className="text-[11px] text-slate-400 block truncate">
+                    Valid: {formatDate(coupon.start_date)} - {formatDate(coupon.end_date)}
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold block truncate">
+                    {coupon.used_count || 0} / {coupon.usage_limit} redeemed
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Button
+                    variant={coupon.is_active ? 'outline' : 'success'}
+                    size="md"
+                    icon={coupon.is_active ? Ban : CheckCircle2}
+                    onClick={() => handleToggleStatus(coupon)}
+                    className="w-10 h-10 sm:w-8 sm:h-8 p-0 flex items-center justify-center rounded-xl"
+                    title={coupon.is_active ? 'Deactivate Coupon' : 'Activate Coupon'}
+                  />
+
+                  <Button
+                    variant="outline"
+                    size="md"
+                    icon={Edit2}
+                    onClick={() => handleOpenEdit(coupon)}
+                    className="w-10 h-10 sm:w-8 sm:h-8 p-0 flex items-center justify-center rounded-xl"
+                    title="Edit Coupon"
+                  />
+
+                  <Button
+                    variant="danger"
+                    size="md"
+                    icon={Trash2}
+                    onClick={() => setDeleteConfirmCoupon(coupon)}
+                    className="w-10 h-10 sm:w-8 sm:h-8 p-0 flex items-center justify-center rounded-xl"
+                    title="Delete Coupon"
+                  />
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       {/* Create / Edit Coupon Modal */}
       <Modal
@@ -321,16 +481,45 @@ export const CouponList = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-            <Button variant="outline" size="md" onClick={() => setIsModalOpen(false)} disabled={actionLoading} className="w-full">
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" size="md" loading={actionLoading} className="w-full">
-              Save Coupon
-            </Button>
+          <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+            {editingCoupon ? (
+              <Button
+                type="button"
+                variant="danger"
+                size="md"
+                icon={Trash2}
+                onClick={() => {
+                  setDeleteConfirmCoupon(editingCoupon)
+                }}
+                className="text-xs"
+              >
+                Delete
+              </Button>
+            ) : <div />}
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="md" onClick={() => setIsModalOpen(false)} disabled={actionLoading}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="md" loading={actionLoading}>
+                Save Coupon
+              </Button>
+            </div>
           </div>
         </form>
       </Modal>
+
+      {/* Safe Delete Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={!!deleteConfirmCoupon}
+        onClose={() => setDeleteConfirmCoupon(null)}
+        onConfirm={handleDeleteCoupon}
+        title="Delete Promo Coupon?"
+        message={`Are you sure you want to delete coupon ${deleteConfirmCoupon?.code}? Customers will no longer be able to apply this discount at checkout.`}
+        confirmText="Delete Coupon"
+        confirmVariant="danger"
+        loading={actionLoading}
+      />
     </div>
   )
 }

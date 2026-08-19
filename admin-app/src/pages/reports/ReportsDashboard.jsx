@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   BarChart3,
   Download,
@@ -28,19 +28,17 @@ export const ReportsDashboard = () => {
   const [dateRange, setDateRange] = useState('LAST_7_DAYS')
   const [exportLoading, setExportLoading] = useState(false)
 
-  const { data, loading, error, retry } = useApi(
+  const { data, loading, error, retry, silentRefresh } = useApi(
     () => reportsApi.getReportData(reportType, { range: dateRange }),
-    [reportType, dateRange],
-    {
-      initialData: [
-        { date: '2026-02-08', total_orders: 142, gross_sales: 68450.00, dastak_commission: 10267.50, cod_amount: 24800.00, cancelled_orders: 4 },
-        { date: '2026-02-07', total_orders: 135, gross_sales: 62100.00, dastak_commission: 9315.00, cod_amount: 21500.00, cancelled_orders: 2 },
-        { date: '2026-02-06', total_orders: 158, gross_sales: 74200.00, dastak_commission: 11130.00, cod_amount: 28900.00, cancelled_orders: 5 },
-        { date: '2026-02-05', total_orders: 120, gross_sales: 58900.00, dastak_commission: 8835.00, cod_amount: 19400.00, cancelled_orders: 3 },
-        { date: '2026-02-04', total_orders: 148, gross_sales: 71300.00, dastak_commission: 10695.00, cod_amount: 25100.00, cancelled_orders: 1 },
-      ],
-    }
+    [reportType, dateRange]
   )
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      silentRefresh()
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [silentRefresh])
 
   const handleExportCsv = () => {
     setExportLoading(true)
@@ -118,38 +116,39 @@ export const ReportsDashboard = () => {
   ]
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Analytics & Reports
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Export real operational data for accounting, tax filings, and performance analysis.
+            Export operational reports, commission revenue & tax filings.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" icon={RefreshCw} onClick={retry}>
-            Refresh
-          </Button>
           <Button
             variant="primary"
-            size="sm"
+            size="md"
             icon={Download}
             onClick={handleExportCsv}
             loading={exportLoading}
+            className="h-11 sm:h-9 text-xs font-bold w-full sm:w-auto"
           >
             Export to CSV
           </Button>
         </div>
       </div>
 
+      {/* Tabs */}
       <Tabs tabs={tabs} activeTab={reportType} onChange={setReportType} />
 
-      <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* Timeline Filter */}
+      <div className="p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-          <Calendar className="w-4 h-4 text-slate-400" />
+          <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
           <span>Select Timeline:</span>
         </div>
 
@@ -160,22 +159,85 @@ export const ReportsDashboard = () => {
             options={[
               { value: 'TODAY', label: 'Today' },
               { value: 'LAST_7_DAYS', label: 'Last 7 Days' },
-              { value: 'THIS_MONTH', label: 'This Month (Feb 2026)' },
-              { value: 'LAST_MONTH', label: 'Last Month (Jan 2026)' },
+              { value: 'THIS_MONTH', label: 'This Month' },
+              { value: 'LAST_MONTH', label: 'Last Month' },
             ]}
           />
         </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={data || []}
-        loading={loading}
-        error={error}
-        onRetry={retry}
-        emptyTitle="No report data"
-        emptyDescription="No transaction records match the specified date range."
-      />
+      {/* Desktop Table View */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data || []}
+          loading={loading}
+          error={error}
+          onRetry={retry}
+          emptyTitle="No report data"
+          emptyDescription="No transaction records match the specified date range."
+        />
+      </div>
+
+      {/* Mobile Report Cards */}
+      <div className="md:hidden space-y-2.5">
+        {loading ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-xs text-slate-400 font-medium">Loading report metrics...</p>
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+            No transaction records found for this timeline.
+          </div>
+        ) : (
+          data.map((row, idx) => (
+            <div
+              key={row.date || idx}
+              className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-2.5 text-xs"
+            >
+              {/* Header: Date & Orders Completed */}
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                  {formatDate(row.date)}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#2845D6] dark:text-blue-400 font-bold text-[11px]">
+                    {row.total_orders} Orders
+                  </span>
+                  {row.cancelled_orders > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/50 text-rose-600 font-semibold text-[10px]">
+                      {row.cancelled_orders} Cancel
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Financial Metrics Strip */}
+              <div className="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 text-center">
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Gross Sales</span>
+                  <span className="font-black text-slate-900 dark:text-slate-100 text-xs">
+                    {formatCurrency(row.gross_sales)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block">Commission</span>
+                  <span className="font-black text-[#2845D6] dark:text-blue-400 text-xs">
+                    {formatCurrency(row.dastak_commission)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block">COD Collected</span>
+                  <span className="font-bold text-amber-600 dark:text-amber-400 text-xs">
+                    {formatCurrency(row.cod_amount)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   )
 }
