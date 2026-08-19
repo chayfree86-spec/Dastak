@@ -414,7 +414,7 @@ export const SettingsPage = () => {
 
         {activeTab !== 'service_areas' && (
           <div className="flex items-center justify-end">
-            <Button type="submit" variant="primary" size="lg" icon={Save} loading={saving}>
+            <Button type="submit" variant="primary" size="lg" icon={Save} loading={saving} className="w-full sm:w-auto">
               Save All Settings
             </Button>
           </div>

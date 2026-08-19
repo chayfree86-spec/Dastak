@@ -30,7 +30,16 @@ export const ReportsDashboard = () => {
 
   const { data, loading, error, retry } = useApi(
     () => reportsApi.getReportData(reportType, { range: dateRange }),
-    [reportType, dateRange]
+    [reportType, dateRange],
+    {
+      initialData: [
+        { date: '2026-02-08', total_orders: 142, gross_sales: 68450.00, dastak_commission: 10267.50, cod_amount: 24800.00, cancelled_orders: 4 },
+        { date: '2026-02-07', total_orders: 135, gross_sales: 62100.00, dastak_commission: 9315.00, cod_amount: 21500.00, cancelled_orders: 2 },
+        { date: '2026-02-06', total_orders: 158, gross_sales: 74200.00, dastak_commission: 11130.00, cod_amount: 28900.00, cancelled_orders: 5 },
+        { date: '2026-02-05', total_orders: 120, gross_sales: 58900.00, dastak_commission: 8835.00, cod_amount: 19400.00, cancelled_orders: 3 },
+        { date: '2026-02-04', total_orders: 148, gross_sales: 71300.00, dastak_commission: 10695.00, cod_amount: 25100.00, cancelled_orders: 1 },
+      ],
+    }
   )
 
   const handleExportCsv = () => {

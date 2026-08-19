@@ -36,12 +36,12 @@ export const Drawer = ({
         onClick={onClose}
       />
 
-      <div className="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+      <div className="fixed inset-y-0 right-0 pl-0 sm:pl-10 max-w-full flex">
         <div
-          className={`w-screen ${width} bg-white dark:bg-slate-800 shadow-2xl border-l border-slate-200 dark:border-slate-700 flex flex-col z-10 animate-in slide-in-from-right duration-200`}
+          className={`w-screen ${width} max-w-full bg-white dark:bg-slate-800 shadow-2xl border-l border-slate-200 dark:border-slate-700 flex flex-col z-10 animate-in slide-in-from-right duration-200`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100 dark:border-slate-700/60">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4.5 border-b border-slate-100 dark:border-slate-700/60">
             <div>
               {title && <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{title}</h3>}
               {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
@@ -56,7 +56,7 @@ export const Drawer = ({
           </div>
 
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto p-6">{children}</div>
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
 
           {/* Optional Footer */}
           {footer && (

@@ -3,7 +3,7 @@ import React from 'react'
 export const Tabs = ({ tabs = [], activeTab, onChange, className = '', variant = 'pills' }) => {
   if (variant === 'underline') {
     return (
-      <div className={`border-b border-slate-200 dark:border-slate-700 overflow-x-auto ${className}`}>
+      <div className={`border-b border-slate-200 dark:border-slate-700 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden no-scrollbar ${className}`}>
         <nav className="flex space-x-6 min-w-max" aria-label="Tabs">
           {tabs.map((tab) => {
             const isActive = tab.id === activeTab
@@ -40,16 +40,17 @@ export const Tabs = ({ tabs = [], activeTab, onChange, className = '', variant =
 
   // Default 'pills'
   return (
-    <div className={`flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 overflow-x-auto max-w-full ${className}`}>
+    <div className={`flex items-center gap-1.5 p-1 rounded-2xl sm:rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden no-scrollbar max-w-full select-none ${className}`}>
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab
         return (
           <button
             key={tab.id}
+            type="button"
             onClick={() => onChange(tab.id)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
+            className={`flex items-center gap-2 px-3.5 h-10 sm:h-8 rounded-xl sm:rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 shrink-0 cursor-pointer active:scale-95 ${
               isActive
-                ? 'bg-white dark:bg-slate-700 text-[#2845D6] dark:text-blue-400 shadow-xs'
+                ? 'bg-white dark:bg-slate-700 text-[#2845D6] dark:text-blue-400 shadow-xs font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -57,10 +58,10 @@ export const Tabs = ({ tabs = [], activeTab, onChange, className = '', variant =
             <span>{tab.label}</span>
             {tab.badge !== undefined && tab.badge !== null && (
               <span
-                className={`ml-1 px-1.5 py-0.2 text-[10px] rounded-full font-bold ${
+                className={`ml-1 px-1.5 py-0.5 text-[10px] rounded-full font-bold ${
                   isActive
-                    ? 'bg-[#2845D6]/10 dark:bg-blue-900/40 text-[#2845D6] dark:text-blue-400'
-                    : 'bg-slate-200/70 dark:bg-slate-600 text-slate-700 dark:text-slate-300'
+                    ? 'bg-[#2845D6]/15 text-[#2845D6] dark:bg-blue-900/40 dark:text-blue-300'
+                    : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 {tab.badge}

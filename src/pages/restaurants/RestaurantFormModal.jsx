@@ -497,11 +497,11 @@ export const RestaurantFormModal = ({
         </div>
 
         {/* Pinned/Sticky Footer containing actions */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/60 shrink-0">
-          <Button variant="outline" onClick={onClose} disabled={loading}>
+        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700/60 shrink-0">
+          <Button variant="outline" size="md" onClick={onClose} disabled={loading} className="w-full">
             Cancel
           </Button>
-          <Button type="submit" variant="primary" loading={loading}>
+          <Button type="submit" variant="primary" size="md" loading={loading} className="w-full">
             {restaurant ? 'Update Restaurant' : 'Onboard Restaurant'}
           </Button>
         </div>

@@ -321,11 +321,11 @@ export const CouponList = () => {
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={actionLoading}>
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+            <Button variant="outline" size="md" onClick={() => setIsModalOpen(false)} disabled={actionLoading} className="w-full">
               Cancel
             </Button>
-            <Button type="submit" variant="primary" loading={actionLoading}>
+            <Button type="submit" variant="primary" size="md" loading={actionLoading} className="w-full">
               Save Coupon
             </Button>
           </div>

@@ -15,7 +15,20 @@ export const DeliveryBoyIdCard = () => {
 
   const { data: rider, loading, error } = useApi(
     () => deliveryBoysApi.getDeliveryBoyDetails(id),
-    [id]
+    [id],
+    {
+      initialData: {
+        id: id || '1',
+        name: 'Rahul Pal',
+        mobile: '9876543211',
+        vehicle_type: 'MOTORCYCLE',
+        vehicle_number: 'UP 78 AB 1234',
+        license_number: 'DL-0420110012345',
+        aadhar_number: '123456789012',
+        pan_number: 'ABCDE1234F',
+        status: 'ACTIVE',
+      },
+    }
   )
 
   const handlePrint = () => {

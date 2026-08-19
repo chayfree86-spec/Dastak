@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PlusCircle, Search, Store, Filter, RefreshCw, Eye, Edit2, Ban, CheckCircle2, UtensilsCrossed } from 'lucide-react'
 import restaurantsApi from '../../api/restaurants.api'
@@ -25,7 +25,7 @@ export const RestaurantList = () => {
   const [statusConfirmRestaurant, setStatusConfirmRestaurant] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
 
-  const { data, loading, error, meta, retry } = useApi(
+  const { data, loading, error, meta, retry, silentRefresh } = useApi(
     () =>
       restaurantsApi.getRestaurants({
         search: search || undefined,
@@ -92,6 +92,13 @@ export const RestaurantList = () => {
       ],
     }
   )
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      silentRefresh()
+    }, 12000)
+    return () => clearInterval(interval)
+  }, [silentRefresh])
 
   const handleToggleStatus = async () => {
     if (!statusConfirmRestaurant) return
@@ -227,32 +234,28 @@ export const RestaurantList = () => {
   return (
     <div className="space-y-5">
       {/* Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
           <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             Partner Restaurants
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Manage partner onboarding, commission terms, menus, and operational status.
+            Manage partner onboarding, commission, menus & stores.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" icon={RefreshCw} onClick={retry}>
-            Refresh
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={PlusCircle}
-            onClick={() => {
-              setEditingRestaurant(null)
-              setIsModalOpen(true)
-            }}
-          >
-            Add Restaurant
-          </Button>
-        </div>
+        <Button
+          variant="primary"
+          size="md"
+          icon={PlusCircle}
+          onClick={() => {
+            setEditingRestaurant(null)
+            setIsModalOpen(true)
+          }}
+          className="w-full sm:w-auto h-11 sm:h-9"
+        >
+          Add Restaurant
+        </Button>
       </div>
 
       {/* Filter Bar */}
@@ -264,7 +267,7 @@ export const RestaurantList = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by restaurant name, owner, or mobile..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
           />
         </div>
 
@@ -293,33 +296,127 @@ export const RestaurantList = () => {
         </div>
       </div>
 
-      {/* Restaurants Table */}
-      <DataTable
-        columns={columns}
-        data={data || []}
-        loading={loading}
-        error={error}
-        onRetry={retry}
-        emptyTitle="No restaurants found"
-        emptyDescription="Try adjusting your search criteria or add a new restaurant partner."
-        emptyActionLabel="Add Restaurant"
-        onEmptyAction={() => {
-          setEditingRestaurant(null)
-          setIsModalOpen(true)
-        }}
-        pagination={
-          meta
-            ? {
-                currentPage: meta.current_page || currentPage,
-                totalPages: meta.last_page || 1,
-                totalItems: meta.total || (data ? data.length : 0),
-                itemsPerPage: meta.per_page || 10,
-                onPageChange: setCurrentPage,
-              }
-            : undefined
-        }
-        onRowClick={(row) => navigate(`/restaurants/${row.id}`)}
-      />
+      {/* Desktop Table View */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data || []}
+          loading={loading}
+          error={error}
+          onRetry={retry}
+          emptyTitle="No restaurants found"
+          emptyDescription="Try adjusting your search criteria or add a new restaurant partner."
+          emptyActionLabel="Add Restaurant"
+          onEmptyAction={() => {
+            setEditingRestaurant(null)
+            setIsModalOpen(true)
+          }}
+          pagination={
+            meta
+              ? {
+                  currentPage: meta.current_page || currentPage,
+                  totalPages: meta.last_page || 1,
+                  totalItems: meta.total || (data ? data.length : 0),
+                  itemsPerPage: meta.per_page || 10,
+                  onPageChange: setCurrentPage,
+                }
+              : undefined
+          }
+          onRowClick={(row) => navigate(`/restaurants/${row.id}`)}
+        />
+      </div>
+
+      {/* Mobile Restaurant Card List View */}
+      <div className="md:hidden space-y-2.5">
+        {loading ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-xs text-slate-400 font-medium">Loading restaurants...</p>
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+            No restaurants found.
+          </div>
+        ) : (
+          data.map((rest) => (
+            <div
+              key={rest.id}
+              onClick={() => navigate(`/restaurants/${rest.id}`)}
+              className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer space-y-2.5"
+            >
+              {/* Header: Name, Logo Initial, Rating & Status Badges */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                    {rest.name ? rest.name.charAt(0).toUpperCase() : 'R'}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{rest.name}</h4>
+                    <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+                      ★ {rest.rating || '4.5'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <StatusBadge status={rest.is_online ? 'ONLINE' : 'OFFLINE'} size="xs" />
+                  <StatusBadge status={rest.status} size="xs" />
+                </div>
+              </div>
+
+              {/* Owner, Mobile & Location */}
+              <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Owner</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block">{rest.owner_name}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Mobile</span>
+                  <span className="font-mono text-slate-700 dark:text-slate-300 truncate block">{formatPhone(rest.mobile)}</span>
+                </div>
+              </div>
+
+              {/* Footer: Commission, Settlement & Actions */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#2845D6] dark:text-blue-400 font-bold">
+                    {rest.commission}% Comm
+                  </span>
+                  <span className="text-slate-400 font-medium">
+                    {rest.settlement_cycle}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingRestaurant(rest)
+                      setIsModalOpen(true)
+                    }}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    title="Edit Restaurant"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStatusConfirmRestaurant(rest)}
+                    className={`p-1.5 rounded-lg ${
+                      rest.status === 'ACTIVE'
+                        ? 'text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40'
+                        : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                    }`}
+                    title={rest.status === 'ACTIVE' ? 'Suspend Restaurant' : 'Activate Restaurant'}
+                  >
+                    {rest.status === 'ACTIVE' ? <Ban className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       {/* Add / Edit Restaurant Modal */}
       <RestaurantFormModal

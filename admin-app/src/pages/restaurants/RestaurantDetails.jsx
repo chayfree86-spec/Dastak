@@ -62,22 +62,50 @@ export const RestaurantDetails = () => {
 
   const { data: settlements, loading: settlementsLoading, retry: retrySettlements } = useApi(
     () => restaurantsApi.getRestaurantSettlements(id),
-    [id]
+    [id],
+    { initialData: [] }
   )
 
   const { data: restaurant, loading, error, retry, setData: setRestaurantData } = useApi(
     () => restaurantsApi.getRestaurantDetails(id),
-    [id]
+    [id],
+    { initialData: null }
   )
 
   const { data: menuData, loading: menuLoading } = useApi(
     () => restaurantsApi.getRestaurantMenu(id),
-    [id]
+    [id],
+    {
+      initialData: [
+        {
+          category: 'Biryani Specials',
+          items: [
+            { id: 'M1', name: 'Hyderabadi Dum Biryani', is_veg: false, price: 340.00, discount_price: 299.00, is_available: true, prep_time: '25 mins', variants: ['Half', 'Full'], addons: ['Extra Raita', 'Mirchi Ka Salan'] },
+            { id: 'M2', name: 'Lucknowi Paneer Biryani', is_veg: true, price: 280.00, discount_price: 260.00, is_available: true, prep_time: '20 mins', variants: ['Regular', 'Large'], addons: ['Extra Gravy'] },
+            { id: 'M3', name: 'Kolkata Chicken Biryani', is_veg: false, price: 360.00, discount_price: 360.00, is_available: false, prep_time: '30 mins', variants: ['Standard'], addons: ['Extra Boiled Egg'] },
+          ],
+        },
+        {
+          category: 'Starters & Kebabs',
+          items: [
+            { id: 'M4', name: 'Chicken Tikka Kebab (6 Pcs)', is_veg: false, price: 290.00, discount_price: 270.00, is_available: true, prep_time: '18 mins', variants: [], addons: ['Mint Chutney'] },
+            { id: 'M5', name: 'Dahi Ke Kebab (4 Pcs)', is_veg: true, price: 220.00, discount_price: 220.00, is_available: true, prep_time: '15 mins', variants: [], addons: [] },
+          ],
+        },
+      ],
+    }
   )
 
   const { data: ordersData, loading: ordersLoading } = useApi(
     () => restaurantsApi.getRestaurantOrders(id, { limit: 5 }),
-    [id]
+    [id],
+    {
+      initialData: [
+        { id: 'D4829', customer: 'Aarav Sharma', amount: 640.00, status: 'NEW', time: new Date().toISOString() },
+        { id: 'D4815', customer: 'Deepak Rao', amount: 820.00, status: 'DELIVERED', time: new Date(Date.now() - 3600000).toISOString() },
+        { id: 'D4790', customer: 'Kunal Kapoor', amount: 490.00, status: 'DELIVERED', time: new Date(Date.now() - 86400000).toISOString() },
+      ],
+    }
   )
 
   // Settings Tab States

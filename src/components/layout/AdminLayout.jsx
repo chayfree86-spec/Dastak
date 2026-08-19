@@ -5,7 +5,7 @@ import Header from './Header'
 import Modal from '../common/Modal'
 import Button from '../common/Button'
 import { useAuth } from '../../context/AuthContext'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Menu } from 'lucide-react'
 
 const routeTitles = {
   '/dashboard': 'Operational Dashboard',
@@ -58,10 +58,21 @@ export const AdminLayout = () => {
           onOpenMobileSidebar={() => setMobileOpen(true)}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 w-full">
           <Outlet />
         </main>
       </div>
+
+      {/* Floating Center Hamburger Menu Pill for Mobile Only (Hidden on Desktop) */}
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-[#2845D6] text-white shadow-2xl shadow-[#2845D6]/40 border border-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
+        aria-label="Open Navigation Menu"
+      >
+        <Menu className="w-5 h-5 text-white" />
+        <span className="text-xs font-bold tracking-wide uppercase text-white">Menu</span>
+      </button>
 
       {/* Session Expired Modal */}
       <Modal isOpen={sessionExpired} onClose={handleSessionLoginRedirect} maxWidth="max-w-sm" showClose={false}>

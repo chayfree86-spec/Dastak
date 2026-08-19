@@ -58,12 +58,54 @@ export const DeliveryBoyDetails = () => {
 
   const { data: rider, loading, error, retry } = useApi(
     () => deliveryBoysApi.getDeliveryBoyDetails(id),
-    [id]
+    [id],
+    {
+      initialData: {
+        id: id || 'R101',
+        name: 'Rahul Pal',
+        mobile: '9876543211',
+        emergency_contact: '9812345678',
+        email: 'rahul.pal@dastakfleet.in',
+        address: 'House No 12, Gali 4, Shanti Nagar, Kanpur',
+        vehicle_type: 'Motorcycle (Hero Splendor)',
+        vehicle_number: 'UP 78 AB 1234',
+        license_number: 'DL-1420180012345',
+        latitude: 26.4520000,
+        longitude: 80.3340000,
+        speed: 34.2,
+        heading: 140,
+        status: 'ACTIVE',
+        is_online: true,
+        rating: 4.8,
+        total_deliveries: 428,
+        completed_deliveries: 422,
+        failed_deliveries: 6,
+        lifetime_earnings: 28450.00,
+        today_earnings: 520.00,
+        cod_collected_pending: 1850.00,
+        current_active_order: {
+          id: 'D4827',
+          restaurant: 'Punjabi Tadka',
+          customer: 'Rohit Gupta',
+          address: 'Flat 301, Tower C, Lotus Boulevard, Sector 100',
+          amount: 920.00,
+          payment: 'ONLINE_PAYMENT',
+          assigned_at: new Date(Date.now() - 25 * 60000).toISOString(),
+        },
+      },
+    }
   )
 
   const { data: orderHistory, loading: historyLoading } = useApi(
     () => deliveryBoysApi.getOrderHistory(id, { limit: 5 }),
-    [id]
+    [id],
+    {
+      initialData: [
+        { id: 'D4820', restaurant: 'Biryani Central', customer: 'Vipin Jain', amount: 640.00, status: 'DELIVERED', trip_earning: 45.00, time: new Date(Date.now() - 3600000).toISOString() },
+        { id: 'D4811', restaurant: 'South Express', customer: 'Kiran Rao', amount: 320.00, status: 'DELIVERED', trip_earning: 40.00, time: new Date(Date.now() - 7200000).toISOString() },
+        { id: 'D4802', restaurant: 'Royal Spice Kitchen', customer: 'Gaurav Das', amount: 890.00, status: 'DELIVERED', trip_earning: 55.00, time: new Date(Date.now() - 14400000).toISOString() },
+      ],
+    }
   )
 
   const handleReconcileCod = async () => {
@@ -192,38 +234,64 @@ export const DeliveryBoyDetails = () => {
       </div>
 
       {/* Rider Header Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-orange-50 text-[#F97316] dark:bg-orange-950/60 text-2xl font-black flex items-center justify-center shadow-xs">
-            <Bike className="w-8 h-8" />
+      <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5">
+        <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 w-full md:w-auto">
+          <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-orange-50 text-[#F97316] dark:bg-orange-950/60 text-xl sm:text-2xl font-black flex items-center justify-center shrink-0 shadow-2xs">
+            <Bike className="w-6 h-6 sm:w-8 sm:h-8" />
           </div>
-          <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h2 className="text-xl font-black text-slate-900 dark:text-slate-100">{rider?.name}</h2>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 truncate">{rider?.name}</h2>
               <StatusBadge status={rider?.status} size="xs" />
               <StatusBadge status={rider?.is_online ? 'ONLINE' : 'OFFLINE'} size="xs" />
             </div>
 
-            <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+            <div className="flex items-center gap-2 sm:gap-3 mt-1 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+              {rider?.mobile && (
+                <a
+                  href={`tel:${rider?.mobile}`}
+                  className="font-mono text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-semibold inline-flex items-center gap-1"
+                >
+                  <span>{formatPhone(rider?.mobile)}</span>
+                  <Phone className="w-3 h-3 text-emerald-500 shrink-0" />
+                </a>
+              )}
+              <span>&bull;</span>
               <span className="font-mono font-semibold">ID: {rider?.id}</span>
               <span>&bull;</span>
               <span className="flex items-center gap-1 font-bold text-amber-500">
                 <Star className="w-3.5 h-3.5 fill-amber-400" />
                 {rider?.rating || '4.8'}
               </span>
-              <span>&bull;</span>
-              <span>Vehicle: <strong>{rider?.vehicle_type}</strong></span>
+              {rider?.vehicle_type && (
+                <>
+                  <span className="hidden sm:inline">&bull;</span>
+                  <span className="hidden sm:inline">Vehicle: <strong>{rider?.vehicle_type}</strong></span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
+          {rider?.mobile && (
+            <a
+              href={`tel:${rider?.mobile}`}
+              className="h-10 sm:h-9 px-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Call Rider</span>
+            </a>
+          )}
+
           {rider?.cod_collected_pending > 0 && (
             <Button
               variant="accent"
-              size="sm"
+              size="md"
               icon={Wallet}
               onClick={() => setReconcileModalOpen(true)}
+              className="h-10 sm:h-9 text-xs"
             >
               Reconcile COD ({formatCurrency(rider?.cod_collected_pending)})
             </Button>
@@ -231,36 +299,40 @@ export const DeliveryBoyDetails = () => {
           
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             icon={FileText}
             onClick={() => navigate(`/delivery-boys/${id}/id-card`)}
+            className="h-10 sm:h-9 text-xs"
           >
             ID Card
           </Button>
 
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             icon={Key}
             onClick={() => setActiveTab('settings')}
+            className="h-10 sm:h-9 text-xs"
           >
             Login Access
           </Button>
 
           <Button
             variant="outline"
-            size="sm"
+            size="md"
             icon={Edit}
             onClick={() => setFormModalOpen(true)}
+            className="h-10 sm:h-9 text-xs"
           >
             Edit
           </Button>
 
           <Button
             variant="danger"
-            size="sm"
+            size="md"
             icon={Trash2}
             onClick={() => setDeleteConfirmOpen(true)}
+            className="h-10 sm:h-9 text-xs"
           >
             Delete
           </Button>
@@ -270,41 +342,41 @@ export const DeliveryBoyDetails = () => {
       {/* Tabs */}
       <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
-      {/* Tab: Overview */}
+      {/* Tab: Overview (2x2 Bento Grid on Mobile) */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Deliveries</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Total Deliveries</span>
+            <div className="text-lg sm:text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5 sm:mt-1">
               {rider?.total_deliveries || 0}
             </div>
-            <span className="text-[11px] text-emerald-600 font-semibold">
-              {rider?.completed_deliveries} Completed &bull; {rider?.failed_deliveries} Cancelled
+            <span className="text-[10px] sm:text-[11px] text-emerald-600 font-semibold block truncate">
+              {rider?.completed_deliveries} Done &bull; {rider?.failed_deliveries} Cancel
             </span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Today's Earnings</span>
-            <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Today's Earnings</span>
+            <div className="text-lg sm:text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5 sm:mt-1 truncate">
               {formatCurrency(rider?.today_earnings)}
             </div>
-            <span className="text-[11px] text-slate-400">Calculated per completed trip</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-400 block truncate">Per completed trip</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Lifetime Earnings</span>
-            <div className="text-2xl font-black text-[#2845D6] dark:text-blue-400 mt-1">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Lifetime Earnings</span>
+            <div className="text-lg sm:text-2xl font-black text-[#2845D6] dark:text-blue-400 mt-0.5 sm:mt-1 truncate">
               {formatCurrency(rider?.lifetime_earnings)}
             </div>
-            <span className="text-[11px] text-slate-400">All-time platform payouts</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-400 block truncate">All-time payouts</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Pending COD Due</span>
-            <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Pending COD Due</span>
+            <div className="text-lg sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 sm:mt-1 truncate">
               {formatCurrency(rider?.cod_collected_pending)}
             </div>
-            <span className="text-[11px] text-amber-500 font-semibold">Cash to deposit</span>
+            <span className="text-[10px] sm:text-[11px] text-amber-500 font-semibold block truncate">Cash to deposit</span>
           </div>
         </div>
       )}
@@ -390,22 +462,67 @@ export const DeliveryBoyDetails = () => {
 
       {/* Tab: History */}
       {activeTab === 'history' && (
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Trip History</h3>
-          <DataTable
-            columns={[
-              { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
-              { key: 'restaurant', header: 'Restaurant' },
-              { key: 'customer', header: 'Customer' },
-              { key: 'amount', header: 'Order Value', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
-              { key: 'trip_earning', header: 'Rider Pay', align: 'right', render: (r) => <span className="font-bold text-emerald-600">{formatCurrency(r.trip_earning)}</span> },
-              { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} size="xs" /> },
-              { key: 'time', header: 'Delivered At', render: (r) => <span className="text-slate-400">{formatDateTime(r.time)}</span> },
-            ]}
-            data={orderHistory || []}
-            loading={historyLoading}
-            emptyTitle="No trips logged"
-          />
+          
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <DataTable
+              columns={[
+                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
+                { key: 'restaurant', header: 'Restaurant' },
+                { key: 'customer', header: 'Customer' },
+                { key: 'amount', header: 'Order Value', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
+                { key: 'trip_earning', header: 'Rider Pay', align: 'right', render: (r) => <span className="font-bold text-emerald-600">{formatCurrency(r.trip_earning)}</span> },
+                { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} size="xs" /> },
+                { key: 'time', header: 'Delivered At', render: (r) => <span className="text-slate-400">{formatDateTime(r.time)}</span> },
+              ]}
+              data={orderHistory || []}
+              loading={historyLoading}
+              emptyTitle="No trips logged"
+            />
+          </div>
+
+          {/* Mobile Trip Cards */}
+          <div className="md:hidden space-y-2.5">
+            {historyLoading ? (
+              <div className="p-6 text-center text-xs text-slate-400 font-medium">
+                Loading trip history...
+              </div>
+            ) : !orderHistory || orderHistory.length === 0 ? (
+              <div className="p-6 text-center text-xs text-slate-400 font-medium">
+                No trips logged yet.
+              </div>
+            ) : (
+              orderHistory.map((trip) => (
+                <div
+                  key={trip.id}
+                  className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                      <span>#{trip.id}</span>
+                      <span className="text-[11px] font-normal text-slate-400">&bull; {formatDateTime(trip.time)}</span>
+                    </div>
+                    <StatusBadge status={trip.status} size="xs" />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                    <div>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200 block">{trip.restaurant}</span>
+                      <span className="text-[11px] text-slate-400">Customer: {trip.customer}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm block">
+                        +{formatCurrency(trip.trip_earning)}
+                      </span>
+                      <span className="text-[10px] text-slate-400">Order: {formatCurrency(trip.amount)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 

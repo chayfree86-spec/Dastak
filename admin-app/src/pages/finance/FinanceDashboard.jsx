@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Wallet,
   IndianRupee,
@@ -49,16 +49,16 @@ export const FinanceDashboard = () => {
     { id: 4, type: 'Free Delivery', min_order: 500.00, fee: 0.00 },
   ])
 
-  const { data: summary, loading: summaryLoading, retry: retrySummary } = useApi(
+  const { data: summary, loading: summaryLoading, retry: retrySummary, silentRefresh: silentRefreshSummary } = useApi(
     () => financeApi.getFinanceSummary()
   )
 
-  const { data: settlements, loading: settleLoading, retry: retrySettlements } = useApi(
+  const { data: settlements, loading: settleLoading, retry: retrySettlements, silentRefresh: silentRefreshSettlements } = useApi(
     () => financeApi.getSettlements({ cycle: cycleFilter !== 'ALL' ? cycleFilter : undefined }),
     [cycleFilter]
   )
 
-  const { data: commissions, loading: commLoading, retry: retryCommissions } = useApi(
+  const { data: commissions, loading: commLoading, retry: retryCommissions, silentRefresh: silentRefreshCommissions } = useApi(
     () => financeApi.getRestaurantCommissions()
   )
 
@@ -223,26 +223,29 @@ export const FinanceDashboard = () => {
     },
   ]
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      silentRefreshSummary()
+      silentRefreshSettlements()
+      silentRefreshCommissions()
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [silentRefreshSummary, silentRefreshSettlements, silentRefreshCommissions])
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Financial Health & Settlements
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Track gross sales, platform commission, restaurant payout cycles, and delivery charges.
-          </p>
-        </div>
-
-        <Button variant="outline" size="sm" icon={RefreshCw} onClick={retrySummary}>
-          Refresh Finance
-        </Button>
+      <div>
+        <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+          Financial Health & Settlements
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Track sales, commission, settlements & payouts.
+        </p>
       </div>
 
-      {/* 4 Core Financial KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 4 Core Financial KPI Cards (2-col on mobile, 4-col on desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <KPICard
           title="Gross Sales"
           value={formatCurrency(summary?.gross_sales)}
@@ -307,31 +310,110 @@ export const FinanceDashboard = () => {
       {/* Tab 1: Restaurant Settlements */}
       {activeTab === 'settlements' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="w-48">
-              <CustomSelect
-                value={cycleFilter}
-                onChange={setCycleFilter}
-                options={[
-                  { value: 'ALL', label: 'All Settlement Cycles' },
-                  { value: 'DAILY', label: 'Daily Settlements' },
-                  { value: 'WEEKLY', label: 'Weekly Settlements' },
-                  { value: 'MONTHLY', label: 'Monthly Settlements' },
-                ]}
-              />
-            </div>
-
-            <Button variant="outline" size="sm" icon={RefreshCw} onClick={retrySettlements}>
-              Refresh
-            </Button>
+          <div className="w-full sm:w-56">
+            <CustomSelect
+              value={cycleFilter}
+              onChange={setCycleFilter}
+              options={[
+                { value: 'ALL', label: 'All Settlement Cycles' },
+                { value: 'DAILY', label: 'Daily Settlements' },
+                { value: 'WEEKLY', label: 'Weekly Settlements' },
+                { value: 'MONTHLY', label: 'Monthly Settlements' },
+              ]}
+            />
           </div>
 
-          <DataTable
-            columns={settlementColumns}
-            data={settlements || []}
-            loading={settleLoading}
-            emptyTitle="No settlements pending"
-          />
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <DataTable
+              columns={settlementColumns}
+              data={settlements || []}
+              loading={settleLoading}
+              emptyTitle="No settlements pending"
+            />
+          </div>
+
+          {/* Mobile Settlement Cards */}
+          <div className="md:hidden space-y-2.5">
+            {settleLoading ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-xs text-slate-400 font-medium">Loading settlements...</p>
+              </div>
+            ) : !settlements || settlements.length === 0 ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+                No settlements pending.
+              </div>
+            ) : (
+              settlements.map((settle) => (
+                <div
+                  key={settle.id}
+                  className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-2.5 text-xs"
+                >
+                  {/* Header: ID, Restaurant & Status */}
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                        <span>#{settle.id}</span>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100 font-sans truncate">
+                          &bull; {settle.restaurant_name}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 block mt-0.5">
+                        {settle.period} &bull; {settle.orders_count} Orders
+                      </span>
+                    </div>
+                    <StatusBadge status={settle.status} size="xs" />
+                  </div>
+
+                  {/* Financial Breakdown Strip */}
+                  <div className="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 text-center">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Gross</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                        {formatCurrency(settle.gross_sales)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Comm (-)</span>
+                      <span className="font-semibold text-[#2845D6] dark:text-blue-400 text-xs">
+                        -{formatCurrency(settle.commission_deducted)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block">Net Pay</span>
+                      <span className="font-black text-emerald-600 dark:text-emerald-400 text-xs">
+                        {formatCurrency(settle.payable_amount)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Cycle: {settle.settlement_cycle}
+                    </span>
+
+                    {settle.status === 'PENDING' ? (
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => setSettleModalItem(settle)}
+                        className="h-10 sm:h-8 px-4 text-xs font-bold"
+                      >
+                        Process Pay
+                      </Button>
+                    ) : (
+                      <span className="text-emerald-600 text-xs font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Paid
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 
@@ -349,12 +431,65 @@ export const FinanceDashboard = () => {
             </div>
           </div>
 
-          <DataTable
-            columns={commissionColumns}
-            data={commissions || []}
-            loading={commLoading}
-            emptyTitle="No commission rules configured"
-          />
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <DataTable
+              columns={commissionColumns}
+              data={commissions || []}
+              loading={commLoading}
+              emptyTitle="No commission rules configured"
+            />
+          </div>
+
+          {/* Mobile Commission Cards */}
+          <div className="md:hidden space-y-2.5">
+            {commLoading ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-xs text-slate-400 font-medium">Loading commissions...</p>
+              </div>
+            ) : !commissions || commissions.length === 0 ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+                No commission rules configured.
+              </div>
+            ) : (
+              commissions.map((comm) => (
+                <div
+                  key={comm.id}
+                  className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-2 text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">{comm.restaurant_name}</h4>
+                    <StatusBadge status={comm.status} size="xs" />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                    <div>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Commission</span>
+                      <span className="text-base font-black text-[#2845D6] dark:text-blue-400">{comm.commission}%</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Effective Date</span>
+                      <span className="text-slate-600 dark:text-slate-400">{formatDate(comm.effective_from)}</span>
+                    </div>
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="md"
+                        onClick={() => {
+                          setEditingCommissionRest(comm)
+                          setNewCommissionRate(String(comm.commission))
+                        }}
+                        className="h-10 sm:h-8 text-xs"
+                      >
+                        Change %
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 

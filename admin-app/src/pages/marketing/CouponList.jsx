@@ -34,7 +34,50 @@ export const CouponList = () => {
 
   const { data, loading, error, retry } = useApi(
     () => marketingApi.getCoupons({ search: search || undefined }),
-    [search]
+    [search],
+    {
+      initialData: [
+        {
+          id: 1,
+          code: 'DASTAK50',
+          discount_type: 'PERCENTAGE',
+          discount_value: 50,
+          min_order: 199.00,
+          max_discount: 100.00,
+          start_date: '2026-02-01',
+          end_date: '2026-02-28',
+          usage_limit: 1000,
+          used_count: 342,
+          is_active: true,
+        },
+        {
+          id: 2,
+          code: 'WELCOME100',
+          discount_type: 'FLAT',
+          discount_value: 100,
+          min_order: 399.00,
+          max_discount: 100.00,
+          start_date: '2026-01-01',
+          end_date: '2026-12-31',
+          usage_limit: 5000,
+          used_count: 1240,
+          is_active: true,
+        },
+        {
+          id: 3,
+          code: 'FEAST20',
+          discount_type: 'PERCENTAGE',
+          discount_value: 20,
+          min_order: 499.00,
+          max_discount: 150.00,
+          start_date: '2026-02-10',
+          end_date: '2026-02-15',
+          usage_limit: 200,
+          used_count: 200,
+          is_active: false,
+        },
+      ],
+    }
   )
 
   const handleOpenCreate = () => {
@@ -278,11 +321,11 @@ export const CouponList = () => {
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={actionLoading}>
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+            <Button variant="outline" size="md" onClick={() => setIsModalOpen(false)} disabled={actionLoading} className="w-full">
               Cancel
             </Button>
-            <Button type="submit" variant="primary" loading={actionLoading}>
+            <Button type="submit" variant="primary" size="md" loading={actionLoading} className="w-full">
               Save Coupon
             </Button>
           </div>

@@ -13,33 +13,26 @@ import OrderDetailsDrawer from './OrderDetailsDrawer'
 
 export const OrderList = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialStatus = searchParams.get('status') || 'ALL'
+  const currentStatus = searchParams.get('status') || 'NEW'
 
-  const [activeTab, setActiveTab] = useState(initialStatus)
+  const [activeTab, setActiveTab] = useState(currentStatus)
   const [searchQuery, setSearchQuery] = useState('')
   const [paymentFilter, setPaymentFilter] = useState('ALL')
   const [selectedOrderId, setSelectedOrderId] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
-    const statusParam = searchParams.get('status')
-    if (statusParam && statusParam !== activeTab) {
-      setActiveTab(statusParam)
-    }
+    const statusParam = searchParams.get('status') || 'NEW'
+    setActiveTab(statusParam)
   }, [searchParams])
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId)
-    if (tabId === 'ALL') {
-      searchParams.delete('status')
-    } else {
-      searchParams.set('status', tabId)
-    }
-    setSearchParams(searchParams)
+    setSearchParams({ status: tabId })
     setCurrentPage(1)
   }
 
-  const { data, loading, error, meta, retry } = useApi(
+  const { data, loading, error, meta, retry, silentRefresh } = useApi(
     () =>
       ordersApi.getOrders({
         status: activeTab !== 'ALL' ? activeTab : undefined,
@@ -48,21 +41,17 @@ export const OrderList = () => {
         page: currentPage,
         per_page: 10,
       }),
-    [activeTab, searchQuery, paymentFilter, currentPage],
-    {
-      initialData: [
-        { id: 'D4829', customer: 'Aarav Sharma', restaurant: 'Biryani Central', amount: 640.00, payment: 'ONLINE_PAYMENT', status: 'NEW', delivery_boy: 'Unassigned', time: new Date().toISOString() },
-        { id: 'D4828', customer: 'Pooja Verma', restaurant: 'Royal Spice Kitchen', amount: 480.00, payment: 'COD', status: 'PREPARING', delivery_boy: 'Vikas Kumar', time: new Date(Date.now() - 15 * 60000).toISOString() },
-        { id: 'D4827', customer: 'Rohit Gupta', restaurant: 'Punjabi Tadka', amount: 920.00, payment: 'ONLINE_PAYMENT', status: 'OUT_FOR_DELIVERY', delivery_boy: 'Amit Singh', time: new Date(Date.now() - 30 * 60000).toISOString() },
-        { id: 'D4826', customer: 'Neha Patel', restaurant: 'South Express', amount: 310.00, payment: 'COD', status: 'DELIVERED', delivery_boy: 'Rahul Pal', time: new Date(Date.now() - 60 * 60000).toISOString() },
-        { id: 'D4825', customer: 'Manish Singh', restaurant: 'Burger & Beyond', amount: 550.00, payment: 'ONLINE_PAYMENT', status: 'READY', delivery_boy: 'Suresh Patil', time: new Date(Date.now() - 75 * 60000).toISOString() },
-        { id: 'D4824', customer: 'Ananya Roy', restaurant: 'Biryani Central', amount: 720.00, payment: 'ONLINE_PAYMENT', status: 'CANCELLED', delivery_boy: 'Unassigned', time: new Date(Date.now() - 120 * 60000).toISOString() },
-      ],
-    }
+    [activeTab, searchQuery, paymentFilter, currentPage]
   )
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      silentRefresh()
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [silentRefresh])
+
   const orderTabs = [
-    { id: 'ALL', label: 'All Orders' },
     { id: 'NEW', label: 'New', badge: 3 },
     { id: 'ACCEPTED', label: 'Accepted' },
     { id: 'PREPARING', label: 'Preparing', badge: 5 },
@@ -71,6 +60,7 @@ export const OrderList = () => {
     { id: 'PICKED_UP', label: 'Picked Up' },
     { id: 'OUT_FOR_DELIVERY', label: 'Out for Delivery' },
     { id: 'DELIVERED', label: 'Delivered' },
+    { id: 'ALL', label: 'All Orders' },
     { id: 'CANCELLED', label: 'Cancelled' },
     { id: 'REJECTED', label: 'Rejected' },
   ]
@@ -147,20 +137,14 @@ export const OrderList = () => {
 
   return (
     <div className="space-y-5">
-      {/* Page Title & Refresh */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Live Order Management
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Monitor incoming orders, track delivery timelines, and manage exceptions.
-          </p>
-        </div>
-
-        <Button variant="outline" size="sm" icon={RefreshCw} onClick={retry}>
-          Refresh Queue
-        </Button>
+      {/* Page Title */}
+      <div>
+        <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+          Live Order Management
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Real-time incoming orders & dispatch queue.
+        </p>
       </div>
 
       {/* 10 Status Tabs */}
@@ -175,7 +159,7 @@ export const OrderList = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by Order ID (e.g. D4829), customer or restaurant..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
           />
         </div>
 
@@ -193,28 +177,79 @@ export const OrderList = () => {
         </div>
       </div>
 
-      {/* Orders Data Table */}
-      <DataTable
-        columns={columns}
-        data={data || []}
-        loading={loading}
-        error={error}
-        onRetry={retry}
-        emptyTitle="No orders found"
-        emptyDescription="There are no active orders matching your current filter criteria."
-        pagination={
-          meta
-            ? {
-                currentPage: meta.current_page || currentPage,
-                totalPages: meta.last_page || 1,
-                totalItems: meta.total || (data ? data.length : 0),
-                itemsPerPage: meta.per_page || 10,
-                onPageChange: setCurrentPage,
-              }
-            : undefined
-        }
-        onRowClick={(row) => setSelectedOrderId(row.id)}
-      />
+      {/* Desktop Table View */}
+      <div className="hidden md:block">
+        <DataTable
+          columns={columns}
+          data={data || []}
+          loading={loading}
+          error={error}
+          onRetry={retry}
+          emptyTitle="No orders found"
+          emptyDescription="There are no active orders matching your current filter criteria."
+          pagination={
+            meta
+              ? {
+                  currentPage: meta.current_page || currentPage,
+                  totalPages: meta.last_page || 1,
+                  totalItems: meta.total || (data ? data.length : 0),
+                  itemsPerPage: meta.per_page || 10,
+                  onPageChange: setCurrentPage,
+                }
+              : undefined
+          }
+          onRowClick={(row) => setSelectedOrderId(row.id)}
+        />
+      </div>
+
+      {/* Mobile Card List View */}
+      <div className="md:hidden space-y-2.5">
+        {loading ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-xs text-slate-400 font-medium">Loading orders...</p>
+          </div>
+        ) : !data || data.length === 0 ? (
+          <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+            No orders found matching this filter.
+          </div>
+        ) : (
+          data.map((order) => (
+            <div
+              key={order.id}
+              onClick={() => setSelectedOrderId(order.id)}
+              className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer space-y-2.5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-bold text-sm text-[#2845D6] dark:text-blue-400">
+                  #{order.id}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <StatusBadge status={order.status} size="xs" />
+                  <span className="text-[10px] text-slate-400 font-medium">{formatTime(order.time)}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <div className="min-w-0 pr-2">
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 truncate">{order.customer || order.customer_name}</h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{order.restaurant || order.restaurant_name}</p>
+                </div>
+                <span className="font-black text-slate-900 dark:text-slate-100 text-sm shrink-0">
+                  {formatCurrency(order.amount)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
+                <StatusBadge status={order.payment || order.payment_method} size="xs" />
+                <span className={`text-[11px] font-medium ${order.delivery_boy === 'Unassigned' ? 'text-amber-500' : 'text-slate-600 dark:text-slate-300'}`}>
+                  {order.delivery_boy || 'Unassigned'}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       {/* Detailed Order Drawer */}
       {selectedOrderId && (

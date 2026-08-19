@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Menu, Search, Sun, Moon, LogOut, User, Shield, ChevronDown } from 'lucide-react'
+import { Search, Sun, Moon, LogOut, User, Shield, ChevronDown } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import { ROLE_LABELS } from '../../utils/permissions'
@@ -37,16 +37,8 @@ export const Header = ({ onOpenMobileSidebar, title, breadcrumbs = [] }) => {
   return (
     <>
       <header className="sticky top-0 z-30 h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 flex items-center justify-between gap-4">
-        {/* Left Side: Mobile Menu + Breadcrumb / Title */}
+        {/* Left Side: Breadcrumb / Title */}
         <div className="flex items-center gap-3 min-w-0">
-          <button
-            type="button"
-            onClick={onOpenMobileSidebar}
-            className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-
           <div className="flex flex-col min-w-0">
             <h1 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 truncate">
               {title || 'Dashboard'}

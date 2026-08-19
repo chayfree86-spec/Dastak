@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ShoppingBag,
@@ -29,22 +29,32 @@ export const Dashboard = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null)
   const [addRestaurantOpen, setAddRestaurantOpen] = useState(false)
 
-  // Real API hooks
-  const { data: kpiData, loading: kpiLoading, error: kpiError, retry: retryKpi } = useApi(
+  // Real API hooks with silent live background updates
+  const { data: kpiData, loading: kpiLoading, error: kpiError, retry: retryKpi, silentRefresh: silentRefreshKpis } = useApi(
     () => dashboardApi.getKpis()
   )
 
-  const { data: orderOverview, loading: overviewLoading } = useApi(
+  const { data: orderOverview, loading: overviewLoading, silentRefresh: silentRefreshOverview } = useApi(
     () => dashboardApi.getOrderOverview()
   )
 
-  const { data: liveOps, loading: liveLoading } = useApi(
+  const { data: liveOps, loading: liveLoading, silentRefresh: silentRefreshLiveOps } = useApi(
     () => dashboardApi.getLiveOperations()
   )
 
-  const { data: recentOrders, loading: ordersLoading, error: ordersError, retry: retryOrders } = useApi(
+  const { data: recentOrders, loading: ordersLoading, error: ordersError, retry: retryOrders, silentRefresh: silentRefreshOrders } = useApi(
     () => dashboardApi.getRecentOrders({ limit: 8 })
   )
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      silentRefreshKpis()
+      silentRefreshOverview()
+      silentRefreshLiveOps()
+      silentRefreshOrders()
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [silentRefreshKpis, silentRefreshOverview, silentRefreshLiveOps, silentRefreshOrders])
 
   const orderColumns = [
     {
@@ -172,8 +182,8 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* 8 Real-Time Operational KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 8 Real-Time Operational KPI Cards (2-col on mobile, 4-col on desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <KPICard
           title="Today's Orders"
           value={kpiData?.today_orders}
@@ -336,33 +346,77 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recent Live Orders Table (2 Cols) */}
+        {/* Recent Live Orders Section (2 Cols) */}
         <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <ShoppingBag className="w-4 h-4 text-[#2845D6]" />
               <span>Recent Operational Orders</span>
             </h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              icon={RefreshCw}
-              onClick={retryOrders}
-            >
-              Refresh
-            </Button>
           </div>
 
-          <DataTable
-            columns={orderColumns}
-            data={recentOrders || []}
-            loading={ordersLoading}
-            error={ordersError}
-            onRetry={retryOrders}
-            emptyTitle="No recent orders"
-            emptyDescription="New incoming customer orders will appear here automatically."
-            onRowClick={(row) => setSelectedOrderId(row.id)}
-          />
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <DataTable
+              columns={orderColumns}
+              data={recentOrders || []}
+              loading={ordersLoading}
+              error={ordersError}
+              onRetry={retryOrders}
+              emptyTitle="No recent orders"
+              emptyDescription="New incoming customer orders will appear here automatically."
+              onRowClick={(row) => setSelectedOrderId(row.id)}
+            />
+          </div>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden space-y-2.5">
+            {ordersLoading ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-xs text-slate-400 font-medium">Loading orders...</p>
+              </div>
+            ) : !recentOrders || recentOrders.length === 0 ? (
+              <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
+                No recent orders found.
+              </div>
+            ) : (
+              recentOrders.map((order) => (
+                <div
+                  key={order.id}
+                  onClick={() => setSelectedOrderId(order.id)}
+                  className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer space-y-2.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-sm text-[#2845D6] dark:text-blue-400">
+                      #{order.id}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <StatusBadge status={order.status} size="xs" />
+                      <span className="text-[10px] text-slate-400 font-medium">{formatTime(order.time)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="min-w-0 pr-2">
+                      <h4 className="font-bold text-slate-900 dark:text-slate-100 truncate">{order.customer_name || order.customer}</h4>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{order.restaurant_name || order.restaurant}</p>
+                    </div>
+                    <span className="font-black text-slate-900 dark:text-slate-100 text-sm shrink-0">
+                      {formatCurrency(order.amount)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
+                    <StatusBadge status={order.payment_method || order.payment} size="xs" />
+                    <span className={`text-[11px] font-medium ${order.delivery_boy === 'Unassigned' ? 'text-amber-500' : 'text-slate-600 dark:text-slate-300'}`}>
+                      {order.delivery_boy || 'Unassigned'}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 

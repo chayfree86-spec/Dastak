@@ -36,7 +36,7 @@ export const KPICard = ({
   return (
     <div
       onClick={onClick}
-      className={`p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
+      className={`p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
         onClick ? 'cursor-pointer hover:border-[#2845D6]/40' : ''
       }`}
     >

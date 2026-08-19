@@ -34,12 +34,39 @@ export const CustomerDetails = () => {
 
   const { data: customer, loading, error, retry } = useApi(
     () => customersApi.getCustomerDetails(id),
-    [id]
+    [id],
+    {
+      initialData: {
+        id: id || 'C101',
+        name: 'Aarav Sharma',
+        mobile: '9876543210',
+        email: 'aarav.sharma@gmail.com',
+        joined_date: '2025-11-10T10:00:00Z',
+        status: 'ACTIVE',
+        total_orders: 28,
+        total_spend: 14650.00,
+        average_order_value: 523.21,
+        latitude: 26.4500000,
+        longitude: 80.3320000,
+        zone_name: 'Kanpur Central Zone',
+        addresses: [
+          { id: 1, type: 'Home', address: 'Flat 402, Tower B, Ganga Heights, Civil Lines, Kanpur', is_default: true, latitude: 26.4500000, longitude: 80.3320000 },
+          { id: 2, type: 'Office', address: 'Plot 10, Mall Road Commercial Complex, Kanpur', is_default: false, latitude: 26.4610000, longitude: 80.3450000 },
+        ],
+      },
+    }
   )
 
   const { data: orders, loading: ordersLoading } = useApi(
     () => customersApi.getCustomerOrders(id, { limit: 10 }),
-    [id]
+    [id],
+    {
+      initialData: [
+        { id: 'D4829', restaurant: 'Biryani Central', amount: 640.00, payment: 'ONLINE_PAYMENT', status: 'NEW', time: new Date().toISOString() },
+        { id: 'D4750', restaurant: 'Burger & Beyond', amount: 550.00, payment: 'ONLINE_PAYMENT', status: 'DELIVERED', time: new Date(Date.now() - 3 * 86400000).toISOString() },
+        { id: 'D4680', restaurant: 'South Express', amount: 310.00, payment: 'COD', status: 'DELIVERED', time: new Date(Date.now() - 7 * 86400000).toISOString() },
+      ],
+    }
   )
 
   const handleToggleBlock = async () => {
@@ -77,58 +104,84 @@ export const CustomerDetails = () => {
       </div>
 
       {/* Customer Header Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 text-2xl font-black flex items-center justify-center shadow-xs">
+      <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5">
+        <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 w-full md:w-auto">
+          <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 text-xl sm:text-2xl font-black flex items-center justify-center shrink-0 shadow-2xs">
             {customer?.name?.charAt(0) || 'C'}
           </div>
-          <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h2 className="text-xl font-black text-slate-900 dark:text-slate-100">{customer?.name}</h2>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 truncate">{customer?.name}</h2>
               <StatusBadge status={customer?.status} size="xs" />
             </div>
 
-            <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
-              <span className="font-mono">{formatPhone(customer?.mobile)}</span>
-              <span>&bull;</span>
-              <span>{customer?.email}</span>
-              <span>&bull;</span>
-              <span>Joined: {formatDate(customer?.joined_date)}</span>
+            <div className="flex items-center gap-2 sm:gap-3 mt-1 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+              {customer?.mobile && (
+                <a
+                  href={`tel:${customer?.mobile}`}
+                  className="font-mono text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-semibold inline-flex items-center gap-1"
+                >
+                  <span>{formatPhone(customer?.mobile)}</span>
+                  <Phone className="w-3 h-3 text-emerald-500 shrink-0" />
+                </a>
+              )}
+              {customer?.email && (
+                <>
+                  <span className="hidden sm:inline">&bull;</span>
+                  <span className="truncate">{customer?.email}</span>
+                </>
+              )}
+              {customer?.joined_date && (
+                <>
+                  <span className="hidden sm:inline">&bull;</span>
+                  <span className="text-[11px] text-slate-400">Joined: {formatDate(customer?.joined_date)}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
+          {customer?.mobile && (
+            <a
+              href={`tel:${customer?.mobile}`}
+              className="flex-1 sm:flex-none h-11 sm:h-9 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+            >
+              <Phone className="w-4 h-4" />
+              <span>Call Customer</span>
+            </a>
+          )}
           <Button
             variant={customer?.status === 'ACTIVE' ? 'danger' : 'primary'}
-            size="sm"
+            size="md"
             icon={customer?.status === 'ACTIVE' ? Ban : CheckCircle2}
             onClick={() => setBlockConfirmOpen(true)}
+            className="flex-1 sm:flex-none h-11 sm:h-9 text-xs"
           >
             {customer?.status === 'ACTIVE' ? 'Block Account' : 'Unblock Account'}
           </Button>
         </div>
       </div>
 
-      {/* 3 Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Orders</span>
-          <div className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1">
+      {/* 3 Metric Cards Bento Grid */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
+        <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-center sm:text-left">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Total Orders</span>
+          <div className="text-base sm:text-2xl font-black text-slate-900 dark:text-slate-100 mt-0.5 sm:mt-1">
             {customer?.total_orders || 0}
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Lifetime Spend</span>
-          <div className="text-2xl font-black text-[#2845D6] dark:text-blue-400 mt-1">
+        <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-center sm:text-left">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Lifetime Spend</span>
+          <div className="text-base sm:text-2xl font-black text-[#2845D6] dark:text-blue-400 mt-0.5 sm:mt-1 truncate">
             {formatCurrency(customer?.total_spend)}
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Average Order Value</span>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+        <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-center sm:text-left">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Avg Order Value</span>
+          <div className="text-base sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 sm:mt-1 truncate">
             {formatCurrency(customer?.average_order_value)}
           </div>
         </div>
@@ -137,21 +190,64 @@ export const CustomerDetails = () => {
       <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === 'orders' && (
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3 sm:space-y-4">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Customer Order History</h3>
-          <DataTable
-            columns={[
-              { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
-              { key: 'restaurant', header: 'Restaurant' },
-              { key: 'amount', header: 'Amount', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
-              { key: 'payment', header: 'Payment', render: (r) => <StatusBadge status={r.payment} size="xs" /> },
-              { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} size="xs" /> },
-              { key: 'time', header: 'Ordered On', render: (r) => <span className="text-slate-400">{formatDateTime(r.time)}</span> },
-            ]}
-            data={orders || []}
-            loading={ordersLoading}
-            emptyTitle="No orders placed yet"
-          />
+          
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <DataTable
+              columns={[
+                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
+                { key: 'restaurant', header: 'Restaurant' },
+                { key: 'amount', header: 'Amount', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
+                { key: 'payment', header: 'Payment', render: (r) => <StatusBadge status={r.payment} size="xs" /> },
+                { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} size="xs" /> },
+                { key: 'time', header: 'Ordered On', render: (r) => <span className="text-slate-400">{formatDateTime(r.time)}</span> },
+              ]}
+              data={orders || []}
+              loading={ordersLoading}
+              emptyTitle="No orders placed yet"
+            />
+          </div>
+
+          {/* Mobile Order Cards */}
+          <div className="md:hidden space-y-2.5">
+            {ordersLoading ? (
+              <div className="p-6 text-center text-xs text-slate-400 font-medium">
+                Loading orders...
+              </div>
+            ) : !orders || orders.length === 0 ? (
+              <div className="p-6 text-center text-xs text-slate-400 font-medium">
+                No orders placed yet.
+              </div>
+            ) : (
+              orders.map((ord) => (
+                <div
+                  key={ord.id}
+                  className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                      <span>#{ord.id}</span>
+                      <span className="text-[11px] font-normal text-slate-400">&bull; {formatDateTime(ord.time)}</span>
+                    </div>
+                    <StatusBadge status={ord.status} size="xs" />
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{ord.restaurant}</span>
+                    <span className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                      {formatCurrency(ord.amount)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <StatusBadge status={ord.payment} size="xs" />
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 

@@ -40,7 +40,72 @@ export const OrderDetailsDrawer = ({
 
   const { data: order, loading, error, retry } = useApi(
     () => ordersApi.getOrderDetails(orderId),
-    [orderId]
+    [orderId],
+    {
+      initialData: {
+        id: orderId || 'D4829',
+        created_at: new Date(Date.now() - 35 * 60000).toISOString(),
+        status: 'PREPARING',
+        payment_method: 'ONLINE_PAYMENT',
+        payment_status: 'PAID',
+        
+        customer: {
+          name: 'Aarav Sharma',
+          mobile: '9876543210',
+          address: 'Flat 402, Tower B, Green Valley Apartments, Sector 62',
+          landmark: 'Opposite Central Park',
+          city: 'Noida',
+        },
+
+        restaurant: {
+          id: 1,
+          name: 'Biryani Central',
+          address: 'Plot 42, Sector 18, Commercial Belt',
+          mobile: '9811223344',
+          commission_rate: 15,
+        },
+
+        delivery: {
+          delivery_boy_id: 'R104',
+          delivery_boy_name: 'Vikas Kumar',
+          mobile: '9899112233',
+          assignment_type: 'AUTO',
+          distance_km: 4.8,
+          pickup_time: null,
+          delivery_time: null,
+        },
+
+        items: [
+          { id: 1, name: 'Hyderabadi Dum Biryani', variant: 'Full', addons: ['Extra Raita'], quantity: 2, price: 299.00, total: 598.00 },
+          { id: 2, name: 'Chicken Tikka Kebab', variant: '6 Pcs', addons: ['Mint Chutney'], quantity: 1, price: 270.00, total: 270.00 },
+        ],
+
+        pricing: {
+          subtotal: 868.00,
+          discount: 100.00,
+          delivery_charge: 45.00,
+          tax: 43.40,
+          final_amount: 856.40,
+        },
+
+        business_summary: {
+          restaurant_commission: 130.20,
+          delivery_boy_earning: 45.00,
+          dastak_net_earning: 130.20,
+          settlement_status: 'PENDING',
+        },
+
+        timeline: [
+          { title: 'Order Placed', timestamp: new Date(Date.now() - 35 * 60000).toISOString(), status: 'completed', description: 'Paid via UPI' },
+          { title: 'Restaurant Accepted', timestamp: new Date(Date.now() - 32 * 60000).toISOString(), status: 'completed', description: 'Estimated prep time 25 mins' },
+          { title: 'Food Preparing', timestamp: new Date(Date.now() - 25 * 60000).toISOString(), status: 'current', description: 'Kitchen is preparing your order' },
+          { title: 'Food Ready for Pickup', timestamp: null, status: 'upcoming', description: 'Awaiting packing' },
+          { title: 'Rider Assigned', timestamp: new Date(Date.now() - 15 * 60000).toISOString(), status: 'upcoming', description: 'Vikas Kumar assigned' },
+          { title: 'Order Picked Up', timestamp: null, status: 'upcoming', description: 'En route to customer' },
+          { title: 'Delivered', timestamp: null, status: 'upcoming', description: 'Customer doorstep delivery' },
+        ],
+      },
+    }
   )
 
   const handleUpdateStatus = async (nextStatus) => {

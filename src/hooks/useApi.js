@@ -22,12 +22,11 @@ export const useApi = (apiFn, params = null, options = {}) => {
 
   const paramsKey = JSON.stringify(params)
 
-  const execute = useCallback(async (overrideParams) => {
-    // Show loading while we have no data yet (keeps current data visible on refetch).
-    if (!data) {
+  const execute = useCallback(async (overrideParams, { silent = false } = {}) => {
+    if (!silent) {
       setLoading(true)
+      setError(null)
     }
-    setError(null)
     try {
       const queryParams = overrideParams !== undefined ? overrideParams : paramsRef.current
       const response = await apiFnRef.current(queryParams)
@@ -47,19 +46,20 @@ export const useApi = (apiFn, params = null, options = {}) => {
       return response
     } catch (err) {
       if (isMounted.current) {
-        // Never fall back to mock/placeholder data — surface a real error state.
-        setError(err)
+        if (!silent) {
+          setError(err)
+        }
         if (optionsRef.current.onError) {
           optionsRef.current.onError(err)
         }
       }
       return null
     } finally {
-      if (isMounted.current) {
+      if (isMounted.current && !silent) {
         setLoading(false)
       }
     }
-  }, [data])
+  }, [])
 
   useEffect(() => {
     isMounted.current = true
@@ -73,6 +73,10 @@ export const useApi = (apiFn, params = null, options = {}) => {
 
   const isEmpty = !loading && !error && (data === null || data === undefined || (Array.isArray(data) && data.length === 0))
 
+  const silentRefresh = useCallback(() => {
+    return execute(undefined, { silent: true })
+  }, [execute])
+
   return {
     data,
     loading,
@@ -81,6 +85,7 @@ export const useApi = (apiFn, params = null, options = {}) => {
     meta,
     refetch: execute,
     retry: execute,
+    silentRefresh,
     setData,
   }
 }
