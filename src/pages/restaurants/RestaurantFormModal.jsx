@@ -76,6 +76,7 @@ export const RestaurantFormModal = ({
     setDeliveryRadiusKm(r.delivery_radius_km != null ? String(r.delivery_radius_km) : '7')
     setIsActive(r.status ? r.status === 'ACTIVE' : true)
     setIsVegOnly(!!r.is_veg_only)
+    setImage(r.logo || r.image || r.banner || null)
     if (r.latitude != null && r.longitude != null) {
       setLatitude(Number(r.latitude))
       setLongitude(Number(r.longitude))
@@ -295,6 +296,8 @@ export const RestaurantFormModal = ({
         delivery_radius_km: Number(deliveryRadiusKm),
         status: isActive ? 'ACTIVE' : 'INACTIVE',
         is_veg_only: isVegOnly,
+        image: image || null,
+        logo: image || null,
         latitude: Number(latitude),
         longitude: Number(longitude),
       }

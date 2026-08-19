@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => 'admin@dastakdelivery.com'],
             [
-                'name' => 'Sandeep Sharma (Super Admin)',
+                'name' => 'Sandeep Prajapati (Super Admin)',
                 'mobile' => '9876543210',
                 'password' => Hash::make('Dastak@Admin2026!'),
                 'status' => AccountStatus::ACTIVE,

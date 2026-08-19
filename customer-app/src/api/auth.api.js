@@ -1,13 +1,49 @@
 import apiClient from './client'
+import { getDeviceId, getDeviceName, getDevicePlatform } from '../utils/device'
 
 export const authApi = {
-  login: async (identifier, password) => {
-    const res = await apiClient.post('/auth/login', { identifier, password })
+  // Mobile Verification + Device Binding
+  startVerification: async (mobile) => {
+    const res = await apiClient.post('/customer/auth/start', {
+      mobile,
+      device_id: getDeviceId(),
+      device_name: getDeviceName(),
+      device_platform: getDevicePlatform(),
+    })
     return res.data
   },
 
-  register: async ({ name, mobile, password, email }) => {
-    const res = await apiClient.post('/auth/register', { name, mobile, password, email })
+  resendOtp: async (sessionId) => {
+    const res = await apiClient.post('/customer/auth/resend-otp', {
+      session_id: sessionId,
+      device_id: getDeviceId(),
+    })
+    return res.data
+  },
+
+  verifyOtp: async (sessionId, otp, name = null) => {
+    const res = await apiClient.post('/customer/auth/verify', {
+      session_id: sessionId,
+      otp,
+      device_id: getDeviceId(),
+      device_name: getDeviceName(),
+      name,
+    })
+    return res.data
+  },
+
+  validateSession: async (sessionToken) => {
+    const res = await apiClient.post('/customer/auth/session', {
+      session_token: sessionToken,
+      device_id: getDeviceId(),
+    })
+    return res.data
+  },
+
+  changeDevice: async () => {
+    const res = await apiClient.post('/customer/auth/change-device', {
+      device_id: getDeviceId(),
+    })
     return res.data
   },
 
@@ -18,9 +54,12 @@ export const authApi = {
 
   logout: async () => {
     try {
-      await apiClient.post('/auth/logout')
+      await apiClient.post('/customer/auth/logout', {
+        device_id: getDeviceId(),
+      })
     } catch (e) {}
     localStorage.removeItem('dastak_customer_token')
+    localStorage.removeItem('dastak_customer_session_token')
     localStorage.removeItem('dastak_customer_user')
   },
 }

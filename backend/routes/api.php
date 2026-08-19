@@ -37,7 +37,9 @@ use App\Http\Controllers\Api\V1\Delivery\DeliveryOrderController;
 use App\Http\Controllers\Api\V1\Delivery\DeliveryProfileController;
 use App\Http\Controllers\Api\V1\Delivery\DeliveryReviewController;
 use App\Http\Controllers\Api\V1\DeviceTokenController;
-use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\Customer\CustomerDeviceAuthController;
+use App\Http\Controllers\Api\V1\Delivery\DeliveryDeviceAuthController;
+use App\Http\Controllers\Api\V1\Partner\PartnerDeviceAuthController;
 use App\Http\Controllers\Api\V1\Partner\MenuPartnerController;
 use App\Http\Controllers\Api\V1\Partner\PartnerAnalyticsController;
 use App\Http\Controllers\Api\V1\Partner\PartnerOrderController;
@@ -68,6 +70,43 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+        Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+    });
+
+    // Customer Device Authentication
+    Route::prefix('customer/auth')->group(function () {
+        Route::post('/start', [CustomerDeviceAuthController::class, 'start']);
+        Route::post('/resend-otp', [CustomerDeviceAuthController::class, 'resendOtp']);
+        Route::post('/verify', [CustomerDeviceAuthController::class, 'verify']);
+        Route::post('/session', [CustomerDeviceAuthController::class, 'session']);
+    });
+
+    // Delivery Rider Device Authentication
+    Route::prefix('delivery/auth')->group(function () {
+        Route::post('/start', [DeliveryDeviceAuthController::class, 'start']);
+        Route::post('/resend-otp', [DeliveryDeviceAuthController::class, 'resendOtp']);
+        Route::post('/verify', [DeliveryDeviceAuthController::class, 'verify']);
+        Route::post('/session', [DeliveryDeviceAuthController::class, 'session']);
+    });
+
+    // Restaurant Partner Device Authentication
+    Route::prefix('partner/auth')->group(function () {
+        Route::post('/start', [PartnerDeviceAuthController::class, 'start']);
+        Route::post('/resend-otp', [PartnerDeviceAuthController::class, 'resendOtp']);
+        Route::post('/verify', [PartnerDeviceAuthController::class, 'verify']);
+        Route::post('/session', [PartnerDeviceAuthController::class, 'session']);
+    });
+
+    // Admin Auth Aliases
+    Route::prefix('admin/auth')->group(function () {
+        Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/profile', [AuthController::class, 'me']);
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+        Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::put('/change-password', [AuthController::class, 'changePassword']);
     });
 
     Route::get('/restaurants', [RestaurantPublicController::class, 'index']);
@@ -100,6 +139,16 @@ Route::prefix('v1')->group(function () {
             Route::post('/device-token', [DeviceTokenController::class, 'store']);
             Route::delete('/device-token', [DeviceTokenController::class, 'destroy']);
         });
+
+        // Device-Bound Session Operations
+        Route::post('/customer/auth/change-device', [CustomerDeviceAuthController::class, 'changeDevice']);
+        Route::post('/customer/auth/logout', [CustomerDeviceAuthController::class, 'logout']);
+
+        Route::post('/delivery/auth/change-device', [DeliveryDeviceAuthController::class, 'changeDevice']);
+        Route::post('/delivery/auth/logout', [DeliveryDeviceAuthController::class, 'logout']);
+
+        Route::post('/partner/auth/change-device', [PartnerDeviceAuthController::class, 'changeDevice']);
+        Route::post('/partner/auth/logout', [PartnerDeviceAuthController::class, 'logout']);
 
         // In-App Notifications Feed for Authenticated Users
         Route::prefix('notifications')->group(function () {
@@ -425,6 +474,14 @@ Route::prefix('v1')->group(function () {
                     Route::post('/service-areas', [SettingsController::class, 'createServiceArea']);
                     Route::put('/service-areas/{id}', [SettingsController::class, 'updateServiceArea']);
                     Route::delete('/service-areas/{id}', [SettingsController::class, 'deleteServiceArea']);
+                });
+
+                // Central System Log & Monitoring Center
+                Route::prefix('system-logs')->group(function () {
+                    Route::get('/overview', [\App\Http\Controllers\Api\V1\Admin\SystemLogAdminController::class, 'overview']);
+                    Route::get('/export', [\App\Http\Controllers\Api\V1\Admin\SystemLogAdminController::class, 'export']);
+                    Route::get('/', [\App\Http\Controllers\Api\V1\Admin\SystemLogAdminController::class, 'index']);
+                    Route::get('/{id}', [\App\Http\Controllers\Api\V1\Admin\SystemLogAdminController::class, 'show']);
                 });
 
                 // Live Fleet Telemetry Map

@@ -60,6 +60,7 @@ export function App() {
                   <PwaController />
                   <Suspense fallback={<PageLoadingFallback />}>
                     <Routes>
+                      <Route path="/login" element={<LoginPage />} />
                       <Route element={<CustomerLayout />}>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/search" element={<SearchPage />} />
@@ -75,7 +76,6 @@ export function App() {
                         <Route path="/more" element={<MorePage />} />
                         <Route path="/account" element={<AccountPage />} />
                         <Route path="/addresses" element={<SavedAddressesPage />} />
-                        <Route path="/login" element={<LoginPage />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                       </Route>
                     </Routes>

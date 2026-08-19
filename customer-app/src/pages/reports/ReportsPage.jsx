@@ -283,35 +283,47 @@ export const ReportsPage = () => {
                       )}
 
                       {/* Order Footer & Actions */}
-                      <div className="flex items-center justify-between gap-3 pt-1">
-                        <div>
-                          <span className="text-[10px] font-black uppercase text-slate-400 block">
-                            {lang === 'hi' ? 'कुल बिल' : 'Total Bill'}
-                          </span>
-                          <span className="font-black text-base text-slate-900 dark:text-slate-100">
-                            {formatCurrency(billTotal)}
-                          </span>
+                      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider">
+                              {lang === 'hi' ? 'कुल बिल' : 'Total Bill'}
+                            </span>
+                            <span className="font-black text-base sm:text-lg text-slate-900 dark:text-slate-100">
+                              {formatCurrency(billTotal)}
+                            </span>
+                          </div>
+
+                          <div className="text-right">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase block">
+                              {o.payment_mode === 'COD' ? 'Cash on Delivery' : 'Paid Online'}
+                            </span>
+                            <span className="text-[11px] font-bold text-slate-500">
+                              {items.length} {items.length === 1 ? 'item' : 'items'}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        {/* Action Buttons Grid (Mobile Optimized) */}
+                        <div className={`grid gap-2 pt-1 ${isDelivered ? 'grid-cols-3' : 'grid-cols-2'}`}>
                           {isDelivered && (
                             <>
                               <button
                                 type="button"
                                 onClick={() => setSelectedOrderForRating(o)}
-                                className="px-3 py-2 rounded-2xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 text-xs font-black flex items-center gap-1.5 border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shadow-xs"
+                                className="min-h-[40px] px-2 py-2 rounded-2xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 text-xs font-black flex items-center justify-center gap-1.5 border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shadow-xs active:scale-95"
                               >
-                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                <span>{t.rateOrder || (lang === 'hi' ? 'रेटिंग दें' : 'Rate')}</span>
+                                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                                <span className="truncate">{t.rateOrder || (lang === 'hi' ? 'रेटिंग दें' : 'Rate')}</span>
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => handleReorder(o)}
-                                className="px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#2845D6] dark:text-blue-400 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer"
+                                className="min-h-[40px] px-2 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#2845D6] dark:text-blue-400 text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                               >
-                                <RotateCcw className="w-3.5 h-3.5" />
-                                <span>{t.orderAgain || (lang === 'hi' ? 'फिर से ऑर्डर करें' : 'Re-Order')}</span>
+                                <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+                                <span className="truncate">{t.orderAgain || (lang === 'hi' ? 'फिर ऑर्डर करें' : 'Re-Order')}</span>
                               </button>
                             </>
                           )}
@@ -319,10 +331,10 @@ export const ReportsPage = () => {
                           <button
                             type="button"
                             onClick={() => navigate(`/orders/${o.order_number}`)}
-                            className="px-4 py-2 rounded-2xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white text-xs font-black shadow-md shadow-blue-600/20 flex items-center gap-1 transition-all cursor-pointer"
+                            className="min-h-[40px] px-3 py-2 rounded-2xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white text-xs font-black shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                           >
                             <span>{lang === 'hi' ? 'रसीद देखें' : 'Receipt'}</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
+                            <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                           </button>
                         </div>
                       </div>

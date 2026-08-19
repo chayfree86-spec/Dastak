@@ -28,6 +28,7 @@ import Button from '../../components/common/Button'
 import Modal from '../../components/common/Modal'
 import RatingModal from '../../components/common/RatingModal'
 import LiveOrderTrackingMap from '../../components/orders/LiveOrderTrackingMap'
+import { realtimeBus } from '../../utils/realtimeSync'
 
 export const OrderTrackingPage = () => {
   const { orderNumber } = useParams()
@@ -80,8 +81,21 @@ export const OrderTrackingPage = () => {
 
   useEffect(() => {
     fetchOrder()
-    const interval = setInterval(fetchOrder, 8000)
-    return () => clearInterval(interval)
+
+    // 0ms Realtime status sync
+    const unsubscribe = realtimeBus.subscribe(() => {
+      fetchOrder()
+    })
+
+    const handleFocus = () => fetchOrder()
+    window.addEventListener('focus', handleFocus)
+
+    const interval = setInterval(fetchOrder, 6000)
+    return () => {
+      unsubscribe()
+      window.removeEventListener('focus', handleFocus)
+      clearInterval(interval)
+    }
   }, [fetchOrder])
 
   // Countdown timer for cancellation

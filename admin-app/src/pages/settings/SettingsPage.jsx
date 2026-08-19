@@ -32,28 +32,29 @@ export const SettingsPage = () => {
   const toast = useToast()
   const [activeTab, setActiveTab] = useState('general')
   const [saving, setSaving] = useState(false)
+  const [loadingSettings, setLoadingSettings] = useState(true)
 
   // General Settings
-  const [appName, setAppName] = useState('Dastak')
-  const [tagline, setTagline] = useState('Jo Chahiye, Ghar Par')
-  const [supportPhone, setSupportPhone] = useState('1800-123-4567')
-  const [supportEmail, setSupportEmail] = useState('support@dastakdelivery.com')
+  const [appName, setAppName] = useState('')
+  const [tagline, setTagline] = useState('')
+  const [supportPhone, setSupportPhone] = useState('')
+  const [supportEmail, setSupportEmail] = useState('')
 
   // Order Settings
-  const [cancelWindowMins, setCancelWindowMins] = useState('1')
+  const [cancelWindowMins, setCancelWindowMins] = useState('')
   const [autoAcceptOrders, setAutoAcceptOrders] = useState(false)
 
   // Delivery Settings
   const [dispatchMode, setDispatchMode] = useState('AUTO')
-  const [maxRadiusKm, setMaxRadiusKm] = useState('12')
-  const [baseDeliveryFee, setBaseDeliveryFee] = useState('35.00')
+  const [maxRadiusKm, setMaxRadiusKm] = useState('')
+  const [baseDeliveryFee, setBaseDeliveryFee] = useState('')
 
   // Payment Settings
   const [codEnabled, setCodEnabled] = useState(true)
   const [onlineGateway, setOnlineGateway] = useState('RAZORPAY')
 
   // Commission Settings
-  const [defaultCommission, setDefaultCommission] = useState('15')
+  const [defaultCommission, setDefaultCommission] = useState('')
 
   // Service Areas Management State
   const [serviceAreas, setServiceAreas] = useState([])
@@ -63,6 +64,32 @@ export const SettingsPage = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [zoneToDelete, setZoneToDelete] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
+
+  const fetchSettings = async () => {
+    setLoadingSettings(true)
+    try {
+      const res = await settingsApi.getSettings()
+      const data = res?.data || res || {}
+      if (data) {
+        if (data.app_name !== undefined) setAppName(data.app_name)
+        if (data.tagline !== undefined) setTagline(data.tagline)
+        if (data.support_phone !== undefined) setSupportPhone(data.support_phone)
+        if (data.support_email !== undefined) setSupportEmail(data.support_email)
+        if (data.cancel_window_mins !== undefined) setCancelWindowMins(String(data.cancel_window_mins))
+        if (data.auto_accept !== undefined) setAutoAcceptOrders(Boolean(data.auto_accept))
+        if (data.dispatch_mode !== undefined) setDispatchMode(data.dispatch_mode)
+        if (data.max_radius_km !== undefined) setMaxRadiusKm(String(data.max_radius_km))
+        if (data.base_delivery_fee !== undefined) setBaseDeliveryFee(String(data.base_delivery_fee))
+        if (data.cod_enabled !== undefined) setCodEnabled(Boolean(data.cod_enabled))
+        if (data.online_gateway !== undefined) setOnlineGateway(data.online_gateway)
+        if (data.default_commission !== undefined) setDefaultCommission(String(data.default_commission))
+      }
+    } catch (err) {
+      console.error('Failed to load settings:', err)
+    } finally {
+      setLoadingSettings(false)
+    }
+  }
 
   const fetchServiceAreas = async () => {
     setLoadingZones(true)
@@ -78,6 +105,7 @@ export const SettingsPage = () => {
   }
 
   useEffect(() => {
+    fetchSettings()
     fetchServiceAreas()
   }, [])
 
@@ -117,10 +145,10 @@ export const SettingsPage = () => {
   }
 
   const handleSave = async (e) => {
-    e.preventDefault()
+    if (e) e.preventDefault()
     setSaving(true)
     try {
-      await settingsApi.updateSettings({
+      const payload = {
         app_name: appName,
         tagline,
         support_phone: supportPhone,
@@ -131,9 +159,26 @@ export const SettingsPage = () => {
         max_radius_km: Number(maxRadiusKm),
         base_delivery_fee: Number(baseDeliveryFee),
         cod_enabled: codEnabled,
+        online_gateway: onlineGateway,
         default_commission: Number(defaultCommission),
-      })
-      toast.success('Settings Saved', 'Platform configuration updated successfully.')
+      }
+      const res = await settingsApi.updateSettings(payload)
+      const data = res?.data || res || {}
+      if (data) {
+        if (data.app_name !== undefined) setAppName(data.app_name)
+        if (data.tagline !== undefined) setTagline(data.tagline)
+        if (data.support_phone !== undefined) setSupportPhone(data.support_phone)
+        if (data.support_email !== undefined) setSupportEmail(data.support_email)
+        if (data.cancel_window_mins !== undefined) setCancelWindowMins(String(data.cancel_window_mins))
+        if (data.auto_accept !== undefined) setAutoAcceptOrders(Boolean(data.auto_accept))
+        if (data.dispatch_mode !== undefined) setDispatchMode(data.dispatch_mode)
+        if (data.max_radius_km !== undefined) setMaxRadiusKm(String(data.max_radius_km))
+        if (data.base_delivery_fee !== undefined) setBaseDeliveryFee(String(data.base_delivery_fee))
+        if (data.cod_enabled !== undefined) setCodEnabled(Boolean(data.cod_enabled))
+        if (data.online_gateway !== undefined) setOnlineGateway(data.online_gateway)
+        if (data.default_commission !== undefined) setDefaultCommission(String(data.default_commission))
+      }
+      toast.success('Settings Saved', 'Platform configuration updated successfully in database.')
     } catch (err) {
       toast.error('Failed', err.message || 'Unable to update platform settings.')
     } finally {
@@ -177,12 +222,35 @@ export const SettingsPage = () => {
 
       <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* Tab 1: General & Brand */}
-        {activeTab === 'general' && (
-          <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Brand Identity & Support</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {loadingSettings && activeTab !== 'service_areas' ? (
+        <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-5 animate-pulse">
+          <div className="h-4 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+            <div className="space-y-2">
+              <div className="h-3 w-28 bg-slate-200 dark:bg-slate-700 rounded-md" />
+              <div className="h-11 bg-slate-100 dark:bg-slate-700/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 w-28 bg-slate-200 dark:bg-slate-700 rounded-md" />
+              <div className="h-11 bg-slate-100 dark:bg-slate-700/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 w-28 bg-slate-200 dark:bg-slate-700 rounded-md" />
+              <div className="h-11 bg-slate-100 dark:bg-slate-700/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50" />
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 w-28 bg-slate-200 dark:bg-slate-700 rounded-md" />
+              <div className="h-11 bg-slate-100 dark:bg-slate-700/50 rounded-2xl border border-slate-200/50 dark:border-slate-700/50" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSave} className="space-y-6">
+          {/* Tab 1: General & Brand */}
+          {activeTab === 'general' && (
+            <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Brand Identity & Support</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 label="Application Name"
                 value={appName}
@@ -420,6 +488,7 @@ export const SettingsPage = () => {
           </div>
         )}
       </form>
+      )}
 
       {/* Add / Edit Service Area Modal */}
       <ZoneFormModal

@@ -11,6 +11,19 @@ class LoginRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (!$this->has('identifier')) {
+            $identifier = $this->input('login') ?? $this->input('email') ?? $this->input('mobile');
+            if ($identifier) {
+                $this->merge(['identifier' => (string)$identifier]);
+            }
+        }
+        if (!$this->has('password') && $this->has('pin')) {
+            $this->merge(['password' => (string)$this->input('pin')]);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -24,7 +37,7 @@ class LoginRequest extends FormRequest
     {
         return [
             'identifier.required' => 'Email or mobile number is required.',
-            'password.required' => 'Password is required.',
+            'password.required' => 'Password or PIN is required.',
         ];
     }
 }

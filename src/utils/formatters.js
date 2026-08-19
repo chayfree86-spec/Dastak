@@ -1,4 +1,4 @@
-// Currency, date, time and phone formatters
+// Currency, date, time and phone formatters with strict Indian Standard Time (Asia/Kolkata)
 
 export const formatCurrency = (amount) => {
   if (amount === undefined || amount === null || isNaN(amount)) return '₹ 0.00'
@@ -16,6 +16,7 @@ export const formatDate = (dateString) => {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
   return new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -27,6 +28,7 @@ export const formatDateTime = (dateString) => {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
   return new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -41,6 +43,7 @@ export const formatTime = (dateString) => {
   const date = new Date(dateString)
   if (isNaN(date.getTime())) return dateString
   return new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,

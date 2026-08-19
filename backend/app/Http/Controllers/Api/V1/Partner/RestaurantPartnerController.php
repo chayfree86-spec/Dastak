@@ -101,18 +101,35 @@ class RestaurantPartnerController extends Controller
         $restaurant = $this->getPartnerRestaurant($request);
         $hours = $request->input('hours', []);
 
+        $dayMap = [
+            'sunday' => 0, 'sun' => 0, '0' => 0,
+            'monday' => 1, 'mon' => 1, '1' => 1,
+            'tuesday' => 2, 'tue' => 2, '2' => 2,
+            'wednesday' => 3, 'wed' => 3, '3' => 3,
+            'thursday' => 4, 'thu' => 4, '4' => 4,
+            'friday' => 5, 'fri' => 5, '5' => 5,
+            'saturday' => 6, 'sat' => 6, '6' => 6,
+        ];
+
         if (is_array($hours)) {
             foreach ($hours as $item) {
-                if (isset($item['day'])) {
+                $dayRaw = strtolower(trim((string) ($item['day'] ?? $item['day_of_week'] ?? '')));
+                $dayIndex = array_key_exists($dayRaw, $dayMap) ? $dayMap[$dayRaw] : null;
+
+                if ($dayIndex !== null) {
+                    $isClosed = isset($item['is_closed'])
+                        ? (bool) $item['is_closed']
+                        : (isset($item['is_open']) ? ! (bool) $item['is_open'] : false);
+
                     \App\Models\RestaurantOperatingHour::updateOrCreate(
                         [
                             'restaurant_id' => $restaurant->id,
-                            'day_of_week' => strtolower($item['day']),
+                            'day_of_week' => $dayIndex,
                         ],
                         [
-                            'is_open' => (bool) ($item['is_open'] ?? true),
-                            'open_time' => $item['open_time'] ?? '08:00',
-                            'close_time' => $item['close_time'] ?? '23:00',
+                            'is_closed' => $isClosed,
+                            'opening_time' => $item['opening_time'] ?? $item['open_time'] ?? '09:00:00',
+                            'closing_time' => $item['closing_time'] ?? $item['close_time'] ?? '23:00:00',
                         ]
                     );
                 }

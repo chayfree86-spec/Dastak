@@ -13,6 +13,28 @@ class StoreAddressRequest extends FormRequest
         return auth('sanctum')->check();
     }
 
+    protected function prepareForValidation(): void
+    {
+        $type = $this->input('type');
+        if ($type) {
+            $upper = strtoupper((string) $type);
+            if (in_array($upper, ['HOME', 'WORK', 'OTHER'])) {
+                $type = $upper;
+            } else {
+                $type = 'HOME';
+            }
+        }
+
+        $this->merge([
+            'contact_name' => $this->input('contact_name') ?? $this->input('customer_name') ?? $this->input('name') ?? $this->user()?->name ?? 'Customer',
+            'contact_mobile' => $this->input('contact_mobile') ?? $this->input('customer_phone') ?? $this->input('phone') ?? $this->input('mobile') ?? $this->user()?->mobile ?? '9876543210',
+            'address_line1' => $this->input('address_line1') ?? $this->input('address') ?? 'N/A',
+            'city' => $this->input('city') ?? 'Kanpur',
+            'pincode' => $this->input('pincode') ?? '208001',
+            'type' => $type ?? 'HOME',
+        ]);
+    }
+
     public function rules(): array
     {
         return [

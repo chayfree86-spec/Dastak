@@ -18,6 +18,7 @@ import {
   Moon,
   LogOut,
   Shield,
+  Activity,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -34,6 +35,7 @@ const navigationItems = [
   { label: 'Reports', path: '/reports', icon: BarChart3, permission: 'REPORTS', color: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' },
   { label: 'Support', path: '/support', icon: HelpCircle, permission: 'SUPPORT', color: 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400' },
   { label: 'Settings', path: '/settings', icon: Settings, permission: 'SETTINGS', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' },
+  { label: 'System Log', path: '/system-logs', icon: Activity, permission: 'SYSTEM_LOG', color: 'bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400' },
 ]
 
 export const Sidebar = ({

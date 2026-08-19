@@ -22,6 +22,7 @@ import CouponList from './pages/marketing/CouponList'
 import ReportsDashboard from './pages/reports/ReportsDashboard'
 import SupportTickets from './pages/support/SupportTickets'
 import SettingsPage from './pages/settings/SettingsPage'
+import SystemLogDashboard from './pages/systemLog/SystemLogDashboard'
 
 import { PwaInstallModal } from './components/pwa/PwaInstallModal'
 import { usePwaUpdate } from './hooks/usePwaUpdate'
@@ -81,6 +82,7 @@ export const App = () => {
                 <Route path="finance" element={<FinanceDashboard />} />
                 <Route path="marketing" element={<CouponList />} />
                 <Route path="reports" element={<ReportsDashboard />} />
+                <Route path="system-logs" element={<SystemLogDashboard />} />
                 <Route path="support" element={<SupportTickets />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />

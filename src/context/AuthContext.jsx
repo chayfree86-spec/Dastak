@@ -7,7 +7,7 @@ const AuthContext = createContext()
 const BYPASS_TOKEN = 'dastak-admin-master-bypass-token-2026'
 const DEFAULT_USER = {
   id: 1,
-  name: 'Sandeep Sharma',
+  name: 'Sandeep Prajapati',
   email: 'admin@dastakdelivery.com',
   role: ROLES.SUPER_ADMIN,
 }

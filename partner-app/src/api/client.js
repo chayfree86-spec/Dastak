@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { emitRealtimeEvent } from '../utils/realtimeSync'
 
 const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -21,9 +22,20 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor for consistent error extraction
+// Response interceptor for consistent error extraction & realtime broadcast
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config?.method?.toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      emitRealtimeEvent('DATA_MUTATION', {
+        source: 'partner-app',
+        url: response.config?.url,
+        method,
+        timestamp: Date.now(),
+      })
+    }
+    return response
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('dastak_partner_token')

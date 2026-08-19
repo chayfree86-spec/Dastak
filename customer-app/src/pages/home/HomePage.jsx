@@ -29,6 +29,7 @@ import RestaurantCard from '../../components/common/RestaurantCard'
 import ActiveOrderBanner from '../../components/common/ActiveOrderBanner'
 import VoiceSearchModal from '../../components/common/VoiceSearchModal'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
+import { realtimeBus } from '../../utils/realtimeSync'
 
 export const HomePage = () => {
   const navigate = useNavigate()
@@ -82,11 +83,13 @@ export const HomePage = () => {
           : idx % 3 === 1
           ? 'from-amber-600 via-orange-600 to-rose-700'
           : 'from-emerald-600 via-teal-700 to-slate-900',
-        bgImage: idx % 3 === 0
-          ? 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70'
-          : idx % 3 === 1
-          ? 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=70'
-          : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=70',
+        bgImage: c.image_url || c.banner_image || c.image || (
+          idx % 3 === 0
+            ? 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70'
+            : idx % 3 === 1
+            ? 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=70'
+            : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=70'
+        ),
         query: 'food',
       }))
     : [
@@ -130,44 +133,70 @@ export const HomePage = () => {
     { id: 'sweets', name: t.catSweets || 'Desserts & Sweets', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=120&auto=format&fit=crop&q=70', query: 'jalebi' },
   ]
 
-  useEffect(() => {
-    const loadHomeData = async () => {
-      setLoading(true)
+  const loadHomeData = async (isSilent = false) => {
+    if (!isSilent) setLoading(true)
+    try {
+      const restRes = await restaurantApi.getRestaurants({ per_page: 12 })
+      setRestaurants(restRes.data?.data || restRes.data || [])
+
+      const searchRes = await searchApi.search('food', null, 12)
+      const dishes = searchRes.data?.dishes || []
+      setPopularDishes(dishes)
+
       try {
-        const restRes = await restaurantApi.getRestaurants({ per_page: 12 })
-        setRestaurants(restRes.data?.data || restRes.data || [])
+        const couponRes = await customerApi.getCoupons()
+        const coupons = couponRes.data?.data || couponRes.data || []
+        setLiveCoupons(coupons.filter(c => c.is_active !== false))
+      } catch (e) {}
 
-        const searchRes = await searchApi.search('food', null, 12)
-        const dishes = searchRes.data?.dishes || []
-        setPopularDishes(dishes)
-
+      if (isAuthenticated) {
         try {
-          const couponRes = await customerApi.getCoupons()
-          const coupons = couponRes.data?.data || couponRes.data || []
-          setLiveCoupons(coupons.filter(c => c.is_active !== false))
+          const ordersRes = await customerApi.getOrders({ status: 'active' })
+          const orders = ordersRes.data?.data || ordersRes.data || []
+          const active = orders.find(
+            (o) =>
+              o.status !== 'DELIVERED' &&
+              o.status !== 'CANCELLED' &&
+              o.status !== 'REJECTED'
+          )
+          setActiveOrder(active || null)
         } catch (e) {}
-
-        if (isAuthenticated) {
-          try {
-            const ordersRes = await customerApi.getOrders({ status: 'active' })
-            const orders = ordersRes.data?.data || ordersRes.data || []
-            const active = orders.find(
-              (o) =>
-                o.status !== 'DELIVERED' &&
-                o.status !== 'CANCELLED' &&
-                o.status !== 'REJECTED'
-            )
-            setActiveOrder(active || null)
-          } catch (e) {}
-        }
-      } catch (e) {
-        console.warn('Home data error:', e)
-      } finally {
-        setLoading(false)
       }
+    } catch (e) {
+      console.warn('Home data error:', e)
+    } finally {
+      if (!isSilent) setLoading(false)
     }
+  }
 
-    loadHomeData()
+  // Initial load + Realtime Sync subscription + Window Focus + Heartbeat Sync
+  useEffect(() => {
+    loadHomeData(false)
+
+    // 1. Instant 0ms Cross-App Event Bus Subscription
+    const unsubscribe = realtimeBus.subscribe((event) => {
+      loadHomeData(true)
+    })
+
+    // 2. Tab Visibility / Focus revalidation
+    const handleFocus = () => loadHomeData(true)
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        loadHomeData(true)
+      }
+    })
+
+    // 3. 8-second Heartbeat Sync for multi-device cross-browser parity
+    const heartbeat = setInterval(() => {
+      loadHomeData(true)
+    }, 8000)
+
+    return () => {
+      unsubscribe()
+      window.removeEventListener('focus', handleFocus)
+      clearInterval(heartbeat)
+    }
   }, [isAuthenticated])
 
   const handleVoiceSearch = (transcript) => {
@@ -198,34 +227,34 @@ export const HomePage = () => {
       {activeOrder && <ActiveOrderBanner order={activeOrder} />}
 
       {/* 2. Hero Promo Banner Carousel (Strict Fixed Height for 0.00 CLS) */}
-      <section className="relative overflow-hidden rounded-3xl shadow-xl h-[180px] sm:h-[220px]" aria-label="Special Offers and Promotions">
-        <div
-          className={`relative p-5 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between h-full w-full overflow-hidden`}
-        >
-          {/* Background Photo with soft overlay */}
-          <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5 overflow-hidden opacity-30 sm:opacity-40 mix-blend-luminosity pointer-events-none">
-            <img
-              src={promoBanners[activeBannerIndex].bgImage}
-              alt=""
-              width="400"
-              height="220"
-              decoding="async"
-              fetchpriority="high"
-              className="w-full h-full object-cover"
-            />
-          </div>
+      <section className="relative overflow-hidden rounded-3xl shadow-xl h-[185px] sm:h-[225px] bg-slate-900" aria-label="Special Offers and Promotions">
+        <div className="relative flex flex-col justify-between h-full w-full overflow-hidden p-5 sm:p-8">
+          {/* Full-width Natural Background Photo (No color overlay / tint) */}
+          <img
+            src={promoBanners[activeBannerIndex].bgImage}
+            alt={promoBanners[activeBannerIndex].title}
+            width="800"
+            height="225"
+            decoding="async"
+            fetchpriority="high"
+            className="absolute inset-0 w-full h-full object-cover z-0 transition-all duration-700 scale-100 hover:scale-105"
+          />
 
-          <div className="relative z-10 space-y-1.5 sm:space-y-2 max-w-lg">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-xl bg-white/20 backdrop-blur-md text-[10px] sm:text-xs font-black uppercase tracking-wider">
+          {/* Smooth Left-to-Right Dark Scrim for 100% Crisp Text Readability without changing image colors */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/55 to-black/10 pointer-events-none z-1" />
+
+          {/* Text & Content Protected by High Contrast Drop Shadows */}
+          <div className="relative z-10 space-y-1.5 sm:space-y-2 max-w-[80%] sm:max-w-lg">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-xl bg-black/40 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs font-black uppercase tracking-wider text-amber-300 shadow-sm">
               <Flame className="w-3 sm:w-3.5 h-3 sm:h-3.5 fill-amber-300 text-amber-300" />
               <span>{promoBanners[activeBannerIndex].badge}</span>
             </span>
 
-            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight drop-shadow-sm truncate">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] truncate">
               {promoBanners[activeBannerIndex].title}
             </h2>
 
-            <p className="text-xs sm:text-sm text-white/95 font-medium line-clamp-1">
+            <p className="text-xs sm:text-sm text-white/95 font-semibold line-clamp-1 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
               {promoBanners[activeBannerIndex].subtitle}
             </p>
           </div>

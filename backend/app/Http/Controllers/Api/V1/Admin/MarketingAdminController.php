@@ -154,6 +154,7 @@ class MarketingAdminController extends Controller
             'end_date' => ['nullable', 'date'],
             'usage_limit' => ['nullable', 'integer', 'min:0'],
             'user_limit' => ['nullable', 'integer', 'min:0'],
+            'image_url' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ]);
     }
@@ -176,6 +177,7 @@ class MarketingAdminController extends Controller
         if (array_key_exists('end_date', $v)) $map['expires_at'] = $v['end_date'];
         if (array_key_exists('usage_limit', $v)) $map['total_usage_limit'] = $v['usage_limit'];
         if (array_key_exists('user_limit', $v)) $map['usage_limit_per_user'] = $v['user_limit'];
+        if (array_key_exists('image_url', $v)) $map['image_url'] = $v['image_url'];
         if (array_key_exists('is_active', $v)) $map['is_active'] = (bool) $v['is_active'];
 
         if ($isCreate) {

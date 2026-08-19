@@ -28,6 +28,7 @@ class StoreCouponRequest extends FormRequest
             'restaurant_id' => ['nullable', 'exists:restaurants,id'],
             'starts_at' => ['nullable', 'date'],
             'expires_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'image_url' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

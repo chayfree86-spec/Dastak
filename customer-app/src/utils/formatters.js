@@ -11,6 +11,7 @@ export const formatTime = (isoString) => {
   try {
     const d = new Date(isoString)
     return d.toLocaleTimeString('en-IN', {
+      timeZone: 'Asia/Kolkata',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
@@ -25,12 +26,28 @@ export const formatDateTime = (isoString) => {
   try {
     const d = new Date(isoString)
     return d.toLocaleDateString('en-IN', {
+      timeZone: 'Asia/Kolkata',
       day: 'numeric',
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
+    })
+  } catch (e) {
+    return ''
+  }
+}
+
+export const formatDate = (isoString) => {
+  if (!isoString) return ''
+  try {
+    const d = new Date(isoString)
+    return d.toLocaleDateString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
     })
   } catch (e) {
     return ''

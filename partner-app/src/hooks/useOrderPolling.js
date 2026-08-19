@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import ordersApi from '../api/orders.api'
 import { soundAlert } from '../utils/soundAlert'
+import { realtimeBus } from '../utils/realtimeSync'
 
-export const useOrderPolling = (intervalMs = 9000) => {
+export const useOrderPolling = (intervalMs = 8000) => {
   const [newOrders, setNewOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -48,14 +49,27 @@ export const useOrderPolling = (intervalMs = 9000) => {
   useEffect(() => {
     fetchNewOrders().catch(() => {})
 
+    // 0ms Realtime subscription on new order placed by customer or dispatch by admin
+    const unsubscribe = realtimeBus.subscribe(() => {
+      fetchNewOrders().catch(() => {})
+    })
+
+    const handleFocus = () => {
+      fetchNewOrders().catch(() => {})
+    }
+    window.addEventListener('focus', handleFocus)
+
     const timer = setInterval(() => {
-      // Only poll when page is active/visible to save battery and network
       if (!document.hidden) {
         fetchNewOrders().catch(() => {})
       }
     }, intervalMs)
 
-    return () => clearInterval(timer)
+    return () => {
+      unsubscribe()
+      window.removeEventListener('focus', handleFocus)
+      clearInterval(timer)
+    }
   }, [fetchNewOrders, intervalMs])
 
   return {

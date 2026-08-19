@@ -24,6 +24,7 @@ import EmptyState from '../../components/common/EmptyState'
 import VoiceSearchModal from '../../components/common/VoiceSearchModal'
 import { formatCurrency } from '../../utils/formatters'
 import { makePhoneCall } from '../../utils/geo'
+import { realtimeBus } from '../../utils/realtimeSync'
 
 const getRestaurantBanner = (restaurant) => {
   if (restaurant?.banner && !restaurant.banner.includes('placeholder')) {
@@ -56,26 +57,39 @@ export const RestaurantPage = () => {
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const loadRestaurant = async () => {
-      setLoading(true)
-      try {
-        const res = await restaurantApi.getRestaurant(slug)
-        const restData = res?.data?.data || res?.data || res || {}
-        setRestaurant(restData)
+  const loadRestaurant = async (isSilent = false) => {
+    if (!isSilent) setLoading(true)
+    try {
+      const res = await restaurantApi.getRestaurant(slug)
+      const restData = res?.data?.data || res?.data || res || {}
+      setRestaurant(restData)
 
-        const menuRes = await restaurantApi.getMenu(slug)
-        const rawMenu = menuRes?.data?.data || menuRes?.data || menuRes?.categories || menuRes || []
-        const categoriesList = Array.isArray(rawMenu) ? rawMenu : (rawMenu.categories || [])
-        setCategories(categoriesList)
-      } catch (e) {
-        console.warn('Failed to load restaurant:', e)
-      } finally {
-        setLoading(false)
-      }
+      const menuRes = await restaurantApi.getMenu(slug)
+      const rawMenu = menuRes?.data?.data || menuRes?.data || menuRes?.categories || menuRes || []
+      const categoriesList = Array.isArray(rawMenu) ? rawMenu : (rawMenu.categories || [])
+      setCategories(categoriesList)
+    } catch (e) {
+      console.warn('Failed to load restaurant:', e)
+    } finally {
+      if (!isSilent) setLoading(false)
     }
+  }
 
-    loadRestaurant()
+  useEffect(() => {
+    loadRestaurant(false)
+
+    // Realtime sync on menu / item updates
+    const unsubscribe = realtimeBus.subscribe(() => {
+      loadRestaurant(true)
+    })
+
+    const handleFocus = () => loadRestaurant(true)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      unsubscribe()
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [slug])
 
   if (loading) {

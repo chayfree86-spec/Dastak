@@ -29,6 +29,7 @@ export const LocationProvider = ({ children }) => {
         }
   })
   const [loading, setLoading] = useState(false)
+  const [isGpsModalOpen, setIsGpsModalOpen] = useState(false)
 
   // Fetch addresses if authenticated
   useEffect(() => {
@@ -227,24 +228,33 @@ export const LocationProvider = ({ children }) => {
     return formatted
   }
 
-  // Detect GPS Location with Automatic Reverse Geocoding
+  const openGpsModal = () => setIsGpsModalOpen(true)
+  const closeGpsModal = () => setIsGpsModalOpen(false)
+
+  // Detect GPS Location with Automatic Reverse Geocoding and GPS-Off Modal Trigger
   const detectCurrentLocation = async () => {
-    const geocoded = await detectCurrentGPS()
-    const detected = {
-      id: 'gps_' + Date.now(),
-      customer_name: activeAddress?.customer_name || user?.name || 'My Location',
-      customer_phone: activeAddress?.customer_phone || user?.mobile || '',
-      address: geocoded.short_address || geocoded.formatted_address,
-      full_address: geocoded.formatted_address,
-      landmark: geocoded.locality || 'Detected via GPS',
-      type: 'Current Location',
-      is_default: true,
-      latitude: geocoded.latitude,
-      longitude: geocoded.longitude,
-      city: geocoded.city,
+    try {
+      const geocoded = await detectCurrentGPS()
+      const detected = {
+        id: 'gps_' + Date.now(),
+        customer_name: activeAddress?.customer_name || user?.name || 'My Location',
+        customer_phone: activeAddress?.customer_phone || user?.mobile || '',
+        address: geocoded.short_address || geocoded.formatted_address,
+        full_address: geocoded.formatted_address,
+        landmark: geocoded.locality || 'Detected via GPS',
+        type: 'Current Location',
+        is_default: true,
+        latitude: geocoded.latitude,
+        longitude: geocoded.longitude,
+        city: geocoded.city,
+      }
+      selectAddress(detected)
+      setIsGpsModalOpen(false)
+      return detected
+    } catch (err) {
+      setIsGpsModalOpen(true)
+      throw err
     }
-    selectAddress(detected)
-    return detected
   }
 
   return (
@@ -260,6 +270,9 @@ export const LocationProvider = ({ children }) => {
         removeAddress,
         saveAddressToBook,
         detectCurrentLocation,
+        isGpsModalOpen,
+        openGpsModal,
+        closeGpsModal,
       }}
     >
       {children}

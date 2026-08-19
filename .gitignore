@@ -134,3 +134,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Graphic & CorelDRAW Design Backups
+*.cdr
+Backup_of_*.cdr
+Backup_of_logo-cdr.cdr
+*.psd
+*.ai
+

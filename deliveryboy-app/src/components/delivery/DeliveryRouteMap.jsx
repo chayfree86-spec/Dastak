@@ -248,12 +248,12 @@ export const DeliveryRouteMap = ({
   }
 
   return (
-    <div className={`relative rounded-3xl overflow-hidden border-2 border-blue-200 dark:border-slate-700 shadow-md ${className}`}>
+    <div className={`relative isolate z-0 rounded-3xl overflow-hidden border-2 border-blue-200 dark:border-slate-700 shadow-md ${className}`}>
       {/* Map Container */}
       <div ref={mapContainerRef} className="w-full h-52 sm:h-64 md:h-72 lg:h-80 z-0 bg-slate-100 dark:bg-slate-900" />
 
       {/* Top Floating App Info Header: Circle Radius & Live Distance Badge */}
-      <div className="absolute top-2.5 left-2.5 right-12 z-[1000] flex items-center justify-between gap-1.5 pointer-events-none">
+      <div className="absolute top-2.5 left-2.5 right-12 z-10 flex items-center justify-between gap-1.5 pointer-events-none">
         <div className="pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 sm:px-3.5 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md flex items-center gap-1.5 sm:gap-2 max-w-[calc(100%-48px)]">
           <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
           <div className="text-[10px] sm:text-[11px] font-black text-slate-900 dark:text-slate-100 flex items-center gap-1 sm:gap-1.5 truncate">
@@ -269,14 +269,14 @@ export const DeliveryRouteMap = ({
       <button
         type="button"
         onClick={handleCenterRider}
-        className="absolute bottom-14 sm:bottom-16 right-2.5 sm:right-3 z-[1000] p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 shadow-md hover:bg-slate-50 cursor-pointer touch-manipulation"
+        className="absolute bottom-14 sm:bottom-16 right-2.5 sm:right-3 z-10 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer touch-manipulation"
         title="Focus My Location"
       >
         <Crosshair className="w-4 h-4 text-[#2845D6]" />
       </button>
 
       {/* Bottom Floating Navigation Action: Clean local destination link */}
-      <div className="absolute bottom-2.5 sm:bottom-3 inset-x-2.5 sm:inset-x-3 z-[1000] flex items-center gap-2">
+      <div className="absolute bottom-2.5 sm:bottom-3 inset-x-2.5 sm:inset-x-3 z-10 flex items-center gap-2">
         <button
           type="button"
           onClick={onOpenFullscreen || handleOpenGoogleMaps}

@@ -132,7 +132,7 @@ class OrderService
                     $menuItemId = (int) ($it['menu_item_id'] ?? $it['id'] ?? 1);
                     $menuItem = \App\Models\MenuItem::find($menuItemId);
                     $qty = max(1, (int) ($it['quantity'] ?? 1));
-                    $unitPrice = (float) ($it['price'] ?? $menuItem?->discount_price ?? $menuItem?->base_price ?? 49.00);
+                    $unitPrice = (float) ($menuItem?->discount_price ?? $menuItem?->base_price ?? $it['price'] ?? 49.00);
                     $lineTotal = round($unitPrice * $qty, 2);
                     $subtotal += $lineTotal;
 

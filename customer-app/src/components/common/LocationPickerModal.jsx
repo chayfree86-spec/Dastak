@@ -85,10 +85,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
       )
       onClose()
     } catch (e) {
-      toast.error(
-        'Location Permission Needed',
-        'Please allow location access in your browser or search your area below.'
-      )
+      onClose() // GpsEnableModal automatically opens via LocationContext
     } finally {
       setDetecting(false)
     }

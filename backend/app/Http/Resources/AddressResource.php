@@ -9,12 +9,19 @@ class AddressResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $fullAddress = trim(($this->address_line1 ?? '').' '.($this->address_line2 ?? ''));
+
         return [
             'id' => $this->id,
             'type' => $this->type?->value ?? (string) $this->type,
             'type_label' => $this->type?->label() ?? 'Address',
             'contact_name' => $this->contact_name,
+            'customer_name' => $this->contact_name,
+            'name' => $this->contact_name,
             'contact_mobile' => $this->contact_mobile,
+            'customer_phone' => $this->contact_mobile,
+            'phone' => $this->contact_mobile,
+            'address' => $fullAddress ?: $this->address_line1,
             'address_line1' => $this->address_line1,
             'address_line2' => $this->address_line2,
             'landmark' => $this->landmark,

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { emitRealtimeEvent } from '../utils/realtimeSync'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.dastakdelivery.com/api/v1'
 
@@ -23,9 +24,20 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response Interceptor: Global Error & Session Expiry Handling
+// Response Interceptor: Global Error, Session Expiry & Realtime Sync Broadcast
 apiClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    const method = response.config?.method?.toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      emitRealtimeEvent('DATA_MUTATION', {
+        source: 'admin-app',
+        url: response.config?.url,
+        method,
+        timestamp: Date.now(),
+      })
+    }
+    return response.data
+  },
   (error) => {
     const status = error.response ? error.response.status : null
 

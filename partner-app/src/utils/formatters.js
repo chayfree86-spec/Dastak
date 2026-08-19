@@ -1,5 +1,5 @@
 /**
- * Standard formatters for Dastak Partner App
+ * Standard formatters for Dastak Partner App with strict Indian Standard Time (Asia/Kolkata)
  */
 
 export const formatCurrency = (val) => {
@@ -26,6 +26,7 @@ export const formatTime = (dateStr) => {
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return ''
   return d.toLocaleTimeString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
@@ -37,6 +38,7 @@ export const formatDateTime = (dateStr) => {
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return ''
   return d.toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -64,9 +66,9 @@ export const formatDate = (dateStr) => {
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return ''
   return d.toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   })
 }
-

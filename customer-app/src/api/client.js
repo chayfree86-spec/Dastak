@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { emitRealtimeEvent } from '../utils/realtimeSync'
 
 export const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -23,7 +24,18 @@ apiClient.interceptors.request.use(
 
 // Response Interceptor
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config?.method?.toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      emitRealtimeEvent('DATA_MUTATION', {
+        source: 'customer-app',
+        url: response.config?.url,
+        method,
+        timestamp: Date.now(),
+      })
+    }
+    return response
+  },
   (error) => {
     const status = error.response?.status
     const message =

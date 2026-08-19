@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { PlusCircle, Search, Tag, Calendar, Percent, Trash2, Edit2, CheckCircle2, Ban, AlertCircle } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { PlusCircle, Search, Tag, Calendar, Percent, Trash2, Edit2, CheckCircle2, Ban, AlertCircle, Upload, Image as ImageIcon, Sparkles, Flame, ArrowRight } from 'lucide-react'
 import marketingApi from '../../api/marketing.api'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatDate } from '../../utils/formatters'
@@ -32,6 +32,7 @@ export const CouponList = () => {
   const [endDate, setEndDate] = useState('2026-03-31')
   const [usageLimit, setUsageLimit] = useState('500')
   const [userLimit, setUserLimit] = useState('1')
+  const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70')
   const [isActive, setIsActive] = useState(true)
 
   const { data, loading, error, retry, silentRefresh } = useApi(
@@ -57,6 +58,7 @@ export const CouponList = () => {
     setEndDate('2026-03-31')
     setUsageLimit('500')
     setUserLimit('1')
+    setImageUrl('https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70')
     setIsActive(true)
     setIsModalOpen(true)
   }
@@ -72,6 +74,7 @@ export const CouponList = () => {
     setEndDate(coupon.end_date || '')
     setUsageLimit(String(coupon.usage_limit || ''))
     setUserLimit(String(coupon.user_limit || '1'))
+    setImageUrl(coupon.image_url || 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70')
     setIsActive(Boolean(coupon.is_active))
     setIsModalOpen(true)
   }
@@ -125,15 +128,16 @@ export const CouponList = () => {
         end_date: endDate,
         usage_limit: Number(usageLimit),
         user_limit: Number(userLimit),
+        image_url: imageUrl || undefined,
         is_active: isActive,
       }
 
       if (editingCoupon?.id) {
         await marketingApi.updateCoupon(editingCoupon.id, payload)
-        toast.success('Coupon Updated', `Coupon ${code} updated successfully.`)
+        toast.success('Coupon & Banner Updated', `Coupon ${code} updated successfully.`)
       } else {
         await marketingApi.createCoupon(payload)
-        toast.success('Coupon Created', `Coupon ${code} created successfully.`)
+        toast.success('Coupon & Banner Created', `Coupon ${code} created successfully.`)
       }
 
       setIsModalOpen(false)
@@ -470,6 +474,146 @@ export const CouponList = () => {
               value={userLimit}
               onChange={(e) => setUserLimit(e.target.value)}
             />
+          </div>
+
+          {/* Promo Banner Background Image & Live Preview */}
+          <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-700/80">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
+                <ImageIcon className="w-4 h-4 text-[#2845D6]" />
+                <span>Customer App Promo Banner Image</span>
+              </label>
+              <span className="text-[11px] text-slate-400 font-medium">Shown on Home Carousel</span>
+            </div>
+
+            {/* Quick 1-Click Food Presets */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider">
+                1-Click Food Theme Presets:
+              </span>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-xs font-bold">
+                {[
+                  { label: '🍛 Biryani', url: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70' },
+                  { label: '🍔 Burgers', url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=70' },
+                  { label: '🍕 Pizza', url: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&auto=format&fit=crop&q=70' },
+                  { label: '☕ Chai/Snacks', url: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&auto=format&fit=crop&q=70' },
+                  { label: '🥗 Pure Veg', url: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&auto=format&fit=crop&q=70' },
+                  { label: '🍬 Desserts', url: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=70' },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => setImageUrl(preset.url)}
+                    className={`py-1.5 px-2 rounded-xl text-[11px] font-bold border transition-all cursor-pointer truncate ${
+                      imageUrl === preset.url
+                        ? 'bg-[#2845D6] text-white border-[#2845D6] shadow-xs'
+                        : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom Image Upload & URL Input Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* File Upload */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400">
+                  Upload Local Image
+                </label>
+                <label className="flex items-center justify-center gap-2 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-[#2845D6] cursor-pointer transition-colors text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <Upload className="w-4 h-4 text-[#2845D6]" />
+                  <span>Choose Image File...</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        try {
+                          const reader = new FileReader()
+                          reader.onload = (ev) => {
+                            const img = new Image()
+                            img.onload = () => {
+                              const canvas = document.createElement('canvas')
+                              const maxW = 700
+                              let { width, height } = img
+                              if (width > maxW) {
+                                height = Math.round((height * maxW) / width)
+                                width = maxW
+                              }
+                              canvas.width = width
+                              canvas.height = height
+                              const ctx = canvas.getContext('2d')
+                              ctx.drawImage(img, 0, 0, width, height)
+                              const compressedBase64 = canvas.toDataURL('image/jpeg', 0.78)
+                              setImageUrl(compressedBase64)
+                            }
+                            img.src = ev.target.result
+                          }
+                          reader.readAsDataURL(file)
+                        } catch (err) {
+                          console.error('Image compression error', err)
+                        }
+                      }
+                    }}
+                  />
+                </label>
+              </div>
+
+              {/* Direct Image URL */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400">
+                  Or Paste Image URL
+                </label>
+                <Input
+                  placeholder="https://images.unsplash.com/..."
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="text-xs"
+                />
+              </div>
+            </div>
+
+            {/* Live Real-time App Banner Preview */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[10px] font-black uppercase text-slate-400 block tracking-wider">
+                Live App Carousel Banner Preview (Full-Width Natural Photo):
+              </span>
+              <div className="relative overflow-hidden rounded-2xl bg-slate-900 text-white p-4 shadow-md flex items-center justify-between min-h-[115px]">
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt="Banner Preview"
+                    className="absolute inset-0 w-full h-full object-cover z-0"
+                  />
+                )}
+                {/* Contrast gradient without tinting photo */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-black/10 z-1 pointer-events-none" />
+
+                <div className="relative z-10 space-y-1 max-w-[70%]">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/40 backdrop-blur-md border border-white/20 text-[9px] font-black uppercase tracking-wider text-amber-300">
+                    <Flame className="w-3 h-3 fill-amber-300 text-amber-300" />
+                    <span>LIVE PROMO</span>
+                  </span>
+                  <h4 className="text-base font-black tracking-tight leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                    {discountType === 'PERCENTAGE' ? `FLAT ${discountValue || 20}% OFF` : `FLAT ₹${discountValue || 50} OFF`}
+                  </h4>
+                  <p className="text-[11px] text-white/95 font-semibold truncate drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                    Use code <span className="font-black text-amber-300">{code || 'PROMO'}</span> on orders above ₹{minOrder || 149}
+                  </p>
+                </div>
+                <div className="relative z-10">
+                  <span className="px-3 py-1.5 rounded-xl bg-white text-slate-900 font-black text-[11px] shadow-sm flex items-center gap-1">
+                    <span>Order Now</span>
+                    <ArrowRight className="w-3 h-3 text-[#2845D6]" />
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-700">

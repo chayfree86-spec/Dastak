@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { emitRealtimeEvent } from '../utils/realtimeSync'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
 
@@ -23,9 +24,20 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor for unified error formatting
+// Response interceptor for unified error formatting & realtime sync broadcast
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const method = response.config?.method?.toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+      emitRealtimeEvent('DATA_MUTATION', {
+        source: 'deliveryboy-app',
+        url: response.config?.url,
+        method,
+        timestamp: Date.now(),
+      })
+    }
+    return response
+  },
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('dastak_delivery_token')

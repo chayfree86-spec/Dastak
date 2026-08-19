@@ -75,6 +75,9 @@ class RestaurantAdminController extends Controller
             'status' => ['nullable', 'string'],
             'is_veg_only' => ['nullable', 'boolean'],
             'is_pure_veg' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'string'],
+            'logo' => ['nullable', 'string'],
+            'banner' => ['nullable', 'string'],
         ]);
 
         $owner = $this->resolveOwner($validated);
@@ -120,6 +123,9 @@ class RestaurantAdminController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'status' => ['nullable', 'string'],
             'is_veg_only' => ['nullable', 'boolean'],
+            'image' => ['nullable', 'string'],
+            'logo' => ['nullable', 'string'],
+            'banner' => ['nullable', 'string'],
         ]);
 
         $updated = $this->restaurantService->updateRestaurant($restaurant, $this->mapRestaurantData($validated, false));
@@ -377,6 +383,9 @@ class RestaurantAdminController extends Controller
         if (array_key_exists('is_veg_only', $v)) $map['is_pure_veg'] = (bool) $v['is_veg_only'];
         if (array_key_exists('is_pure_veg', $v)) $map['is_pure_veg'] = (bool) $v['is_pure_veg'];
         if (array_key_exists('status', $v)) $map['is_active'] = strtoupper((string) $v['status']) === 'ACTIVE';
+        if (array_key_exists('image', $v) && $v['image']) $map['logo'] = $v['image'];
+        if (array_key_exists('logo', $v) && $v['logo']) $map['logo'] = $v['logo'];
+        if (array_key_exists('banner', $v) && $v['banner']) $map['banner'] = $v['banner'];
         // Map coordinates on both create AND update (delivery-area map save relies on this).
         if (array_key_exists('latitude', $v) && $v['latitude'] !== null) $map['latitude'] = $v['latitude'];
         if (array_key_exists('longitude', $v) && $v['longitude'] !== null) $map['longitude'] = $v['longitude'];

@@ -4,20 +4,18 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponse;
+use App\Models\SystemSetting;
 use App\Models\Zone;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Backs the admin Settings screen (src/pages/settings/SettingsPage.jsx) under
- * /admin/settings. Platform settings persist to a JSON store (no settings table
- * yet); service areas are backed by the real Zone model.
+ * /admin/settings. Platform settings persist to database table `system_settings`.
+ * Service areas are backed by Zone model.
  */
 class SettingsController extends Controller
 {
-    protected string $store = 'platform_settings.json';
-
     public function getSettings(): JsonResponse
     {
         return ApiResponse::success($this->all(), 'Platform settings retrieved.');
@@ -25,10 +23,10 @@ class SettingsController extends Controller
 
     public function updateSettings(Request $request): JsonResponse
     {
-        $merged = array_merge($this->all(), $request->all());
-        $this->save($merged);
+        $payload = $request->except(['_token']);
+        SystemSetting::setMany($payload);
 
-        return ApiResponse::success($merged, 'Platform settings updated successfully.');
+        return ApiResponse::success($this->all(), 'Platform settings updated successfully.');
     }
 
     public function getOrderSettings(): JsonResponse
@@ -186,18 +184,18 @@ class SettingsController extends Controller
     protected function defaults(): array
     {
         return [
-            'app_name' => config('dastak.name', 'Dastak'),
-            'tagline' => config('dastak.tagline', 'Jo Chahiye, Ghar Par'),
+            'app_name' => 'Dastak',
+            'tagline' => 'Jo Chahiye, Ghar Par',
             'support_phone' => '1800-123-4567',
             'support_email' => 'support@dastakdelivery.com',
-            'cancel_window_mins' => (int) config('dastak.orders.cancel_window_minutes', 5),
+            'cancel_window_mins' => 5,
             'auto_accept' => false,
-            'dispatch_mode' => config('dastak.delivery.default_dispatch_mode', 'AUTO'),
-            'max_radius_km' => (int) config('dastak.delivery.max_radius_km', 12),
-            'base_delivery_fee' => (float) config('dastak.delivery.base_fee', 35),
-            'cod_enabled' => (bool) config('dastak.payments.cod_enabled', true),
-            'online_gateway' => strtoupper((string) config('dastak.payments.default_gateway', 'razorpay')),
-            'default_commission' => (float) config('dastak.commission.default_percentage', 15),
+            'dispatch_mode' => 'AUTO',
+            'max_radius_km' => 12,
+            'base_delivery_fee' => 35,
+            'cod_enabled' => true,
+            'online_gateway' => 'RAZORPAY',
+            'default_commission' => 15,
             'notify_sms' => true,
             'notify_push' => true,
             'notify_email' => false,
@@ -206,11 +204,7 @@ class SettingsController extends Controller
 
     protected function all(): array
     {
-        $stored = [];
-        if (Storage::exists($this->store)) {
-            $stored = json_decode(Storage::get($this->store), true) ?: [];
-        }
-
+        $stored = SystemSetting::getAllSettings();
         return array_merge($this->defaults(), $stored);
     }
 
@@ -219,16 +213,11 @@ class SettingsController extends Controller
         return array_intersect_key($this->all(), array_flip($keys));
     }
 
-    protected function save(array $data): void
-    {
-        Storage::put($this->store, json_encode($data, JSON_PRETTY_PRINT));
-    }
-
     protected function patchStore(Request $request, string $message): JsonResponse
     {
-        $merged = array_merge($this->all(), $request->all());
-        $this->save($merged);
+        $payload = $request->except(['_token']);
+        SystemSetting::setMany($payload);
 
-        return ApiResponse::success($merged, $message);
+        return ApiResponse::success($this->all(), $message);
     }
 }

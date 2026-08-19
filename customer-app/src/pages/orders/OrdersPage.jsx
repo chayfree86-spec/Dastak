@@ -20,6 +20,7 @@ import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import EmptyState from '../../components/common/EmptyState'
 import Button from '../../components/common/Button'
 import RatingModal from '../../components/common/RatingModal'
+import { realtimeBus } from '../../utils/realtimeSync'
 
 export const OrdersPage = () => {
   const navigate = useNavigate()
@@ -33,26 +34,45 @@ export const OrdersPage = () => {
   const [loading, setLoading] = useState(true)
   const [selectedOrderForRating, setSelectedOrderForRating] = useState(null)
 
+  const loadOrders = async (isSilent = false) => {
+    if (!isAuthenticated) return
+    if (!isSilent) setLoading(true)
+    try {
+      const res = await customerApi.getOrders({ per_page: 30 })
+      const list = res.data?.data || res.data || []
+      setOrders(list)
+    } catch (e) {
+      console.warn('Orders load error:', e)
+    } finally {
+      if (!isSilent) setLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (!isAuthenticated) {
       setLoading(false)
       return
     }
 
-    const loadOrders = async () => {
-      setLoading(true)
-      try {
-        const res = await customerApi.getOrders({ per_page: 30 })
-        const list = res.data?.data || res.data || []
-        setOrders(list)
-      } catch (e) {
-        console.warn('Orders load error:', e)
-      } finally {
-        setLoading(false)
-      }
-    }
+    loadOrders(false)
 
-    loadOrders()
+    // Realtime sync on order status changes (assigned, preparing, dispatched, delivered)
+    const unsubscribe = realtimeBus.subscribe(() => {
+      loadOrders(true)
+    })
+
+    const handleFocus = () => loadOrders(true)
+    window.addEventListener('focus', handleFocus)
+
+    const interval = setInterval(() => {
+      loadOrders(true)
+    }, 6000)
+
+    return () => {
+      unsubscribe()
+      window.removeEventListener('focus', handleFocus)
+      clearInterval(interval)
+    }
   }, [isAuthenticated])
 
   if (!isAuthenticated) {
@@ -247,35 +267,35 @@ export const OrdersPage = () => {
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
                     {isActive ? (
                       <Button
                         variant="primary"
-                        size="sm"
+                        size="md"
                         icon={Bike}
                         onClick={() => navigate(`/orders/${order.order_number}`)}
-                        className="font-bold text-xs"
+                        className="w-full font-black text-xs py-2.5 rounded-2xl justify-center shadow-md shadow-blue-600/20"
                       >
                         {t.trackOrder}
                       </Button>
                     ) : (
-                      <>
+                      <div className={`grid gap-2 ${order.status === 'DELIVERED' ? 'grid-cols-3' : 'grid-cols-2'}`}>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => navigate(`/orders/${order.order_number}`)}
-                          className="font-bold text-xs"
+                          className="min-h-[40px] px-2 py-2 font-bold text-xs rounded-2xl justify-center whitespace-nowrap active:scale-95"
                         >
-                          {lang === 'hi' ? 'विवरण देखें' : 'View Details'}
+                          {lang === 'hi' ? 'विवरण' : 'Details'}
                         </Button>
                         {order.status === 'DELIVERED' && (
                           <button
                             type="button"
                             onClick={() => setSelectedOrderForRating(order)}
-                            className="px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 font-black text-xs flex items-center gap-1.5 border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shadow-xs"
+                            className="min-h-[40px] px-2 py-2 rounded-2xl bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 text-amber-800 dark:text-amber-300 font-black text-xs flex items-center justify-center gap-1.5 border border-amber-200 dark:border-amber-800 transition-all cursor-pointer shadow-xs active:scale-95"
                           >
-                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                            <span>{t.rateOrder || (lang === 'hi' ? 'रेटिंग दें' : 'Rate')}</span>
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                            <span className="truncate">{t.rateOrder || (lang === 'hi' ? 'रेटिंग दें' : 'Rate')}</span>
                           </button>
                         )}
                         <Button
@@ -283,11 +303,11 @@ export const OrdersPage = () => {
                           size="sm"
                           icon={RotateCcw}
                           onClick={() => handleReorder(order)}
-                          className="font-black text-xs"
+                          className="min-h-[40px] px-2 py-2 font-black text-xs rounded-2xl justify-center whitespace-nowrap active:scale-95 shadow-md shadow-orange-500/20"
                         >
-                          {t.orderAgain}
+                          <span className="truncate">{t.orderAgain || (lang === 'hi' ? 'फिर ऑर्डर करें' : 'Re-Order')}</span>
                         </Button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>

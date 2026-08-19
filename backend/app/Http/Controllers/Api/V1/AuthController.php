@@ -48,6 +48,40 @@ class AuthController extends Controller
         ], 'Registration successful.', 201);
     }
 
+    public function sendOtp(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'mobile' => ['required', 'string', 'min:10', 'max:15'],
+        ]);
+
+        $result = $this->authService->sendOtp($validated['mobile']);
+
+        return ApiResponse::success($result, $result['message']);
+    }
+
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'mobile' => ['required', 'string', 'min:10', 'max:15'],
+            'otp' => ['required', 'string', 'max:6'],
+            'name' => ['nullable', 'string', 'max:100'],
+            'device_name' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $result = $this->authService->verifyOtp(
+            mobile: $validated['mobile'],
+            otp: $validated['otp'],
+            name: $validated['name'] ?? null,
+            deviceName: $validated['device_name'] ?? 'Customer App'
+        );
+
+        return ApiResponse::success([
+            'token' => $result['token'],
+            'user' => new UserResource($result['user']),
+            'is_new_user' => $result['is_new_user'],
+        ], $result['is_new_user'] ? 'Account verified! Please complete your delivery profile.' : 'Welcome back! Signed in successfully.');
+    }
+
     public function me(Request $request): JsonResponse
     {
         $user = $request->user()->load('roles.permissions');

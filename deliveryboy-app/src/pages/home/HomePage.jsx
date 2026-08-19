@@ -22,6 +22,7 @@ import deliveryApi from '../../api/delivery.api'
 import ActiveDeliveryCard from '../../components/delivery/ActiveDeliveryCard'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import Button from '../../components/common/Button'
+import { realtimeBus } from '../../utils/realtimeSync'
 
 export const HomePage = () => {
   const { riderProfile, activeOrder, refreshActiveOrder } = useAuth()
@@ -53,6 +54,26 @@ export const HomePage = () => {
 
   useEffect(() => {
     fetchDashboardData()
+
+    // 0ms Realtime subscription on rider assignment / dispatch from Admin or Partner
+    const unsubscribe = realtimeBus.subscribe(() => {
+      fetchDashboardData()
+    })
+
+    const handleFocus = () => fetchDashboardData()
+    window.addEventListener('focus', handleFocus)
+
+    const timer = setInterval(() => {
+      if (!document.hidden) {
+        fetchDashboardData()
+      }
+    }, 7000)
+
+    return () => {
+      unsubscribe()
+      window.removeEventListener('focus', handleFocus)
+      clearInterval(timer)
+    }
   }, [fetchDashboardData])
 
   const handleRefresh = () => {

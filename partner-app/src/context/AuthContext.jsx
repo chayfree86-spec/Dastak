@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [restaurant, setRestaurant] = useState(null)
   const [token, setToken] = useState(localStorage.getItem('dastak_partner_token'))
+  const [sessionToken, setSessionToken] = useState(localStorage.getItem('dastak_partner_session_token'))
   const [loading, setLoading] = useState(true)
 
   const fetchRestaurantProfile = useCallback(async () => {
@@ -23,8 +24,37 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  const clearSession = useCallback(() => {
+    localStorage.removeItem('dastak_partner_token')
+    localStorage.removeItem('dastak_partner_session_token')
+    localStorage.removeItem('dastak_partner_user')
+    setToken(null)
+    setSessionToken(null)
+    setUser(null)
+    setRestaurant(null)
+  }, [])
+
   const checkAuth = useCallback(async () => {
+    const storedSessionToken = localStorage.getItem('dastak_partner_session_token')
     const storedToken = localStorage.getItem('dastak_partner_token')
+
+    if (storedSessionToken) {
+      try {
+        const res = await authApi.validateSession(storedSessionToken)
+        const userData = res.data?.data?.user || res.data?.user || null
+        if (userData) {
+          setUser(userData)
+          await fetchRestaurantProfile()
+        }
+      } catch (e) {
+        console.warn('Partner permanent session validation failed / revoked:', e)
+        clearSession()
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
     if (!storedToken) {
       setUser(null)
       setRestaurant(null)
@@ -39,43 +69,53 @@ export const AuthProvider = ({ children }) => {
       await fetchRestaurantProfile()
     } catch (e) {
       console.warn('Token validation failed:', e)
-      localStorage.removeItem('dastak_partner_token')
-      setUser(null)
-      setRestaurant(null)
-      setToken(null)
+      clearSession()
     } finally {
       setLoading(false)
     }
-  }, [fetchRestaurantProfile])
+  }, [fetchRestaurantProfile, clearSession])
 
   useEffect(() => {
     checkAuth()
   }, [checkAuth])
 
-  const login = async (identifier, password) => {
-    // Unlock audio context on user interaction
+  const startVerification = async (mobile) => {
+    const res = await authApi.startVerification(mobile)
+    return res.data?.data || res.data
+  }
+
+  const resendOtp = async (sessionId) => {
+    const res = await authApi.resendOtp(sessionId)
+    return res.data?.data || res.data
+  }
+
+  const verifyDeviceOtp = async (sessionId, otp, name = null) => {
     soundAlert.initContext()
-
-    const res = await authApi.login({
-      identifier,
-      password,
-      device_name: 'Dastak Partner Web/PWA',
-    })
-
-    const tokenVal = res.data?.data?.token
-    const userData = res.data?.data?.user
-
-    const role = userData?.role || (userData?.roles && userData?.roles[0]?.slug)
-    if (role && role !== 'restaurant_owner' && role !== 'super_admin') {
-      throw new Error('This account is not registered as a Restaurant Partner. Please use the Customer or Delivery app.')
-    }
+    const res = await authApi.verifyOtp(sessionId, otp, name)
+    const tokenVal = res.data?.data?.token || res.data?.token
+    const rawSessionToken = res.data?.data?.session_token || res.data?.session_token
+    const userData = res.data?.data?.user || res.data?.user
 
     localStorage.setItem('dastak_partner_token', tokenVal)
+    if (rawSessionToken) {
+      localStorage.setItem('dastak_partner_session_token', rawSessionToken)
+      setSessionToken(rawSessionToken)
+    }
     setToken(tokenVal)
     setUser(userData)
 
     const rest = await fetchRestaurantProfile()
     return { user: userData, restaurant: rest }
+  }
+
+  const changeDevice = async () => {
+    try {
+      await authApi.changeDevice()
+    } catch (e) {
+      console.warn('Change device API warning:', e)
+    } finally {
+      clearSession()
+    }
   }
 
   const logout = async () => {
@@ -84,10 +124,7 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       console.warn('Logout API warning:', e)
     } finally {
-      localStorage.removeItem('dastak_partner_token')
-      setToken(null)
-      setUser(null)
-      setRestaurant(null)
+      clearSession()
     }
   }
 
@@ -106,9 +143,13 @@ export const AuthProvider = ({ children }) => {
         user,
         restaurant,
         token,
+        sessionToken,
         loading,
         isAuthenticated: !!token && !!user,
-        login,
+        startVerification,
+        resendOtp,
+        verifyDeviceOtp,
+        changeDevice,
         logout,
         refreshProfile: fetchRestaurantProfile,
         updateStoreState,
@@ -125,3 +166,5 @@ export const useAuth = () => {
   if (!context) throw new Error('useAuth must be used within AuthProvider')
   return context
 }
+
+export default AuthProvider

@@ -11,29 +11,40 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
     return localStorage.getItem('dastak_customer_token') || null
   })
+  const [sessionToken, setSessionToken] = useState(() => {
+    return localStorage.getItem('dastak_customer_session_token') || null
+  })
   const [loading, setLoading] = useState(true)
 
-  // Verify session on mount
+  // Verify permanent device session on mount
   useEffect(() => {
     const initAuth = async () => {
-      const savedToken = localStorage.getItem('dastak_customer_token')
-      if (savedToken) {
+      const savedSessionToken = localStorage.getItem('dastak_customer_session_token')
+      const savedAuthToken = localStorage.getItem('dastak_customer_token')
+
+      if (savedSessionToken) {
+        try {
+          const res = await authApi.validateSession(savedSessionToken)
+          const userData = res.data?.user || res.data?.data?.user || res.data
+          if (userData && userData.id) {
+            setUser(userData)
+            localStorage.setItem('dastak_customer_user', JSON.stringify(userData))
+          }
+        } catch (e) {
+          console.warn('Permanent session check failed / session revoked:', e)
+          // Session was revoked or moved to another device
+          await clearSession()
+        }
+      } else if (savedAuthToken) {
         try {
           const res = await authApi.getMe()
           const userData = res.data?.data || res.data?.user || res.data
           if (userData && userData.id) {
-            const role = userData.role || (userData.roles && userData.roles[0]?.slug)
-            if (role && role !== 'customer') {
-              console.warn('Non-customer role detected in customer app session, clearing...')
-              logout()
-            } else {
-              setUser(userData)
-              localStorage.setItem('dastak_customer_user', JSON.stringify(userData))
-            }
+            setUser(userData)
+            localStorage.setItem('dastak_customer_user', JSON.stringify(userData))
           }
         } catch (e) {
-          console.warn('Session expired or invalid token')
-          logout()
+          await clearSession()
         }
       }
       setLoading(false)
@@ -42,47 +53,62 @@ export const AuthProvider = ({ children }) => {
     initAuth()
   }, [])
 
-  const login = async (identifier, password) => {
-    const res = await authApi.login(identifier, password)
-    const authToken = res.data?.token || res.data?.data?.token
-    const authUser = res.data?.user || res.data?.data?.user
-
-    if (!authToken || !authUser) {
-      throw new Error('Invalid response from server.')
-    }
-
-    // Role check: Only customer role is allowed in Customer App
-    const role = authUser.role || (authUser.roles && authUser.roles[0]?.slug)
-    if (role && role !== 'customer') {
-      const roleName = role === 'restaurant_owner' 
-        ? 'Restaurant Partner' 
-        : role === 'delivery_boy' 
-        ? 'Delivery Rider' 
-        : 'Admin'
-      throw new Error(`This mobile number is registered as a ${roleName} account. Please use a Customer mobile number, or log into the Partner/Admin portal.`)
-    }
-
-    setToken(authToken)
-    setUser(authUser)
-    localStorage.setItem('dastak_customer_token', authToken)
-    localStorage.setItem('dastak_customer_user', JSON.stringify(authUser))
+  const startVerification = async (mobile) => {
+    const res = await authApi.startVerification(mobile)
     return res
   }
 
-  const register = async ({ name, mobile, password, email }) => {
-    const res = await authApi.register({ name, mobile, password, email })
+  const resendOtp = async (sessionId) => {
+    const res = await authApi.resendOtp(sessionId)
+    return res
+  }
+
+  const verifyDeviceOtp = async (sessionId, otp, name = null) => {
+    const res = await authApi.verifyOtp(sessionId, otp, name)
     const authToken = res.data?.token || res.data?.data?.token
+    const rawSessionToken = res.data?.session_token || res.data?.data?.session_token
     const authUser = res.data?.user || res.data?.data?.user
+    const isNewUser = res.data?.is_new_user ?? res.data?.data?.is_new_user
 
     if (!authToken || !authUser) {
       throw new Error('Invalid response from server.')
     }
 
     setToken(authToken)
+    if (rawSessionToken) {
+      setSessionToken(rawSessionToken)
+      localStorage.setItem('dastak_customer_session_token', rawSessionToken)
+    }
     setUser(authUser)
     localStorage.setItem('dastak_customer_token', authToken)
     localStorage.setItem('dastak_customer_user', JSON.stringify(authUser))
-    return res
+
+    return {
+      token: authToken,
+      sessionToken: rawSessionToken,
+      user: authUser,
+      isNewUser: Boolean(isNewUser),
+      response: res,
+    }
+  }
+
+  const changeDevice = async () => {
+    try {
+      await authApi.changeDevice()
+    } catch (e) {
+      console.warn('Change device API warning:', e)
+    } finally {
+      await clearSession()
+    }
+  }
+
+  const clearSession = async () => {
+    localStorage.removeItem('dastak_customer_token')
+    localStorage.removeItem('dastak_customer_session_token')
+    localStorage.removeItem('dastak_customer_user')
+    setUser(null)
+    setToken(null)
+    setSessionToken(null)
   }
 
   const logout = async () => {
@@ -91,24 +117,30 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
       console.warn('Logout API error:', e)
     } finally {
-      localStorage.removeItem('dastak_customer_token')
-      localStorage.removeItem('dastak_customer_user')
-      setUser(null)
-      setToken(null)
+      await clearSession()
     }
   }
 
-  const isAuthenticated = Boolean(token && user)
+  const updateSessionUser = (updatedUserData) => {
+    setUser(updatedUserData)
+    localStorage.setItem('dastak_customer_user', JSON.stringify(updatedUserData))
+  }
+
+  const isAuthenticated = Boolean((token || sessionToken) && user)
 
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
+        sessionToken,
         loading,
         isAuthenticated,
-        login,
-        register,
+        startVerification,
+        resendOtp,
+        verifyDeviceOtp,
+        changeDevice,
+        updateSessionUser,
         logout,
         setUser,
       }}

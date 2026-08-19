@@ -7,7 +7,9 @@ use App\Enums\UserRole;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
 use App\Models\User;
+use App\Models\DeliveryBoyProfile;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DispatchService
@@ -19,20 +21,23 @@ class DispatchService
             return null;
         }
 
-        // Find nearest online & available delivery rider
-        $rider = User::whereHas('roles', fn ($q) => $q->where('slug', UserRole::DELIVERY_BOY->value))
-            ->whereHas('deliveryProfile', function (Builder $q) {
-                $q->where('is_online', true)
-                    ->where('is_busy', false);
-            })
-            ->first();
+        return DB::transaction(function () use ($order) {
+            // Find nearest online & available delivery rider with update lock
+            $rider = User::whereHas('roles', fn ($q) => $q->where('slug', UserRole::DELIVERY_BOY->value))
+                ->whereHas('deliveryProfile', function (Builder $q) {
+                    $q->where('is_online', true)
+                        ->where('is_busy', false);
+                })
+                ->lockForUpdate()
+                ->first();
 
-        if ($rider) {
-            $this->assignRiderToOrder($order, $rider, null, ActorType::SYSTEM);
-            return $rider;
-        }
+            if ($rider) {
+                $this->assignRiderToOrder($order, $rider, null, ActorType::SYSTEM);
+                return $rider;
+            }
 
-        return null;
+            return null;
+        });
     }
 
     public function manualAssignRider(Order $order, User $rider, User $admin): Order
@@ -48,28 +53,41 @@ class DispatchService
 
     protected function assignRiderToOrder(Order $order, User $rider, ?User $actor, ActorType $actorType): Order
     {
-        $order->delivery_boy_id = $rider->id;
-        $order->save();
+        return DB::transaction(function () use ($order, $rider, $actor, $actorType) {
+            // Atomic lock on order and rider profile
+            $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->firstOrFail();
+            $lockedProfile = DeliveryBoyProfile::where('user_id', $rider->id)->lockForUpdate()->first();
 
-        // Mark rider busy
-        $rider->deliveryProfile?->update(['is_busy' => true]);
+            $lockedOrder->delivery_boy_id = $rider->id;
+            $lockedOrder->save();
 
-        // Record history
-        OrderStatusHistory::create([
-            'order_id' => $order->id,
-            'from_status' => $order->status->value,
-            'to_status' => $order->status->value,
-            'actor_id' => $actor?->id,
-            'actor_type' => $actorType,
-            'comment' => "Assigned to delivery rider: {$rider->name} ({$rider->mobile})",
-            'created_at' => now(),
-        ]);
+            // Mark rider busy
+            if ($lockedProfile) {
+                $lockedProfile->is_busy = true;
+                $lockedProfile->save();
+            }
 
-        $assignedOrder = $order->fresh(['deliveryBoy.deliveryProfile', 'restaurant', 'customer']);
+            // Record history
+            OrderStatusHistory::create([
+                'order_id' => $lockedOrder->id,
+                'from_status' => $lockedOrder->status->value,
+                'to_status' => $lockedOrder->status->value,
+                'actor_id' => $actor?->id,
+                'actor_type' => $actorType,
+                'comment' => "Assigned to delivery rider: {$rider->name} ({$rider->mobile})",
+                'created_at' => now(),
+            ]);
 
-        // Fire RiderAssignedEvent (Triggers Rider & Customer notifications)
-        event(new \App\Events\RiderAssignedEvent($assignedOrder, $rider));
+            $assignedOrder = $lockedOrder->fresh(['deliveryBoy.deliveryProfile', 'restaurant', 'customer']);
 
-        return $assignedOrder;
+            // Fire RiderAssignedEvent (Triggers Rider & Customer notifications)
+            try {
+                event(new \App\Events\RiderAssignedEvent($assignedOrder, $rider));
+            } catch (\Exception $e) {
+                // Continue
+            }
+
+            return $assignedOrder;
+        });
     }
 }

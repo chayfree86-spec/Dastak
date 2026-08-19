@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { realtimeBus } from '../utils/realtimeSync'
 
 export const useApi = (apiFn, params = null, options = {}) => {
-  const { immediate = true, initialData = null, onSuccess, onError } = options
+  const { immediate = true, initialData = null, onSuccess, onError, autoSync = true } = options
   // NOTE: initialData is treated as a placeholder/type hint ONLY — it is never
   // rendered. Data starts empty and `loading` is true so pages show a proper
   // loading/empty state and then REAL data, instead of flashing demo/mock data.
@@ -14,8 +15,8 @@ export const useApi = (apiFn, params = null, options = {}) => {
   const apiFnRef = useRef(apiFn)
   apiFnRef.current = apiFn
 
-  const optionsRef = useRef({ onSuccess, onError, initialData })
-  optionsRef.current = { onSuccess, onError, initialData }
+  const optionsRef = useRef({ onSuccess, onError, initialData, autoSync })
+  optionsRef.current = { onSuccess, onError, initialData, autoSync }
 
   const paramsRef = useRef(params)
   paramsRef.current = params
@@ -61,21 +62,43 @@ export const useApi = (apiFn, params = null, options = {}) => {
     }
   }, [])
 
+  const silentRefresh = useCallback(() => {
+    return execute(undefined, { silent: true })
+  }, [execute])
+
   useEffect(() => {
     isMounted.current = true
     if (immediate) {
       execute()
     }
+
+    let unsubscribe = () => {}
+    let handleFocus = () => {}
+
+    if (autoSync) {
+      // 0ms Realtime bus auto-refresh
+      unsubscribe = realtimeBus.subscribe(() => {
+        if (isMounted.current && !document.hidden) {
+          silentRefresh()
+        }
+      })
+
+      handleFocus = () => {
+        if (isMounted.current) {
+          silentRefresh()
+        }
+      }
+      window.addEventListener('focus', handleFocus)
+    }
+
     return () => {
       isMounted.current = false
+      unsubscribe()
+      window.removeEventListener('focus', handleFocus)
     }
-  }, [immediate, paramsKey])
+  }, [immediate, paramsKey, autoSync, execute, silentRefresh])
 
   const isEmpty = !loading && !error && (data === null || data === undefined || (Array.isArray(data) && data.length === 0))
-
-  const silentRefresh = useCallback(() => {
-    return execute(undefined, { silent: true })
-  }, [execute])
 
   return {
     data,

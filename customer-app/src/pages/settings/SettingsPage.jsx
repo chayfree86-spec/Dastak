@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Settings as SettingsIcon,
@@ -14,6 +14,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Phone,
+  Smartphone,
+  AlertTriangle,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -26,14 +28,31 @@ export const SettingsPage = () => {
   const navigate = useNavigate()
   const { lang, toggleLanguage, t } = useLanguage()
   const { isDark, toggleTheme } = useTheme()
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, logout, changeDevice } = useAuth()
   const { activeAddress } = useLocationContext()
   const toast = useToast()
+
+  const [showChangeDeviceModal, setShowChangeDeviceModal] = useState(false)
+  const [changeDeviceLoading, setChangeDeviceLoading] = useState(false)
 
   const handleLogout = async () => {
     await logout()
     toast.success('Signed Out', 'You have been logged out successfully.')
     navigate('/')
+  }
+
+  const handleConfirmChangeDevice = async () => {
+    setChangeDeviceLoading(true)
+    try {
+      await changeDevice()
+      setShowChangeDeviceModal(false)
+      toast.success('Device Changed', 'Current device session removed. You can now verify on this or a new device.')
+      navigate('/login')
+    } catch (err) {
+      toast.error('Action Failed', err.message || 'Could not revoke device session.')
+    } finally {
+      setChangeDeviceLoading(false)
+    }
   }
 
   return (
@@ -79,7 +98,7 @@ export const SettingsPage = () => {
           </Button>
         ) : (
           <span className="text-[11px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 rounded-xl">
-            {lang === 'hi' ? 'लॉग इन हैं' : 'Logged In'}
+            {lang === 'hi' ? 'सक्रिय डिवाइस' : 'Active Device'}
           </span>
         )}
       </div>
@@ -153,6 +172,31 @@ export const SettingsPage = () => {
           <ChevronRight className="w-4 h-4 text-slate-400" />
         </div>
 
+        {/* Change Device Feature */}
+        {isAuthenticated && (
+          <div
+            onClick={() => setShowChangeDeviceModal(true)}
+            className="p-4 flex items-center justify-between gap-3 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 rounded-2xl transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400">
+                <Smartphone className="w-5 h-5" />
+              </div>
+              <div>
+                <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                  Change Device
+                </h5>
+                <p className="text-slate-400 text-[11px] font-medium">
+                  {lang === 'hi' ? 'दूसरे फोन या ब्राउज़र पर अकाउंट ट्रांसफर करें' : 'Switch active session to another phone or device'}
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-black text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 px-3 py-1.5 rounded-xl">
+              Change Device
+            </span>
+          </div>
+        )}
+
         {/* Support & Helpline */}
         <div
           onClick={() => window.open('tel:1800123456', '_blank')}
@@ -185,6 +229,47 @@ export const SettingsPage = () => {
           <LogOut className="w-4 h-4" />
           <span>{t.logout || (lang === 'hi' ? 'खाते से लॉग आउट करें' : 'Sign Out of Account')}</span>
         </button>
+      )}
+
+      {/* Change Device Confirmation Modal */}
+      {showChangeDeviceModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center mx-auto">
+              <Smartphone className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1.5">
+              <h4 className="text-lg font-black text-slate-900 dark:text-white">
+                Change Device?
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                Your current device session will be removed. You will need to verify your mobile number again on this or another device.
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setShowChangeDeviceModal(false)}
+                disabled={changeDeviceLoading}
+                className="flex-1 font-bold text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleConfirmChangeDevice}
+                loading={changeDeviceLoading}
+                className="flex-1 font-bold text-xs bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -27,6 +27,7 @@ class AdminCouponResource extends JsonResource
             'usage_limit' => (int) $this->total_usage_limit,
             'used_count' => (int) $this->total_used_count,
             'user_limit' => (int) $this->usage_limit_per_user,
+            'image_url' => $this->image_url,
             'is_active' => (bool) $this->is_active,
         ];
     }

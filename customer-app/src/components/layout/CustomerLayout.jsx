@@ -24,6 +24,7 @@ import { useCart } from '../../context/CartContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useAuth } from '../../context/AuthContext'
 import LocationPickerModal from '../common/LocationPickerModal'
+import GpsEnableModal from '../common/GpsEnableModal'
 import ActiveOrderBanner from '../common/ActiveOrderBanner'
 import customerApi from '../../api/customer.api'
 
@@ -31,7 +32,7 @@ export const CustomerLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { lang, toggleLanguage, t } = useLanguage()
-  const { activeAddress } = useLocationContext()
+  const { activeAddress, isGpsModalOpen, closeGpsModal } = useLocationContext()
   const { itemCount } = useCart()
   const { isDark, toggleTheme } = useTheme()
   const { isAuthenticated } = useAuth()
@@ -270,6 +271,13 @@ export const CustomerLayout = () => {
       <LocationPickerModal
         isOpen={locationModalOpen}
         onClose={() => setLocationModalOpen(false)}
+      />
+
+      {/* GPS Enable Custom Popup Modal */}
+      <GpsEnableModal
+        isOpen={isGpsModalOpen}
+        onClose={closeGpsModal}
+        onOpenPicker={() => setLocationModalOpen(true)}
       />
     </div>
   )

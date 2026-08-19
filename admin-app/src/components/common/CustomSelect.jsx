@@ -86,7 +86,7 @@ export const CustomSelect = ({
               )}
             </div>
           )}
-          <div className="max-h-56 overflow-y-auto py-1">
+          <div className="max-h-56 overflow-y-auto">
             {filteredOptions.length === 0 ? (
               <div className="px-3.5 py-2.5 text-xs text-slate-400 text-center">No options found</div>
             ) : (
@@ -95,7 +95,7 @@ export const CustomSelect = ({
                   key={opt.value}
                   type="button"
                   onClick={() => handleSelect(opt.value)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2 text-xs text-left transition-colors ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left transition-colors cursor-pointer ${
                     opt.value === value
                       ? 'bg-[#2845D6]/10 text-[#2845D6] dark:bg-[#2845D6]/20 dark:text-blue-400 font-semibold'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'

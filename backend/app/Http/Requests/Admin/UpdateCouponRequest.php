@@ -31,6 +31,7 @@ class UpdateCouponRequest extends FormRequest
             'restaurant_id' => ['nullable', 'exists:restaurants,id'],
             'starts_at' => ['nullable', 'date'],
             'expires_at' => ['nullable', 'date'],
+            'image_url' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

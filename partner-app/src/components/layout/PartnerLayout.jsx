@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Sun,
   Moon,
+  Smartphone,
   Menu as MenuIcon,
   X as CloseIcon,
 } from 'lucide-react'
@@ -29,7 +30,7 @@ import Button from '../common/Button'
 import CustomSelect from '../common/CustomSelect'
 
 export const PartnerLayout = () => {
-  const { user, restaurant, logout, updateRestaurant } = useAuth()
+  const { user, restaurant, logout, changeDevice, updateRestaurant } = useAuth()
   const { soundEnabled, toggleSound } = useSound()
   const { theme, toggleTheme, isDark } = useTheme()
   const toast = useToast()
@@ -42,6 +43,22 @@ export const PartnerLayout = () => {
   const [offlineReason, setOfflineReason] = useState('Kitchen Peak Hours / Prep Delay')
   const [toggleLoading, setToggleLoading] = useState(false)
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+
+  const [showChangeDeviceModal, setShowChangeDeviceModal] = useState(false)
+  const [changeDeviceLoading, setChangeDeviceLoading] = useState(false)
+
+  const handleConfirmChangeDevice = async () => {
+    setChangeDeviceLoading(true)
+    try {
+      await changeDevice()
+      setShowChangeDeviceModal(false)
+      toast.success('Device Changed', 'Partner terminal session removed. Please verify on this or a new terminal.')
+    } catch (err) {
+      toast.error('Action Failed', err.message || 'Could not revoke partner session.')
+    } finally {
+      setChangeDeviceLoading(false)
+    }
+  }
 
   const isStoreOpen = restaurant?.is_open ?? true
 
@@ -190,8 +207,17 @@ export const PartnerLayout = () => {
 
           <button
             type="button"
+            onClick={() => setShowChangeDeviceModal(true)}
+            className="w-full flex items-center justify-center gap-2 p-2 rounded-xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 font-bold text-xs transition-all cursor-pointer"
+          >
+            <Smartphone className="w-4 h-4" />
+            <span>Change Device</span>
+          </button>
+
+          <button
+            type="button"
             onClick={logout}
-            className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 font-bold text-xs transition-all"
+            className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 font-bold text-xs transition-all cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign Out</span>
@@ -603,6 +629,45 @@ export const PartnerLayout = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Change Device Confirmation Modal */}
+      {showChangeDeviceModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-800 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-950/60 text-amber-400 flex items-center justify-center mx-auto border border-amber-800">
+              <Smartphone className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1.5">
+              <h4 className="text-lg font-black text-white">
+                Change Partner Terminal?
+              </h4>
+              <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                Your current device session will be removed. You will need to verify your partner mobile number again on this or another terminal.
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowChangeDeviceModal(false)}
+                disabled={changeDeviceLoading}
+                className="flex-1 h-11 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs hover:bg-slate-700 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmChangeDevice}
+                disabled={changeDeviceLoading}
+                className="flex-1 h-11 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md shadow-amber-600/30 transition-all cursor-pointer"
+              >
+                {changeDeviceLoading ? 'Processing...' : 'Continue'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

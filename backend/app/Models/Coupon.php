@@ -24,6 +24,7 @@ class Coupon extends Model
         'total_usage_limit',
         'total_used_count',
         'restaurant_id',
+        'image_url',
         'starts_at',
         'expires_at',
         'is_active',

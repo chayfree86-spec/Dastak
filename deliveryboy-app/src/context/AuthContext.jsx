@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [riderProfile, setRiderProfile] = useState(null)
   const [token, setToken] = useState(localStorage.getItem('dastak_delivery_token'))
+  const [sessionToken, setSessionToken] = useState(localStorage.getItem('dastak_delivery_session_token'))
   const [loading, setLoading] = useState(true)
 
   // Active delivery state cached across tabs
@@ -28,8 +29,38 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  const clearSession = useCallback(() => {
+    localStorage.removeItem('dastak_delivery_token')
+    localStorage.removeItem('dastak_delivery_session_token')
+    localStorage.removeItem('dastak_delivery_user')
+    setToken(null)
+    setSessionToken(null)
+    setUser(null)
+    setRiderProfile(null)
+    setActiveOrder(null)
+  }, [])
+
   const checkAuth = useCallback(async () => {
+    const storedSessionToken = localStorage.getItem('dastak_delivery_session_token')
     const storedToken = localStorage.getItem('dastak_delivery_token')
+
+    if (storedSessionToken) {
+      try {
+        const res = await authApi.validateSession(storedSessionToken)
+        const userData = res.data?.data?.user || res.data?.user || null
+        if (userData) {
+          setUser(userData)
+          await fetchRiderProfile()
+        }
+      } catch (e) {
+        console.warn('Rider device session invalid / revoked:', e)
+        clearSession()
+      } finally {
+        setLoading(false)
+      }
+      return
+    }
+
     if (!storedToken) {
       setUser(null)
       setRiderProfile(null)
@@ -44,14 +75,11 @@ export const AuthProvider = ({ children }) => {
       await fetchRiderProfile()
     } catch (e) {
       console.warn('Token validation failed:', e)
-      localStorage.removeItem('dastak_delivery_token')
-      setUser(null)
-      setRiderProfile(null)
-      setToken(null)
+      clearSession()
     } finally {
       setLoading(false)
     }
-  }, [fetchRiderProfile])
+  }, [fetchRiderProfile, clearSession])
 
   useEffect(() => {
     checkAuth()
@@ -73,7 +101,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     sendGps()
-    const interval = setInterval(sendGps, 30000) // update every 30s
+    const interval = setInterval(sendGps, 30000)
     return () => clearInterval(interval)
   }, [token, riderProfile?.is_online])
 
@@ -85,7 +113,6 @@ export const AuthProvider = ({ children }) => {
       const order = res.data?.data || null
 
       setActiveOrder((prevOrder) => {
-        // Trigger new assignment popup if newly assigned order detected
         if (order && (!prevOrder || prevOrder.id !== order.id)) {
           setNewAssignmentModal(order)
           soundAlert.playOrderTone()
@@ -94,7 +121,6 @@ export const AuthProvider = ({ children }) => {
       })
       return order
     } catch (err) {
-      console.warn('Active order poll failed:', err)
       return null
     }
   }, [token, user])
@@ -102,27 +128,32 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!token || !user) return
     checkAssignedOrder()
-    const pollInterval = setInterval(checkAssignedOrder, 10000) // check every 10s
+    const pollInterval = setInterval(checkAssignedOrder, 10000)
     return () => clearInterval(pollInterval)
   }, [token, user, checkAssignedOrder])
 
-  const login = async (identifier, password) => {
+  const startVerification = async (mobile) => {
+    const res = await authApi.startVerification(mobile)
+    return res.data?.data || res.data
+  }
+
+  const resendOtp = async (sessionId) => {
+    const res = await authApi.resendOtp(sessionId)
+    return res.data?.data || res.data
+  }
+
+  const verifyDeviceOtp = async (sessionId, otp, name = null) => {
     soundAlert.initContext()
-
-    const res = await authApi.login({
-      identifier,
-      password,
-    })
-
-    const tokenVal = res.data?.data?.token
-    const userData = res.data?.data?.user
-
-    const role = userData?.role || (userData?.roles && userData?.roles[0]?.slug)
-    if (role && role !== 'delivery_boy' && role !== 'super_admin') {
-      throw new Error('This account is not registered as a Delivery Partner. Please use the Customer or Partner app.')
-    }
+    const res = await authApi.verifyOtp(sessionId, otp, name)
+    const tokenVal = res.data?.data?.token || res.data?.token
+    const rawSessionToken = res.data?.data?.session_token || res.data?.session_token
+    const userData = res.data?.data?.user || res.data?.user
 
     localStorage.setItem('dastak_delivery_token', tokenVal)
+    if (rawSessionToken) {
+      localStorage.setItem('dastak_delivery_session_token', rawSessionToken)
+      setSessionToken(rawSessionToken)
+    }
     setToken(tokenVal)
     setUser(userData)
 
@@ -131,17 +162,23 @@ export const AuthProvider = ({ children }) => {
     return { user: userData, riderProfile: profile }
   }
 
+  const changeDevice = async () => {
+    try {
+      await authApi.changeDevice()
+    } catch (e) {
+      console.warn('Change device API warning:', e)
+    } finally {
+      clearSession()
+    }
+  }
+
   const logout = async () => {
     try {
       await authApi.logout()
     } catch (e) {
       console.warn('Logout API warning:', e)
     } finally {
-      localStorage.removeItem('dastak_delivery_token')
-      setToken(null)
-      setUser(null)
-      setRiderProfile(null)
-      setActiveOrder(null)
+      clearSession()
     }
   }
 
@@ -166,12 +203,16 @@ export const AuthProvider = ({ children }) => {
         user,
         riderProfile,
         token,
+        sessionToken,
         loading,
         isAuthenticated: !!token && !!user,
         activeOrder,
         newAssignmentModal,
         setNewAssignmentModal,
-        login,
+        startVerification,
+        resendOtp,
+        verifyDeviceOtp,
+        changeDevice,
         logout,
         refreshProfile: fetchRiderProfile,
         toggleDutyStatus,
