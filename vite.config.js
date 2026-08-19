@@ -1,27 +1,17 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
 
-// https://vitejs.dev/config/
+// Root Vite Configuration delegates seamlessly to admin-app
 export default defineConfig({
+  root: path.resolve(__dirname, 'admin-app'),
   plugins: [
     react(),
     tailwindcss(),
   ],
   server: {
     port: 5173,
-    watch: {
-      usePolling: true,
-      interval: 1000,
-      ignored: [
-        '**/customer-app/**',
-        '**/partner-app/**',
-        '**/deliveryboy-app/**',
-        '**/backend/**',
-        '**/api/**',
-        '**/dist/**',
-      ],
-    },
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

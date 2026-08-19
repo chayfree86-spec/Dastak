@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Store,
@@ -20,6 +20,8 @@ import {
   Pizza,
   Moon,
   Sun,
+  ChefHat,
+  ShoppingBag,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
@@ -44,7 +46,29 @@ export const Login = () => {
   const [error, setError] = useState('')
   const [focusedOtpIdx, setFocusedOtpIdx] = useState(null)
 
+  // Mouse Parallax Offset
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 })
+
   const otpInputsRef = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
+
+  // Track Mouse Movement for 3D Dynamic Parallax
+  useEffect(() => {
+    let animationFrameId
+    const handleMouseMove = (e) => {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = requestAnimationFrame(() => {
+        const normX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)
+        const normY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)
+        setMouseOffset({ x: normX, y: normY })
+      })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -172,10 +196,161 @@ export const Login = () => {
     }
   }
 
+  // Scattered Multi-Depth Constellation with Half-Hidden Background Store Elements
+  const bgElements = useMemo(() => [
+    // 1. Far Top-Left
+    {
+      icon: Store,
+      pos: { top: '8%', left: '7%' },
+      speed: { x: 38, y: 32 },
+      rotate: '-8deg',
+      color: 'text-[#FF5200]',
+      border: 'border-orange-200/70 dark:border-orange-900/40',
+      shadow: 'shadow-orange-500/10',
+      size: 'w-6 h-6',
+      delay: '0s',
+    },
+    // 2. Top-Center Left (Mid-Field)
+    {
+      icon: UtensilsCrossed,
+      pos: { top: '12%', left: '26%' },
+      speed: { x: -24, y: -20 },
+      rotate: '12deg',
+      color: 'text-amber-500',
+      border: 'border-amber-200/70 dark:border-amber-900/40',
+      shadow: 'shadow-amber-500/10',
+      size: 'w-5 h-5',
+      delay: '1.2s',
+    },
+    // 3. Top-Right Corner
+    {
+      icon: TrendingUp,
+      pos: { top: '9%', right: '8%' },
+      speed: { x: 30, y: 26 },
+      rotate: '-6deg',
+      color: 'text-emerald-500',
+      border: 'border-emerald-200/70 dark:border-emerald-900/40',
+      shadow: 'shadow-emerald-500/10',
+      size: 'w-6 h-6',
+      delay: '2s',
+    },
+    // 4. Top-Center Right (Mid-Field)
+    {
+      icon: Receipt,
+      pos: { top: '16%', right: '25%' },
+      speed: { x: -28, y: -22 },
+      rotate: '8deg',
+      color: 'text-orange-500',
+      border: 'border-orange-200/70 dark:border-orange-900/40',
+      shadow: 'shadow-orange-500/10',
+      size: 'w-5 h-5',
+      delay: '0.8s',
+    },
+    // 5. HALF-HIDDEN BEHIND LOGIN BOX: Top-Left Edge Behind Box
+    {
+      icon: Flame,
+      pos: { top: '34%', left: '33%' },
+      speed: { x: 14, y: 12 },
+      rotate: '-15deg',
+      color: 'text-rose-500',
+      border: 'border-rose-200/80 dark:border-rose-900/50',
+      shadow: 'shadow-rose-500/15',
+      size: 'w-6 h-6',
+      delay: '3s',
+      halfHide: true,
+    },
+    // 6. HALF-HIDDEN BEHIND LOGIN BOX: Bottom-Right Edge Behind Box
+    {
+      icon: CookingPot,
+      pos: { bottom: '26%', right: '32%' },
+      speed: { x: -16, y: -14 },
+      rotate: '14deg',
+      color: 'text-amber-600 dark:text-amber-400',
+      border: 'border-amber-200/80 dark:border-amber-900/50',
+      shadow: 'shadow-amber-500/15',
+      size: 'w-6 h-6',
+      delay: '1.5s',
+      halfHide: true,
+    },
+    // 7. HALF-HIDDEN BEHIND LOGIN BOX: Mid-Right Peeking Under Edge
+    {
+      icon: ShieldCheck,
+      pos: { top: '50%', right: '34%' },
+      speed: { x: 18, y: 15 },
+      rotate: '-10deg',
+      color: 'text-emerald-600 dark:text-emerald-400',
+      border: 'border-emerald-200/80 dark:border-emerald-900/50',
+      shadow: 'shadow-emerald-500/15',
+      size: 'w-5 h-5',
+      delay: '2.5s',
+      halfHide: true,
+    },
+    // 8. Mid-Left Scattered
+    {
+      icon: Pizza,
+      pos: { top: '48%', left: '6%' },
+      speed: { x: -35, y: 28 },
+      rotate: '6deg',
+      color: 'text-[#FF5200]',
+      border: 'border-orange-200/70 dark:border-orange-900/40',
+      shadow: 'shadow-orange-500/10',
+      size: 'w-6 h-6',
+      delay: '1.8s',
+    },
+    // 9. Mid-Right Scattered
+    {
+      icon: Coffee,
+      pos: { top: '44%', right: '6%' },
+      speed: { x: 36, y: -26 },
+      rotate: '-12deg',
+      color: 'text-amber-700 dark:text-amber-300',
+      border: 'border-amber-200/70 dark:border-amber-900/40',
+      shadow: 'shadow-amber-500/10',
+      size: 'w-6 h-6',
+      delay: '2.2s',
+    },
+    // 10. Bottom-Left Corner
+    {
+      icon: Store,
+      pos: { bottom: '10%', left: '8%' },
+      speed: { x: 30, y: -34 },
+      rotate: '10deg',
+      color: 'text-[#FF5200]',
+      border: 'border-orange-200/70 dark:border-orange-900/40',
+      shadow: 'shadow-orange-500/10',
+      size: 'w-6 h-6',
+      delay: '0.5s',
+    },
+    // 11. Bottom-Center Left
+    {
+      icon: ShoppingBag,
+      pos: { bottom: '16%', left: '28%' },
+      speed: { x: -22, y: 20 },
+      rotate: '-8deg',
+      color: 'text-emerald-500',
+      border: 'border-emerald-200/70 dark:border-emerald-900/40',
+      shadow: 'shadow-emerald-500/10',
+      size: 'w-5 h-5',
+      delay: '3.5s',
+    },
+    // 12. Bottom-Right Corner
+    {
+      icon: UtensilsCrossed,
+      pos: { bottom: '9%', right: '8%' },
+      speed: { x: -38, y: 32 },
+      rotate: '15deg',
+      color: 'text-amber-500',
+      border: 'border-amber-200/70 dark:border-amber-900/40',
+      shadow: 'shadow-amber-500/10',
+      size: 'w-6 h-6',
+      delay: '1s',
+    },
+  ], [])
+
   return (
     <div className="relative min-h-screen w-full bg-[#F8FAFC] dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 transition-colors duration-200 font-sans antialiased overflow-hidden selection:bg-[#FF5200] selection:text-white">
       {/* Theme Toggle Top Right */}
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-4 right-4 z-30">
         <button
           type="button"
           onClick={toggleTheme}
@@ -186,58 +361,53 @@ export const Login = () => {
         </button>
       </div>
 
-      {/* ======================================================== */}
-      {/* 1. FLOATING KITCHEN & STORE MOTION ICONS (THEME RESPECTED) */}
-      {/* ======================================================== */}
+      {/* ========================================================================= */}
+      {/* FULL-VIEWPORT MOUSE-REACTIVE 3D PARALLAX STORE CONSTELLATION */}
+      {/* ========================================================================= */}
       <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden select-none z-0">
         {/* Soft Ambient Mesh */}
-        <div className="absolute -top-24 -left-24 w-[450px] h-[450px] bg-orange-500/10 dark:bg-orange-500/15 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute -bottom-24 -right-24 w-[450px] h-[450px] bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '3s' }} />
+        <div
+          style={{
+            transform: `translate3d(${mouseOffset.x * -15}px, ${mouseOffset.y * -15}px, 0)`,
+          }}
+          className="absolute -top-24 -left-24 w-[480px] h-[480px] bg-orange-500/10 dark:bg-orange-500/15 rounded-full blur-3xl transition-transform duration-700 ease-out"
+        />
+        <div
+          style={{
+            transform: `translate3d(${mouseOffset.x * 20}px, ${mouseOffset.y * 20}px, 0)`,
+          }}
+          className="absolute -bottom-24 -right-24 w-[480px] h-[480px] bg-amber-500/10 dark:bg-amber-500/15 rounded-full blur-3xl transition-transform duration-700 ease-out"
+        />
 
-        {/* 1. Store / Restaurant Terminal Bubble (Top Left) */}
-        <div className="absolute top-12 left-6 sm:left-14 lg:left-24 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-orange-200/70 dark:border-orange-900/40 shadow-lg shadow-orange-500/10 text-[#FF5200] animate-float-slow">
-          <Store className="w-6 h-6" />
-        </div>
+        {/* Scattered Dynamic Floating Icons */}
+        {bgElements.map((item, idx) => {
+          const Icon = item.icon
+          const transX = mouseOffset.x * item.speed.x
+          const transY = mouseOffset.y * item.speed.y
 
-        {/* 2. Order Prep Utensils Bubble (Top Right) */}
-        <div className="absolute top-16 right-6 sm:right-14 lg:right-28 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-amber-200/70 dark:border-amber-900/40 shadow-lg shadow-amber-500/10 text-amber-500 animate-float-reverse">
-          <UtensilsCrossed className="w-6 h-6" />
-        </div>
-
-        {/* 3. Live KOT Flame Bubble (Mid Left) */}
-        <div className="absolute top-1/2 -translate-y-16 left-4 sm:left-10 lg:left-20 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-rose-200/70 dark:border-rose-900/40 shadow-lg shadow-rose-500/10 text-rose-500 animate-float-horizontal">
-          <Flame className="w-6 h-6" />
-        </div>
-
-        {/* 4. Revenue Growth Bubble (Mid Right) */}
-        <div className="absolute top-1/2 -translate-y-12 right-4 sm:right-10 lg:right-20 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-emerald-200/70 dark:border-emerald-900/40 shadow-lg shadow-emerald-500/10 text-emerald-500 animate-float-slow" style={{ animationDelay: '1.5s' }}>
-          <TrendingUp className="w-6 h-6" />
-        </div>
-
-        {/* 5. Cooking Pot Bubble (Bottom Left) */}
-        <div className="absolute bottom-14 left-6 sm:left-14 lg:left-24 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-amber-200/70 dark:border-amber-900/40 shadow-lg shadow-amber-500/10 text-amber-600 dark:text-amber-400 animate-float-horizontal">
-          <CookingPot className="w-6 h-6" />
-        </div>
-
-        {/* 6. Receipt / KOT Bill Bubble (Bottom Right) */}
-        <div className="absolute bottom-14 right-6 sm:right-14 lg:right-28 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-orange-200/70 dark:border-orange-900/40 shadow-lg shadow-orange-500/10 text-[#FF5200] animate-float-slow" style={{ animationDelay: '2.5s' }}>
-          <Receipt className="w-6 h-6" />
-        </div>
-
-        {/* 7. Pizza Bubble (Top Center Left) */}
-        <div className="absolute top-28 left-1/4 hidden lg:flex p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-800 text-orange-500 shadow-md animate-float-reverse">
-          <Pizza className="w-5 h-5" />
-        </div>
-
-        {/* 8. Coffee Bubble (Bottom Center Right) */}
-        <div className="absolute bottom-28 right-1/4 hidden lg:flex p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/60 dark:border-slate-800 text-amber-600 dark:text-amber-400 shadow-md animate-float-slow" style={{ animationDelay: '3s' }}>
-          <Coffee className="w-5 h-5" />
-        </div>
+          return (
+            <div
+              key={idx}
+              style={{
+                ...item.pos,
+                transform: `translate3d(${transX}px, ${transY}px, 0) rotate(${item.rotate})`,
+                animationDelay: item.delay,
+              }}
+              className="absolute pointer-events-none transition-transform duration-500 ease-out"
+            >
+              <div
+                className={`p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border ${item.border} ${item.shadow} ${item.color} animate-float-slow transition-colors`}
+              >
+                <Icon className={item.size} />
+              </div>
+            </div>
+          )
+        })}
       </div>
 
-      {/* ======================================================== */}
-      {/* 2. AUTHENTICATION CARD (THEME RESPECTED) */}
-      {/* ======================================================== */}
+      {/* ========================================================================= */}
+      {/* 2. AUTHENTICATION CARD (Layers ABOVE background icons) */}
+      {/* ========================================================================= */}
       <div className="relative z-10 w-full max-w-md space-y-6">
         {/* Brand Banner */}
         <div className="text-center space-y-3">
@@ -255,7 +425,7 @@ export const Login = () => {
         </div>
 
         {/* Auth Card */}
-        <div className="bg-white dark:bg-slate-900 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-2xl space-y-6">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl space-y-6 transition-colors">
           <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h2 className="text-base font-black text-slate-900 dark:text-white">
               {step === 'active_elsewhere'
@@ -281,9 +451,7 @@ export const Login = () => {
             </div>
           )}
 
-          {/* ======================================================== */}
           {/* CASE C: ACTIVE ON ANOTHER DEVICE NOTICE */}
-          {/* ======================================================== */}
           {step === 'active_elsewhere' && (
             <div className="space-y-5 animate-in fade-in">
               <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-center space-y-3">
@@ -328,9 +496,7 @@ export const Login = () => {
             </div>
           )}
 
-          {/* ======================================================== */}
           {/* STEP 1: MOBILE NUMBER INPUT */}
-          {/* ======================================================== */}
           {step === 'mobile' && (
             <form onSubmit={handleStartVerification} className="space-y-4 animate-in fade-in">
               <div className="space-y-1.5">
@@ -377,12 +543,9 @@ export const Login = () => {
             </form>
           )}
 
-          {/* ======================================================== */}
           {/* STEP 2: 6-DIGIT OTP VERIFICATION WITH CODE DISPLAY */}
-          {/* ======================================================== */}
           {step === 'otp' && (
             <form onSubmit={handleVerifyOtp} className="space-y-4 animate-in fade-in">
-              {/* Visible Verification Code Banner for manual fill or tap */}
               {generatedOtp && (
                 <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 flex items-center justify-between gap-2.5">
                   <div className="flex items-center gap-2.5 min-w-0">

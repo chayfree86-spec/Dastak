@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\V1\Admin\SupportAdminController;
 use App\Http\Controllers\Api\V1\Admin\UserManagementController;
 use App\Http\Controllers\Api\V1\Admin\ZoneAdminController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\GeocodeController;
 use App\Http\Controllers\Api\V1\Customer\CartController;
 use App\Http\Controllers\Api\V1\Customer\CustomerOrderController;

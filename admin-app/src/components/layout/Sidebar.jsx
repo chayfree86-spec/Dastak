@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
-import { hasPermission, ROLE_LABELS } from '../../utils/permissions'
+import { hasPermission, ROLE_LABELS, normalizeRole } from '../../utils/permissions'
 
 const navigationItems = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, permission: 'DASHBOARD', color: 'bg-blue-50 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400' },
@@ -151,7 +151,7 @@ export const Sidebar = ({
                   }}
                 />
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#2845D6]/10 text-[#2845D6] dark:bg-blue-900/40 dark:text-blue-300">
-                  {ROLE_LABELS[role] || 'Admin'}
+                  {ROLE_LABELS[normalizeRole(user?.role || role)] || 'Super Admin'}
                 </span>
               </div>
 

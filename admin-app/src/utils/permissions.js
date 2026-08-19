@@ -5,6 +5,30 @@ export const ROLES = {
   SUPPORT_ADMIN: 'SUPPORT_ADMIN',
 }
 
+export const normalizeRole = (role) => {
+  if (!role) return ROLES.SUPER_ADMIN
+  const clean = String(role).toUpperCase().replace(/[-\s]/g, '_')
+  if (
+    clean === 'ADMIN' ||
+    clean === 'SUPERADMIN' ||
+    clean === 'SUPER_ADMIN' ||
+    clean === 'SUPER_ADMINISTRATOR' ||
+    clean === 'ROOT'
+  ) {
+    return ROLES.SUPER_ADMIN
+  }
+  if (clean === 'OPERATIONS' || clean === 'OPERATIONS_ADMIN' || clean === 'OPS_ADMIN') {
+    return ROLES.OPERATIONS_ADMIN
+  }
+  if (clean === 'FINANCE' || clean === 'FINANCE_ADMIN') {
+    return ROLES.FINANCE_ADMIN
+  }
+  if (clean === 'SUPPORT' || clean === 'SUPPORT_ADMIN') {
+    return ROLES.SUPPORT_ADMIN
+  }
+  return clean
+}
+
 export const ROLE_LABELS = {
   [ROLES.SUPER_ADMIN]: 'Super Admin',
   [ROLES.OPERATIONS_ADMIN]: 'Operations Admin',
@@ -27,8 +51,9 @@ export const PERMISSIONS = {
 }
 
 export const hasPermission = (userRole, moduleKey) => {
-  if (!userRole) return false
-  if (userRole === ROLES.SUPER_ADMIN) return true
+  if (!userRole) return true
+  const norm = normalizeRole(userRole)
+  if (norm === ROLES.SUPER_ADMIN) return true
   const allowedRoles = PERMISSIONS[moduleKey] || []
-  return allowedRoles.includes(userRole)
+  return allowedRoles.includes(norm)
 }

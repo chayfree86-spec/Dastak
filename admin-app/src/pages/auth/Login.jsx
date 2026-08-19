@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Mail,
@@ -15,7 +15,14 @@ import {
   MapPin,
   Compass,
   Navigation,
-  Clock,
+  Sun,
+  Moon,
+  Store,
+  TrendingUp,
+  Zap,
+  Activity,
+  Layers,
+  BarChart3,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -41,14 +48,35 @@ export const Login = () => {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
+  // Mouse Parallax Offset
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 })
+
   const { login, isAuthenticated } = useAuth()
-  const { isDark } = useTheme()
+  const { isDark, toggleTheme } = useTheme()
   const toast = useToast()
   const navigate = useNavigate()
 
+  // Track Mouse Movement for 3D Dynamic Parallax
+  useEffect(() => {
+    let animationFrameId
+    const handleMouseMove = (e) => {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = requestAnimationFrame(() => {
+        const normX = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2)
+        const normY = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2)
+        setMouseOffset({ x: normX, y: normY })
+      })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [])
+
   // Intelligent Realtime Type Detection:
   const isEmail = /[a-zA-Z@]/.test(identifier.trim())
-  const isMobile = !isEmail && identifier.trim().length > 0 && /^\+?[0-9\s-]+$/.test(identifier.trim())
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -149,11 +177,161 @@ export const Login = () => {
     }
   }
 
-
+  // Scattered Multi-Depth Constellation with Half-Hidden Background Elements
+  const bgElements = useMemo(() => [
+    // 1. Far Top-Left
+    {
+      icon: Bike,
+      pos: { top: '8%', left: '7%' },
+      speed: { x: 38, y: 32 },
+      rotate: '-8deg',
+      color: 'text-[#FF5200]',
+      border: 'border-orange-200/70 dark:border-orange-900/40',
+      shadow: 'shadow-orange-500/10',
+      size: 'w-6 h-6',
+      delay: '0s',
+    },
+    // 2. Top-Center Left (Mid-Field)
+    {
+      icon: Package,
+      pos: { top: '12%', left: '26%' },
+      speed: { x: -22, y: -18 },
+      rotate: '12deg',
+      color: 'text-[#2845D6] dark:text-blue-400',
+      border: 'border-blue-200/70 dark:border-blue-900/40',
+      shadow: 'shadow-blue-500/10',
+      size: 'w-5 h-5',
+      delay: '1.2s',
+    },
+    // 3. Top-Right Corner
+    {
+      icon: TrendingUp,
+      pos: { top: '9%', right: '8%' },
+      speed: { x: 32, y: 28 },
+      rotate: '-6deg',
+      color: 'text-emerald-500',
+      border: 'border-emerald-200/70 dark:border-emerald-900/40',
+      shadow: 'shadow-emerald-500/10',
+      size: 'w-6 h-6',
+      delay: '2s',
+    },
+    // 4. Top-Center Right (Mid-Field)
+    {
+      icon: Activity,
+      pos: { top: '16%', right: '25%' },
+      speed: { x: -28, y: -24 },
+      rotate: '8deg',
+      color: 'text-rose-500',
+      border: 'border-rose-200/70 dark:border-rose-900/40',
+      shadow: 'shadow-rose-500/10',
+      size: 'w-5 h-5',
+      delay: '0.8s',
+    },
+    // 5. HALF-HIDDEN BEHIND LOGIN BOX: Top-Left Edge Behind Box
+    {
+      icon: Layers,
+      pos: { top: '34%', left: '33%' },
+      speed: { x: 14, y: 12 },
+      rotate: '-15deg',
+      color: 'text-indigo-500 dark:text-indigo-400',
+      border: 'border-indigo-200/80 dark:border-indigo-900/50',
+      shadow: 'shadow-indigo-500/15',
+      size: 'w-6 h-6',
+      delay: '3s',
+      halfHide: true,
+    },
+    // 6. HALF-HIDDEN BEHIND LOGIN BOX: Bottom-Right Edge Behind Box
+    {
+      icon: BarChart3,
+      pos: { bottom: '26%', right: '32%' },
+      speed: { x: -16, y: -14 },
+      rotate: '14deg',
+      color: 'text-amber-500',
+      border: 'border-amber-200/80 dark:border-amber-900/50',
+      shadow: 'shadow-amber-500/15',
+      size: 'w-6 h-6',
+      delay: '1.5s',
+      halfHide: true,
+    },
+    // 7. HALF-HIDDEN BEHIND LOGIN BOX: Mid-Right Peeking Under Edge
+    {
+      icon: ShieldCheck,
+      pos: { top: '50%', right: '34%' },
+      speed: { x: 18, y: 15 },
+      rotate: '-10deg',
+      color: 'text-blue-600 dark:text-blue-400',
+      border: 'border-blue-200/80 dark:border-blue-900/50',
+      shadow: 'shadow-blue-500/15',
+      size: 'w-5 h-5',
+      delay: '2.5s',
+      halfHide: true,
+    },
+    // 8. Mid-Left Scattered
+    {
+      icon: MapPin,
+      pos: { top: '48%', left: '6%' },
+      speed: { x: -35, y: 28 },
+      rotate: '6deg',
+      color: 'text-emerald-500',
+      border: 'border-emerald-200/70 dark:border-emerald-900/40',
+      shadow: 'shadow-emerald-500/10',
+      size: 'w-6 h-6',
+      delay: '1.8s',
+    },
+    // 9. Mid-Right Scattered
+    {
+      icon: Navigation,
+      pos: { top: '44%', right: '6%' },
+      speed: { x: 36, y: -26 },
+      rotate: '-14deg',
+      color: 'text-purple-500',
+      border: 'border-purple-200/70 dark:border-purple-900/40',
+      shadow: 'shadow-purple-500/10',
+      size: 'w-6 h-6',
+      delay: '2.2s',
+    },
+    // 10. Bottom-Left Corner
+    {
+      icon: Compass,
+      pos: { bottom: '10%', left: '8%' },
+      speed: { x: 30, y: -34 },
+      rotate: '12deg',
+      color: 'text-[#2845D6] dark:text-blue-400',
+      border: 'border-blue-200/70 dark:border-blue-900/40',
+      shadow: 'shadow-blue-500/10',
+      size: 'w-6 h-6',
+      delay: '0.5s',
+    },
+    // 11. Bottom-Center Left
+    {
+      icon: Store,
+      pos: { bottom: '16%', left: '28%' },
+      speed: { x: -22, y: 20 },
+      rotate: '-8deg',
+      color: 'text-orange-500',
+      border: 'border-orange-200/70 dark:border-orange-900/40',
+      shadow: 'shadow-orange-500/10',
+      size: 'w-5 h-5',
+      delay: '3.5s',
+    },
+    // 12. Bottom-Right Corner
+    {
+      icon: Zap,
+      pos: { bottom: '9%', right: '8%' },
+      speed: { x: -38, y: 32 },
+      rotate: '15deg',
+      color: 'text-amber-500',
+      border: 'border-amber-200/70 dark:border-amber-900/40',
+      shadow: 'shadow-amber-500/10',
+      size: 'w-6 h-6',
+      delay: '1s',
+    },
+  ], [])
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-[#2845D6] selection:text-white transition-colors duration-200">
-      <div className="absolute top-4 right-4 z-20">
+      {/* Theme Toggle in Top Right */}
+      <div className="absolute top-4 right-4 z-30">
         <button
           type="button"
           onClick={toggleTheme}
@@ -164,35 +342,53 @@ export const Login = () => {
         </button>
       </div>
 
+      {/* ========================================================================= */}
+      {/* FULL-VIEWPORT MOUSE-REACTIVE 3D PARALLAX ICON CONSTELLATION */}
+      {/* ========================================================================= */}
       <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden select-none z-0">
-        <div className="absolute -top-24 -left-24 w-[450px] h-[450px] bg-blue-600/10 dark:bg-blue-600/15 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute -bottom-24 -right-24 w-[450px] h-[450px] bg-orange-500/10 dark:bg-orange-500/15 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: '3s' }} />
+        {/* Soft Ambient Mesh Background */}
+        <div
+          style={{
+            transform: `translate3d(${mouseOffset.x * -15}px, ${mouseOffset.y * -15}px, 0)`,
+          }}
+          className="absolute -top-24 -left-24 w-[480px] h-[480px] bg-blue-600/10 dark:bg-blue-600/15 rounded-full blur-3xl transition-transform duration-700 ease-out"
+        />
+        <div
+          style={{
+            transform: `translate3d(${mouseOffset.x * 20}px, ${mouseOffset.y * 20}px, 0)`,
+          }}
+          className="absolute -bottom-24 -right-24 w-[480px] h-[480px] bg-orange-500/10 dark:bg-orange-500/15 rounded-full blur-3xl transition-transform duration-700 ease-out"
+        />
 
-        <div className="absolute top-12 left-6 sm:left-14 lg:left-24 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-orange-200/70 dark:border-orange-900/40 shadow-lg shadow-orange-500/10 text-[#FF5200] animate-float-slow">
-          <Bike className="w-6 h-6" />
-        </div>
+        {/* Scattered Dynamic Floating Icons */}
+        {bgElements.map((item, idx) => {
+          const Icon = item.icon
+          const transX = mouseOffset.x * item.speed.x
+          const transY = mouseOffset.y * item.speed.y
 
-        <div className="absolute top-16 right-6 sm:right-14 lg:right-28 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-blue-200/70 dark:border-blue-900/40 shadow-lg shadow-blue-500/10 text-[#2845D6] dark:text-blue-400 animate-float-reverse">
-          <Package className="w-6 h-6" />
-        </div>
-
-        <div className="absolute top-1/2 -translate-y-16 left-4 sm:left-10 lg:left-20 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-emerald-200/70 dark:border-emerald-900/40 shadow-lg shadow-emerald-500/10 text-emerald-500 animate-float-horizontal">
-          <MapPin className="w-6 h-6" />
-        </div>
-
-        <div className="absolute top-1/2 -translate-y-12 right-4 sm:right-10 lg:right-20 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-purple-200/70 dark:border-purple-900/40 shadow-lg shadow-purple-500/10 text-purple-500 animate-float-slow" style={{ animationDelay: '1.5s' }}>
-          <Navigation className="w-6 h-6" />
-        </div>
-
-        <div className="absolute bottom-14 left-6 sm:left-14 lg:left-24 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-blue-200/70 dark:border-blue-900/40 shadow-lg shadow-blue-500/10 text-[#2845D6] dark:text-blue-400 animate-float-horizontal">
-          <ShieldCheck className="w-6 h-6" />
-        </div>
-
-        <div className="absolute bottom-14 right-6 sm:right-14 lg:right-28 p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-amber-200/70 dark:border-amber-900/40 shadow-lg shadow-amber-500/10 text-amber-500 animate-float-slow" style={{ animationDelay: '2.5s' }}>
-          <Compass className="w-6 h-6" />
-        </div>
+          return (
+            <div
+              key={idx}
+              style={{
+                ...item.pos,
+                transform: `translate3d(${transX}px, ${transY}px, 0) rotate(${item.rotate})`,
+                animationDelay: item.delay,
+              }}
+              className="absolute pointer-events-none transition-transform duration-500 ease-out"
+            >
+              <div
+                className={`p-3.5 rounded-2xl bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border ${item.border} ${item.shadow} ${item.color} animate-float-slow transition-colors`}
+              >
+                <Icon className={item.size} />
+              </div>
+            </div>
+          )
+        })}
       </div>
 
+      {/* ========================================================================= */}
+      {/* BRAND HEADER */}
+      {/* ========================================================================= */}
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
         <div className="flex justify-center mb-4">
           <img
@@ -214,8 +410,11 @@ export const Login = () => {
         </p>
       </div>
 
+      {/* ========================================================================= */}
+      {/* AUTHENTICATION CARD (Layers ABOVE background icons, creating half-hidden overlap) */}
+      {/* ========================================================================= */}
       <div className="relative z-10 mt-7 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-xl py-8 px-6 sm:px-8 shadow-2xl border border-slate-200/80 dark:border-slate-800 rounded-3xl">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl py-8 px-6 sm:px-8 shadow-2xl border border-slate-200/90 dark:border-slate-800 rounded-3xl transition-colors">
           {errorMsg && (
             <div className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex items-start gap-2.5 text-xs text-rose-700 dark:text-rose-300 animate-in fade-in duration-150">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />

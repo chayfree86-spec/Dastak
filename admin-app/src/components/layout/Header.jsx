@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Search, Sun, Moon, LogOut, User, Shield, ChevronDown } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
-import { ROLE_LABELS } from '../../utils/permissions'
+import { ROLE_LABELS, normalizeRole } from '../../utils/permissions'
 import NotificationsPopover from './NotificationsPopover'
 import GlobalSearchModal from './GlobalSearchModal'
 
@@ -107,7 +107,7 @@ export const Header = ({ onOpenMobileSidebar, title, breadcrumbs = [] }) => {
                   {user?.name || 'Administrator'}
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                  {ROLE_LABELS[role] || 'Admin'}
+                  {ROLE_LABELS[normalizeRole(user?.role || role)] || 'Super Admin'}
                 </span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden md:block" />

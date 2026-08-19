@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "dev": "npm --prefix admin-app run dev",
     "dev:admin": "npm --prefix admin-app run dev",
     "dev:customer": "npm --prefix customer-app run dev",
     "dev:partner": "npm --prefix partner-app run dev",
