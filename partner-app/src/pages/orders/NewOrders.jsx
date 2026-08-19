@@ -54,42 +54,56 @@ export const NewOrders = () => {
     }
   }
 
+  // 3. Mark Food Ready for Pickup Handler
+  const handleConfirmReady = async (order) => {
+    setActionLoading(true)
+    try {
+      await ordersApi.markReady(order.order_number)
+      toast.success(
+        'Food is Ready!',
+        `Order #${order.order_number} is marked ready. Rider is notified for pickup.`
+      )
+      await refresh()
+    } catch (err) {
+      toast.error('Action Failed', err.message || 'Unable to mark order ready.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const pendingCount = newOrders.filter((o) => o.status === 'PENDING').length
+  const preparingCount = newOrders.filter((o) => o.status === 'CONFIRMED' || o.status === 'PREPARING').length
+
   return (
     <div className="space-y-6 w-full">
       {/* Screen Header Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#F97316] flex items-center justify-center">
-                <Flame className="w-5 h-5" />
-              </div>
-              <span>New Incoming Orders</span>
-            </h2>
-            <span
-              className={`px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase border select-none ${
-                count > 0
-                  ? 'bg-rose-500 text-white border-rose-500 shadow-sm shadow-rose-500/30 animate-pulse'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600'
-              }`}
-            >
-              {count} {count === 1 ? 'Pending' : 'Pending'}
+      <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#F97316] flex items-center justify-center">
+              <Flame className="w-5 h-5" />
+            </div>
+            <span>Live Kitchen Orders</span>
+          </h2>
+          {pendingCount > 0 && (
+            <span className="px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase bg-rose-500 text-white border border-rose-500 shadow-sm shadow-rose-500/30 animate-pulse select-none">
+              {pendingCount} New
             </span>
-          </div>
-          <p className="text-xs text-slate-400 dark:text-slate-400 mt-1 font-medium">
-            Incoming orders appear here automatically with real-time audio chime alerts.
-          </p>
+          )}
+          {preparingCount > 0 && (
+            <span className="px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase bg-blue-500 text-white border border-blue-500 shadow-sm shadow-blue-500/30 select-none">
+              {preparingCount} In Kitchen
+            </span>
+          )}
+          {newOrders.length === 0 && (
+            <span className="px-3 py-0.5 rounded-full text-xs font-black tracking-wider uppercase bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border border-slate-200 dark:border-slate-600 select-none">
+              0 Active
+            </span>
+          )}
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          icon={RefreshCw}
-          onClick={() => refresh().catch(() => {})}
-          className="shrink-0"
-        >
-          Check Now
-        </Button>
+        <p className="text-xs text-slate-400 dark:text-slate-400 mt-1 font-medium truncate">
+          Orders remain in queue until marked ready for pickup.
+        </p>
       </div>
 
       {/* Loading State */}
@@ -98,25 +112,25 @@ export const NewOrders = () => {
       {/* Error State */}
       {error && newOrders.length === 0 && (
         <ErrorState
-          title="Unable to load new orders"
+          title="Unable to load active kitchen orders"
           message={error}
           onRetry={() => refresh().catch(() => {})}
         />
       )}
 
-      {/* Empty State when no new orders */}
+      {/* Empty State when no active orders */}
       {!loading && !error && newOrders.length === 0 && (
         <EmptyState
           icon={Inbox}
-          title="No Pending Orders"
-          description="Your kitchen is all caught up! New orders placed by customers will chime and show up here instantly."
+          title="No Active Orders"
+          description="Your kitchen queue is clear! Incoming customer orders will appear here automatically."
           actionText="Refresh Kitchen Queue"
           onAction={() => refresh().catch(() => {})}
           className="py-16 sm:py-20"
         />
       )}
 
-      {/* Active New Order Cards Grid (Full-Width Responsive 2-column on desktop) */}
+      {/* Active Kitchen Order Cards Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         {newOrders.map((order) => (
           <OrderCard
@@ -124,6 +138,7 @@ export const NewOrders = () => {
             order={order}
             onAccept={() => setSelectedOrderForAccept(order)}
             onReject={() => setSelectedOrderForReject(order)}
+            onMarkReady={() => handleConfirmReady(order)}
             onViewDetails={() => setDetailOrder(order)}
           />
         ))}

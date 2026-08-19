@@ -63,9 +63,20 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
             </div>
             <div>
               <span className="text-slate-400 block">Contact Phone</span>
-              <span className="font-bold text-slate-800">
-                {formatPhone(order.customer?.mobile)}
-              </span>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span className="font-bold text-slate-800 dark:text-slate-200">
+                  {formatPhone(order.customer?.mobile)}
+                </span>
+                {order.customer?.mobile && (
+                  <a
+                    href={`tel:${order.customer.mobile}`}
+                    className="px-2.5 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800/50 text-[11px] font-bold inline-flex items-center gap-1 active:scale-95 shadow-2xs"
+                  >
+                    <Phone className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>Call Customer</span>
+                  </a>
+                )}
+              </div>
             </div>
             {order.delivery_address && (
               <div className="sm:col-span-2">

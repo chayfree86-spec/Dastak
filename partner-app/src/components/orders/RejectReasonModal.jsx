@@ -98,21 +98,25 @@ export const RejectReasonModal = ({ isOpen, onClose, order, onConfirm, loading }
           </div>
         )}
 
-        {/* Action buttons */}
-        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-700">
-          <Button variant="outline" size="md" onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            size="md"
-            icon={XCircle}
-            onClick={handleConfirm}
-            loading={loading}
-            className="shadow-sm font-bold"
+        {/* Action buttons (Touch-friendly 48px height) */}
+        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm flex items-center justify-center active:scale-98 transition-all hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer select-none"
           >
-            Confirm Rejection
-          </Button>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm flex items-center justify-center gap-1.5 shadow-md shadow-rose-500/25 active:scale-98 transition-all cursor-pointer select-none disabled:opacity-50"
+          >
+            <XCircle className="w-4 h-4 stroke-[2.2]" />
+            <span>Confirm Reject</span>
+          </button>
         </div>
       </div>
     </Modal>

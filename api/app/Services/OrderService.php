@@ -431,7 +431,13 @@ class OrderService
         $query = Order::with(['restaurant', 'customer', 'deliveryBoy', 'items']);
 
         if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+            if (is_array($filters['status'])) {
+                $query->whereIn('status', $filters['status']);
+            } elseif (str_contains($filters['status'], ',')) {
+                $query->whereIn('status', explode(',', $filters['status']));
+            } else {
+                $query->where('status', $filters['status']);
+            }
         }
 
         if (! empty($filters['restaurant_id'])) {

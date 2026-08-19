@@ -11,17 +11,19 @@ export const useOrderPolling = (intervalMs = 9000) => {
 
   const fetchNewOrders = useCallback(async () => {
     try {
-      const res = await ordersApi.getOrders({ status: 'PENDING', per_page: 30 })
+      const res = await ordersApi.getOrders({ status: 'PENDING,CONFIRMED,PREPARING', per_page: 30 })
       const list = res.data?.data || []
       setNewOrders(list)
       setError(null)
 
-      // Detect if new orders arrived that were not previously in our known set
-      const currentIds = new Set(list.map((o) => o.id || o.order_number))
+      // Detect if new PENDING orders arrived that were not previously in our known set
+      const currentPendingIds = new Set(
+        list.filter((o) => o.status === 'PENDING').map((o) => o.id || o.order_number)
+      )
       let hasFreshArrivals = false
 
       if (!isFirstLoad.current) {
-        for (const id of currentIds) {
+        for (const id of currentPendingIds) {
           if (!knownOrderIds.current.has(id)) {
             hasFreshArrivals = true
             break
@@ -32,7 +34,7 @@ export const useOrderPolling = (intervalMs = 9000) => {
         }
       }
 
-      knownOrderIds.current = currentIds
+      knownOrderIds.current = currentPendingIds
       isFirstLoad.current = false
       setLoading(false)
       return list

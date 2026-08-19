@@ -105,21 +105,25 @@ export const PrepTimeModal = ({ isOpen, onClose, order, onConfirm, loading }) =>
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-700">
-          <Button variant="outline" size="md" onClick={onClose} disabled={loading}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={Check}
-            onClick={handleConfirm}
-            loading={loading}
-            className="shadow-sm font-bold"
+        {/* Action buttons (Touch-friendly 48px height) */}
+        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            className="w-full h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm flex items-center justify-center active:scale-98 transition-all hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer select-none"
           >
-            Confirm & Accept Order
-          </Button>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={loading}
+            className="w-full h-12 rounded-xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-sm flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none disabled:opacity-50"
+          >
+            <Check className="w-4 h-4 stroke-[2.5]" />
+            <span>Confirm & Accept</span>
+          </button>
         </div>
       </div>
     </Modal>

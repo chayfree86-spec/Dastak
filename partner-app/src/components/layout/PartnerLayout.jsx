@@ -313,37 +313,46 @@ export const PartnerLayout = () => {
             <span className="text-[10px] leading-none truncate max-w-full">Menu</span>
           </NavLink>
 
-          {/* 3. CENTER HERO: Elevated Orange Circular Action Button (Floating High with Slim Halo Ring) */}
-          <NavLink
-            to="/new-orders"
-            className="flex flex-col items-center justify-end h-full relative group px-0.5"
-          >
-            <div
-              className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 border-[2.5px] border-white dark:border-slate-800 -mt-10 mb-2 shadow-lg shadow-orange-500/25 ring-2 ring-orange-400/30 active:scale-95 ${
-                location.pathname === '/new-orders'
-                  ? 'bg-gradient-to-b from-[#FB923C] to-[#EA580C] text-white ring-[3px] ring-orange-500/40 scale-105'
-                  : 'bg-gradient-to-b from-[#FB923C] to-[#EA580C] text-white hover:scale-105'
-              }`}
-            >
-              <Bell className="w-6 h-6 stroke-[2.3] text-white" />
+          {/* 3. CENTER HERO: Dynamic Elevated Action Button (Orange when active or has pending orders, sleek Gray when idle) */}
+          {(() => {
+            const isNewOrdersActive = location.pathname === '/new-orders' || (newOrdersCount && newOrdersCount > 0)
+            return (
+              <NavLink
+                to="/new-orders"
+                className="flex flex-col items-center justify-end h-full relative group px-0.5"
+              >
+                <div
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 border-[2.5px] border-white dark:border-slate-800 -mt-10 mb-2 active:scale-95 ${
+                    isNewOrdersActive
+                      ? 'bg-gradient-to-b from-[#FB923C] to-[#EA580C] text-white shadow-lg shadow-orange-500/25 ring-2 ring-orange-400/30 scale-105'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  <Bell
+                    className={`w-6 h-6 stroke-[2.3] ${
+                      isNewOrdersActive ? 'text-white' : 'text-slate-400 dark:text-slate-400'
+                    }`}
+                  />
 
-              {/* Real-Time Live Orders Notification Badge */}
-              {newOrdersCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[9px] font-black animate-pulse shadow-md border-2 border-white dark:border-slate-800">
-                  {newOrdersCount}
+                  {/* Real-Time Live Orders Notification Badge */}
+                  {newOrdersCount > 0 && (
+                    <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[9px] font-black animate-pulse shadow-md border-2 border-white dark:border-slate-800">
+                      {newOrdersCount}
+                    </span>
+                  )}
+                </div>
+                <span
+                  className={`text-[10px] leading-none tracking-tight truncate max-w-full ${
+                    isNewOrdersActive
+                      ? 'font-bold text-[#EA580C] dark:text-orange-400'
+                      : 'font-medium text-slate-400 dark:text-slate-400'
+                  }`}
+                >
+                  New Orders
                 </span>
-              )}
-            </div>
-            <span
-              className={`text-[10px] font-bold leading-none tracking-tight truncate max-w-full ${
-                location.pathname === '/new-orders'
-                  ? 'text-[#EA580C] dark:text-orange-400'
-                  : 'text-[#EA580C] dark:text-orange-400'
-              }`}
-            >
-              New Orders
-            </span>
-          </NavLink>
+              </NavLink>
+            )
+          })()}
 
           {/* 4. All Orders (Report) */}
           <NavLink
