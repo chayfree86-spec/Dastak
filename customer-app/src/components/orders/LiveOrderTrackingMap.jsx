@@ -12,10 +12,12 @@ import {
   Crosshair,
   ShieldCheck,
   Radio,
+  Navigation,
 } from 'lucide-react'
 import {
   calculateDistanceKm,
   calculateEtaMinutes,
+  fetchOsrmRoute,
   makePhoneCall,
 } from '../../utils/geo'
 import { useTheme } from '../../context/ThemeContext'
@@ -46,60 +48,94 @@ export const LiveOrderTrackingMap = ({
   const custLat = Number(customerAddress.latitude) || 26.4590
   const custLng = Number(customerAddress.longitude) || 80.3440
 
-  // Simulation progress for live movement (0 to 1 between restaurant and customer)
-  const [progress, setProgress] = useState(0.45)
-  const [distanceKm, setDistanceKm] = useState(1.4)
-  const [etaMins, setEtaMins] = useState(6)
+  // OSRM Road Geometry Coordinates State
+  const [roadPath, setRoadPath] = useState([])
+  const [osrmLoading, setOsrmLoading] = useState(true)
+  const [roadDistanceKm, setRoadDistanceKm] = useState(1.4)
+  const [roadDurationMins, setRoadDurationMins] = useState(6)
+
+  // Simulation progress along the road points (index fraction)
+  const [routePointIndex, setRoutePointIndex] = useState(0)
 
   const isOutForDelivery = order?.status === 'OUT_FOR_DELIVERY'
   const isDelivered = order?.status === 'DELIVERED'
 
-  // Calculate simulated or real Rider coordinates
+  // Fetch real road route from OSRM
+  useEffect(() => {
+    let isMounted = true
+
+    const loadRoadRoute = async () => {
+      setOsrmLoading(true)
+      try {
+        const routeData = await fetchOsrmRoute(restLat, restLng, custLat, custLng)
+        if (isMounted && routeData && routeData.coordinates.length > 0) {
+          setRoadPath(routeData.coordinates)
+          setRoadDistanceKm(routeData.distanceKm)
+          setRoadDurationMins(routeData.durationMinutes)
+          if (onEtaChange) {
+            onEtaChange({ distanceKm: routeData.distanceKm, etaMins: routeData.durationMinutes })
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load OSRM road geometry:', err)
+      } finally {
+        if (isMounted) setOsrmLoading(false)
+      }
+    }
+
+    loadRoadRoute()
+    return () => {
+      isMounted = false
+    }
+  }, [restLat, restLng, custLat, custLng])
+
+  // Calculate live Rider coordinates along the actual OSRM road
   const riderCoords = useMemo(() => {
-    // If real GPS coords available on delivery_boy object
+    // If real GPS coords available from rider device stream
     if (deliveryBoy.latitude && deliveryBoy.longitude) {
       const dLat = Number(deliveryBoy.latitude)
       const dLng = Number(deliveryBoy.longitude)
-      if (dLat && dLng && Math.abs(dLat - restLat) < 0.2) {
+      if (dLat && dLng && Math.abs(dLat - restLat) < 0.3) {
         return [dLat, dLng]
       }
     }
 
-    // Realistic curved interpolation from Restaurant to Customer
-    const currentProg = isDelivered ? 1 : isOutForDelivery ? Math.min(0.92, Math.max(0.1, progress)) : 0.08
-    
-    // Add small realistic road curve offset
-    const curveOffset = Math.sin(currentProg * Math.PI) * 0.0022
-    const lat = restLat + (custLat - restLat) * currentProg + curveOffset
-    const lng = restLng + (custLng - restLng) * currentProg - (curveOffset * 0.6)
-
-    return [lat, lng]
-  }, [restLat, restLng, custLat, custLng, deliveryBoy, progress, isOutForDelivery, isDelivered])
-
-  // Live simulation tick: every 3.2s bike moves smoothly forward if out for delivery
-  useEffect(() => {
-    if (!isOutForDelivery) return
-
-    const timer = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 0.90) return 0.25 // loop smooth cycle for visual feel
-        return prev + 0.04
-      })
-    }, 3200)
-
-    return () => clearInterval(timer)
-  }, [isOutForDelivery])
-
-  // Recalculate live distance and ETA and notify parent
-  useEffect(() => {
-    const dist = calculateDistanceKm(riderCoords[0], riderCoords[1], custLat, custLng)
-    const mins = calculateEtaMinutes(dist)
-    setDistanceKm(dist)
-    setEtaMins(mins)
-    if (onEtaChange) {
-      onEtaChange({ distanceKm: dist, etaMins: mins })
+    if (isDelivered) {
+      return [custLat, custLng]
     }
-  }, [riderCoords, custLat, custLng, onEtaChange])
+
+    if (!isOutForDelivery) {
+      return [restLat, restLng]
+    }
+
+    // Move smoothly along the OSRM road coordinates
+    if (roadPath.length > 1) {
+      const idx = Math.min(roadPath.length - 1, Math.max(0, routePointIndex))
+      return roadPath[idx]
+    }
+
+    return [restLat, restLng]
+  }, [deliveryBoy, isDelivered, isOutForDelivery, roadPath, routePointIndex, restLat, restLng, custLat, custLng])
+
+  // Live simulation ticker along OSRM road nodes
+  useEffect(() => {
+    if (!isOutForDelivery || roadPath.length < 2) return
+
+    const totalNodes = roadPath.length
+    const initialIndex = Math.floor(totalNodes * 0.25)
+    setRoutePointIndex((prev) => (prev === 0 ? initialIndex : prev))
+
+    const interval = setInterval(() => {
+      setRoutePointIndex((prev) => {
+        if (prev >= totalNodes - 2) {
+          return Math.floor(totalNodes * 0.15) // restart loop smoothly
+        }
+        return prev + 1
+      })
+    }, 2400)
+
+    return () => clearInterval(interval)
+  }, [isOutForDelivery, roadPath])
 
   // Initialize and update Leaflet Map
   useEffect(() => {
@@ -109,7 +145,7 @@ export const LiveOrderTrackingMap = ({
       const map = L.map(mapContainerRef.current, {
         center: [(restLat + custLat) / 2, (restLng + custLng) / 2],
         zoom: 15,
-        minZoom: 13,
+        minZoom: 12,
         maxZoom: 18,
         zoomControl: false,
         attributionControl: false,
@@ -117,7 +153,7 @@ export const LiveOrderTrackingMap = ({
 
       L.control.zoom({ position: 'topright' }).addTo(map)
 
-      // High quality CartoDB tiles
+      // High quality CartoDB Voyager tiles
       const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
 
       L.tileLayer(tileUrl, {
@@ -133,35 +169,24 @@ export const LiveOrderTrackingMap = ({
     const group = layerGroupRef.current
     group.clearLayers()
 
-    // 1. Route Polyline Path (Restaurant -> Waypoints -> Customer)
-    const midPoint1 = [
-      restLat + (custLat - restLat) * 0.35 + 0.0018,
-      restLng + (custLng - restLng) * 0.35 - 0.0012,
-    ]
-    const midPoint2 = [
-      restLat + (custLat - restLat) * 0.70 + 0.0015,
-      restLng + (custLng - restLng) * 0.70 - 0.0008,
-    ]
-
-    const fullRouteCoords = [
+    // 1. Draw Real OSRM Road Polyline Path
+    const activeRouteCoordinates = roadPath.length > 0 ? roadPath : [
       [restLat, restLng],
-      midPoint1,
-      midPoint2,
       [custLat, custLng],
     ]
 
-    // Background thick route line
-    L.polyline(fullRouteCoords, {
+    // Background thick road route line
+    L.polyline(activeRouteCoordinates, {
       color: '#2845D6',
       weight: 6,
-      opacity: 0.85,
+      opacity: 0.9,
       lineCap: 'round',
       lineJoin: 'round',
     }).addTo(group)
 
     // Animated dashed pulse route line
-    L.polyline(fullRouteCoords, {
-      color: '#FFFFFF',
+    L.polyline(activeRouteCoordinates, {
+      color: '#60A5FA',
       weight: 2.5,
       dashArray: '8, 12',
       opacity: 0.95,
@@ -252,7 +277,7 @@ export const LiveOrderTrackingMap = ({
       padding: [45, 45],
       maxZoom: 16,
     })
-  }, [restLat, restLng, custLat, custLng, isDark, restaurant.name, deliveryBoy.name])
+  }, [restLat, restLng, custLat, custLng, isDark, restaurant.name, deliveryBoy.name, roadPath])
 
   // Smoothly pan & update rider position on map
   useEffect(() => {
@@ -277,11 +302,12 @@ export const LiveOrderTrackingMap = ({
         <div className="px-3 py-1.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg border border-slate-200/80 dark:border-slate-800 flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
           <div>
-            <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block leading-none">
-              {isOutForDelivery ? 'LIVE RIDER GPS' : isDelivered ? 'DELIVERED' : 'KITCHEN READY'}
+            <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block leading-none flex items-center gap-1">
+              <Navigation className="w-2.5 h-2.5 text-[#2845D6]" />
+              <span>{isOutForDelivery ? 'OSRM LIVE ROUTE' : isDelivered ? 'DELIVERED' : 'KITCHEN READY'}</span>
             </span>
             <span className="text-xs font-black text-slate-900 dark:text-slate-100 leading-tight">
-              {isOutForDelivery ? `${distanceKm} km away • ~${etaMins} mins` : 'Food Being Prepared'}
+              {isOutForDelivery ? `${roadDistanceKm} km road • ~${roadDurationMins} mins` : isDelivered ? 'Delivered to Home' : 'Food Being Prepared'}
             </span>
           </div>
         </div>

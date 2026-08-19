@@ -211,63 +211,63 @@ export const HomePage = () => {
           </div>
 
           {/* Today's Shift Overview */}
-          <div className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
+          <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3 sm:space-y-4">
             <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
               TODAY'S SHIFT OVERVIEW
             </h3>
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2.5 sm:gap-3">
               {/* Metric 1: Today's Earnings */}
               <div
                 onClick={() => navigate('/earnings')}
-                className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 cursor-pointer hover:border-emerald-500/40 transition-all"
+                className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 cursor-pointer hover:border-emerald-500/40 transition-all touch-manipulation"
               >
-                <div className="space-y-0.5">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                <div className="space-y-0.5 min-w-0">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block truncate">
                     Today's Earnings
                   </span>
-                  <div className="text-xl font-black text-slate-900 dark:text-slate-100">
+                  <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
                     {formatCurrency(todayEarnings)}
                   </div>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
 
               {/* Metric 2: Completed Trips */}
               <div
                 onClick={() => navigate('/deliveries')}
-                className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-500/40 transition-all"
+                className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-500/40 transition-all touch-manipulation"
               >
-                <div className="space-y-0.5">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                <div className="space-y-0.5 min-w-0">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block truncate">
                     Completed Trips
                   </span>
-                  <div className="text-xl font-black text-slate-900 dark:text-slate-100">
+                  <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
                     {todayDeliveries} <span className="text-xs font-semibold text-slate-400">Orders</span>
                   </div>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 flex items-center justify-center">
-                  <Package className="w-5 h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <Package className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
 
               {/* Metric 3: Cash in Hand */}
               <div
                 onClick={() => navigate('/cod')}
-                className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 cursor-pointer hover:border-amber-500/40 transition-all"
+                className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-3 cursor-pointer hover:border-amber-500/40 transition-all touch-manipulation sm:col-span-2 lg:col-span-1"
               >
-                <div className="space-y-0.5">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                <div className="space-y-0.5 min-w-0">
+                  <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block truncate">
                     Cash in Hand (COD)
                   </span>
-                  <div className="text-xl font-black text-slate-900 dark:text-slate-100">
+                  <div className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100">
                     {formatCurrency(pendingCod)}
                   </div>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                  <Banknote className="w-5 h-5" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <Banknote className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
             </div>

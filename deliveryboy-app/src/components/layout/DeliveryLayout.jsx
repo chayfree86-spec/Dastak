@@ -271,16 +271,16 @@ export const DeliveryLayout = () => {
       {/* ========================================================================= */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile Header Bar */}
-        <header className="md:hidden sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-xs shadow-md shadow-blue-500/20 shrink-0">
+        <header className="md:hidden sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-5 py-3.5 sm:py-4 flex items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#2845D6] via-indigo-600 to-[#F97316] text-white flex items-center justify-center font-black shadow-md shadow-blue-500/25 shrink-0">
               <Bike className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+              <span className="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 block truncate leading-tight">
                 {user?.name || 'Rahul Verma'}
               </span>
-              <span className="text-[10px] font-bold text-slate-400 block truncate">
+              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 block truncate mt-0.5">
                 Kanpur Central Zone
               </span>
             </div>
@@ -291,23 +291,23 @@ export const DeliveryLayout = () => {
             type="button"
             onClick={handleDutyToggleClick}
             disabled={dutyLoading}
-            className={`px-3 py-1 rounded-2xl border font-black text-[11px] flex items-center gap-1.5 shadow-xs transition-all cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-full border font-black text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer touch-manipulation shrink-0 ${
               isOnline
-                ? 'bg-emerald-500 text-white border-emerald-400'
-                : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-400 shadow-emerald-500/25'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
             }`}
           >
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
+              className={`w-2 h-2 rounded-full ${
                 isOnline ? 'bg-white animate-ping' : 'bg-slate-400'
               }`}
             />
-            <span>{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+            <span className="tracking-wide">{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
           </button>
         </header>
 
         {/* Fullwidth Page Body */}
-        <main className="flex-1 w-full p-4 sm:p-6 lg:p-8 max-w-full pb-24 md:pb-8 overflow-y-auto">
+        <main className="flex-1 w-full p-3 sm:p-5 md:p-6 lg:p-8 max-w-full pb-28 md:pb-8 overflow-y-auto">
           <Outlet />
         </main>
       </div>

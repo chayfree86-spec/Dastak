@@ -203,3 +203,56 @@ export const calculateEtaMinutes = (distanceKm) => {
   return Math.max(3, minutes)
 }
 
+/**
+ * Fetch real road driving route using OSRM (Open Source Routing Machine)
+ * Returns road polyline coordinates [[lat, lng], ...], road distance (km), and driving duration (mins)
+ */
+export const fetchOsrmRoute = async (startLat, startLng, endLat, endLng) => {
+  if (!startLat || !startLng || !endLat || !endLng) return null
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson&steps=true`
+    const res = await fetch(url)
+    const data = await res.json()
+
+    if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      const primaryRoute = data.routes[0]
+      // Convert OSRM [lng, lat] GeoJSON coordinates to Leaflet [lat, lng]
+      const coordinates = primaryRoute.geometry.coordinates.map(([lng, lat]) => [lat, lng])
+      const distanceKm = Number((primaryRoute.distance / 1000).toFixed(2))
+      const durationMinutes = Math.max(2, Math.round(primaryRoute.duration / 60))
+
+      const steps = primaryRoute.legs?.[0]?.steps?.map((s) => ({
+        instruction: s.maneuver?.type + ' ' + (s.maneuver?.modifier || ''),
+        name: s.name || 'Road',
+        distance: s.distance,
+        duration: s.duration,
+      })) || []
+
+      return {
+        coordinates,
+        distanceKm,
+        durationMinutes,
+        steps,
+        source: 'OSRM',
+      }
+    }
+  } catch (error) {
+    console.warn('OSRM route fetch failed, using fallback interpolation:', error)
+  }
+
+  // Fallback if OSRM server is unreachable or offline: generate smooth straight-line coordinates
+  const distanceKm = calculateDistanceKm(startLat, startLng, endLat, endLng)
+  const durationMinutes = calculateEtaMinutes(distanceKm)
+  return {
+    coordinates: [
+      [startLat, startLng],
+      [endLat, endLng],
+    ],
+    distanceKm,
+    durationMinutes,
+    steps: [],
+    source: 'FALLBACK',
+  }
+}
+

@@ -24,6 +24,7 @@ import ReportIssueModal from './ReportIssueModal'
 import OtpVerifyModal from './OtpVerifyModal'
 import QuickCallSheet from './QuickCallSheet'
 import DeliveryRouteMap from './DeliveryRouteMap'
+import FullscreenNavModal from './FullscreenNavModal'
 import deliveryApi from '../../api/delivery.api'
 import { useToast } from '../../context/ToastContext'
 
@@ -32,6 +33,8 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
   const [reportModalOpen, setReportModalOpen] = useState(false)
   const [verifyModalOpen, setVerifyModalOpen] = useState(false)
   const [pickupLoading, setPickupLoading] = useState(false)
+  const [fullscreenNavOpen, setFullscreenNavOpen] = useState(false)
+  const [navTargetType, setNavTargetType] = useState('RESTAURANT') // 'RESTAURANT' | 'CUSTOMER'
 
   // Quick Contact Sheet State
   const [callSheetState, setCallSheetState] = useState({
@@ -146,6 +149,10 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
         <DeliveryRouteMap
           order={order}
           isOutForDelivery={isOutForDelivery}
+          onOpenFullscreen={() => {
+            setNavTargetType(isOutForDelivery ? 'CUSTOMER' : 'RESTAURANT')
+            setFullscreenNavOpen(true)
+          }}
         />
       </div>
 
@@ -174,27 +181,25 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
             </div>
 
             {/* Quick Action Navigation & Call Restaurant */}
-            <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0 pt-2 sm:pt-0">
               <button
                 type="button"
                 onClick={handleOpenRestaurantCall}
-                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 shadow-xs flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer"
+                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 shadow-xs flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
                 title="Call & Message Restaurant"
               >
                 <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Call Kitchen</span>
+                <span className="truncate">Call Kitchen</span>
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  openGoogleMapsNavigation(
-                    restaurant.latitude,
-                    restaurant.longitude,
-                    restaurant.name || restaurantAddress
-                  )
-                }
-                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-[#2845D6] hover:bg-[#F97316] text-white shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer"
+                onClick={() => {
+                  setNavTargetType('RESTAURANT')
+                  setFullscreenNavOpen(true)
+                }}
+                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-[#2845D6] hover:bg-[#F97316] text-white shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
+                title="Open Fullscreen In-App Navigation Map"
               >
                 <Navigation className="w-4 h-4 fill-white" />
                 <span>Navigate</span>
@@ -204,7 +209,7 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
 
           {/* Kitchen Order Status Banner */}
           {!isOutForDelivery && (
-            <div className="mt-3 pt-3 border-t border-blue-100 dark:border-slate-700/60 flex items-center justify-between text-xs">
+            <div className="mt-3 pt-3 border-t border-blue-100 dark:border-slate-700/60 flex items-center justify-between text-xs flex-wrap gap-1">
               <span className="text-slate-500 dark:text-slate-400 font-medium">
                 {items.length} Item{items.length !== 1 ? 's' : ''} in package
               </span>
@@ -225,18 +230,34 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
 
         {/* Step B: Customer Delivery Details Card */}
         <div
-          className={`p-4 rounded-2xl border transition-all ${
+          className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
             isOutForDelivery
               ? 'bg-orange-50/50 dark:bg-slate-900/90 border-orange-200 dark:border-orange-800/60 ring-2 ring-orange-500/15 shadow-md'
               : 'bg-slate-50/40 dark:bg-slate-900/30 border-slate-200 dark:border-slate-700/60 opacity-80'
           }`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="space-y-1 min-w-0">
-              <span className="text-[10px] font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1">
-                <User className="w-3.5 h-3.5" />
-                <span>STEP 2: DELIVER TO CUSTOMER</span>
-              </span>
+            <div className="space-y-1.5 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1">
+                  <User className="w-3.5 h-3.5" />
+                  <span>STEP 2: DELIVER TO CUSTOMER</span>
+                </span>
+
+                {/* Prominent Payment Type Badge */}
+                {isCod ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-900 dark:text-amber-200 text-[10px] font-black">
+                    <Banknote className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+                    <span>COD: Collect {formatCurrency(totalAmount)}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-800 dark:text-emerald-200 text-[10px] font-black">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                    <span>PREPAID (Paid Online)</span>
+                  </span>
+                )}
+              </div>
+
               <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 truncate">
                 {customer.name || customer.customer_name || 'Valued Customer'}
               </h4>
@@ -251,27 +272,25 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
             </div>
 
             {/* Quick Actions Call & Navigate Customer */}
-            <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0">
+            <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0 pt-2 sm:pt-0">
               <button
                 type="button"
                 onClick={handleOpenCustomerCall}
-                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 shadow-xs flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer"
+                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 shadow-xs flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
                 title="Call & Message Customer"
               >
                 <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Call Customer</span>
+                <span className="truncate">Call Customer</span>
               </button>
 
               <button
                 type="button"
-                onClick={() =>
-                  openGoogleMapsNavigation(
-                    order.delivery_address?.latitude || order.delivery_address_json?.latitude,
-                    order.delivery_address?.longitude || order.delivery_address_json?.longitude,
-                    deliveryAddress
-                  )
-                }
-                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#2845D6] text-white shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer"
+                onClick={() => {
+                  setNavTargetType('CUSTOMER')
+                  setFullscreenNavOpen(true)
+                }}
+                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#2845D6] text-white shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
+                title="Open Fullscreen In-App Navigation Map"
               >
                 <Navigation className="w-4 h-4 fill-white" />
                 <span>Navigate</span>
@@ -373,6 +392,15 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
           setVerifyModalOpen(false)
           if (onRefresh) onRefresh()
         }}
+      />
+
+      {/* Fullscreen In-App Interactive Navigation Map Modal */}
+      <FullscreenNavModal
+        isOpen={fullscreenNavOpen}
+        onClose={() => setFullscreenNavOpen(false)}
+        order={order}
+        isOutForDelivery={isOutForDelivery}
+        targetType={navTargetType}
       />
     </div>
   )

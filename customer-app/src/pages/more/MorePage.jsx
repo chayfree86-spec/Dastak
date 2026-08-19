@@ -20,6 +20,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useLocationContext } from '../../context/LocationContext'
+import { useToast } from '../../context/ToastContext'
 import Button from '../../components/common/Button'
 
 export const MorePage = () => {
@@ -28,9 +29,11 @@ export const MorePage = () => {
   const { isDark, toggleTheme } = useTheme()
   const { user, isAuthenticated, logout } = useAuth()
   const { activeAddress } = useLocationContext()
+  const toast = useToast()
 
   const handleLogout = async () => {
     await logout()
+    toast.success('Signed Out', 'You have been logged out successfully.')
     navigate('/')
   }
 

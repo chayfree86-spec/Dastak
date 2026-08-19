@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Phone, Lock, Eye, EyeOff, LogIn, AlertCircle, ShieldCheck } from 'lucide-react'
+import { Lock, Eye, EyeOff, LogIn, UserPlus, AlertCircle, ShieldCheck, User } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
-import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
 import Button from '../../components/common/Button'
 
@@ -11,42 +10,56 @@ export const LoginPage = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
-  const { login } = useAuth()
-  const { isDark } = useTheme()
+  const { login, register } = useAuth()
   const { t } = useLanguage()
   const toast = useToast()
 
+  const [mode, setMode] = useState('login') // 'login' | 'register'
+  const [name, setName] = useState('')
   const [mobile, setMobile] = useState('9666600001')
   const [password, setPassword] = useState('password123')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e?.preventDefault()
     setError('')
     setLoading(true)
 
     try {
-      await login(mobile, password)
-      toast.success('Welcome to Dastak!', 'Signed in successfully.')
+      if (mode === 'login') {
+        await login(mobile.trim(), password)
+        toast.success('Welcome to Dastak!', 'Signed in successfully.')
+      } else {
+        if (!name.trim()) {
+          throw new Error('Please enter your full name.')
+        }
+        await register({
+          name: name.trim(),
+          mobile: mobile.trim(),
+          password: password || 'password123',
+        })
+        toast.success('Account Created!', 'Welcome to Dastak food delivery.')
+      }
       navigate(redirect)
     } catch (err) {
-      setError(err.message || 'Invalid mobile number or password.')
+      setError(err.message || 'Invalid credentials. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  const fillDemo = () => {
+  const fillDemoCustomer = () => {
+    setMode('login')
     setMobile('9666600001')
     setPassword('password123')
-    toast.info('Demo Credentials Loaded', 'Ready to sign in with single tap.')
+    toast.info('Customer Demo Loaded', 'Priya Sharma (Customer: 9666600001)')
   }
 
   return (
-    <div className="w-full max-w-sm mx-auto flex-1 flex flex-col justify-between py-4 space-y-6">
-      {/* Top & Middle Content */}
+    <div className="w-full max-w-sm mx-auto flex-1 flex flex-col justify-center py-6 space-y-6 my-auto">
+      {/* Main Content Area */}
       <div className="space-y-5 my-auto">
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -63,16 +76,73 @@ export const LoginPage = () => {
             />
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            Welcome to Dastak
+            {mode === 'login' ? 'Customer Sign In' : 'Create Customer Account'}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Sign in with your mobile number to order & track food
+            {mode === 'login'
+              ? 'Sign in with your customer mobile number to order food'
+              : 'Enter your details to register as a new customer'}
           </p>
         </div>
 
-        {/* Login Card */}
+        {/* Tab Switcher */}
+        <div className="p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center gap-1 text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('login')
+              setError('')
+            }}
+            className={`flex-1 py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              mode === 'login'
+                ? 'bg-white dark:bg-slate-900 text-[#2845D6] dark:text-blue-400 shadow-xs font-black'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Sign In</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('register')
+              setError('')
+            }}
+            className={`flex-1 py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              mode === 'register'
+                ? 'bg-white dark:bg-slate-900 text-[#2845D6] dark:text-blue-400 shadow-xs font-black'
+                : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>New Customer</span>
+          </button>
+        </div>
+
+        {/* Form Card */}
         <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl space-y-4">
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full Name for Registration */}
+            {mode === 'register' && (
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider">
+                  Full Name
+                </label>
+                <div className="relative flex items-center">
+                  <User className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6] transition-all"
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Mobile Number with +91 Country Badge */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider">
@@ -86,12 +156,12 @@ export const LoginPage = () => {
                 <input
                   type="tel"
                   value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
+                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
                   placeholder="10-digit mobile number"
                   className="w-full pl-20 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6] transition-all"
                   required
                   maxLength={10}
-                  autoFocus
+                  autoFocus={mode === 'login'}
                 />
               </div>
             </div>
@@ -123,9 +193,9 @@ export const LoginPage = () => {
             </div>
 
             {error && (
-              <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{error}</span>
+              <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs font-bold text-rose-600 dark:text-rose-400 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{error}</span>
               </div>
             )}
 
@@ -133,17 +203,17 @@ export const LoginPage = () => {
               type="submit"
               variant="primary"
               size="xl"
-              icon={LogIn}
+              icon={mode === 'login' ? LogIn : UserPlus}
               loading={loading}
               className="w-full shadow-lg shadow-blue-600/25 text-sm font-black py-3.5 rounded-2xl"
             >
-              {t.login || 'Sign In / Register'}
+              {mode === 'login' ? 'Sign In as Customer' : 'Create Customer Account'}
             </Button>
           </form>
 
           {/* 1-Tap Demo Credentials Helper */}
           <div
-            onClick={fillDemo}
+            onClick={fillDemoCustomer}
             className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800 flex items-center justify-between gap-2 cursor-pointer hover:border-blue-500/40 transition-colors"
           >
             <div className="min-w-0">
@@ -151,11 +221,11 @@ export const LoginPage = () => {
                 Demo Customer Account
               </span>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate">
-                9666600001 • password123
+                Priya Sharma • 9666600001
               </span>
             </div>
             <span className="text-[10px] font-black text-[#2845D6] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-1 rounded-lg shrink-0">
-              Tap to Fill
+              Fill Demo
             </span>
           </div>
         </div>

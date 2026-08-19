@@ -31,6 +31,23 @@ class AuthController extends Controller
         ], 'Login successful.');
     }
 
+    public function register(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+            'mobile' => ['required', 'string', 'min:10', 'max:15'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'password' => ['nullable', 'string', 'min:6'],
+        ]);
+
+        $result = $this->authService->registerCustomer($validated);
+
+        return ApiResponse::success([
+            'token' => $result['token'],
+            'user' => new UserResource($result['user']),
+        ], 'Registration successful.', 201);
+    }
+
     public function me(Request $request): JsonResponse
     {
         $user = $request->user()->load('roles.permissions');

@@ -87,29 +87,29 @@ export const CustomerLayout = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-[#2845D6] selection:text-white">
-      {/* 1. Header (Full Width Web Header) */}
-      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs h-14 sm:h-16 flex items-center">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex items-center justify-between gap-2.5 sm:gap-4">
-          {/* Logo & Delivery Location */}
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
-            <div
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 cursor-pointer select-none shrink-0"
-            >
-              <img
-                src="/logo-horizontal.svg"
-                alt="Dastak Logo"
-                className="h-8 sm:h-9 max-h-9 w-auto max-w-[130px] sm:max-w-[170px] object-contain shrink-0"
-                style={{ height: '32px', maxHeight: '36px', width: 'auto' }}
-                onError={(e) => {
-                  e.target.onerror = null
-                  e.target.src = '/logo-horizontal.png'
-                }}
-              />
-            </div>
+      {/* 1. Header (Full Width Web Header - Hidden on Auth / Login pages) */}
+      {!isAuthPage && (
+        <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs h-14 sm:h-16 flex items-center">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex items-center justify-between gap-2.5 sm:gap-4">
+            {/* Logo & Delivery Location */}
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
+              <div
+                onClick={() => navigate('/')}
+                className="flex items-center gap-2 cursor-pointer select-none shrink-0"
+              >
+                <img
+                  src="/logo-horizontal.svg"
+                  alt="Dastak Logo"
+                  className="h-8 sm:h-9 max-h-9 w-auto max-w-[130px] sm:max-w-[170px] object-contain shrink-0"
+                  style={{ height: '32px', maxHeight: '36px', width: 'auto' }}
+                  onError={(e) => {
+                    e.target.onerror = null
+                    e.target.src = '/logo-horizontal.png'
+                  }}
+                />
+              </div>
 
-            {/* Location Selector Pill */}
-            {!isAuthPage && (
+              {/* Location Selector Pill */}
               <button
                 type="button"
                 onClick={() => setLocationModalOpen(true)}
@@ -126,34 +126,34 @@ export const CustomerLayout = () => {
                 </div>
                 <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
               </button>
-            )}
-          </div>
+            </div>
 
-          {/* Right Header Utilities: Language Switcher, Theme Toggle */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {/* Language Switcher Button [English / हिंदी] */}
-            <button
-              type="button"
-              onClick={toggleLanguage}
-              className="px-2.5 py-1.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer"
-              title="Toggle English / हिंदी"
-            >
-              <Globe className="w-3.5 h-3.5 text-[#2845D6]" />
-              <span>{lang === 'en' ? 'हिंदी' : 'English'}</span>
-            </button>
+            {/* Right Header Utilities: Language Switcher, Theme Toggle */}
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              {/* Language Switcher Button [English / हिंदी] */}
+              <button
+                type="button"
+                onClick={toggleLanguage}
+                className="px-2.5 py-1.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer"
+                title="Toggle English / हिंदी"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#2845D6]" />
+                <span>{lang === 'en' ? 'हिंदी' : 'English'}</span>
+              </button>
 
-            {/* Dark / Light Theme Toggle */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
-              title="Toggle Theme"
-            >
-              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-            </button>
+              {/* Dark / Light Theme Toggle */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                title="Toggle Theme"
+              >
+                {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* 2. Main Page Content (Full Width Max-W-7xl Web Container) */}
       <main className={`flex-1 max-w-7xl w-full mx-auto px-3 py-4 sm:p-6 ${isAuthPage ? 'pb-8 flex flex-col justify-center' : 'pb-28 sm:pb-32'}`}>

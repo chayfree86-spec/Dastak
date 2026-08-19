@@ -99,3 +99,54 @@ export const getCurrentPosition = () => {
     )
   })
 }
+
+/**
+ * Fetch real road driving route using OSRM (Open Source Routing Machine)
+ * Returns road polyline coordinates [[lat, lng], ...], road distance (km), and driving duration (mins)
+ */
+export const fetchOsrmRoute = async (startLat, startLng, endLat, endLng) => {
+  if (!startLat || !startLng || !endLat || !endLng) return null
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson&steps=true`
+    const res = await fetch(url)
+    const data = await res.json()
+
+    if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+      const primaryRoute = data.routes[0]
+      const coordinates = primaryRoute.geometry.coordinates.map(([lng, lat]) => [lat, lng])
+      const distanceKm = Number((primaryRoute.distance / 1000).toFixed(2))
+      const durationMinutes = Math.max(2, Math.round(primaryRoute.duration / 60))
+
+      const steps = primaryRoute.legs?.[0]?.steps?.map((s) => ({
+        instruction: s.maneuver?.type + ' ' + (s.maneuver?.modifier || ''),
+        name: s.name || 'Road',
+        distance: s.distance,
+        duration: s.duration,
+      })) || []
+
+      return {
+        coordinates,
+        distanceKm,
+        durationMinutes,
+        steps,
+        source: 'OSRM',
+      }
+    }
+  } catch (error) {
+    console.warn('OSRM route fetch failed, fallback to direct:', error)
+  }
+
+  const distanceKm = calculateDistanceKm(startLat, startLng, endLat, endLng) || 2.0
+  const durationMinutes = calculateEtaMinutes(distanceKm)
+  return {
+    coordinates: [
+      [startLat, startLng],
+      [endLat, endLng],
+    ],
+    distanceKm,
+    durationMinutes,
+    steps: [],
+    source: 'FALLBACK',
+  }
+}

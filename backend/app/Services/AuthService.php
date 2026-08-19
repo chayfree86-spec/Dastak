@@ -62,6 +62,51 @@ class AuthService
         ];
     }
 
+    public function registerCustomer(array $data): array
+    {
+        $mobile = $data['mobile'];
+        $email = $data['email'] ?? null;
+        $name = $data['name'] ?? 'Customer';
+        $password = $data['password'] ?? 'password123';
+
+        $existing = User::where('mobile', $mobile)->first();
+        if ($existing) {
+            throw ValidationException::withMessages([
+                'mobile' => ['This mobile number is already registered. Please sign in.'],
+            ]);
+        }
+
+        if ($email && User::where('email', $email)->first()) {
+            throw ValidationException::withMessages([
+                'email' => ['This email is already registered.'],
+            ]);
+        }
+
+        $user = User::create([
+            'name' => $name,
+            'mobile' => $mobile,
+            'email' => $email ?: ($mobile . '@dastak.local'),
+            'password' => Hash::make($password),
+            'status' => AccountStatus::ACTIVE,
+            'mobile_verified_at' => now(),
+        ]);
+
+        $customerRole = \App\Models\Role::firstOrCreate(['slug' => 'customer'], ['name' => 'Customer']);
+        $user->roles()->sync([$customerRole->id]);
+
+        \App\Models\CustomerProfile::create([
+            'user_id' => $user->id,
+            'loyalty_points' => 100,
+        ]);
+
+        $token = $user->createToken($data['device_name'] ?? 'Customer App')->plainTextToken;
+
+        return [
+            'token' => $token,
+            'user' => $user->load('roles.permissions'),
+        ];
+    }
+
     public function logout(User $user): void
     {
         $user->currentAccessToken()?->delete();

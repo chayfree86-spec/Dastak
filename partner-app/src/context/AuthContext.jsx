@@ -65,6 +65,11 @@ export const AuthProvider = ({ children }) => {
     const tokenVal = res.data?.data?.token
     const userData = res.data?.data?.user
 
+    const role = userData?.role || (userData?.roles && userData?.roles[0]?.slug)
+    if (role && role !== 'restaurant_owner' && role !== 'super_admin') {
+      throw new Error('This account is not registered as a Restaurant Partner. Please use the Customer or Delivery app.')
+    }
+
     localStorage.setItem('dastak_partner_token', tokenVal)
     setToken(tokenVal)
     setUser(userData)

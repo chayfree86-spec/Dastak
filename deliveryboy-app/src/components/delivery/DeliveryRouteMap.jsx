@@ -16,6 +16,7 @@ import {
   openGoogleMapsNavigation,
   calculateDistanceKm,
   calculateEtaMinutes,
+  fetchOsrmRoute,
 } from '../../utils/geo'
 import { useTheme } from '../../context/ThemeContext'
 
@@ -23,6 +24,7 @@ export const DeliveryRouteMap = ({
   order,
   riderPosition = null,
   isOutForDelivery = false,
+  onOpenFullscreen = null,
   className = '',
 }) => {
   const mapContainerRef = useRef(null)
@@ -32,6 +34,7 @@ export const DeliveryRouteMap = ({
 
   const [distanceKm, setDistanceKm] = useState(null)
   const [etaMinutes, setEtaMinutes] = useState(null)
+  const [roadPath, setRoadPath] = useState([])
 
   const restaurant = order?.restaurant || {}
   const customerAddress = order?.delivery_address || {}
@@ -58,11 +61,31 @@ export const DeliveryRouteMap = ({
     ? (customerAddress.customer_name || 'Customer Address')
     : (restaurant.name || 'Restaurant Outlet')
 
-  // Calculate live distance & ETA
+  // Fetch OSRM Road Route from Rider to Target
   useEffect(() => {
-    const dist = calculateDistanceKm(riderLat, riderLng, targetLat, targetLng)
-    setDistanceKm(dist)
-    setEtaMinutes(calculateEtaMinutes(dist))
+    let isMounted = true
+
+    const getRoute = async () => {
+      try {
+        const routeData = await fetchOsrmRoute(riderLat, riderLng, targetLat, targetLng)
+        if (isMounted && routeData && routeData.coordinates.length > 0) {
+          setRoadPath(routeData.coordinates)
+          setDistanceKm(routeData.distanceKm)
+          setEtaMinutes(routeData.durationMinutes)
+        }
+      } catch (err) {
+        const dist = calculateDistanceKm(riderLat, riderLng, targetLat, targetLng)
+        if (isMounted) {
+          setDistanceKm(dist)
+          setEtaMinutes(calculateEtaMinutes(dist))
+        }
+      }
+    }
+
+    getRoute()
+    return () => {
+      isMounted = false
+    }
   }, [riderLat, riderLng, targetLat, targetLng])
 
   // Initialize and render the Local Delivery Circle Map
@@ -170,8 +193,10 @@ export const DeliveryRouteMap = ({
     L.marker([restLat, restLng], { icon: restIcon }).addTo(group)
     L.marker([custLat, custLng], { icon: custIcon }).addTo(group)
 
-    // 5. Connect Local Route Polyline (Dotted Local Navigation Path)
-    const waypoints = isOutForDelivery
+    // 5. Connect Real OSRM Road Route Polyline
+    const activeRouteCoordinates = roadPath.length > 0
+      ? roadPath
+      : isOutForDelivery
       ? [
           [riderLat, riderLng],
           [custLat, custLng],
@@ -179,14 +204,24 @@ export const DeliveryRouteMap = ({
       : [
           [riderLat, riderLng],
           [restLat, restLng],
-          [custLat, custLng],
         ]
 
-    L.polyline(waypoints, {
+    // Base road polyline
+    L.polyline(activeRouteCoordinates, {
       color: isOutForDelivery ? '#F97316' : '#2845D6',
-      weight: 4,
-      dashArray: '6, 8',
+      weight: 5,
       opacity: 0.9,
+      lineCap: 'round',
+      lineJoin: 'round',
+    }).addTo(group)
+
+    // Inner glowing dashed line
+    L.polyline(activeRouteCoordinates, {
+      color: '#FFFFFF',
+      weight: 2,
+      dashArray: '6, 10',
+      opacity: 0.95,
+      lineCap: 'round',
     }).addTo(group)
 
     // Fit strictly to the circle and markers (Padding ensures it stays within ~2-3 km view)
@@ -200,7 +235,7 @@ export const DeliveryRouteMap = ({
     setTimeout(() => {
       map.invalidateSize()
     }, 200)
-  }, [riderLat, riderLng, restLat, restLng, custLat, custLng, isOutForDelivery, isDark])
+  }, [riderLat, riderLng, restLat, restLng, custLat, custLng, isOutForDelivery, isDark, roadPath])
 
   const handleCenterRider = () => {
     if (mapInstanceRef.current) {
@@ -215,16 +250,16 @@ export const DeliveryRouteMap = ({
   return (
     <div className={`relative rounded-3xl overflow-hidden border-2 border-blue-200 dark:border-slate-700 shadow-md ${className}`}>
       {/* Map Container */}
-      <div ref={mapContainerRef} className="w-full h-64 sm:h-80 z-0 bg-slate-100 dark:bg-slate-900" />
+      <div ref={mapContainerRef} className="w-full h-52 sm:h-64 md:h-72 lg:h-80 z-0 bg-slate-100 dark:bg-slate-900" />
 
       {/* Top Floating App Info Header: Circle Radius & Live Distance Badge */}
-      <div className="absolute top-3 left-3 right-12 z-[1000] flex items-center justify-between gap-2 pointer-events-none">
-        <div className="pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-          <div className="text-[11px] font-black text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-            <span>Dastak Delivery Zone</span>
-            <span className="text-[#2845D6] dark:text-blue-400 font-black">
-              • {distanceKm !== null ? `${distanceKm} km (~${etaMinutes} min)` : 'Local Area'}
+      <div className="absolute top-2.5 left-2.5 right-12 z-[1000] flex items-center justify-between gap-1.5 pointer-events-none">
+        <div className="pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 sm:px-3.5 py-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md flex items-center gap-1.5 sm:gap-2 max-w-[calc(100%-48px)]">
+          <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+          <div className="text-[10px] sm:text-[11px] font-black text-slate-900 dark:text-slate-100 flex items-center gap-1 sm:gap-1.5 truncate">
+            <span className="truncate">Dastak Zone</span>
+            <span className="text-[#2845D6] dark:text-blue-400 font-black shrink-0">
+              • {distanceKm !== null ? `${distanceKm} km (~${etaMinutes}m)` : 'Local'}
             </span>
           </div>
         </div>
@@ -234,21 +269,21 @@ export const DeliveryRouteMap = ({
       <button
         type="button"
         onClick={handleCenterRider}
-        className="absolute bottom-16 right-3 z-[1000] p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 shadow-md hover:bg-slate-50 cursor-pointer"
+        className="absolute bottom-14 sm:bottom-16 right-2.5 sm:right-3 z-[1000] p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 shadow-md hover:bg-slate-50 cursor-pointer touch-manipulation"
         title="Focus My Location"
       >
         <Crosshair className="w-4 h-4 text-[#2845D6]" />
       </button>
 
       {/* Bottom Floating Navigation Action: Clean local destination link */}
-      <div className="absolute bottom-3 inset-x-3 z-[1000] flex items-center gap-2">
+      <div className="absolute bottom-2.5 sm:bottom-3 inset-x-2.5 sm:inset-x-3 z-[1000] flex items-center gap-2">
         <button
           type="button"
-          onClick={handleOpenGoogleMaps}
-          className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-[#2845D6] to-[#1E3A8A] hover:from-[#F97316] hover:to-[#EA580C] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer"
+          onClick={onOpenFullscreen || handleOpenGoogleMaps}
+          className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-[#2845D6] to-[#1E3A8A] hover:from-[#F97316] hover:to-[#EA580C] text-white font-black text-[11px] sm:text-xs md:text-sm flex items-center justify-center gap-2 shadow-xl shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer touch-manipulation truncate"
         >
-          <Navigation className="w-4 h-4 fill-white" />
-          <span>OPEN IN GOOGLE MAPS ({targetLabel.slice(0, 20)})</span>
+          <Navigation className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white shrink-0" />
+          <span className="truncate">FULLSCREEN NAV MAP ({targetLabel.slice(0, 18)})</span>
         </button>
       </div>
     </div>
