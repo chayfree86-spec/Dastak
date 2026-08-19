@@ -35,6 +35,7 @@ class AdminRestaurantDetailResource extends JsonResource
             'rating' => (float) $this->rating,
             'total_reviews' => (int) $this->total_ratings,
             'status' => $this->is_active ? 'ACTIVE' : 'SUSPENDED',
+            'is_active' => (bool) $this->is_active,
             'is_online' => (bool) $this->is_open,
             'commission' => (float) $this->commission_rate,
             'settlement_cycle' => $this->settlement_cycle ?? 'WEEKLY',

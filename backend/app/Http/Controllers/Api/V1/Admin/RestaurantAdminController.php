@@ -57,12 +57,16 @@ class RestaurantAdminController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:150'],
-            'owner_name' => ['required', 'string', 'max:150'],
-            'mobile' => ['required', 'string', 'max:20'],
+            'owner_id' => ['nullable', 'integer'],
+            'owner_name' => ['nullable', 'string', 'max:150'],
+            'mobile' => ['nullable', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
+            'address_line1' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:100'],
             'commission' => ['nullable', 'numeric', 'between:0,100'],
+            'commission_rate' => ['nullable', 'numeric', 'between:0,100'],
             'settlement_cycle' => ['nullable', 'string', 'in:DAILY,WEEKLY,MONTHLY'],
             'min_order' => ['nullable', 'numeric', 'min:0'],
             'delivery_radius_km' => ['nullable', 'numeric', 'min:0'],
@@ -70,6 +74,7 @@ class RestaurantAdminController extends Controller
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'status' => ['nullable', 'string'],
             'is_veg_only' => ['nullable', 'boolean'],
+            'is_pure_veg' => ['nullable', 'boolean'],
         ]);
 
         $owner = $this->resolveOwner($validated);
@@ -154,6 +159,13 @@ class RestaurantAdminController extends Controller
         // The UI reuses this endpoint for both suspend/activate and open/close toggles.
         if ($request->has('is_online')) {
             $restaurant->update(['is_open' => (bool) $request->input('is_online')]);
+        }
+
+        if ($request->has('is_active')) {
+            $this->restaurantService->updateRestaurantStatus(
+                $restaurant,
+                (bool) $request->input('is_active')
+            );
         }
 
         if ($request->filled('status')) {
@@ -351,14 +363,19 @@ class RestaurantAdminController extends Controller
         $map = [];
         if (array_key_exists('name', $v)) $map['name'] = $v['name'];
         if (array_key_exists('mobile', $v)) $map['phone'] = $v['mobile'];
+        if (array_key_exists('phone', $v)) $map['phone'] = $v['phone'];
         if (array_key_exists('email', $v)) $map['email'] = $v['email'];
         if (array_key_exists('address', $v)) $map['address_line1'] = $v['address'] ?: 'N/A';
+        if (array_key_exists('address_line1', $v)) $map['address_line1'] = $v['address_line1'] ?: 'N/A';
         if (array_key_exists('city', $v)) $map['city'] = $v['city'] ?: 'Kanpur';
         if (array_key_exists('commission', $v)) $map['commission_rate'] = $v['commission'];
+        if (array_key_exists('commission_rate', $v)) $map['commission_rate'] = $v['commission_rate'];
         if (array_key_exists('settlement_cycle', $v) && $v['settlement_cycle']) $map['settlement_cycle'] = strtoupper($v['settlement_cycle']);
         if (array_key_exists('delivery_radius_km', $v) && $v['delivery_radius_km'] !== null) $map['delivery_radius_km'] = (int) $v['delivery_radius_km'];
         if (array_key_exists('min_order', $v)) $map['min_order_value'] = $v['min_order'];
+        if (array_key_exists('min_order_value', $v)) $map['min_order_value'] = $v['min_order_value'];
         if (array_key_exists('is_veg_only', $v)) $map['is_pure_veg'] = (bool) $v['is_veg_only'];
+        if (array_key_exists('is_pure_veg', $v)) $map['is_pure_veg'] = (bool) $v['is_pure_veg'];
         if (array_key_exists('status', $v)) $map['is_active'] = strtoupper((string) $v['status']) === 'ACTIVE';
         // Map coordinates on both create AND update (delivery-area map save relies on this).
         if (array_key_exists('latitude', $v) && $v['latitude'] !== null) $map['latitude'] = $v['latitude'];
@@ -366,6 +383,7 @@ class RestaurantAdminController extends Controller
 
         if ($isCreate) {
             // Backend requires these NOT NULL columns; the admin form may not collect them.
+            $map['phone'] ??= $v['phone'] ?? $v['mobile'] ?? '9876543210';
             $map['pincode'] ??= $v['pincode'] ?? '000000';
             $map['latitude'] ??= 26.4499;
             $map['longitude'] ??= 80.3319;

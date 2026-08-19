@@ -67,39 +67,50 @@ export const HomePage = () => {
     requestAnimationFrame(animateScroll)
   }
 
-  // Curated Promo Banners with full English and Hindi translation support
-  const promoBanners = [
-    {
-      id: 1,
-      title: t.banner1Title || 'FLAT 50% OFF',
-      subtitle: t.banner1Subtitle || 'On your first 3 food orders',
-      code: 'WELCOME50',
-      badge: t.banner1Badge || 'LIMITED OFFER',
-      gradient: 'from-[#2845D6] via-indigo-600 to-blue-800',
-      bgImage: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
-      query: 'biryani',
-    },
-    {
-      id: 2,
-      title: t.banner2Title || 'CHAI & SNACKS FEST',
-      subtitle: t.banner2Subtitle || 'Evening special with up to 40% OFF',
-      code: 'CHAI40',
-      badge: t.banner2Badge || 'POPULAR',
-      gradient: 'from-amber-600 via-orange-600 to-rose-700',
-      bgImage: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80',
-      query: 'chai',
-    },
-    {
-      id: 3,
-      title: t.banner3Title || 'FREE EXPRESS DELIVERY',
-      subtitle: t.banner3Subtitle || 'On orders above ₹199 from top rated kitchens',
-      code: 'FASTFREE',
-      badge: t.banner3Badge || 'LIGHTNING FAST',
-      gradient: 'from-emerald-600 via-teal-700 to-slate-900',
-      bgImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80',
-      query: 'burger',
-    },
-  ]
+  const [liveCoupons, setLiveCoupons] = useState([])
+
+  // Curated Promo Banners with full English and Hindi translation support and live coupon integration
+  const promoBanners = (liveCoupons.length > 0)
+    ? liveCoupons.slice(0, 4).map((c, idx) => ({
+        id: c.id || idx + 1,
+        title: c.discount_type === 'PERCENTAGE' ? `FLAT ${c.discount_value}% OFF` : `FLAT ₹${c.discount_value} OFF`,
+        subtitle: `Use code ${c.code} on orders above ₹${c.min_order || 149}`,
+        code: c.code,
+        badge: 'LIVE PROMO',
+        gradient: idx % 3 === 0
+          ? 'from-[#2845D6] via-indigo-600 to-blue-800'
+          : idx % 3 === 1
+          ? 'from-amber-600 via-orange-600 to-rose-700'
+          : 'from-emerald-600 via-teal-700 to-slate-900',
+        bgImage: idx % 3 === 0
+          ? 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80'
+          : idx % 3 === 1
+          ? 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80'
+          : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80',
+        query: 'food',
+      }))
+    : [
+        {
+          id: 1,
+          title: t.banner1Title || 'FLAT 50% OFF',
+          subtitle: t.banner1Subtitle || 'On your first 3 food orders',
+          code: 'WELCOME50',
+          badge: t.banner1Badge || 'LIMITED OFFER',
+          gradient: 'from-[#2845D6] via-indigo-600 to-blue-800',
+          bgImage: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+          query: 'biryani',
+        },
+        {
+          id: 2,
+          title: t.banner2Title || 'CHAI & SNACKS FEST',
+          subtitle: t.banner2Subtitle || 'Evening special with up to 40% OFF',
+          code: 'CHAI40',
+          badge: t.banner2Badge || 'POPULAR',
+          gradient: 'from-amber-600 via-orange-600 to-rose-700',
+          bgImage: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80',
+          query: 'chai',
+        },
+      ]
 
   // Auto rotate banners
   useEffect(() => {
@@ -129,6 +140,12 @@ export const HomePage = () => {
         const searchRes = await searchApi.search('food', null, 12)
         const dishes = searchRes.data?.dishes || []
         setPopularDishes(dishes)
+
+        try {
+          const couponRes = await customerApi.getCoupons()
+          const coupons = couponRes.data?.data || couponRes.data || []
+          setLiveCoupons(coupons.filter(c => c.is_active !== false))
+        } catch (e) {}
 
         if (isAuthenticated) {
           try {

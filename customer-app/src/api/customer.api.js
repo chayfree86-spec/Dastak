@@ -100,6 +100,12 @@ export const customerApi = {
     return res.data
   },
 
+  // Public Coupons & Promos
+  getCoupons: async () => {
+    const res = await apiClient.get('/coupons')
+    return res.data
+  },
+
   // Reviews
   createReview: async (reviewPayload) => {
     const res = await apiClient.post('/customer/reviews', reviewPayload)

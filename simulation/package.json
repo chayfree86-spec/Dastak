@@ -1,0 +1,14 @@
+{
+  "name": "dastak-simulation",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Dastak 4-Agent Simulation and Automation Engine",
+  "main": "runner.js",
+  "scripts": {
+    "start": "node runner.js",
+    "loop": "node runner.js --loop 5"
+  },
+  "dependencies": {
+    "axios": "^1.7.9"
+  }
+}

@@ -103,7 +103,7 @@ class MenuPartnerController extends Controller
             'is_active' => true,
         ]);
 
-        return ApiResponse::success(['id' => $category->id], 'Category created.', 201);
+        return ApiResponse::success(new MenuCategoryResource($category), 'Category created.', 201);
     }
 
     public function updateCategory(Request $request, int $categoryId): JsonResponse
@@ -113,7 +113,7 @@ class MenuPartnerController extends Controller
 
         $category->update($request->only(['name', 'description', 'image', 'sort_order', 'is_active', 'parent_id']));
 
-        return ApiResponse::success(['id' => $category->id], 'Category updated.');
+        return ApiResponse::success(new MenuCategoryResource($category), 'Category updated.');
     }
 
     public function destroyCategory(Request $request, int $categoryId): JsonResponse
@@ -149,21 +149,25 @@ class MenuPartnerController extends Controller
         $restaurant = $this->getPartnerRestaurant($request);
         $data = $this->validateItem($request, true);
 
-        $item = MenuItem::create([
-            'restaurant_id' => $restaurant->id,
-            'category_id' => $data['category_id'],
-            'name' => $data['name'],
-            'description' => $data['description'] ?? null,
-            'image' => $data['image'] ?? null,
-            'base_price' => $data['price'],
-            'discount_price' => $data['discount_price'] ?? null,
-            'food_type' => ($data['is_veg'] ?? false) ? 'VEG' : 'NON_VEG',
-            'is_available' => $data['is_available'] ?? true,
-            'preparation_time_minutes' => $data['prep_time'] ?? null,
-            'short_code' => $data['short_code'] ?? null,
-        ]);
+        $item = $this->menuService->createMenuItem(
+            $restaurant,
+            [
+                'category_id' => $data['category_id'],
+                'name' => $data['name'],
+                'description' => $data['description'] ?? null,
+                'image' => $data['image'] ?? null,
+                'base_price' => $data['price'],
+                'discount_price' => $data['discount_price'] ?? null,
+                'food_type' => ($data['is_veg'] ?? false) ? 'VEG' : 'NON_VEG',
+                'is_available' => $data['is_available'] ?? true,
+                'preparation_time_minutes' => $data['prep_time'] ?? 15,
+                'short_code' => $data['short_code'] ?? null,
+            ],
+            $request->input('variant_groups'),
+            $request->input('addon_groups')
+        );
 
-        return ApiResponse::success($this->itemArray($item), 'Menu item created.', 201);
+        return ApiResponse::success(new MenuItemResource($item), 'Menu item created.', 201);
     }
 
     public function showItem(Request $request, MenuItem $item): JsonResponse
@@ -242,10 +246,15 @@ class MenuPartnerController extends Controller
 
     protected function validateItem(Request $request, bool $isCreate): array
     {
+        if (! $request->has('price') && $request->has('base_price')) {
+            $request->merge(['price' => $request->input('base_price')]);
+        }
+
         return $request->validate([
             'name' => [$isCreate ? 'required' : 'sometimes', 'string', 'max:150'],
             'category_id' => [$isCreate ? 'required' : 'sometimes', 'integer', 'exists:menu_categories,id'],
             'price' => [$isCreate ? 'required' : 'sometimes', 'numeric', 'min:0'],
+            'base_price' => ['nullable', 'numeric', 'min:0'],
             'discount_price' => ['nullable', 'numeric', 'min:0'],
             'is_veg' => ['nullable', 'boolean'],
             'is_available' => ['nullable', 'boolean'],
@@ -253,6 +262,8 @@ class MenuPartnerController extends Controller
             'image' => ['nullable', 'string'],
             'prep_time' => ['nullable', 'integer', 'min:0'],
             'short_code' => ['nullable', 'string', 'max:50'],
+            'variant_groups' => ['nullable', 'array'],
+            'addon_groups' => ['nullable', 'array'],
         ]);
     }
 

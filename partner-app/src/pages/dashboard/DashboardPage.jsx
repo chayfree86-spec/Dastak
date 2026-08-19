@@ -54,11 +54,13 @@ export const DashboardPage = () => {
             </span>
             <span className="flex items-center gap-1.5 bg-amber-400/20 text-amber-300 px-2.5 py-0.5 rounded-full text-xs font-black backdrop-blur-md">
               <Star className="w-3.5 h-3.5 fill-amber-300" />
-              <span>4.9 (210+ ratings)</span>
+              <span>
+                {restInfo.rating ? `${Number(restInfo.rating).toFixed(1)} (${restInfo.total_ratings || 0} ratings)` : 'Partner Kitchen'}
+              </span>
             </span>
           </div>
           <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white">
-            {restInfo.name || 'Chay Chaupal'}
+            {restInfo.name || restaurant?.name || 'Kitchen Hub'}
           </h2>
           <p className="text-xs sm:text-sm text-blue-100/90 font-medium">
             Live operational dashboard with real database analytics, orders queue & sales metrics.

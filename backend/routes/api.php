@@ -337,8 +337,10 @@ Route::prefix('v1')->group(function () {
                 Route::get('/orders/{id}', [OrderAdminController::class, 'show']);
                 Route::get('/orders/{id}/timeline', [OrderAdminController::class, 'timeline']);
                 Route::patch('/orders/{id}/status', [OrderAdminController::class, 'updateStatus']);
-                Route::post('/orders/{id}/assign-delivery', [OrderAdminController::class, 'assignDelivery']);
-                Route::post('/orders/{id}/reassign-delivery', [OrderAdminController::class, 'reassignDelivery']);
+                Route::match(['post', 'patch'], '/orders/{id}/assign-delivery', [OrderAdminController::class, 'assignDelivery']);
+                Route::match(['post', 'patch'], '/orders/{id}/assign-rider', [OrderAdminController::class, 'assignDelivery']);
+                Route::match(['post', 'patch'], '/orders/{id}/reassign-delivery', [OrderAdminController::class, 'reassignDelivery']);
+                Route::match(['post', 'patch'], '/orders/{id}/reassign-rider', [OrderAdminController::class, 'reassignDelivery']);
                 Route::post('/orders/{id}/cancel', [OrderAdminController::class, 'cancel']);
 
                 // Admin Finance screen (summary, settlements, commissions) under /admin/finance
@@ -393,6 +395,7 @@ Route::prefix('v1')->group(function () {
 
                 // Admin Reports screen: unified daily report per type (orders/commission/cod)
                 Route::prefix('reports')->group(function () {
+                    Route::get('/{type}/export', [ReportScreenController::class, 'exportCsv']);
                     Route::get('/{type}/export-csv', [ReportScreenController::class, 'exportCsv']);
                     Route::get('/{type}/export-excel', [ReportScreenController::class, 'exportExcel']);
                     Route::get('/{type}', [ReportScreenController::class, 'data']);

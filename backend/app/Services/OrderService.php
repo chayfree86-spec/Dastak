@@ -132,7 +132,7 @@ class OrderService
                     $menuItemId = (int) ($it['menu_item_id'] ?? $it['id'] ?? 1);
                     $menuItem = \App\Models\MenuItem::find($menuItemId);
                     $qty = max(1, (int) ($it['quantity'] ?? 1));
-                    $unitPrice = (float) ($it['price'] ?? $menuItem?->price ?? 49.00);
+                    $unitPrice = (float) ($it['price'] ?? $menuItem?->discount_price ?? $menuItem?->base_price ?? 49.00);
                     $lineTotal = round($unitPrice * $qty, 2);
                     $subtotal += $lineTotal;
 
@@ -404,11 +404,11 @@ class OrderService
             ]);
         }
 
-        // Only enforce OTP verification for Online Paid orders
-        if ($order->payment_mode !== PaymentMode::COD) {
-            if (empty($otp) || trim($order->delivery_otp) !== trim($otp)) {
+        // Enforce OTP verification whenever delivery_otp is configured
+        if ($order->delivery_otp !== null) {
+            if (empty($otp) || trim((string) $order->delivery_otp) !== trim((string) $otp)) {
                 throw ValidationException::withMessages([
-                    'delivery_otp' => ['Invalid 4-digit verification OTP provided for online paid order.'],
+                    'delivery_otp' => ['Invalid 4-digit verification OTP provided.'],
                 ]);
             }
         }
