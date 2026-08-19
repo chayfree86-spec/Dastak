@@ -19,7 +19,7 @@ export const BottomNav = () => {
   ]
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800 pb-safe md:hidden shadow-lg">
+    <nav aria-label="Rider Fleet Navigation" className="fixed bottom-0 inset-x-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-slate-800 pb-safe md:hidden shadow-lg">
       <div className="flex items-center justify-around px-1.5 sm:px-3 py-1.5">
         {navItems.map((item) => {
           const Icon = item.icon
@@ -28,11 +28,12 @@ export const BottomNav = () => {
               key={item.to}
               to={item.to}
               end={item.exact}
+              aria-label={`Navigate to ${item.label}${item.badge ? `, ${item.badge} active` : ''}`}
               className={({ isActive }) =>
                 `relative flex flex-col items-center justify-center py-1 px-2.5 sm:px-4 rounded-2xl min-w-[56px] sm:min-w-[68px] transition-all touch-manipulation ${
                   isActive
                     ? 'text-[#2845D6] dark:text-blue-400 font-black'
-                    : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-semibold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-semibold'
                 }`
               }
             >

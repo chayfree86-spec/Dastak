@@ -2,25 +2,57 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo-horizontal.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Dastak — Order delicious food, fresh groceries and everyday essentials delivered to your doorstep in minutes." />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="theme-color" content="#FF5200" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#020617" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Dastak" />
+    <meta name="theme-color" content="#10b981" />
     <link rel="manifest" href="/manifest.json" />
-    <title>Dastak — Fast Food Delivery</title>
-    <!-- Local Fonts: Plus Jakarta Sans (English) & Rubik -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" as="image" href="/logo-horizontal.svg" type="image/svg+xml" />
+    <title>Dastak — Fast Food & Grocery Delivery</title>
+
+    <!-- Local Fast Fonts (Zero Network Overhead) -->
     <link rel="stylesheet" href="/fonts/plus-jakarta-sans/plus-jakarta-sans.css" />
-    <link rel="stylesheet" href="/fonts/rubik/rubik.css" />
-    <!-- Google Fonts for Premium Devanagari / Hindi Typography (Poppins, Mukta, Noto Sans Devanagari) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Mukta:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- Critical CSS for Instant 0.1s FCP & Zero CLS -->
+    <style>
+      :root {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: #0f172a;
+        overflow-x: hidden;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .critical-skeleton {
+        animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        background: #e2e8f0;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+    </style>
   </head>
-  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-[#FF5200] selection:text-white">
-    <div id="root"></div>
+  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white min-h-screen">
+    <div id="root">
+      <!-- Lightweight Initial App Shell for 0.1s First Contentful Paint -->
+      <header style="height: 56px; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; align-items: center; padding: 0 16px; justify-content: space-between;">
+        <img src="/logo-horizontal.svg" alt="Dastak" width="130" height="32" style="height: 32px; width: 130px;" />
+        <div style="width: 80px; height: 28px; border-radius: 12px;" class="critical-skeleton"></div>
+      </header>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

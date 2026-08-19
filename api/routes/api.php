@@ -68,6 +68,9 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
     });
+    Route::prefix('admin/auth')->group(function () {
+        Route::post('/login', [AuthController::class, 'login']);
+    });
 
     Route::get('/restaurants', [RestaurantPublicController::class, 'index']);
     Route::get('/restaurants/{slug}', [RestaurantPublicController::class, 'show']);
@@ -98,6 +101,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/change-password', [AuthController::class, 'changePassword']);
             Route::post('/device-token', [DeviceTokenController::class, 'store']);
             Route::delete('/device-token', [DeviceTokenController::class, 'destroy']);
+        });
+        Route::prefix('admin/auth')->group(function () {
+            Route::get('/me', [AuthController::class, 'me']);
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::post('/change-password', [AuthController::class, 'changePassword']);
+            Route::post('/profile', [AuthController::class, 'me']);
         });
 
         // In-App Notifications Feed for Authenticated Users

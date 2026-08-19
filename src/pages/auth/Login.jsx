@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Mail, Lock, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react'
+import { Mail, Lock, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useToast } from '../../context/ToastContext'
@@ -15,11 +15,17 @@ export const Login = () => {
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
   const { isDark } = useTheme()
   const toast = useToast()
   const navigate = useNavigate()
   const formRef = useRef(null)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, navigate])
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault()
@@ -125,7 +131,7 @@ export const Login = () => {
               variant="primary"
               size="lg"
               loading={loading}
-              className="w-full mt-2 font-bold"
+              className="w-full mt-2 font-bold h-11 sm:h-10"
               icon={ArrowRight}
               iconPosition="right"
             >
@@ -133,7 +139,21 @@ export const Login = () => {
             </Button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium">
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/60">
+            <button
+              type="button"
+              onClick={() => {
+                setEmailOrMobile('admin@dastak.in')
+                setPassword('Admin@123')
+              }}
+              className="w-full py-2.5 px-3 text-xs font-semibold rounded-xl bg-slate-100 dark:bg-slate-700/60 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span>Fill Demo Credentials (admin@dastak.in)</span>
+            </button>
+          </div>
+
+          <div className="mt-4 pt-3 flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium">
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
             <span>Secure Real-Data API Authentication</span>
           </div>

@@ -235,6 +235,7 @@ export const PartnerLayout = () => {
                 else handleToggleStoreStatus()
               }}
               disabled={toggleLoading}
+              aria-label={isStoreOpen ? 'Store is online. Click to pause incoming orders.' : 'Store is offline. Click to take live orders.'}
               className={`md:hidden px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
                 isStoreOpen
                   ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
@@ -250,6 +251,7 @@ export const PartnerLayout = () => {
               onClick={toggleTheme}
               className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4 text-amber-400" />
@@ -263,10 +265,11 @@ export const PartnerLayout = () => {
               type="button"
               onClick={toggleSound}
               title={soundEnabled ? 'Order Audio Chime: ON' : 'Order Audio Chime: OFF'}
+              aria-label={soundEnabled ? 'Order Audio Chime is ON. Click to mute.' : 'Order Audio Chime is OFF. Click to unmute.'}
               className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                 soundEnabled
                   ? 'bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 border-blue-200 dark:border-blue-800'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-400 border-slate-200 dark:border-slate-600'
+                  : 'bg-slate-100 dark:bg-slate-700 text-slate-500 border-slate-200 dark:border-slate-600'
               }`}
             >
               {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -281,16 +284,17 @@ export const PartnerLayout = () => {
       </div>
 
       {/* 3. Reference-Matched Modern Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700/80 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] h-[68px] pb-safe select-none">
+      <nav aria-label="Partner Mobile Navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700/80 shadow-[0_-4px_25px_rgba(0,0,0,0.06)] h-[68px] pb-safe select-none">
         <div className="grid grid-cols-5 h-full items-end pb-2 px-1">
           {/* 1. Dashboard (Restaurants) */}
           <NavLink
             to="/dashboard"
+            aria-label="Navigate to Dashboard"
             className={({ isActive }) =>
               `flex flex-col items-center justify-end h-full px-0.5 transition-colors ${
                 isActive
                   ? 'text-[#EA580C] dark:text-orange-400 font-bold'
-                  : 'text-slate-400 dark:text-slate-400 font-medium hover:text-slate-600'
+                  : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700'
               }`
             }
           >
@@ -301,11 +305,12 @@ export const PartnerLayout = () => {
           {/* 2. Menu */}
           <NavLink
             to="/menu"
+            aria-label="Navigate to Menu"
             className={({ isActive }) =>
               `flex flex-col items-center justify-end h-full px-0.5 transition-colors ${
                 isActive
                   ? 'text-[#EA580C] dark:text-orange-400 font-bold'
-                  : 'text-slate-400 dark:text-slate-400 font-medium hover:text-slate-600'
+                  : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700'
               }`
             }
           >
@@ -313,24 +318,25 @@ export const PartnerLayout = () => {
             <span className="text-[10px] leading-none truncate max-w-full">Menu</span>
           </NavLink>
 
-          {/* 3. CENTER HERO: Dynamic Elevated Action Button (Orange when active or has pending orders, sleek Gray when idle) */}
+          {/* 3. CENTER HERO: Dynamic Elevated Action Button */}
           {(() => {
             const isNewOrdersActive = location.pathname === '/new-orders' || (newOrdersCount && newOrdersCount > 0)
             return (
               <NavLink
                 to="/new-orders"
+                aria-label={`Navigate to New Orders${newOrdersCount > 0 ? `, ${newOrdersCount} pending` : ''}`}
                 className="flex flex-col items-center justify-end h-full relative group px-0.5"
               >
                 <div
                   className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 border-[2.5px] border-white dark:border-slate-800 -mt-10 mb-2 active:scale-95 ${
                     isNewOrdersActive
                       ? 'bg-gradient-to-b from-[#FB923C] to-[#EA580C] text-white shadow-lg shadow-orange-500/25 ring-2 ring-orange-400/30 scale-105'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 shadow-sm hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 shadow-sm hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
                   }`}
                 >
                   <Bell
                     className={`w-6 h-6 stroke-[2.3] ${
-                      isNewOrdersActive ? 'text-white' : 'text-slate-400 dark:text-slate-400'
+                      isNewOrdersActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'
                     }`}
                   />
 
@@ -345,7 +351,7 @@ export const PartnerLayout = () => {
                   className={`text-[10px] leading-none tracking-tight truncate max-w-full ${
                     isNewOrdersActive
                       ? 'font-bold text-[#EA580C] dark:text-orange-400'
-                      : 'font-medium text-slate-400 dark:text-slate-400'
+                      : 'font-medium text-slate-500 dark:text-slate-400'
                   }`}
                 >
                   New Orders
@@ -357,11 +363,12 @@ export const PartnerLayout = () => {
           {/* 4. All Orders (Report) */}
           <NavLink
             to="/orders"
+            aria-label="Navigate to All Orders"
             className={({ isActive }) =>
               `flex flex-col items-center justify-end h-full px-0.5 transition-colors ${
                 isActive
                   ? 'text-[#EA580C] dark:text-orange-400 font-bold'
-                  : 'text-slate-400 dark:text-slate-400 font-medium hover:text-slate-600'
+                  : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700'
               }`
             }
           >
@@ -373,10 +380,11 @@ export const PartnerLayout = () => {
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(true)}
+            aria-label="Open More Menu Options"
             className={`flex flex-col items-center justify-end h-full px-0.5 transition-colors cursor-pointer ${
               ['/settings', '/reports', '/settlements'].includes(location.pathname) || mobileDrawerOpen
                 ? 'text-[#EA580C] dark:text-orange-400 font-bold'
-                : 'text-slate-400 dark:text-slate-400 font-medium hover:text-slate-600'
+                : 'text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700'
             }`}
           >
             <MenuIcon className="w-5 h-5 mb-1 stroke-[1.8]" />

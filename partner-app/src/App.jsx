@@ -14,6 +14,9 @@ import ReportsPage from './pages/reports/ReportsPage'
 import SettlementsPage from './pages/settlements/SettlementsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 
+import { PwaInstallModal } from './components/pwa/PwaInstallModal'
+import { usePwaUpdate } from './hooks/usePwaUpdate'
+
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth()
 
@@ -45,6 +48,19 @@ const PublicOnlyRoute = ({ children }) => {
   return children
 }
 
+const PwaController = () => {
+  usePwaUpdate()
+  return (
+    <PwaInstallModal
+      appName="Dastak Restaurant Partner"
+      appRole="Live Order Management & Kitchen Display System"
+      iconSrc="/pwa-512x512.png"
+      accentColor="bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30"
+      accentBadge="bg-blue-500/10 text-blue-400 border-blue-500/20"
+    />
+  )
+}
+
 export function App() {
   return (
     <ThemeProvider>
@@ -52,6 +68,7 @@ export function App() {
         <ToastProvider>
           <AuthProvider>
             <SoundProvider>
+              <PwaController />
               <Routes>
                 {/* Public Auth */}
                 <Route

@@ -83,10 +83,10 @@ export const HomePage = () => {
           ? 'from-amber-600 via-orange-600 to-rose-700'
           : 'from-emerald-600 via-teal-700 to-slate-900',
         bgImage: idx % 3 === 0
-          ? 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80'
+          ? 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70'
           : idx % 3 === 1
-          ? 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80'
-          : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80',
+          ? 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=70'
+          : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=70',
         query: 'food',
       }))
     : [
@@ -97,7 +97,7 @@ export const HomePage = () => {
           code: 'WELCOME50',
           badge: t.banner1Badge || 'LIMITED OFFER',
           gradient: 'from-[#2845D6] via-indigo-600 to-blue-800',
-          bgImage: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+          bgImage: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70',
           query: 'biryani',
         },
         {
@@ -107,27 +107,27 @@ export const HomePage = () => {
           code: 'CHAI40',
           badge: t.banner2Badge || 'POPULAR',
           gradient: 'from-amber-600 via-orange-600 to-rose-700',
-          bgImage: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80',
+          bgImage: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=70',
           query: 'chai',
         },
       ]
 
-  // Auto rotate banners
+  // Auto rotate banners smoothly with longer delay
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveBannerIndex((prev) => (prev + 1) % promoBanners.length)
-    }, 4500)
+    }, 8000)
     return () => clearInterval(timer)
   }, [promoBanners.length])
 
   // Food Categories list with i18n
   const categories = [
-    { id: 'all', name: t.catAllFood || 'All Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&auto=format&fit=crop&q=80', query: 'food' },
-    { id: 'biryani', name: t.catBiryani || 'Biryani', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300&auto=format&fit=crop&q=80', query: 'biryani' },
-    { id: 'tea', name: t.catChai || 'Chai & Snacks', image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=300&auto=format&fit=crop&q=80', query: 'chai' },
-    { id: 'burger', name: t.catBurger || 'Burgers & Rolls', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&auto=format&fit=crop&q=80', query: 'burger' },
-    { id: 'veg', name: t.catVeg || 'Pure Veg', image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=300&auto=format&fit=crop&q=80', query: 'paneer' },
-    { id: 'sweets', name: t.catSweets || 'Desserts & Sweets', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=300&auto=format&fit=crop&q=80', query: 'jalebi' },
+    { id: 'all', name: t.catAllFood || 'All Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=120&auto=format&fit=crop&q=70', query: 'food' },
+    { id: 'biryani', name: t.catBiryani || 'Biryani', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=120&auto=format&fit=crop&q=70', query: 'biryani' },
+    { id: 'tea', name: t.catChai || 'Chai & Snacks', image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=120&auto=format&fit=crop&q=70', query: 'chai' },
+    { id: 'burger', name: t.catBurger || 'Burgers & Rolls', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=120&auto=format&fit=crop&q=70', query: 'burger' },
+    { id: 'veg', name: t.catVeg || 'Pure Veg', image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=120&auto=format&fit=crop&q=70', query: 'paneer' },
+    { id: 'sweets', name: t.catSweets || 'Desserts & Sweets', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=120&auto=format&fit=crop&q=70', query: 'jalebi' },
   ]
 
   useEffect(() => {
@@ -191,19 +191,26 @@ export const HomePage = () => {
 
   return (
     <div className="space-y-5 pb-16">
+      {/* Hidden Semantic H1 for 100% SEO and Accessibility */}
+      <h1 className="sr-only">Dastak — Order Food, Grocery & Essentials in Minutes</h1>
+
       {/* 1. Active Order Banner in Header Area */}
       {activeOrder && <ActiveOrderBanner order={activeOrder} />}
 
-      {/* 2. Hero Promo Banner Carousel */}
-      <div className="relative overflow-hidden rounded-3xl shadow-xl">
+      {/* 2. Hero Promo Banner Carousel (Strict Fixed Height for 0.00 CLS) */}
+      <section className="relative overflow-hidden rounded-3xl shadow-xl h-[180px] sm:h-[220px]" aria-label="Special Offers and Promotions">
         <div
-          className={`relative p-5 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between min-h-[160px] sm:min-h-[220px] overflow-hidden transition-all duration-500`}
+          className={`relative p-5 sm:p-8 bg-gradient-to-r ${promoBanners[activeBannerIndex].gradient} text-white flex flex-col justify-between h-full w-full overflow-hidden`}
         >
           {/* Background Photo with soft overlay */}
           <div className="absolute right-0 top-0 bottom-0 w-1/2 sm:w-2/5 overflow-hidden opacity-30 sm:opacity-40 mix-blend-luminosity pointer-events-none">
             <img
               src={promoBanners[activeBannerIndex].bgImage}
-              alt="Promo Food"
+              alt=""
+              width="400"
+              height="220"
+              decoding="async"
+              fetchpriority="high"
               className="w-full h-full object-cover"
             />
           </div>
@@ -214,48 +221,52 @@ export const HomePage = () => {
               <span>{promoBanners[activeBannerIndex].badge}</span>
             </span>
 
-            <h3 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight drop-shadow-sm">
+            <h2 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight drop-shadow-sm truncate">
               {promoBanners[activeBannerIndex].title}
-            </h3>
+            </h2>
 
-            <p className="text-xs sm:text-sm text-white/90 font-medium line-clamp-2">
+            <p className="text-xs sm:text-sm text-white/95 font-medium line-clamp-1">
               {promoBanners[activeBannerIndex].subtitle}
             </p>
           </div>
 
           {/* Banner Action CTA */}
-          <div className="relative z-10 pt-4 flex items-center justify-between gap-3">
+          <div className="relative z-10 pt-2 flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={() =>
                 navigate(`/search?q=${encodeURIComponent(promoBanners[activeBannerIndex].query)}`)
               }
               className="px-4 py-2 rounded-2xl bg-white text-slate-900 font-black text-xs sm:text-sm shadow-lg hover:bg-slate-100 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+              aria-label={`Order now with promo: ${promoBanners[activeBannerIndex].title}`}
             >
               <span>{t.orderNow || 'Order Now'}</span>
               <ArrowRight className="w-4 h-4 text-[#2845D6]" />
             </button>
 
             {/* Carousel Dots */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5" role="tablist" aria-label="Promotion Carousel Navigation">
               {promoBanners.map((_, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setActiveBannerIndex(idx)}
-                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                    activeBannerIndex === idx ? 'w-6 bg-white' : 'w-2 bg-white/40'
+                  aria-label={`Go to promotion slide ${idx + 1}`}
+                  aria-selected={activeBannerIndex === idx}
+                  role="tab"
+                  className={`h-2 rounded-full transition-all cursor-pointer ${
+                    activeBannerIndex === idx ? 'w-6 bg-white' : 'w-2 bg-white/50'
                   }`}
                 />
               ))}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* 4. Food Mood / Category Circular Strip */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-400 px-0.5">
+      <section className="space-y-3" aria-label="Food Categories">
+        <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 px-0.5">
           <span>{t.categories}</span>
         </div>
 
@@ -267,6 +278,7 @@ export const HomePage = () => {
             onClick={() => scrollCategories(-240)}
             className="hidden sm:flex absolute sm:-left-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
             title="Previous Categories"
+            aria-label="Scroll to previous categories"
           >
             <ChevronLeft className="w-4.5 h-4.5 stroke-[2.5]" />
           </button>
@@ -282,13 +294,17 @@ export const HomePage = () => {
                 type="button"
                 onClick={() => navigate(`/search?q=${encodeURIComponent(cat.query)}`)}
                 className="flex flex-col items-center gap-2 shrink-0 cursor-pointer group select-none text-center"
+                aria-label={`Explore ${cat.name} category`}
               >
                 <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 p-1.5 group-hover:border-[#2845D6] group-hover:scale-105 transition-all duration-300 shadow-xs group-hover:shadow-lg group-hover:shadow-blue-500/15 shrink-0">
                   <img
                     src={cat.image}
                     alt={cat.name}
+                    width="88"
+                    height="88"
                     className="w-full h-full object-cover rounded-2xl"
                     loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
@@ -304,14 +320,15 @@ export const HomePage = () => {
             onClick={() => scrollCategories(240)}
             className="hidden sm:flex absolute sm:-right-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
             title="Next Categories"
+            aria-label="Scroll to next categories"
           >
             <ChevronRight className="w-4.5 h-4.5 stroke-[2.5]" />
           </button>
         </div>
-      </div>
+      </section>
 
       {/* 5. Quick Filters Bar (Ergonomic Touch Height: min 40px - 44px) */}
-      <div className="flex items-center gap-2.5 overflow-x-auto py-1.5 px-0.5 -my-0.5 scrollbar-none no-scrollbar text-xs sm:text-sm font-black">
+      <section aria-label="Filter Dishes and Restaurants" className="flex items-center gap-2.5 overflow-x-auto py-1.5 px-0.5 -my-0.5 scrollbar-none no-scrollbar text-xs sm:text-sm font-black">
         {[
           { id: 'all', label: t.filterAll || 'All Items' },
           { id: 'rating', label: t.filterRating || '★ 4.0+ Rating' },
@@ -322,6 +339,7 @@ export const HomePage = () => {
             key={flt.id}
             type="button"
             onClick={() => setActiveFilter(flt.id)}
+            aria-pressed={activeFilter === flt.id}
             className={`px-4 py-2.5 min-h-[40px] sm:min-h-[44px] rounded-2xl transition-all shrink-0 cursor-pointer shadow-sm active:scale-95 flex items-center justify-center select-none ${
               activeFilter === flt.id
                 ? 'bg-[#FF5200] text-white shadow-md shadow-orange-500/30'
@@ -331,21 +349,22 @@ export const HomePage = () => {
             {flt.label}
           </button>
         ))}
-      </div>
+      </section>
 
       {/* 6. Popular / Trending Dishes Grid */}
-      <div className="space-y-3.5">
+      <section className="space-y-3.5" aria-label="Popular Dishes">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-[#F97316]" />
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               {t.popularNearYou}
-            </h3>
+            </h2>
           </div>
           <button
             type="button"
             onClick={() => navigate('/search')}
             className="text-xs font-bold text-[#2845D6] dark:text-blue-400 hover:underline flex items-center gap-0.5 cursor-pointer"
+            aria-label="See all popular dishes"
           >
             <span>{t.seeAll || 'See All'}</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -353,9 +372,9 @@ export const HomePage = () => {
         </div>
 
         {loading ? (
-          <LoadingSkeleton count={4} />
+          <LoadingSkeleton count={4} type="card" />
         ) : filteredDishes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 min-h-[224px]">
             {filteredDishes.slice(0, 8).map((dish) => (
               <ProductCard
                 key={dish.id}
@@ -369,48 +388,49 @@ export const HomePage = () => {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center text-xs text-slate-400 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="p-8 text-center text-xs text-slate-600 dark:text-slate-400 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
             No dishes matching this filter.
           </div>
         )}
-      </div>
+      </section>
 
       {/* 7. Nearby Partner Kitchens & Restaurants */}
-      <div className="space-y-3.5 pt-2">
+      <section className="space-y-3.5 pt-2" aria-label="Nearby Restaurants">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Store className="w-5 h-5 text-[#2845D6]" />
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               {t.restaurantsNearYou}
-            </h3>
+            </h2>
           </div>
         </div>
 
         {loading ? (
-          <LoadingSkeleton count={2} />
+          <LoadingSkeleton count={2} type="restaurant" />
         ) : filteredRestaurants.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 min-h-[220px]">
             {filteredRestaurants.map((rest) => (
               <RestaurantCard key={rest.id} restaurant={rest} />
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center text-xs text-slate-400 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="p-8 text-center text-xs text-slate-600 dark:text-slate-400 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
             No restaurants found matching this filter.
           </div>
         )}
-      </div>
+      </section>
 
       {/* 8. Floating Sticky Search Bar + Popular Dishes Near Footer Navigation */}
-      <div className="fixed bottom-16 sm:bottom-20 inset-x-3 sm:inset-x-6 max-w-lg mx-auto z-30 drop-shadow-2xl space-y-1.5 animate-in slide-in-from-bottom-4 duration-300">
+      <aside aria-label="Quick Search" className="fixed bottom-16 sm:bottom-20 inset-x-3 sm:inset-x-6 max-w-lg mx-auto z-30 drop-shadow-2xl space-y-1.5">
         {/* Popular Dishes Quick Tags Horizontal Scroll */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-1 px-1 scrollbar-none no-scrollbar">
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1 px-1 scrollbar-none no-scrollbar" aria-label="Quick Search Suggestions">
           {['Chai', 'Samosa', 'Burger', 'Biryani', 'Pizza', 'Jalebi', 'Paneer Butter Masala'].map((dish) => (
             <button
               key={dish}
               type="button"
               onClick={() => navigate(`/search?q=${encodeURIComponent(dish)}`)}
               className="px-3 py-1 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-200 shadow-md hover:border-[#2845D6] dark:hover:border-blue-500 shrink-0 transition-all active:scale-95 cursor-pointer"
+              aria-label={`Search for ${dish}`}
             >
               {dish}
             </button>
@@ -421,6 +441,12 @@ export const HomePage = () => {
         <div
           onClick={() => navigate('/search')}
           className="p-2.5 sm:p-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-2 border-slate-200/90 dark:border-slate-800 shadow-2xl hover:border-[#FF5200] dark:hover:border-orange-500 transition-all flex items-center justify-between gap-3 cursor-pointer group"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') navigate('/search')
+          }}
+          aria-label="Click to search for restaurants, dishes or groceries"
         >
           <div className="flex items-center gap-2.5 min-w-0 flex-1 ml-1.5">
             <Search className="w-4 h-4 text-[#FF5200] dark:text-orange-400 group-hover:scale-110 transition-transform shrink-0" />
@@ -437,11 +463,12 @@ export const HomePage = () => {
             }}
             className="p-2 rounded-xl bg-gradient-to-tr from-[#FF5200] to-amber-500 text-white shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
             title="Search with Voice"
+            aria-label="Voice Search"
           >
             <Mic className="w-3.5 h-3.5" />
           </button>
         </div>
-      </div>
+      </aside>
 
       {/* Voice Search Modal */}
       <VoiceSearchModal

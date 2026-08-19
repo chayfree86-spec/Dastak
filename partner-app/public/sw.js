@@ -1,37 +1,115 @@
-const CACHE_NAME = 'dastak-partner-v1'
-const urlsToCache = ['/', '/index.html', '/manifest.json']
+// Dastak Partner App - Zero-Cache Auto-Update Service Worker
+const APP_NAME = 'dastak-partner';
+const CACHE_VERSION = 'v1.0.2';
+const CACHE_NAME = `${APP_NAME}-${CACHE_VERSION}`;
+
+const STATIC_ASSETS = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/favicon.png',
+  '/pwa-192x192.png',
+  '/pwa-512x512.png',
+  '/pwa-maskable-512x512.png',
+  '/apple-touch-icon.png'
+];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache).catch(() => {})
+      return cache.addAll(STATIC_ASSETS).catch((err) => {
+        console.warn('[SW] Pre-caching warning:', err);
+      });
     })
-  )
-  self.skipWaiting()
-})
+  );
+});
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) {
-            return caches.delete(name)
-          }
-        })
-      )
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => {
+            console.log('[SW] Purging old cache:', name);
+            return caches.delete(name);
+          })
+      );
+    }).then(() => {
+      return self.clients.claim();
     })
-  )
-  self.clients.claim()
-})
+  );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && (event.data.type === 'SKIP_WAITING' || event.data.type === 'PURGE_CACHE')) {
+    self.skipWaiting();
+    if (event.data.type === 'PURGE_CACHE') {
+      caches.keys().then((keys) => {
+        return Promise.all(keys.map((k) => caches.delete(k)));
+      });
+    }
+  }
+});
 
 self.addEventListener('fetch', (event) => {
-  // Pass network requests through, fallback to cache for offline static assets
-  if (event.request.method === 'GET' && !event.request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match(event.request)
-      })
-    )
+  const request = event.request;
+
+  // Ignore non-http/https requests and dev tools / extensions
+  if (!request.url.startsWith('http')) {
+    return;
   }
-})
+
+  // Never cache API calls, Vite internals, HMR, or non-GET requests
+  if (
+    request.method !== 'GET' ||
+    request.url.includes('/api/') ||
+    request.url.includes('/@vite/') ||
+    request.url.includes('/@fs/') ||
+    request.url.includes('/@id/') ||
+    request.url.includes('/@react-refresh') ||
+    request.url.includes('node_modules') ||
+    request.url.includes('__vite') ||
+    request.url.includes('chrome-extension:')
+  ) {
+    return;
+  }
+
+  // Network-First for Navigation / HTML pages
+  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(request, { cache: 'no-cache' })
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = (await caches.match('/index.html')) || (await caches.match('/'));
+          if (cached) return cached;
+          return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        })
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate with safe fallback Response for static assets
+  event.respondWith(
+    fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const copy = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        }
+        return networkResponse;
+      })
+      .catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        return new Response('', { status: 408, statusText: 'Offline or asset not in cache' });
+      })
+  );
+});

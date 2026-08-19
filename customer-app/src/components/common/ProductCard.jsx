@@ -4,7 +4,7 @@ import { formatCurrency } from '../../utils/formatters'
 import { useCart } from '../../context/CartContext'
 import { useLanguage } from '../../context/LanguageContext'
 
-// Fallback high quality mouth-watering food photography based on food name
+// Fallback high quality mouth-watering food photography optimized for fast mobile load
 const getFoodImage = (product) => {
   const rawImage = product?.image || ''
   if (
@@ -19,45 +19,45 @@ const getFoodImage = (product) => {
 
   const name = (product?.name || '').toLowerCase()
   if (name.includes('chai') || name.includes('tea') || name.includes('kulhad') || name.includes('coffee')) {
-    return 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('sandwich') || name.includes('toast') || name.includes('wrap')) {
-    return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('burger')) {
-    return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('pizza')) {
-    return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('biryani') || name.includes('rice') || name.includes('pulao')) {
-    return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('samosa') || name.includes('snack') || name.includes('kachori') || name.includes('pakoda') || name.includes('chaat')) {
-    return 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('paneer') || name.includes('curry') || name.includes('dal') || name.includes('gravy') || name.includes('shahi')) {
-    return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('thali') || name.includes('roti') || name.includes('naan') || name.includes('paratha')) {
-    return 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('dosa') || name.includes('idli') || name.includes('vada') || name.includes('south')) {
-    return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('noodle') || name.includes('chowmein') || name.includes('manchurian') || name.includes('chinese') || name.includes('pasta') || name.includes('maggi')) {
-    return 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('sweet') || name.includes('jalebi') || name.includes('cake') || name.includes('dessert') || name.includes('gulab') || name.includes('ice cream')) {
-    return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('roll') || name.includes('kathi') || name.includes('frankie') || name.includes('shawarma')) {
-    return 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('shake') || name.includes('lassi') || name.includes('juice') || name.includes('drink')) {
-    return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800&auto=format&fit=crop&q=85'
+    return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=75'
   }
-  return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=85'
+  return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&auto=format&fit=crop&q=75'
 }
 
 export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
@@ -97,21 +97,25 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
       : null
 
   return (
-    <div
+    <article
       onClick={onSelect}
       className={`group relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl border border-slate-200/80 dark:border-slate-800 transition-all duration-300 h-56 sm:h-64 w-full select-none ${
         onSelect ? 'cursor-pointer' : ''
       }`}
+      aria-label={`${product.name} - ${formatCurrency(price)}`}
     >
       {/* 1. Full-Width Full-Height Food Photography Background */}
       <img
         src={imageUrl}
         alt={product.name}
-        className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 pointer-events-none"
+        width="360"
+        height="240"
         loading="lazy"
+        decoding="async"
+        className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 pointer-events-none"
         onError={(e) => {
           e.target.onerror = null
-          e.target.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=85'
+          e.target.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&auto=format&fit=crop&q=75'
         }}
       />
 
@@ -127,6 +131,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
               isVeg ? 'border-emerald-600' : 'border-rose-600'
             }`}
             title={isVeg ? 'Pure Veg' : 'Non-Veg'}
+            aria-label={isVeg ? 'Pure Veg' : 'Non-Veg'}
           >
             <span
               className={`w-2.5 h-2.5 rounded-full ${
@@ -171,12 +176,12 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
       <div className="absolute bottom-3 inset-x-3 sm:bottom-4 sm:inset-x-4 flex items-end justify-between gap-3 z-10">
         {/* Left: Dish Name, Description, and Price */}
         <div className="space-y-1 min-w-0 flex-1 text-white pr-2">
-          <h4 className="text-base sm:text-lg font-black tracking-tight line-clamp-1 drop-shadow-md leading-tight text-white group-hover:text-amber-300 transition-colors">
+          <h3 className="text-base sm:text-lg font-black tracking-tight line-clamp-1 drop-shadow-md leading-tight text-white group-hover:text-amber-300 transition-colors">
             {product.name}
-          </h4>
+          </h3>
 
           {product.description && (
-            <p className="text-[11px] text-white/80 line-clamp-1 font-medium drop-shadow-xs leading-tight">
+            <p className="text-[11px] text-white/90 line-clamp-1 font-medium drop-shadow-xs leading-tight">
               {product.description}
             </p>
           )}
@@ -187,7 +192,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
               {formatCurrency(price)}
             </span>
             {discountPercent && (
-              <span className="text-xs text-white/60 line-through font-medium">
+              <span className="text-xs text-white/70 line-through font-medium">
                 {formatCurrency(originalPrice)}
               </span>
             )}
@@ -204,28 +209,31 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
             <button
               type="button"
               onClick={handleAdd}
-              className="min-h-[38px] px-4 py-2 rounded-2xl bg-gradient-to-r from-[#FF5200] to-[#EA580C] hover:from-[#E04800] hover:to-[#C2410C] text-white font-black text-xs uppercase tracking-wider shadow-2xl shadow-black/50 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-white/25"
+              aria-label={`Add ${product.name} to cart`}
+              className="min-h-[40px] px-4 py-2 rounded-2xl bg-gradient-to-r from-[#FF5200] to-[#EA580C] hover:from-[#E04800] hover:to-[#C2410C] text-white font-black text-xs uppercase tracking-wider shadow-2xl shadow-black/50 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer border border-white/25"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>{t.add || 'ADD'}</span>
             </button>
           ) : (
-            <div className="min-h-[38px] px-2 py-1 rounded-2xl bg-gradient-to-r from-[#FF5200] to-[#EA580C] text-white font-black text-xs shadow-2xl shadow-black/60 flex items-center justify-between gap-2 select-none border border-white/25 backdrop-blur-md">
+            <div className="min-h-[40px] px-2 py-1 rounded-2xl bg-gradient-to-r from-[#FF5200] to-[#EA580C] text-white font-black text-xs shadow-2xl shadow-black/60 flex items-center justify-between gap-2 select-none border border-white/25 backdrop-blur-md">
               <button
                 type="button"
                 onClick={handleDecrement}
-                className="w-7 h-7 flex items-center justify-center hover:bg-white/25 rounded-xl active:scale-90 transition-transform cursor-pointer"
+                aria-label={`Decrease quantity of ${product.name}`}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white/25 rounded-xl active:scale-90 transition-transform cursor-pointer"
                 title="Decrease"
               >
                 <Minus className="w-3.5 h-3.5 stroke-[3]" />
               </button>
-              <span className="text-xs sm:text-sm font-black px-1 min-w-[18px] text-center drop-shadow-sm">
+              <span className="text-xs sm:text-sm font-black px-1 min-w-[18px] text-center drop-shadow-sm" aria-label={`Current quantity: ${currentQty}`}>
                 {currentQty}
               </span>
               <button
                 type="button"
                 onClick={handleIncrement}
-                className="w-7 h-7 flex items-center justify-center hover:bg-white/25 rounded-xl active:scale-90 transition-transform cursor-pointer"
+                aria-label={`Increase quantity of ${product.name}`}
+                className="w-8 h-8 flex items-center justify-center hover:bg-white/25 rounded-xl active:scale-90 transition-transform cursor-pointer"
                 title="Increase"
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
@@ -234,7 +242,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
           )}
         </div>
       </div>
-    </div>
+    </article>
   )
 }
 

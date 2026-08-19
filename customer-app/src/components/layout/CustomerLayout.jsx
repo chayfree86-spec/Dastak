@@ -93,13 +93,17 @@ export const CustomerLayout = () => {
           <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex items-center justify-between gap-2.5 sm:gap-4">
             {/* Logo & Delivery Location */}
             <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
-              <div
+              <button
+                type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center gap-2 cursor-pointer select-none shrink-0"
+                className="flex items-center gap-2 cursor-pointer select-none shrink-0 bg-transparent border-0 p-0"
+                aria-label="Dastak Food and Grocery Home"
               >
                 <img
                   src="/logo-horizontal.svg"
                   alt="Dastak Logo"
+                  width="140"
+                  height="36"
                   className="h-8 sm:h-9 max-h-9 w-auto max-w-[130px] sm:max-w-[170px] object-contain shrink-0"
                   style={{ height: '32px', maxHeight: '36px', width: 'auto' }}
                   onError={(e) => {
@@ -107,17 +111,18 @@ export const CustomerLayout = () => {
                     e.target.src = '/logo-horizontal.png'
                   }}
                 />
-              </div>
+              </button>
 
               {/* Location Selector Pill */}
               <button
                 type="button"
                 onClick={() => setLocationModalOpen(true)}
                 className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-left min-w-0 max-w-[130px] xs:max-w-[165px] sm:max-w-xs cursor-pointer border border-slate-200/60 dark:border-slate-700/60 shrink"
+                aria-label={`Delivering to: ${activeAddress?.address || 'Civil Lines, Kanpur'}. Click to change address.`}
               >
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F97316] shrink-0" />
                 <div className="min-w-0 truncate flex-1">
-                  <span className="text-[8px] sm:text-[9px] font-black uppercase text-slate-400 block tracking-wider leading-none">
+                  <span className="text-[8px] sm:text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 block tracking-wider leading-none">
                     {t.deliveringTo}
                   </span>
                   <span className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-slate-100 truncate block leading-tight">
@@ -136,6 +141,7 @@ export const CustomerLayout = () => {
                 onClick={toggleLanguage}
                 className="px-2.5 py-1.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer"
                 title="Toggle English / हिंदी"
+                aria-label="Toggle language between English and Hindi"
               >
                 <Globe className="w-3.5 h-3.5 text-[#2845D6]" />
                 <span>{lang === 'en' ? 'हिंदी' : 'English'}</span>
@@ -147,6 +153,7 @@ export const CustomerLayout = () => {
                 onClick={toggleTheme}
                 className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                 title="Toggle Theme"
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               >
                 {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
               </button>
@@ -165,6 +172,7 @@ export const CustomerLayout = () => {
         <nav
           className="fixed bottom-0 inset-x-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200/90 dark:border-slate-800 shadow-2xl px-2 sm:px-6 overflow-visible"
           style={{ paddingBottom: 'max(0.4rem, env(safe-area-inset-bottom, 0px))' }}
+          aria-label="Main Mobile Navigation"
         >
           <div className="max-w-md sm:max-w-2xl mx-auto grid grid-cols-5 items-end justify-items-center relative">
             {navItems.map((item) => {
@@ -178,6 +186,7 @@ export const CustomerLayout = () => {
                     to={item.to}
                     end
                     className="group relative flex flex-col items-center select-none cursor-pointer -mt-6 mb-1 focus:outline-none z-10"
+                    aria-label="Go to Home"
                   >
                     {({ isActive }) => (
                       <>
@@ -217,9 +226,10 @@ export const CustomerLayout = () => {
                     `flex flex-col items-center justify-center pt-2 pb-1 px-1 rounded-xl transition-colors duration-150 select-none w-full gap-1 ${
                       isActive
                         ? 'text-[#FF5200] dark:text-orange-400 font-extrabold'
-                        : 'text-slate-500 dark:text-slate-400 font-semibold hover:text-slate-900 dark:hover:text-slate-200'
+                        : 'text-slate-600 dark:text-slate-400 font-semibold hover:text-slate-900 dark:hover:text-slate-200'
                     }`
                   }
+                  aria-label={`Navigate to ${item.label}`}
                 >
                   {({ isActive }) => (
                     <>
@@ -242,7 +252,7 @@ export const CustomerLayout = () => {
                         className={`text-[11px] text-center truncate max-w-full leading-tight ${
                           isActive
                             ? 'font-bold text-[#FF5200] dark:text-orange-400'
-                            : 'font-medium text-slate-600 dark:text-slate-400'
+                            : 'font-medium text-slate-700 dark:text-slate-300'
                         }`}
                       >
                         {item.label}

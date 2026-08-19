@@ -9,15 +9,15 @@ const getRestaurantBanner = (restaurant) => {
   }
   const name = (restaurant.name || '').toLowerCase()
   if (name.includes('biryani')) {
-    return 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=600&auto=format&fit=crop&q=80'
+    return 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('chai') || name.includes('chaupal') || name.includes('tea')) {
-    return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&auto=format&fit=crop&q=80'
+    return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&auto=format&fit=crop&q=75'
   }
   if (name.includes('burger') || name.includes('fast food')) {
-    return 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop&q=80'
+    return 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=75'
   }
-  return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80'
+  return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&auto=format&fit=crop&q=75'
 }
 
 export const RestaurantCard = ({ restaurant }) => {
@@ -33,20 +33,31 @@ export const RestaurantCard = ({ restaurant }) => {
   const bannerUrl = getRestaurantBanner(restaurant)
 
   return (
-    <div
+    <article
       onClick={() => navigate(`/restaurant/${restaurant.slug || restaurant.id}`)}
       className="group rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-xs hover:shadow-2xl hover:border-blue-500/30 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          navigate(`/restaurant/${restaurant.slug || restaurant.id}`)
+        }
+      }}
+      aria-label={`View restaurant: ${restaurant.name}, Rating: ${rating.toFixed(1)}, Delivery in ${timeMin} to ${timeMin + 10} minutes`}
     >
       {/* Banner Hero with Aspect Ratio */}
       <div className="relative aspect-[16/9] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
         <img
           src={bannerUrl}
           alt={restaurant.name}
+          width="360"
+          height="202"
           className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
           loading="lazy"
+          decoding="async"
           onError={(e) => {
             e.target.onerror = null
-            e.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80'
+            e.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&auto=format&fit=crop&q=75'
           }}
         />
 
@@ -92,16 +103,16 @@ export const RestaurantCard = ({ restaurant }) => {
       {/* Details Footer */}
       <div className="p-3.5 sm:p-4 space-y-2">
         <div className="min-w-0">
-          <h4 className="text-base font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors truncate">
+          <h3 className="text-base font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors truncate">
             {restaurant.name}
-          </h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
+          </h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 truncate mt-0.5 font-medium">
             {restaurant.description || restaurant.address_line1 || 'Civil Lines, Kanpur'}
           </p>
         </div>
 
         {/* Meta Footer: Delivery Time & Location */}
-        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold gap-2">
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-bold gap-2">
           <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
             <Clock className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400 shrink-0" />
             <span>{timeMin}-{timeMin + 10} min</span>
@@ -112,7 +123,7 @@ export const RestaurantCard = ({ restaurant }) => {
           </div>
         </div>
       </div>
-    </div>
+    </article>
   )
 }
 

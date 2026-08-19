@@ -1,22 +1,36 @@
 {
+  "name": "Dastak Food & Grocery",
   "short_name": "Dastak",
-  "name": "Dastak - Fast Food Delivery",
+  "description": "Order Food, Grocery & Essentials in Minutes",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
   "icons": [
     {
-      "src": "/logo-horizontal.png",
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "sizes": "192x192 512x512"
+      "purpose": "any"
     },
     {
-      "src": "/logo-horizontal.svg",
-      "type": "image/svg+xml",
-      "sizes": "any"
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ],
-  "start_url": "/",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FF5200",
-  "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/"
+  "categories": ["shopping", "food", "lifestyle"]
 }

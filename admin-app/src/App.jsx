@@ -23,8 +23,28 @@ import ReportsDashboard from './pages/reports/ReportsDashboard'
 import SupportTickets from './pages/support/SupportTickets'
 import SettingsPage from './pages/settings/SettingsPage'
 
+import { PwaInstallModal } from './components/pwa/PwaInstallModal'
+import { usePwaUpdate } from './hooks/usePwaUpdate'
+
 const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
   return children
+}
+
+const PwaController = () => {
+  usePwaUpdate()
+  return (
+    <PwaInstallModal
+      appName="Dastak Admin Portal"
+      appRole="Multi-Vendor Operations & Administration"
+      iconSrc="/pwa-512x512.png"
+      accentColor="bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30"
+      accentBadge="bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+    />
+  )
 }
 
 export const App = () => {
@@ -33,16 +53,19 @@ export const App = () => {
       <ToastProvider>
         <AuthProvider>
           <BrowserRouter>
+            <PwaController />
             <Routes>
-              {/* Redirect /login and /forgot-password to /dashboard for direct access */}
-              <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+              {/* Public Auth Routes */}
+              <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
 
-              {/* Admin Routes */}
+              {/* Protected Admin Routes */}
               <Route
                 path="/"
                 element={
-                  <AdminLayout />
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
                 }
               >
                 <Route index element={<Navigate to="/dashboard" replace />} />
