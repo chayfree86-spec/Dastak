@@ -55,19 +55,29 @@ export const ConfirmDialog = ({
         {getIcon()}
         <h4 className="text-base font-black text-slate-900 dark:text-slate-100 mb-1.5">{title}</h4>
         <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">{message}</p>
-        <div className="flex items-center justify-center gap-3">
-          <Button variant="outline" size="md" onClick={onClose} disabled={loading} className="w-28">
-            {cancelText}
-          </Button>
-          <Button
-            variant={getButtonVariant()}
-            size="md"
-            onClick={onConfirm}
-            loading={loading}
-            className="w-28 shadow-sm"
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            className="h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-98 transition-all cursor-pointer select-none"
           >
-            {confirmText}
-          </Button>
+            {cancelText}
+          </button>
+          <button
+            type="button"
+            disabled={loading}
+            onClick={onConfirm}
+            className={`h-12 rounded-xl text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md active:scale-98 transition-all cursor-pointer select-none ${
+              type === 'danger'
+                ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/25'
+                : type === 'success'
+                ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/25'
+                : 'bg-[#2845D6] hover:bg-[#1E3A8A] shadow-blue-500/25'
+            }`}
+          >
+            {loading ? 'Processing...' : confirmText}
+          </button>
         </div>
       </div>
     </Modal>

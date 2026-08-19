@@ -8,6 +8,12 @@ import {
   ImageOff,
   Filter,
   Search,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Sparkles,
+  ChevronRight,
+  Layers,
 } from 'lucide-react'
 import menuApi from '../../api/menu.api'
 import { useApi } from '../../hooks/useApi'
@@ -25,14 +31,20 @@ import ErrorState from '../../components/common/ErrorState'
 import { useToast } from '../../context/ToastContext'
 
 /** Square image thumbnail that auto-fits ANY image size/ratio via object-cover */
-const Thumb = ({ src, size = 'w-12 h-12', veg }) => (
+const Thumb = ({ src, size = 'w-16 h-16 sm:w-20 sm:h-20', veg }) => (
   <div
-    className={`${size} rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0`}
+    className={`${size} rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-2xs`}
   >
     {src ? (
       <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
     ) : (
-      <ImageOff className={`w-4 h-4 ${veg ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-500'}`} />
+      <div className="flex flex-col items-center justify-center p-2 text-center">
+        <UtensilsCrossed
+          className={`w-6 h-6 ${
+            veg ? 'text-emerald-500/70' : 'text-rose-500/70'
+          }`}
+        />
+      </div>
     )}
   </div>
 )
@@ -49,6 +61,9 @@ export const MenuPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('ALL')
   const [subFilter, setSubFilter] = useState('ALL')
   const [search, setSearch] = useState('')
+  const [vegOnlyFilter, setVegOnlyFilter] = useState(false)
+  const [inStockOnlyFilter, setInStockOnlyFilter] = useState(false)
+
   const [catModal, setCatModal] = useState(null) // { parentId, category }
   const [itemModal, setItemModal] = useState(null) // { item }
   const [confirm, setConfirm] = useState(null) // { type, id, label }
@@ -61,13 +76,19 @@ export const MenuPage = () => {
     const rows = []
     tree.forEach((c) => {
       ;(c.items || []).forEach((i) =>
-        rows.push({ ...i, catId: c.id, categoryName: c.category || c.name })
+        rows.push({
+          ...i,
+          catId: c.id,
+          parentCatId: c.id,
+          categoryName: c.category || c.name,
+        })
       )
       ;(c.subcategories || []).forEach((s) =>
         (s.items || []).forEach((i) =>
           rows.push({
             ...i,
             catId: s.id,
+            parentCatId: c.id,
             categoryName: `${c.category || c.name} › ${s.category || s.name}`,
           })
         )
@@ -76,61 +97,76 @@ export const MenuPage = () => {
     return rows
   }, [tree])
 
-  // Category filter options (top-level only)
+  // Category filter dropdown options
   const categoryFilterOptions = useMemo(
     () => [
-      { value: 'ALL', label: 'All Categories' },
-      ...tree.map((c) => ({ value: c.id, label: c.category || c.name })),
+      { value: 'ALL', label: `All Categories (${allItems.length})` },
+      ...tree.map((c) => {
+        const catCount = allItems.filter(
+          (i) => i.parentCatId === c.id || i.catId === c.id
+        ).length
+        return {
+          value: c.id,
+          label: `${c.category || c.name} (${catCount})`,
+        }
+      }),
     ],
-    [tree]
+    [tree, allItems]
   )
 
-  const selectedTop =
-    categoryFilter !== 'ALL' ? tree.find((c) => c.id === Number(categoryFilter) || c.id === categoryFilter) : null
+  const selectedCategoryObj = useMemo(() => {
+    if (categoryFilter === 'ALL') return null
+    return tree.find((c) => c.id === Number(categoryFilter) || c.id === categoryFilter)
+  }, [categoryFilter, tree])
 
-  // Sub-category filter options depend on the chosen category
+  // Sub-category filter dropdown options
   const subFilterOptions = useMemo(() => {
-    if (!selectedTop) return [{ value: 'ALL', label: 'All Sub-categories' }]
+    if (!selectedCategoryObj) return [{ value: 'ALL', label: 'All Sub-categories' }]
     return [
       { value: 'ALL', label: 'All Sub-categories' },
-      ...(selectedTop.subcategories || []).map((s) => ({
-        value: s.id,
-        label: s.category || s.name,
-      })),
+      ...(selectedCategoryObj.subcategories || []).map((s) => {
+        const subCount = allItems.filter((i) => i.catId === s.id).length
+        return {
+          value: s.id,
+          label: `${s.category || s.name} (${subCount})`,
+        }
+      }),
     ]
-  }, [selectedTop])
+  }, [selectedCategoryObj, allItems])
 
-  // Which category ids match the current category + sub-category filter
-  const allowedIds = useMemo(() => {
-    if (categoryFilter === 'ALL') return null
-    if (subFilter !== 'ALL') return [Number(subFilter), subFilter]
-    return [
-      selectedTop.id,
-      ...(selectedTop.subcategories || []).map((s) => s.id),
-    ]
-  }, [categoryFilter, subFilter, selectedTop])
-
-  const filteredItems = allItems
-    .filter((i) => !allowedIds || allowedIds.includes(i.catId))
-    .filter((i) => {
-      if (!search.trim()) return true
-      const q = search.trim().toLowerCase()
-      return (
-        i.name.toLowerCase().includes(q) ||
-        (i.short_code && i.short_code.toLowerCase().includes(q))
-      )
-    })
-
-  // Most specific selected category for edit/delete
-  const activeCategory = useMemo(() => {
-    if (subFilter !== 'ALL' && selectedTop) {
-      const sub = (selectedTop.subcategories || []).find(
-        (s) => s.id === Number(subFilter) || s.id === subFilter
-      )
-      return sub ? { ...sub, isSub: true, parent_id: selectedTop.id } : null
-    }
-    return selectedTop ? { ...selectedTop, isSub: false } : null
-  }, [subFilter, selectedTop])
+  // Filtered items based on Category, Subcategory, Search, Veg-only, In-Stock
+  const filteredItems = useMemo(() => {
+    return allItems
+      .filter((i) => {
+        if (categoryFilter === 'ALL') return true
+        if (subFilter !== 'ALL') {
+          return i.catId === Number(subFilter) || i.catId === subFilter
+        }
+        if (selectedCategoryObj) {
+          const subIds = (selectedCategoryObj.subcategories || []).map((s) => s.id)
+          return (
+            i.catId === selectedCategoryObj.id ||
+            i.parentCatId === selectedCategoryObj.id ||
+            subIds.includes(i.catId)
+          )
+        }
+        return i.catId === Number(categoryFilter) || i.catId === categoryFilter
+      })
+      .filter((i) => {
+        if (vegOnlyFilter && !i.is_veg) return false
+        if (inStockOnlyFilter && !i.is_available) return false
+        return true
+      })
+      .filter((i) => {
+        if (!search.trim()) return true
+        const q = search.trim().toLowerCase()
+        return (
+          i.name.toLowerCase().includes(q) ||
+          (i.short_code && i.short_code.toLowerCase().includes(q)) ||
+          (i.categoryName && i.categoryName.toLowerCase().includes(q))
+        )
+      })
+  }, [allItems, categoryFilter, subFilter, selectedCategoryObj, vegOnlyFilter, inStockOnlyFilter, search])
 
   const onCategoryChange = (val) => {
     setCategoryFilter(val)
@@ -173,236 +209,268 @@ export const MenuPage = () => {
   }
 
   return (
-    <div className="space-y-4 w-full">
-      {/* 1. Header + Action Buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100">
-          Live Menu Catalog
-        </h3>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            icon={FolderPlus}
+    <div className="space-y-4 sm:space-y-5 w-full pb-8">
+      {/* 1. Mobile-First Header & Fast Action CTAs */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
+              Menu Catalog
+            </h2>
+            <p className="text-xs text-slate-400 dark:text-slate-400 font-medium truncate mt-0.5">
+              Manage items, prices, and live kitchen availability.
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs shrink-0 border border-slate-200/80 dark:border-slate-700 select-none">
+            {allItems.length} {allItems.length === 1 ? 'Item' : 'Items'}
+          </span>
+        </div>
+
+        {/* 2 Fast Action Buttons (48px Touch-friendly) */}
+        <div className="grid grid-cols-2 gap-2.5 w-full">
+          <button
+            type="button"
             onClick={() => setCatModal({ parentId: null })}
+            className="h-11 sm:h-12 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs active:scale-98 transition-all cursor-pointer select-none"
           >
-            Add Category
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={PlusCircle}
+            <FolderPlus className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            <span>+ Category</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setItemModal({})}
-            className="shadow-sm"
+            className="h-11 sm:h-12 rounded-xl sm:rounded-2xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none"
           >
-            Add Menu Item
-          </Button>
+            <PlusCircle className="w-4 h-4" />
+            <span>+ Add Item</span>
+          </button>
         </div>
       </div>
 
-      {/* 2. Search + Category + Sub-category filters card */}
-      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
-        <div className="flex flex-col md:flex-row md:items-end gap-3">
-          {/* Search input */}
-          <div className="flex-1 relative">
-            <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-              SEARCH ITEM
-            </label>
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search menu items by name..."
-                className="w-full pl-9 pr-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] transition-all"
-              />
-            </div>
+      {/* 2. Proper Dropdown Lists on Top & Search Bar Below */}
+      <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-xs space-y-3">
+        {/* Row A: Category & Subcategory Dropdowns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <CustomSelect
+              label="Category"
+              value={categoryFilter}
+              onChange={onCategoryChange}
+              options={categoryFilterOptions}
+            />
           </div>
-
-          {/* Filter dropdowns row */}
-          <div className="flex flex-wrap items-end gap-3 shrink-0">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0 pb-2.5">
-              <Filter className="w-3.5 h-3.5 text-slate-400" />
-              <span>Filter</span>
-            </div>
-            <div className="w-48">
-              <CustomSelect
-                label="Category"
-                value={categoryFilter}
-                onChange={onCategoryChange}
-                options={categoryFilterOptions}
-              />
-            </div>
-            <div className="w-48">
-              <CustomSelect
-                label="Sub-category"
-                value={subFilter}
-                onChange={setSubFilter}
-                options={subFilterOptions}
-                disabled={!selectedTop || (selectedTop.subcategories || []).length === 0}
-              />
-            </div>
-
-            {activeCategory && (
-              <div className="flex items-center gap-1 pb-1">
-                {!activeCategory.isSub && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={FolderPlus}
-                    onClick={() => setCatModal({ parentId: activeCategory.id })}
-                  >
-                    Sub-category
-                  </Button>
-                )}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setCatModal({
-                      parentId: activeCategory.parent_id ?? null,
-                      category: activeCategory,
-                    })
-                  }
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700"
-                  title="Edit category"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setConfirm({
-                      type: 'category',
-                      id: activeCategory.id,
-                      label: activeCategory.category || activeCategory.name,
-                    })
-                  }
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                  title="Delete category"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            )}
+          <div>
+            <CustomSelect
+              label="Sub-category"
+              value={subFilter}
+              onChange={setSubFilter}
+              options={subFilterOptions}
+              disabled={!selectedCategoryObj || (selectedCategoryObj.subcategories || []).length === 0}
+            />
           </div>
         </div>
 
-        {/* Count footer */}
-        <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
-          {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''}
+        {/* Row B: Search Bar below Dropdowns with Veg & Stock filter chips */}
+        <div className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+          <div className="relative w-full">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search items by name, code or category..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-10 h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-[#2845D6] focus:ring-2 focus:ring-blue-500/20 transition-all"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Quick Veg & Stock Filter Chips */}
+          <div className="flex items-center justify-between gap-2 select-none flex-wrap">
+            <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
+              Showing {filteredItems.length} of {allItems.length} items
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setVegOnlyFilter((prev) => !prev)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer select-none ${
+                  vegOnlyFilter
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700 shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-xs border border-emerald-600 flex items-center justify-center">
+                  <span className="w-1 h-1 rounded-full bg-emerald-600" />
+                </span>
+                <span>Veg Only</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInStockOnlyFilter((prev) => !prev)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer select-none ${
+                  inStockOnlyFilter
+                    ? 'bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-300 border-blue-300 dark:border-blue-700 shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <span>In Stock</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Loading & Error States */}
-      {loading && <LoadingSkeleton count={5} />}
+      {loading && <LoadingSkeleton count={4} />}
       {error && <ErrorState title="Error loading menu" message={error} onRetry={retry} />}
 
-      {/* 3. Flat Menu Item List matching Admin Style */}
+      {/* 4. Mobile Menu Items List / Grid */}
       {!loading && !error && (
-        <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700/60 shadow-xs overflow-hidden">
+        <div className="space-y-3 sm:space-y-4">
           {filteredItems.length === 0 && (
-            <div className="p-10 text-center">
-              <UtensilsCrossed className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+            <div className="p-8 sm:p-12 text-center rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <UtensilsCrossed className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2.5" />
               <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                {search.trim() ? 'No items match your search' : 'No items here'}
+                {search.trim() ? 'No items match your search' : 'No items in this category'}
               </p>
-              <p className="text-xs text-slate-400 mt-1">Use “Add Menu Item” to create one.</p>
+              <p className="text-xs text-slate-400 mt-1">Tap “+ Add Item” to create a new dish.</p>
             </div>
           )}
 
-          {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-colors"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <Thumb src={item.image} veg={item.is_veg} />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`w-3.5 h-3.5 rounded-xs border-2 flex items-center justify-center shrink-0 ${
-                        item.is_veg ? 'border-emerald-600' : 'border-rose-600'
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          item.is_veg ? 'bg-emerald-600' : 'bg-rose-600'
-                        }`}
-                      />
-                    </span>
-                    <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">
-                      {item.name}
-                    </h5>
-                    {item.short_code && (
-                      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-mono text-[9px] font-black tracking-wider uppercase shrink-0">
-                        {item.short_code}
+          {filteredItems.map((item) => {
+            const isVeg = item.is_veg !== false
+            const hasDiscount =
+              item.discount_price && Number(item.discount_price) < Number(item.price)
+
+            return (
+              <div
+                key={item.id}
+                className={`rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-800 border transition-all duration-200 shadow-xs hover:shadow-md overflow-hidden flex flex-col justify-between ${
+                  !item.is_available
+                    ? 'border-slate-200/80 dark:border-slate-700/80 opacity-90'
+                    : 'border-slate-200/90 dark:border-slate-700'
+                }`}
+              >
+                {/* Item Body: Thumb + Info + Price */}
+                <div className="p-3.5 sm:p-4 flex items-start justify-between gap-3">
+                  {/* Left: Thumbnail & Details */}
+                  <div className="flex items-start gap-3 min-w-0">
+                    <Thumb src={item.image} veg={isVeg} />
+
+                    <div className="min-w-0 space-y-1">
+                      {/* Veg indicator & Title */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`w-3.5 h-3.5 rounded-xs border-2 flex items-center justify-center shrink-0 ${
+                            isVeg ? 'border-emerald-600' : 'border-rose-600'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              isVeg ? 'bg-emerald-600' : 'bg-rose-600'
+                            }`}
+                          />
+                        </span>
+
+                        <h4 className="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 tracking-tight truncate">
+                          {item.name}
+                        </h4>
+
+                        {item.short_code && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 font-mono text-[9px] font-black uppercase shrink-0">
+                            #{item.short_code}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Category Pill & Prep Time */}
+                      <div className="flex items-center gap-2 text-[11px] text-slate-400 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-[10px]">
+                          {item.categoryName}
+                        </span>
+                        <span className="flex items-center gap-1 font-medium">
+                          <Clock className="w-3 h-3 text-slate-400" />
+                          {item.prep_time || 15}m prep
+                        </span>
+                      </div>
+
+                      {item.description && (
+                        <p className="text-[11px] text-slate-400 dark:text-slate-400 line-clamp-1 mt-0.5">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Highlighted Price */}
+                  <div className="text-right shrink-0">
+                    <div className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                      {formatCurrency(item.discount_price || item.price)}
+                    </div>
+                    {hasDiscount && (
+                      <span className="text-[11px] text-slate-400 line-through block">
+                        {formatCurrency(item.price)}
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1 flex-wrap">
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold">
-                      {item.categoryName}
+                </div>
+
+                {/* Card Action Footer: Quick Availability Switch & Edit/Delete buttons */}
+                <div className="p-3 sm:p-3.5 border-t border-slate-100 dark:border-slate-700/60 bg-slate-50/70 dark:bg-slate-900/40 flex items-center justify-between gap-2">
+                  {/* Left: Quick In-Stock Switch with large touch area */}
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none min-h-[36px]">
+                    <Switch
+                      checked={item.is_available}
+                      onChange={() => handleToggleAvail(item)}
+                    />
+                    <span
+                      className={`text-xs font-black uppercase tracking-wider ${
+                        item.is_available
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                      }`}
+                    >
+                      {item.is_available ? 'In Stock' : 'Out of Stock'}
                     </span>
-                    <span>Prep: {item.prep_time || '15 mins'}</span>
+                  </label>
+
+                  {/* Right: Edit & Delete Action Buttons (Icon-only square 40x40 touch-friendly) */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setItemModal({ item })}
+                      className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all select-none cursor-pointer"
+                      title="Edit Item"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setConfirm({ type: 'item', id: item.id, label: item.name })
+                      }
+                      className="h-10 w-10 rounded-xl border border-rose-200 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center shadow-2xs hover:bg-rose-100 dark:hover:bg-rose-900/50 active:scale-95 transition-all select-none cursor-pointer"
+                      title="Delete Item"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-                <div className="text-right shrink-0">
-                  <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100">
-                    {formatCurrency(item.discount_price || item.price)}
-                  </span>
-                  {item.discount_price && Number(item.discount_price) < Number(item.price) && (
-                    <span className="text-[10px] text-slate-400 line-through block">
-                      {formatCurrency(item.price)}
-                    </span>
-                  )}
-                </div>
-
-                <span
-                  className={`hidden sm:inline-flex items-center justify-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wide uppercase border w-24 shrink-0 select-none ${
-                    item.is_available
-                      ? 'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800/30'
-                      : 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border-rose-200/60 dark:border-rose-800/30'
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      item.is_available ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
-                    }`}
-                  />
-                  {item.is_available ? 'Available' : 'Sold Out'}
-                </span>
-
-                <Switch
-                  checked={item.is_available}
-                  onChange={() => handleToggleAvail(item)}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setItemModal({ item })}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                  title="Edit item"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setConfirm({ type: 'item', id: item.id, label: item.name })
-                  }
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                  title="Delete item"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
@@ -502,13 +570,13 @@ const CategoryModal = ({ parentId, category, parentOptions, onClose, onSaved }) 
         <Input
           label="Category Name"
           required
-          placeholder="e.g. Beverages"
+          placeholder="e.g. Beverages / Chai"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         {!isEdit && !parentId && (
           <CustomSelect
-            label="Parent Category (optional — leave as none for a top category)"
+            label="Parent Category (optional)"
             value={parent}
             onChange={setParent}
             options={[
@@ -521,22 +589,31 @@ const CategoryModal = ({ parentId, category, parentOptions, onClose, onSaved }) 
           label="Category Image (optional)"
           value={image}
           onChange={setImage}
-          helperText="Any image — it auto-fits."
+          helperText="Any image — auto-fits."
         />
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-          <Button variant="outline" onClick={onClose} disabled={loading}>
+        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            className="h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-98 transition-all"
+          >
             Cancel
-          </Button>
-          <Button type="submit" variant="primary" loading={loading}>
-            Save Category
-          </Button>
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="h-12 rounded-xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all"
+          >
+            {loading ? 'Saving...' : 'Save Category'}
+          </button>
         </div>
       </form>
     </Modal>
   )
 }
 
-/** Item Modal (Add / Edit Menu Item with exact Admin features) */
+/** Item Modal (Add / Edit Menu Item) */
 const ItemModal = ({ tree, item, onClose, onSaved }) => {
   const toast = useToast()
   const isEdit = !!item
@@ -740,7 +817,7 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
         {lastAdded && (
           <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
             <div>
-              <span className="font-bold text-emerald-900 dark:text-emerald-200">Last Item Added:</span>{' '}
+              <span className="font-bold text-emerald-900 dark:text-emerald-200">Last Added:</span>{' '}
               {lastAdded.name} ({formatCurrency(lastAdded.price)})
               {lastAdded.shortCode && (
                 <span className="ml-1.5 font-mono font-bold bg-emerald-100 dark:bg-emerald-900 px-1 py-0.5 rounded text-[10px]">
@@ -749,13 +826,14 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
               )}
             </div>
             <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-              Success
+              Added
             </span>
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="sm:col-span-2">
+        {/* Row 1: Item Name & Short Code */}
+        <div className="space-y-3">
+          <div>
             <div className="flex items-center justify-between h-6 mb-1.5">
               <label
                 htmlFor="item-name-input"
@@ -812,33 +890,15 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
                     {sug}
                   </button>
                 ))}
-                <span className="text-[9px] text-slate-400 select-none ml-auto hidden sm:inline">
-                  (Space to insert first)
-                </span>
               </div>
             )}
           </div>
-          <div>
-            <div className="flex items-center h-6 mb-1.5">
-              <label
-                htmlFor="item-short-code-input"
-                className="text-xs font-bold text-slate-700 dark:text-slate-200"
-              >
-                Short Code
-              </label>
-            </div>
-            <Input
-              id="item-short-code-input"
-              placeholder="e.g. MC01"
-              value={shortCode}
-              onChange={(e) => setShortCode(e.target.value)}
-            />
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Row 2: Category & Sub-category (2 Columns on mobile) */}
+        <div className="grid grid-cols-2 gap-2.5">
           <CustomSelect
-            label="Category"
+            label="Category *"
             value={categoryId}
             onChange={onCategoryChange}
             options={categoryOptions}
@@ -852,9 +912,10 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Row 3: Price & Discount Price (2 Columns on mobile) */}
+        <div className="grid grid-cols-2 gap-2.5">
           <AmountInput
-            label="Price (₹)"
+            label="Price (₹) *"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
           />
@@ -863,35 +924,33 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
             value={discount}
             onChange={(e) => setDiscount(e.target.value)}
           />
+        </div>
+
+        {/* Row 4: Prep Time & Short Code (2 Columns on mobile) */}
+        <div className="grid grid-cols-2 gap-2.5">
           <Input
             label="Prep Time (mins)"
             type="number"
             value={prepTime}
             onChange={(e) => setPrepTime(e.target.value)}
           />
+          <Input
+            label="Short Code"
+            id="item-short-code-input"
+            placeholder="e.g. MC01"
+            value={shortCode}
+            onChange={(e) => setShortCode(e.target.value)}
+          />
         </div>
 
-        <Input
-          label="Description (optional)"
-          placeholder="Short description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <ImageUpload
-          label="Item Image"
-          value={image}
-          onChange={setImage}
-          helperText="Any size/format — auto-fits everywhere."
-        />
-
-        <div className="space-y-1.5 pt-1">
+        {/* Row 5: Food Type (Veg / Non-Veg - 2 Columns) */}
+        <div className="space-y-1.5 pt-0.5">
           <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Food Type</label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
               onClick={() => setIsVeg(true)}
-              className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-2 h-11 rounded-xl border text-xs font-bold transition-all ${
                 isVeg
                   ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 ring-2 ring-emerald-600/20'
                   : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -900,12 +959,12 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
               <span className="w-3.5 h-3.5 rounded-xs border-2 border-emerald-600 flex items-center justify-center shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
               </span>
-              Vegetarian (Veg)
+              <span>Veg</span>
             </button>
             <button
               type="button"
               onClick={() => setIsVeg(false)}
-              className={`flex items-center justify-center gap-2 p-2.5 rounded-xl border text-xs font-bold transition-all ${
+              className={`flex items-center justify-center gap-2 h-11 rounded-xl border text-xs font-bold transition-all ${
                 !isVeg
                   ? 'border-rose-600 bg-rose-50/60 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 ring-2 ring-rose-600/20'
                   : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
@@ -914,18 +973,44 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
               <span className="w-3.5 h-3.5 rounded-xs border-2 border-rose-600 flex items-center justify-center shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
               </span>
-              Non-Vegetarian (Non-Veg)
+              <span>Non-Veg</span>
             </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-          <Button variant="outline" onClick={onClose} disabled={loading}>
-            Cancel / Close
-          </Button>
-          <Button type="submit" variant="primary" loading={loading} className="shadow-sm">
-            Save Item
-          </Button>
+        {/* Row 6: Description */}
+        <Input
+          label="Description (optional)"
+          placeholder="Brief dish description..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+
+        {/* Row 7: Item Image Upload */}
+        <ImageUpload
+          label="Item Image (optional)"
+          value={image}
+          onChange={setImage}
+          helperText="Auto-fits everywhere."
+        />
+
+        {/* Row 8: Action Buttons (Sticky/Clean 48px touch buttons) */}
+        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+            className="h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-98 transition-all cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="h-12 rounded-xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer"
+          >
+            {loading ? 'Saving...' : isEdit ? 'Update Item' : 'Save Item'}
+          </button>
         </div>
       </form>
     </Modal>

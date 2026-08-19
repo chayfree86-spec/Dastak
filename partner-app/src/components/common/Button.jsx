@@ -49,11 +49,11 @@ export const Button = ({
   }
 
   const sizes = {
-    xs: 'px-2.5 py-1 text-[11px] gap-1',
-    sm: 'px-3 py-1.5 text-xs gap-1.5',
-    md: 'px-4 py-2 text-xs sm:text-sm gap-2',
-    lg: 'px-5 py-2.5 text-sm sm:text-base gap-2.5',
-    xl: 'px-6 py-3 text-base font-bold gap-3 w-full',
+    xs: 'h-8 px-2.5 text-[11px] gap-1',
+    sm: 'h-9 px-3 text-xs gap-1.5',
+    md: 'h-11 sm:h-12 px-4 text-xs sm:text-sm gap-2',
+    lg: 'h-12 sm:h-13 px-5 text-sm sm:text-base gap-2.5',
+    xl: 'h-12 sm:h-14 px-6 text-base font-bold gap-3 w-full',
   }
 
   return (

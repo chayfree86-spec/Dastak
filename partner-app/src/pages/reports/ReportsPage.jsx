@@ -79,24 +79,14 @@ export const ReportsPage = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 w-full sm:w-auto print:hidden">
+        <div className="flex items-center gap-2.5 print:hidden">
           <Button
             variant="outline"
             size="sm"
             icon={Printer}
             onClick={handlePrint}
-            className="flex-1 sm:flex-none"
           >
             Print / Save PDF
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={RefreshCw}
-            onClick={() => retry()}
-            className="flex-1 sm:flex-none shadow-sm"
-          >
-            Refresh
           </Button>
         </div>
       </div>
@@ -148,45 +138,45 @@ export const ReportsPage = () => {
 
       {!loading && !error && (
         <>
-          {/* 3. Summary Bento Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* 3. Summary Bento Stat Cards (2x2 on Mobile, 4-col on Desktop) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <StatCard
               title="Gross Sales (GMV)"
               value={formatCurrency(grossSales)}
-              change={`${deliveredOrders} delivered orders`}
+              change={`${deliveredOrders} orders`}
               icon={ShoppingBag}
               trend="up"
               color="blue"
             />
             <StatCard
-              title="Net Restaurant Payout"
+              title="Net Payout"
               value={formatCurrency(netPayout)}
-              change="Payable directly to bank"
+              change="To bank account"
               icon={Wallet}
               trend="up"
               color="green"
             />
             <StatCard
-              title="Dastak Commission"
+              title="Dastak Fee (15%)"
               value={formatCurrency(commission)}
-              change="Platform service fee"
+              change="Platform fee"
               icon={Percent}
               trend="neutral"
               color="orange"
             />
             <StatCard
-              title="Avg. Order Value (AOV)"
+              title="Avg. Order (AOV)"
               value={formatCurrency(aov)}
-              change="Per completed basket"
+              change="Per basket"
               icon={TrendingUp}
               trend="up"
               color="purple"
             />
           </div>
 
-          {/* 4. Two-Column Insights: Daily Breakdown Table + Top Selling Items */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Daily Settlement & Breakdown Table (Takes 2 Columns) */}
+          {/* 4. Two-Column Insights: Daily Breakdown + Top Selling Items */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+            {/* Daily Settlement & Breakdown (Takes 2 Columns) */}
             <div className="lg:col-span-2 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 flex items-center gap-2">
@@ -198,52 +188,91 @@ export const ReportsPage = () => {
                 </span>
               </div>
 
-              <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
+              <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs overflow-hidden">
                 {daily.length === 0 ? (
-                  <div className="p-10 text-center text-slate-400">
+                  <div className="p-8 sm:p-10 text-center text-slate-400">
                     <BarChart3 className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
                     <p className="text-xs font-bold">No orders recorded in this date range.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
-                        <tr>
-                          <th className="py-3 px-4">Date</th>
-                          <th className="py-3 px-4">Orders</th>
-                          <th className="py-3 px-4">Gross Sales</th>
-                          <th className="py-3 px-4">Commission</th>
-                          <th className="py-3 px-4 text-right">Net Payout</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 font-semibold text-slate-800 dark:text-slate-200">
-                        {daily.map((d, idx) => (
-                          <tr
-                            key={idx}
-                            className="hover:bg-slate-50/70 dark:hover:bg-slate-700/40 transition-colors"
-                          >
-                            <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-100">
+                  <>
+                    {/* Mobile Card List View (< sm) */}
+                    <div className="sm:hidden divide-y divide-slate-100 dark:divide-slate-700/60">
+                      {daily.map((d, idx) => (
+                        <div key={idx} className="p-3.5 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="font-black text-xs text-slate-900 dark:text-slate-100">
                               {d.date || d.day || 'Today'}
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[11px]">
-                                {d.order_count || d.orders || 0} orders
+                            </span>
+                            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[10px]">
+                              {d.order_count || d.orders || 0} orders
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-50 dark:border-slate-700/40">
+                            <div>
+                              <span className="text-[10px] text-slate-400 block font-semibold">Gross Sales</span>
+                              <span className="font-bold text-slate-800 dark:text-slate-200">
+                                {formatCurrency(d.gross_sales || d.sales || 0)}
                               </span>
-                            </td>
-                            <td className="py-3 px-4 font-bold">
-                              {formatCurrency(d.gross_sales || d.sales || 0)}
-                            </td>
-                            <td className="py-3 px-4 text-slate-400">
-                              {formatCurrency(d.commission || (d.gross_sales * 0.15) || 0)}
-                            </td>
-                            <td className="py-3 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
-                              {formatCurrency(d.net_payout || ((d.gross_sales || d.sales || 0) * 0.85))}
-                            </td>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-400 block font-semibold">Commission</span>
+                              <span className="text-slate-500 dark:text-slate-400">
+                                -{formatCurrency(d.commission || (d.gross_sales * 0.15) || 0)}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-bold">Net Payout</span>
+                              <span className="font-black text-emerald-600 dark:text-emerald-400">
+                                {formatCurrency(d.net_payout || ((d.gross_sales || d.sales || 0) * 0.85))}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop / Tablet Table View (>= sm) */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-500 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                          <tr>
+                            <th className="py-3 px-4">Date</th>
+                            <th className="py-3 px-4">Orders</th>
+                            <th className="py-3 px-4">Gross Sales</th>
+                            <th className="py-3 px-4">Commission</th>
+                            <th className="py-3 px-4 text-right">Net Payout</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 font-semibold text-slate-800 dark:text-slate-200">
+                          {daily.map((d, idx) => (
+                            <tr
+                              key={idx}
+                              className="hover:bg-slate-50/70 dark:hover:bg-slate-700/40 transition-colors"
+                            >
+                              <td className="py-3 px-4 font-bold text-slate-900 dark:text-slate-100">
+                                {d.date || d.day || 'Today'}
+                              </td>
+                              <td className="py-3 px-4">
+                                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                                  {d.order_count || d.orders || 0} orders
+                                </span>
+                              </td>
+                              <td className="py-3 px-4 font-bold">
+                                {formatCurrency(d.gross_sales || d.sales || 0)}
+                              </td>
+                              <td className="py-3 px-4 text-slate-400">
+                                {formatCurrency(d.commission || (d.gross_sales * 0.15) || 0)}
+                              </td>
+                              <td className="py-3 px-4 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                                {formatCurrency(d.net_payout || ((d.gross_sales || d.sales || 0) * 0.85))}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
@@ -257,7 +286,7 @@ export const ReportsPage = () => {
                 </h3>
               </div>
 
-              <div className="rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
+              <div className="rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs divide-y divide-slate-100 dark:divide-slate-700/60 overflow-hidden">
                 {topItems.length === 0 ? (
                   <div className="p-8 text-center text-slate-400">
                     <p className="text-xs font-bold">Sales data will rank items automatically.</p>
@@ -289,7 +318,7 @@ export const ReportsPage = () => {
               </div>
 
               {/* Payout Schedule Information Banner */}
-              <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+              <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold">
                   <Clock className="w-4 h-4 text-[#2845D6] dark:text-blue-400" />
                   <span>Settlement Cycle</span>

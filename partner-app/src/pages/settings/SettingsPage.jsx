@@ -340,16 +340,6 @@ export const SettingsPage = () => {
             Manage kitchen timings, online status, bank payouts, and staff credentials.
           </p>
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          icon={RefreshCw}
-          onClick={() => retry()}
-          className="shrink-0"
-        >
-          Refresh Data
-        </Button>
       </div>
 
       {/* Tabs Navigation Pills */}

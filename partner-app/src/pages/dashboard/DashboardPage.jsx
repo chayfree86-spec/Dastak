@@ -66,16 +66,6 @@ export const DashboardPage = () => {
             Live operational dashboard with real database analytics, orders queue & sales metrics.
           </p>
         </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          icon={RefreshCw}
-          onClick={() => retry()}
-          className="bg-white/10 text-white border-white/20 hover:bg-white/25 hover:text-white shadow-xs relative z-10 shrink-0"
-        >
-          Refresh Stats
-        </Button>
       </div>
 
       {loading && <LoadingSkeleton count={4} />}

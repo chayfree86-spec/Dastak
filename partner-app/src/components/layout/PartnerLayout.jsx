@@ -387,109 +387,162 @@ export const PartnerLayout = () => {
 
       {/* 4. Mobile Slide-Over Navigation Drawer */}
       {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-50 md:hidden flex items-end justify-center">
           {/* Backdrop */}
           <div
             onClick={() => setMobileDrawerOpen(false)}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
           />
 
-          {/* Slide Drawer Content */}
-          <div className="fixed inset-y-0 right-0 max-w-[290px] w-full bg-white dark:bg-slate-800 shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
-            {/* Header */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#2845D6] text-white flex items-center justify-center font-black text-sm">
-                  D
+          {/* Sleek Mobile Bottom Sheet */}
+          <div className="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-3xl shadow-2xl flex flex-col z-10 animate-in slide-in-from-bottom duration-300 overflow-hidden max-h-[85vh]">
+            {/* Top Drag Indicator */}
+            <div className="pt-3 pb-1 flex justify-center">
+              <div className="w-12 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+            </div>
+
+            {/* Header: Restaurant Profile & Close Button */}
+            <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#2845D6] text-white flex items-center justify-center font-black text-base shadow-xs shrink-0">
+                  {restaurant?.name ? restaurant.name.charAt(0).toUpperCase() : 'D'}
                 </div>
-                <div>
-                  <h3 className="text-xs font-black text-slate-900 dark:text-slate-100 truncate max-w-[170px]">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 truncate max-w-[200px]">
                     {restaurant?.name || 'Dastak Partner'}
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-bold">Kitchen Operations</span>
+                  <p className="text-[11px] text-slate-400 font-semibold">
+                    {user?.mobile ? `+91 ${user.mobile}` : 'Kitchen Operations'}
+                  </p>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setMobileDrawerOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700/80 text-slate-500 dark:text-slate-300 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
               >
                 <CloseIcon className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Online / Offline Quick Switch in Drawer */}
-            <div className="p-3 border-b border-slate-100 dark:border-slate-700">
+            <div className="p-4 sm:p-5 space-y-3.5 overflow-y-auto flex-1 pb-10 no-scrollbar">
+              {/* Online / Offline Quick Switch in Drawer */}
               <div
                 onClick={() => {
                   setMobileDrawerOpen(false)
                   if (isStoreOpen) setOfflineModalOpen(true)
                   else handleToggleStoreStatus()
                 }}
-                className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer ${
+                className={`p-3.5 rounded-2xl border flex items-center justify-between cursor-pointer active:scale-98 transition-all select-none ${
                   isStoreOpen
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
-                    : 'bg-rose-50 dark:bg-rose-950/30 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300'
+                    ? 'bg-emerald-50/90 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-300 shadow-xs'
+                    : 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-300 shadow-xs'
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <span
-                    className={`w-2 h-2 rounded-full ${
+                    className={`w-3 h-3 rounded-full ${
                       isStoreOpen ? 'bg-emerald-500 animate-ping' : 'bg-rose-500'
                     }`}
                   />
-                  <span className="text-xs font-black uppercase">
-                    {isStoreOpen ? 'Store is Online' : 'Store is Offline'}
-                  </span>
-                </div>
-                <Power className="w-4 h-4" />
-              </div>
-            </div>
-
-            {/* Nav Items in Drawer (Includes Settings, Reports, Settlements, Menu, etc.) */}
-            <nav className="p-3 space-y-1 flex-1 overflow-y-auto">
-              <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                Menu & Management
-              </div>
-
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileDrawerOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-3 py-2.5 rounded-xl font-bold text-xs transition-all ${
-                      isActive
-                        ? 'bg-[#2845D6] text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                    }`
-                  }
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon className="w-4 h-4" />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-black">
-                      {item.badge}
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider block">
+                      {isStoreOpen ? 'Store is Online' : 'Store is Offline (Paused)'}
                     </span>
-                  )}
-                </NavLink>
-              ))}
-            </nav>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                      {isStoreOpen ? 'Accepting new customer orders' : 'Store is temporarily paused'}
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                    isStoreOpen
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'bg-rose-600 text-white shadow-2xs'
+                  }`}
+                >
+                  <Power className="w-4 h-4" />
+                </div>
+              </div>
 
-            {/* Footer in Drawer */}
-            <div className="p-3 border-t border-slate-100 dark:border-slate-700 space-y-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileDrawerOpen(false)
-                  logout()
-                }}
-                className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-bold text-xs"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </button>
+              {/* Management Links (Reports, Settlements, Settings) */}
+              <div className="space-y-2">
+                <div className="px-1 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  Management & Business
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {navItems
+                    .filter((item) =>
+                      ['/reports', '/settlements', '/settings'].includes(item.path)
+                    )
+                    .map((item) => (
+                      <NavLink
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileDrawerOpen(false)}
+                        className={({ isActive }) =>
+                          `p-3 rounded-2xl border flex flex-col items-center justify-center gap-2 text-center transition-all select-none ${
+                            isActive
+                              ? 'bg-[#2845D6] text-white border-[#2845D6] shadow-md shadow-blue-500/25'
+                              : 'bg-slate-50 dark:bg-slate-700/50 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
+                          }`
+                        }
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <span className="text-xs font-bold leading-tight">{item.label}</span>
+                      </NavLink>
+                    ))}
+                </div>
+              </div>
+
+              {/* App Preferences: Theme & Sound Alert */}
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs"
+                  >
+                    {theme === 'dark' ? (
+                      <Sun className="w-4 h-4 text-amber-400" />
+                    ) : (
+                      <Moon className="w-4 h-4 text-slate-600" />
+                    )}
+                    <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={toggleSound}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold shadow-2xs transition-colors ${
+                      soundEnabled
+                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                        : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600'
+                    }`}
+                  >
+                    <Volume2 className="w-4 h-4" />
+                    <span>{soundEnabled ? 'Sound On' : 'Muted'}</span>
+                  </button>
+                </div>
+
+                <span className="text-[10px] font-bold text-slate-400">v2.4</span>
+              </div>
+
+              {/* Sign Out Button (48px Touch-friendly with clean bottom margin) */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileDrawerOpen(false)
+                    logout()
+                  }}
+                  className="w-full h-12 rounded-2xl border border-rose-200 dark:border-rose-800/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-2xs active:scale-98 transition-all cursor-pointer select-none"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -522,24 +575,23 @@ export const PartnerLayout = () => {
             be prepared and handed over to riders.
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-2">
-            <Button
-              variant="outline"
-              size="md"
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+            <button
+              type="button"
               onClick={() => setOfflineModalOpen(false)}
               disabled={toggleLoading}
+              className="h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-98 transition-all cursor-pointer select-none"
             >
               Cancel
-            </Button>
-            <Button
-              variant="danger"
-              size="md"
-              loading={toggleLoading}
+            </button>
+            <button
+              type="button"
+              disabled={toggleLoading}
               onClick={() => handleToggleStoreStatus(offlineReason)}
-              className="flex-1"
+              className="h-12 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-rose-500/25 active:scale-98 transition-all cursor-pointer select-none"
             >
-              Confirm & Go Offline
-            </Button>
+              {toggleLoading ? 'Updating...' : 'Confirm & Go Offline'}
+            </button>
           </div>
         </div>
       </Modal>
