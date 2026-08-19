@@ -4,19 +4,76 @@ import { soundAlert } from '../utils/soundAlert'
 const SoundContext = createContext(null)
 
 export const SoundProvider = ({ children }) => {
-  const [soundEnabled, setSoundEnabled] = useState(soundAlert.isSoundEnabled())
+  const [settings, setSettings] = useState(() => soundAlert.getSettings())
+  const [isPlaying, setIsPlaying] = useState(false)
 
-  const toggleSound = () => {
-    const next = soundAlert.toggleSound()
-    setSoundEnabled(next)
+  const refreshSettings = () => {
+    setSettings(soundAlert.getSettings())
+  }
+
+  const toggleSound = (val) => {
+    const next = soundAlert.toggleSound(val)
+    refreshSettings()
+    return next
   }
 
   const playChime = () => {
-    soundAlert.playOrderChime()
+    setIsPlaying(true)
+    soundAlert.playOrderChime(() => {
+      setIsPlaying(false)
+    })
+  }
+
+  const stopChime = () => {
+    soundAlert.stopChime()
+    setIsPlaying(false)
+  }
+
+  const setSoundType = (type) => {
+    soundAlert.setSoundType(type)
+    refreshSettings()
+  }
+
+  const setCustomAudio = (base64Data, fileName) => {
+    soundAlert.setCustomAudio(base64Data, fileName)
+    refreshSettings()
+  }
+
+  const removeCustomAudio = () => {
+    soundAlert.removeCustomAudio()
+    refreshSettings()
+  }
+
+  const setVolume = (vol) => {
+    soundAlert.setVolume(vol)
+    refreshSettings()
+  }
+
+  const setRepeatCount = (count) => {
+    soundAlert.setRepeatCount(count)
+    refreshSettings()
   }
 
   return (
-    <SoundContext.Provider value={{ soundEnabled, toggleSound, playChime }}>
+    <SoundContext.Provider
+      value={{
+        soundEnabled: settings.enabled,
+        soundType: settings.soundType,
+        customSoundName: settings.customSoundName,
+        hasCustomSound: settings.hasCustomSound,
+        volume: settings.volume,
+        repeatCount: settings.repeatCount,
+        isPlaying,
+        toggleSound,
+        playChime,
+        stopChime,
+        setSoundType,
+        setCustomAudio,
+        removeCustomAudio,
+        setVolume,
+        setRepeatCount,
+      }}
+    >
       {children}
     </SoundContext.Provider>
   )
@@ -27,3 +84,5 @@ export const useSound = () => {
   if (!context) throw new Error('useSound must be used within SoundProvider')
   return context
 }
+
+export default SoundContext

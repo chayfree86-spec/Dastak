@@ -13,6 +13,16 @@ import {
   Play,
   Wallet,
   RefreshCw,
+  Volume1,
+  VolumeX,
+  Music,
+  Bell,
+  Upload,
+  Trash2,
+  Square,
+  Check,
+  Sparkles,
+  FileAudio,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSound } from '../../context/SoundContext'
@@ -28,10 +38,25 @@ import ErrorState from '../../components/common/ErrorState'
 
 export const SettingsPage = () => {
   const { user, restaurant: cachedRest, refreshProfile, updateStoreState, updateRestaurant } = useAuth()
-  const { soundEnabled, toggleSound, playChime } = useSound()
+  const {
+    soundEnabled,
+    soundType,
+    customSoundName,
+    hasCustomSound,
+    volume,
+    isPlaying,
+    toggleSound,
+    playChime,
+    stopChime,
+    setSoundType,
+    setCustomAudio,
+    removeCustomAudio,
+    setVolume,
+  } = useSound()
   const toast = useToast()
 
   const [activeTab, setActiveTab] = useState('general')
+  const [uploadingAudio, setUploadingAudio] = useState(false)
 
   // Fetch real restaurant profile from backend
   const {
@@ -702,38 +727,400 @@ export const SettingsPage = () => {
 
           {/* 5. SOUND & POS ALERTS TAB */}
           {activeTab === 'sound' && (
-            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-5 max-w-xl">
-              <div className="pb-3 border-b border-slate-100 dark:border-slate-700">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400">
-                  KITCHEN AUDIO NOTIFICATIONS
-                </span>
-                <p className="text-xs text-slate-400 dark:text-slate-400 mt-0.5 font-medium">
-                  Loud POS chime plays continuously when a new customer order arrives.
-                </p>
+            <div className="space-y-6 max-w-2xl">
+              {/* Card 1: Master Audio Alert Toggle */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+                <div className="pb-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 block">
+                      KITCHEN AUDIO NOTIFICATIONS
+                    </span>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                      Plays a loud chime or your custom ringtone whenever a new order is received.
+                    </p>
+                  </div>
+                  <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#2845D6] dark:text-blue-400">
+                    <Volume2 className="w-5 h-5" />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100 block">
+                      Order Arrival Audio Alert
+                    </span>
+                    <p className="text-xs text-slate-400">
+                      {soundEnabled ? 'Active — Automatically chimes on incoming orders' : 'Muted — Visual dashboard alerts only'}
+                    </p>
+                  </div>
+                  <Switch checked={soundEnabled} onChange={toggleSound} />
+                </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
-                <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    Order Arrival Audio Alert
+              {/* Card 2: Preset Tone & Custom Audio Selection */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-5">
+                <div className="pb-2 border-b border-slate-100 dark:border-slate-700">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 block">
+                    CHOOSE ALERT TONE / RINGTONE
                   </span>
-                  <p className="text-[11px] text-slate-400">
-                    {soundEnabled ? 'Enabled — Chimes on new orders' : 'Muted — Visual notifications only'}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                    Select a built-in kitchen chime or upload your own custom sound file.
                   </p>
                 </div>
-                <Switch checked={soundEnabled} onChange={toggleSound} />
+
+                {/* Sound Options Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Preset 1: Crystal Bell (Default) */}
+                  <div
+                    onClick={() => setSoundType('default')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                      soundType === 'default'
+                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-[#2845D6] dark:text-blue-300 flex items-center justify-center font-black shrink-0">
+                        🔔
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+                          Crystal Bell
+                        </span>
+                        <span className="text-[10px] text-slate-400 block truncate">
+                          Crisp dual-frequency ring (Default)
+                        </span>
+                      </div>
+                    </div>
+                    {soundType === 'default' && (
+                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Preset 2: Kitchen Buzzer */}
+                  <div
+                    onClick={() => setSoundType('buzzer')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                      soundType === 'buzzer'
+                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300 flex items-center justify-center font-black shrink-0">
+                        🛎️
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+                          Kitchen Buzzer
+                        </span>
+                        <span className="text-[10px] text-slate-400 block truncate">
+                          Urgent loud kitchen attention pulse
+                        </span>
+                      </div>
+                    </div>
+                    {soundType === 'buzzer' && (
+                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Preset 3: Digital POS Horn */}
+                  <div
+                    onClick={() => setSoundType('digital')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                      soundType === 'digital'
+                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 flex items-center justify-center font-black shrink-0">
+                        🎺
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+                          Digital POS Horn
+                        </span>
+                        <span className="text-[10px] text-slate-400 block truncate">
+                          High-energy rhythmic tri-tone
+                        </span>
+                      </div>
+                    </div>
+                    {soundType === 'digital' && (
+                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Preset 4: Melodic Marimba */}
+                  <div
+                    onClick={() => setSoundType('marimba')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                      soundType === 'marimba'
+                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 flex items-center justify-center font-black shrink-0">
+                        🎵
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+                          Melodic Chime
+                        </span>
+                        <span className="text-[10px] text-slate-400 block truncate">
+                          Warm acoustic wooden chime
+                        </span>
+                      </div>
+                    </div>
+                    {soundType === 'marimba' && (
+                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Preset 5: Announcement Chime (MP3) */}
+                  <div
+                    onClick={() => setSoundType('announcement')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                      soundType === 'announcement'
+                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-300 flex items-center justify-center font-black shrink-0">
+                        📢
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+                          Announcement Chime (MP3)
+                        </span>
+                        <span className="text-[10px] text-slate-400 block truncate">
+                          Studio announcement broadcast chime
+                        </span>
+                      </div>
+                    </div>
+                    {soundType === 'announcement' && (
+                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Preset 6: Urgent Warning Siren (MP3) */}
+                  <div
+                    onClick={() => setSoundType('warning')}
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
+                      soundType === 'warning'
+                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center font-black shrink-0">
+                        🚨
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+                          Warning Alert Siren (MP3)
+                        </span>
+                        <span className="text-[10px] text-slate-400 block truncate">
+                          Loud high-priority kitchen alert
+                        </span>
+                      </div>
+                    </div>
+                    {soundType === 'warning' && (
+                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Custom Audio Upload Section */}
+                <div className="pt-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 block mb-2">
+                    CUSTOM RINGTONE FILE (ALL AUDIO FORMATS SUPPORTED)
+                  </span>
+
+                  {hasCustomSound ? (
+                    <div
+                      className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-between gap-3 ${
+                        soundType === 'custom'
+                          ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                          : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40'
+                      }`}
+                    >
+                      <div
+                        onClick={() => setSoundType('custom')}
+                        className="flex items-center gap-3 min-w-0 cursor-pointer flex-1"
+                      >
+                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 shrink-0">
+                          <FileAudio className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-slate-900 dark:text-slate-100 truncate">
+                              {customSoundName || 'Custom Audio Alert'}
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 text-[#2845D6] dark:text-blue-300 text-[9px] font-black uppercase tracking-wider">
+                              ACTIVE CUSTOM SOUND
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-0.5">
+                            Loaded from local file • Ready for order arrival alerts
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {soundType === 'custom' && (
+                          <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            removeCustomAudio()
+                            toast.info('Custom Sound Removed', 'Reverted to default Crystal Bell.')
+                          }}
+                          className="p-2 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors cursor-pointer"
+                          title="Remove custom audio and revert to default"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Upload Dropzone / Button */}
+                  <div className="mt-3">
+                    <label className="relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#2845D6] dark:hover:border-blue-500 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-all cursor-pointer group">
+                      <input
+                        type="file"
+                        accept="audio/*,.mp3,.wav,.ogg,.aac,.m4a,.flac,.webm"
+                        className="sr-only"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (!file) return
+
+                          if (file.size > 15 * 1024 * 1024) {
+                            toast.error('File Too Large', 'Please select an audio file under 15MB.')
+                            return
+                          }
+
+                          setUploadingAudio(true)
+                          const reader = new FileReader()
+                          reader.onload = (event) => {
+                            const base64 = event.target?.result
+                            if (base64) {
+                              setCustomAudio(base64, file.name)
+                              toast.success('Custom Sound Loaded!', `"${file.name}" is now set as your order chime.`)
+                            }
+                            setUploadingAudio(false)
+                          }
+                          reader.onerror = () => {
+                            toast.error('Read Failed', 'Could not read audio file.')
+                            setUploadingAudio(false)
+                          }
+                          reader.readAsDataURL(file)
+                        }}
+                      />
+
+                      <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <Upload className="w-5 h-5" />
+                      </div>
+
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-2.5">
+                        {uploadingAudio ? 'Uploading & Processing Audio...' : 'Click to Browse or Drag & Drop Custom Audio'}
+                      </span>
+
+                      <p className="text-[11px] text-slate-400 mt-1">
+                        Supported formats: <strong className="font-semibold text-slate-600 dark:text-slate-300">MP3, WAV, OGG, AAC, M4A, FLAC, WebM</strong> (Up to 15MB)
+                      </p>
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-2">
-                <Button
-                  variant="outline"
-                  size="md"
-                  icon={Play}
-                  onClick={() => playChime()}
-                  className="w-full sm:w-auto"
-                >
-                  Test Kitchen Chime Sound 🔊
-                </Button>
+              {/* Card 3: Volume Slider & Live Preview Test */}
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-5">
+                <div className="pb-2 border-b border-slate-100 dark:border-slate-700">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 block">
+                    VOLUME & LIVE AUDIO PREVIEW
+                  </span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                    Adjust kitchen volume level and test audio playback.
+                  </p>
+                </div>
+
+                {/* Volume Level Slider */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                      <Volume1 className="w-4 h-4 text-slate-400" />
+                      <span>Alert Volume</span>
+                    </span>
+                    <span className="font-black text-[#2845D6] dark:text-blue-400">
+                      {Math.round(volume * 100)}%
+                    </span>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    step="5"
+                    value={Math.round(volume * 100)}
+                    onChange={(e) => setVolume(Number(e.target.value) / 100)}
+                    className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#2845D6]"
+                  />
+                  <div className="flex justify-between text-[10px] text-slate-400 px-0.5">
+                    <span>Soft (10%)</span>
+                    <span>Standard (80%)</span>
+                    <span>Loud POS (100%)</span>
+                  </div>
+                </div>
+
+                {/* Test Audio Button */}
+                <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Button
+                    variant={isPlaying ? 'danger' : 'primary'}
+                    size="lg"
+                    icon={isPlaying ? Square : Play}
+                    onClick={() => {
+                      if (isPlaying) {
+                        stopChime()
+                      } else {
+                        playChime()
+                      }
+                    }}
+                    className="shadow-md flex-1"
+                  >
+                    {isPlaying ? 'Stop Playing Sound ⏹️' : 'Test Active Sound Alert 🔊'}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      removeCustomAudio()
+                      setVolume(0.8)
+                      toast.success('Reset Complete', 'Sound settings restored to default Crystal Bell at 80% volume.')
+                    }}
+                  >
+                    Reset to Default
+                  </Button>
+                </div>
               </div>
             </div>
           )}
