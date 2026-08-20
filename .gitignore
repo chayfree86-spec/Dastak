@@ -89,7 +89,10 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+
+# NOTE: "dist" is intentionally NOT ignored — the built admin-app/customer-app/
+# partner-app/deliveryboy-app/landing-page dist/ folders are committed and
+# pushed so Hostinger's Git auto-deploy can serve them directly.
 
 # Gatsby files
 .cache/

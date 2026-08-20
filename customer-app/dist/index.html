@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Dastak — Order delicious food, fresh groceries and everyday essentials delivered to your doorstep in minutes." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Dastak" />
+    <meta name="theme-color" content="#10b981" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" as="image" href="/logo-horizontal.svg" type="image/svg+xml" />
+    <title>Dastak — Fast Food & Grocery Delivery</title>
+
+    <!-- Local Fast Fonts (Zero Network Overhead) -->
+    <link rel="stylesheet" href="/fonts/plus-jakarta-sans/plus-jakarta-sans.css" />
+
+    <!-- Critical CSS for Instant 0.1s FCP & Zero CLS -->
+    <style>
+      :root {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: #0f172a;
+        overflow-x: hidden;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .critical-skeleton {
+        animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        background: #e2e8f0;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-DMMx9Ut7.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-router-sh2gdcX_.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-BmibHIua.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-BSuWZhuL.css">
+  </head>
+  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white min-h-screen">
+    <div id="root">
+      <!-- Lightweight Initial App Shell for 0.1s First Contentful Paint -->
+      <header style="height: 56px; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; align-items: center; padding: 0 16px; justify-content: space-between;">
+        <img src="/logo-horizontal.svg" alt="Dastak" width="130" height="32" style="height: 32px; width: 130px;" />
+        <div style="width: 80px; height: 28px; border-radius: 12px;" class="critical-skeleton"></div>
+      </header>
+    </div>
+  </body>
+</html>
