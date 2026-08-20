@@ -1,13 +1,12 @@
-# Repo-root protection for the whole Hostinger account (public_html mirrors this repo 1:1).
-# Each app's own dist/.htaccess handles its SPA routing independently — this file
-# only blocks sensitive source files/folders from ever being web-reachable.
+# This file becomes the repo-root .htaccess once landing-page builds
+# (build.outDir points to the repo root — see landing-page/vite.config.js).
+# It must cover BOTH: landing page's own SPA routing, AND blocking sensitive
+# files/folders across the whole account (public_html mirrors this repo root).
 
 RewriteEngine On
 
-# Never serve the .git folder (would leak full source + history)
+# --- Security: never serve sensitive source files/folders ---
 RewriteRule ^\.git(/.*)?$ - [F,L]
-
-# Never serve Claude Code / automation state folders
 RewriteRule ^\.claude(/.*)?$ - [F,L]
 RewriteRule ^\.agents(/.*)?$ - [F,L]
 
@@ -30,3 +29,15 @@ RewriteRule ^\.agents(/.*)?$ - [F,L]
         Deny from all
     </IfModule>
 </FilesMatch>
+
+# --- SPA routing for the landing page itself ---
+# Only rewrite requests that are NOT for another app's own subfolder
+# (admin-app, backend, customer-app, deliveryboy-app, partner-app each have
+# their own nested .htaccess and must be left alone).
+RewriteCond %{REQUEST_URI} !^/(admin-app|backend|customer-app|deliveryboy-app|partner-app)(/|$)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_URI} !^/(admin-app|backend|customer-app|deliveryboy-app|partner-app)(/|$)
+RewriteRule . /index.html [L]

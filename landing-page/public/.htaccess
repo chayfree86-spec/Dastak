@@ -1,12 +1,43 @@
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
+# This file becomes the repo-root .htaccess once landing-page builds
+# (build.outDir points to the repo root — see landing-page/vite.config.js).
+# It must cover BOTH: landing page's own SPA routing, AND blocking sensitive
+# files/folders across the whole account (public_html mirrors this repo root).
 
-  # Serve real files/directories directly (JS, CSS, images, etc.)
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
+RewriteEngine On
 
-  # Everything else -> index.html so React Router can handle the route
-  RewriteRule . /index.html [L]
-</IfModule>
+# --- Security: never serve sensitive source files/folders ---
+RewriteRule ^\.git(/.*)?$ - [F,L]
+RewriteRule ^\.claude(/.*)?$ - [F,L]
+RewriteRule ^\.agents(/.*)?$ - [F,L]
+
+<FilesMatch "^\.env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "^(\.gitignore|\.gitattributes|composer\.lock|package-lock\.json)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# --- SPA routing for the landing page itself ---
+# Only rewrite requests that are NOT for another app's own subfolder
+# (admin-app, backend, customer-app, deliveryboy-app, partner-app each have
+# their own nested .htaccess and must be left alone).
+RewriteCond %{REQUEST_URI} !^/(admin-app|backend|customer-app|deliveryboy-app|partner-app)(/|$)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteCond %{REQUEST_URI} !^/(admin-app|backend|customer-app|deliveryboy-app|partner-app)(/|$)
+RewriteRule . /index.html [L]

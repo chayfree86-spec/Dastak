@@ -6,6 +6,11 @@ export default defineConfig({
   envDir: '../',
   plugins: [react()],
   build: {
+    // Hostinger's Web Hosting plan can't change the primary domain's document
+    // root (it's always public_html, which mirrors this repo's root). So the
+    // landing page must build directly into the repo root, not landing-page/dist.
+    outDir: '../',
+    emptyOutDir: false,
     target: 'esnext',
     cssCodeSplit: true,
     chunkSizeWarningLimit: 600,
