@@ -53,7 +53,7 @@ apiClient.interceptors.response.use(
 
     if (status === 401) {
       const token = localStorage.getItem('dastak_admin_token')
-      if (token && token !== 'dastak-admin-master-bypass-token-2026') {
+      if (token) {
         localStorage.removeItem('dastak_admin_token')
         localStorage.removeItem('dastak_admin_user')
         // Dispatch custom event for session expired

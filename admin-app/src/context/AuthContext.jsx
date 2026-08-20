@@ -4,28 +4,12 @@ import { ROLES, hasPermission } from '../utils/permissions'
 
 const AuthContext = createContext()
 
-const BYPASS_TOKEN = 'dastak-admin-master-bypass-token-2026'
-const DEFAULT_USER = {
-  id: 1,
-  name: 'Sandeep Prajapati',
-  email: 'admin@dastakdelivery.com',
-  role: ROLES.SUPER_ADMIN,
-}
-
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => {
-    if (localStorage.getItem('dastak_logged_out') === 'true') {
-      return null
-    }
-    return localStorage.getItem('dastak_admin_token') || BYPASS_TOKEN
-  })
+  const [token, setToken] = useState(() => localStorage.getItem('dastak_admin_token'))
 
   const [user, setUser] = useState(() => {
-    if (localStorage.getItem('dastak_logged_out') === 'true') {
-      return null
-    }
     const saved = localStorage.getItem('dastak_admin_user')
-    return saved ? JSON.parse(saved) : DEFAULT_USER
+    return saved ? JSON.parse(saved) : null
   })
 
   const [loading, setLoading] = useState(false)
@@ -39,32 +23,12 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      localStorage.removeItem('dastak_logged_out')
-      let authToken = null
-      let userData = null
-
-      try {
-        const response = await authApi.login({
-          identifier: credentials.login || credentials.email || credentials.identifier,
-          password: credentials.password,
-        })
-        authToken = response?.data?.token || response?.token
-        userData = response?.data?.user || response?.user
-      } catch (err) {
-        // Fallback for bypass master credentials
-        const loginIdentifier = (credentials.login || credentials.email || '').toLowerCase().trim()
-        if (
-          loginIdentifier === 'admin@dastak.in' ||
-          loginIdentifier === 'admin@dastakdelivery.com' ||
-          loginIdentifier === '9876543210' ||
-          loginIdentifier === 'admin'
-        ) {
-          authToken = BYPASS_TOKEN
-          userData = DEFAULT_USER
-        } else {
-          throw err
-        }
-      }
+      const response = await authApi.login({
+        identifier: credentials.login || credentials.email || credentials.identifier,
+        password: credentials.password,
+      })
+      const authToken = response?.data?.token || response?.token
+      const userData = response?.data?.user || response?.user
 
       if (authToken && userData) {
         localStorage.setItem('dastak_admin_token', authToken)
@@ -86,7 +50,6 @@ export const AuthProvider = ({ children }) => {
         await authApi.logout().catch(() => {})
       }
     } finally {
-      localStorage.setItem('dastak_logged_out', 'true')
       localStorage.removeItem('dastak_admin_token')
       localStorage.removeItem('dastak_admin_user')
       setToken(null)
