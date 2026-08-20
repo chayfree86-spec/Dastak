@@ -19,6 +19,7 @@ import {
   LogOut,
   Shield,
   Activity,
+  UtensilsCrossed,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -32,6 +33,7 @@ const navigationItems = [
   { label: 'Customers', path: '/customers', icon: Users, permission: 'CUSTOMERS', color: 'bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400' },
   { label: 'Finance', path: '/finance', icon: Wallet, permission: 'FINANCE', color: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' },
   { label: 'Marketing', path: '/marketing', icon: Tag, permission: 'MARKETING', color: 'bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400' },
+  { label: 'Food Categories', path: '/food-categories', icon: UtensilsCrossed, permission: 'MARKETING', color: 'bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400' },
   { label: 'Reports', path: '/reports', icon: BarChart3, permission: 'REPORTS', color: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' },
   { label: 'Support', path: '/support', icon: HelpCircle, permission: 'SUPPORT', color: 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400' },
   { label: 'Settings', path: '/settings', icon: Settings, permission: 'SETTINGS', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300' },

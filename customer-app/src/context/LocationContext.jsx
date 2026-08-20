@@ -13,20 +13,9 @@ export const LocationProvider = ({ children }) => {
   })
 
   const [activeAddress, setActiveAddress] = useState(() => {
+    // No hardcoded/dummy default — real address comes from the backend (or GPS/selection).
     const saved = localStorage.getItem('dastak_active_address')
-    return saved
-      ? JSON.parse(saved)
-      : {
-          id: 'default_1',
-          customer_name: 'Priya Sharma',
-          customer_phone: '9876501234',
-          address: 'Civil Lines, Kanpur, Uttar Pradesh',
-          landmark: 'Near Phool Bagh',
-          type: 'Home',
-          is_default: true,
-          latitude: 26.456,
-          longitude: 80.339,
-        }
+    return saved ? JSON.parse(saved) : null
   })
   const [loading, setLoading] = useState(false)
   const [isGpsModalOpen, setIsGpsModalOpen] = useState(false)
@@ -53,7 +42,7 @@ export const LocationProvider = ({ children }) => {
           [a.address_line1, a.address_line2, a.city, a.pincode]
             .filter(Boolean)
             .join(', ') ||
-          'Lalganj, Azamgarh 276202'
+          ''
         return {
           ...a,
           customer_name: a.contact_name || a.customer_name || a.name || 'Valued Customer',
@@ -162,18 +151,9 @@ export const LocationProvider = ({ children }) => {
         if (remaining.length > 0) {
           selectAddress(remaining[0])
         } else {
-          const fallback = {
-            id: 'loc_' + Date.now(),
-            customer_name: user?.name || 'Customer',
-            customer_phone: user?.mobile || '',
-            address: 'Civil Lines, Kanpur',
-            landmark: 'Near Phool Bagh',
-            type: 'Home',
-            is_default: true,
-            latitude: 26.456,
-            longitude: 80.339,
-          }
-          selectAddress(fallback)
+          // No addresses left — clear active (no dummy fallback); user re-selects/detects.
+          setActiveAddress(null)
+          localStorage.removeItem('dastak_active_address')
         }
       }
       return remaining
@@ -191,9 +171,9 @@ export const LocationProvider = ({ children }) => {
       landmark: addrData.landmark || '',
       type: addrData.type || 'Home',
       is_default: Boolean(addrData.is_default),
-      latitude: addrData.latitude || 26.456,
-      longitude: addrData.longitude || 80.339,
-      city: addrData.city || 'Kanpur',
+      latitude: addrData.latitude ?? null,
+      longitude: addrData.longitude ?? null,
+      city: addrData.city || '',
     }
 
     try {

@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "dastak-customer",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:customer"],
+      "port": 5176
     }
   ]
 }

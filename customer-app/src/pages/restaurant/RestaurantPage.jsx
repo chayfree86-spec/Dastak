@@ -199,7 +199,7 @@ export const RestaurantPage = () => {
             </h2>
             <p className="text-xs sm:text-sm text-white/90 font-medium flex items-center gap-1.5 truncate">
               <MapPin className="w-3.5 h-3.5 text-[#FF5200] shrink-0" />
-              <span className="truncate">{restaurant.address_line1 || 'Civil Lines, Kanpur'}</span>
+              <span className="truncate">{restaurant.address_line1 || restaurant.city || ''}</span>
             </p>
           </div>
         </div>

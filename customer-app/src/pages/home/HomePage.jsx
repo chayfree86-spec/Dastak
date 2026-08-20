@@ -39,6 +39,7 @@ export const HomePage = () => {
 
   const [restaurants, setRestaurants] = useState([])
   const [popularDishes, setPopularDishes] = useState([])
+  const [categories, setCategories] = useState([])
   const [activeOrder, setActiveOrder] = useState(null)
   const [loading, setLoading] = useState(true)
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
@@ -123,15 +124,7 @@ export const HomePage = () => {
     return () => clearInterval(timer)
   }, [promoBanners.length])
 
-  // Food Categories list with i18n
-  const categories = [
-    { id: 'all', name: t.catAllFood || 'All Food', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=120&auto=format&fit=crop&q=70', query: 'food' },
-    { id: 'biryani', name: t.catBiryani || 'Biryani', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=120&auto=format&fit=crop&q=70', query: 'biryani' },
-    { id: 'tea', name: t.catChai || 'Chai & Snacks', image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=120&auto=format&fit=crop&q=70', query: 'chai' },
-    { id: 'burger', name: t.catBurger || 'Burgers & Rolls', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=120&auto=format&fit=crop&q=70', query: 'burger' },
-    { id: 'veg', name: t.catVeg || 'Pure Veg', image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=120&auto=format&fit=crop&q=70', query: 'paneer' },
-    { id: 'sweets', name: t.catSweets || 'Desserts & Sweets', image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=120&auto=format&fit=crop&q=70', query: 'jalebi' },
-  ]
+  // Food categories are loaded from the backend (DB-driven) in loadHomeData().
 
   const loadHomeData = async (isSilent = false) => {
     if (!isSilent) setLoading(true)
@@ -142,6 +135,11 @@ export const HomePage = () => {
       const searchRes = await searchApi.search('food', null, 12)
       const dishes = searchRes.data?.dishes || []
       setPopularDishes(dishes)
+
+      try {
+        const catRes = await customerApi.getFoodCategories()
+        setCategories(catRes?.data || catRes || [])
+      } catch (e) {}
 
       try {
         const couponRes = await customerApi.getCoupons()

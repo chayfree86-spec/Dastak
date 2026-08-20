@@ -68,18 +68,18 @@ export const CheckoutPage = () => {
     setLoading(true)
     try {
       const payload = {
-        restaurant_id: restaurant?.id || items[0]?.restaurant?.id || 1,
+        restaurant_id: restaurant?.id || items[0]?.restaurant?.id,
         items: items.map((it) => ({
           menu_item_id: it.id,
           quantity: it.quantity,
         })),
         delivery_address_json: {
-          customer_name: activeAddress.customer_name || user?.name || 'Customer',
-          customer_phone: activeAddress.customer_phone || user?.mobile || '9666600001',
+          customer_name: activeAddress.customer_name || user?.name || '',
+          customer_phone: activeAddress.customer_phone || user?.mobile || '',
           address: activeAddress.address,
           landmark: activeAddress.landmark || '',
-          latitude: activeAddress.latitude || 26.456,
-          longitude: activeAddress.longitude || 80.339,
+          latitude: activeAddress.latitude ?? null,
+          longitude: activeAddress.longitude ?? null,
         },
         payment_mode: paymentMode,
         special_instructions: specialInstructions,
@@ -140,10 +140,10 @@ export const CheckoutPage = () => {
 
           <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 space-y-1">
             <h4 className="text-sm font-black text-slate-900 dark:text-slate-100">
-              {activeAddress?.customer_name || user?.name || 'Valued Customer'}
+              {activeAddress?.customer_name || user?.name || '—'}
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {activeAddress?.address || 'Civil Lines, Kanpur'}
+              {activeAddress?.address || (lang === 'hi' ? 'कृपया डिलीवरी पता चुनें' : 'Please select a delivery address')}
             </p>
             {activeAddress?.landmark && (
               <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">

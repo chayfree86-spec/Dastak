@@ -65,6 +65,28 @@ return [
             ]) : [],
         ],
 
+        // Live production database (api.dastak.cc) — used ONLY by the db-sync
+        // commands. Fill DB_LIVE_* in .env once the live server exists.
+        'mysql_live' => [
+            'driver' => 'mysql',
+            'url' => env('DB_LIVE_URL'),
+            'host' => env('DB_LIVE_HOST'),
+            'port' => env('DB_LIVE_PORT', '3306'),
+            'database' => env('DB_LIVE_DATABASE'),
+            'username' => env('DB_LIVE_USERNAME'),
+            'password' => env('DB_LIVE_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'timezone' => env('DB_TIMEZONE', '+05:30'),
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

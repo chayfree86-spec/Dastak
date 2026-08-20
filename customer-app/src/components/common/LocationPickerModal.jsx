@@ -114,7 +114,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
       landmark: landmarkText.trim() || selectedPlace.main_text || '',
       latitude: selectedPlace.latitude,
       longitude: selectedPlace.longitude,
-      city: selectedPlace.city || 'Kanpur',
+      city: selectedPlace.city || '',
     }
 
     selectAddress(newLocation)
@@ -287,7 +287,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
                   [addr.address_line1, addr.address_line2, addr.landmark, addr.city, addr.pincode]
                     .filter(Boolean)
                     .join(', ') ||
-                  'Lalganj, Azamgarh 276202'
+                  ''
 
                 const contactNameStr =
                   addr.customer_name || addr.contact_name || addr.name || ''

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Admin\DeliveryBoyAdminController;
 use App\Http\Controllers\Api\V1\Admin\FinanceAdminController;
 use App\Http\Controllers\Api\V1\Admin\FinanceScreenController;
 use App\Http\Controllers\Api\V1\Admin\FleetAdminController;
+use App\Http\Controllers\Api\V1\Admin\FoodCategoryAdminController;
 use App\Http\Controllers\Api\V1\Admin\MarketingAdminController;
 use App\Http\Controllers\Api\V1\Admin\MenuAdminController;
 use App\Http\Controllers\Api\V1\Admin\OrderAdminController;
@@ -49,6 +50,8 @@ use App\Http\Controllers\Api\V1\Partner\PartnerReviewController;
 use App\Http\Controllers\Api\V1\Partner\RestaurantPartnerController;
 use App\Http\Controllers\Api\V1\Public\CouponPublicController;
 use App\Http\Controllers\Api\V1\Public\PaymentWebhookController;
+use App\Http\Controllers\Api\V1\Public\FoodCategoryPublicController;
+use App\Http\Controllers\Api\V1\Public\PublicStatsController;
 use App\Http\Controllers\Api\V1\Public\RestaurantPublicController;
 use App\Http\Controllers\Api\V1\Public\ReviewPublicController;
 use App\Http\Controllers\Api\V1\RolePermissionController;
@@ -126,6 +129,13 @@ Route::prefix('v1')->group(function () {
     Route::get('/zones', [RestaurantPublicController::class, 'getZones']);
     Route::get('/categories', [RestaurantPublicController::class, 'getCategories']);
     Route::get('/coupons', [CouponPublicController::class, 'index']);
+
+    // Landing-page public marketing data (real numbers + real reviews)
+    Route::get('/stats', [PublicStatsController::class, 'stats']);
+    Route::get('/testimonials', [PublicStatsController::class, 'testimonials']);
+
+    // Customer home food-category chips (DB driven)
+    Route::get('/food-categories', [FoodCategoryPublicController::class, 'index']);
     
     // Intelligent NLP Search & Suggestions
     Route::get('/search', [\App\Http\Controllers\Api\V1\Public\SearchController::class, 'search']);
@@ -391,6 +401,14 @@ Route::prefix('v1')->group(function () {
                     Route::delete('/banners/{id}', [MarketingAdminController::class, 'destroyBanner']);
 
                     Route::post('/push-notifications', [MarketingAdminController::class, 'sendNotification']);
+
+                    // Food-category chips (customer home) — DB managed
+                    Route::get('/food-categories', [FoodCategoryAdminController::class, 'index']);
+                    Route::post('/food-categories/upload-image', [FoodCategoryAdminController::class, 'uploadImage']);
+                    Route::post('/food-categories', [FoodCategoryAdminController::class, 'store']);
+                    Route::put('/food-categories/{id}', [FoodCategoryAdminController::class, 'update']);
+                    Route::patch('/food-categories/{id}/status', [FoodCategoryAdminController::class, 'toggleStatus']);
+                    Route::delete('/food-categories/{id}', [FoodCategoryAdminController::class, 'destroy']);
                 });
 
                 // Full Order Pipeline Operations & Manual Dispatch

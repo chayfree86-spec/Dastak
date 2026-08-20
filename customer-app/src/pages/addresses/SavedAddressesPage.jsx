@@ -57,9 +57,9 @@ export const SavedAddressesPage = () => {
       landmark: addr.landmark || '',
       type: addr.type || 'Home',
       is_default: Boolean(addr.is_default),
-      latitude: addr.latitude || 26.456,
-      longitude: addr.longitude || 80.339,
-      city: addr.city || 'Kanpur',
+      latitude: addr.latitude ?? null,
+      longitude: addr.longitude ?? null,
+      city: addr.city || '',
     })
     setEditModalOpen(true)
   }

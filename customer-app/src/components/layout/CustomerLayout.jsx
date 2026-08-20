@@ -119,7 +119,7 @@ export const CustomerLayout = () => {
                 type="button"
                 onClick={() => setLocationModalOpen(true)}
                 className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-left min-w-0 max-w-[130px] xs:max-w-[165px] sm:max-w-xs cursor-pointer border border-slate-200/60 dark:border-slate-700/60 shrink"
-                aria-label={`Delivering to: ${activeAddress?.address || 'Civil Lines, Kanpur'}. Click to change address.`}
+                aria-label={`Delivering to: ${activeAddress?.address || 'Set location'}. Click to change address.`}
               >
                 <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F97316] shrink-0" />
                 <div className="min-w-0 truncate flex-1">
@@ -127,7 +127,7 @@ export const CustomerLayout = () => {
                     {t.deliveringTo}
                   </span>
                   <span className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-slate-100 truncate block leading-tight">
-                    {activeAddress?.address || 'Civil Lines, Kanpur'}
+                    {activeAddress?.address || (lang === 'hi' ? 'लोकेशन चुनें' : 'Set location')}
                   </span>
                 </div>
                 <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />

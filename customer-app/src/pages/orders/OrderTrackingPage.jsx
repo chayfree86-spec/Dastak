@@ -700,10 +700,10 @@ export const OrderTrackingPage = () => {
                 {lang === 'hi' ? 'किचन / आउटलेट' : 'Kitchen'}
               </span>
               <h5 className="font-black text-slate-900 dark:text-slate-100 truncate">
-                {restaurant.name || 'Dastak Kitchen'}
+                {restaurant.name || '—'}
               </h5>
               <p className="text-[11px] text-slate-500 truncate font-medium">
-                {restaurant.address || 'Civil Lines, Kanpur'}
+                {restaurant.address || restaurant.city || ''}
               </p>
             </div>
           </div>
@@ -732,7 +732,7 @@ export const OrderTrackingPage = () => {
             {order.address?.customer_name || (lang === 'hi' ? 'डिलीवरी गंतव्य' : 'Delivery Destination')}
           </h5>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed break-words font-medium">
-            {order.address?.address || 'Civil Lines, Kanpur'}
+            {order.address?.address || ''}
           </p>
           {order.address?.landmark && (
             <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 block">

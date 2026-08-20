@@ -1,36 +1,24 @@
 import React, { useState, useEffect } from 'react'
-import { Users, Store, Clock, Award, ShieldCheck, TrendingUp } from 'lucide-react'
+import { Users, Store, PackageCheck, MapPin } from 'lucide-react'
 import apiClient from '../../api/client'
 
+// Honest formatting of a REAL count — no inflation, just locale commas + a "+".
+const fmt = (n) => {
+  if (n === null || n === undefined) return '—'
+  const num = Number(n) || 0
+  return num > 0 ? `${num.toLocaleString('en-IN')}+` : '0'
+}
+
 export const LiveStatsBar = () => {
-  const [stats, setStats] = useState({
-    customers: '50,000+',
-    restaurants: '1,200+',
-    avgDeliveryMinutes: '18 Mins',
-    onTimeRate: '99.4%',
-  })
+  const [stats, setStats] = useState(null)
 
   useEffect(() => {
-    // Attempt to load dynamic stats from public stats/zones/restaurants endpoints
     const loadStats = async () => {
       try {
-        const [zonesRes, restRes] = await Promise.allSettled([
-          apiClient.get('/zones'),
-          apiClient.get('/restaurants'),
-        ])
-
-        const restCount = restRes.status === 'fulfilled' && restRes.value.data?.data
-          ? restRes.value.data.data.length
-          : null
-
-        if (restCount) {
-          setStats((prev) => ({
-            ...prev,
-            restaurants: `${Math.max(restCount, 120)}+`,
-          }))
-        }
+        const res = await apiClient.get('/stats')
+        setStats(res.data?.data || res.data || null)
       } catch {
-        // Fallback to established verified platform metrics
+        setStats(null)
       }
     }
     loadStats()
@@ -38,30 +26,30 @@ export const LiveStatsBar = () => {
 
   const statItems = [
     {
-      label: 'Happy Foodies Served',
-      value: stats.customers,
+      label: 'Happy Customers',
+      value: fmt(stats?.customers),
       icon: Users,
       color: 'text-[#FF5200]',
       bg: 'bg-orange-50 dark:bg-orange-950/60',
     },
     {
       label: 'Partner Restaurants',
-      value: stats.restaurants,
+      value: fmt(stats?.restaurants),
       icon: Store,
       color: 'text-purple-600 dark:text-purple-400',
       bg: 'bg-purple-50 dark:bg-purple-950/60',
     },
     {
-      label: 'Average Delivery Time',
-      value: stats.avgDeliveryMinutes,
-      icon: Clock,
+      label: 'Orders Delivered',
+      value: fmt(stats?.orders_delivered),
+      icon: PackageCheck,
       color: 'text-[#113BD0] dark:text-blue-400',
       bg: 'bg-blue-50 dark:bg-blue-950/60',
     },
     {
-      label: 'On-Time Delivery Success',
-      value: stats.onTimeRate,
-      icon: ShieldCheck,
+      label: 'Cities Served',
+      value: fmt(stats?.cities),
+      icon: MapPin,
       color: 'text-emerald-600 dark:text-emerald-400',
       bg: 'bg-emerald-50 dark:bg-emerald-950/60',
     },

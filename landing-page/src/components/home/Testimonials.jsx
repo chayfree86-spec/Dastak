@@ -1,30 +1,27 @@
-import React from 'react'
-import { Star, Quote, CheckCircle2 } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Star, CheckCircle2 } from 'lucide-react'
+import apiClient from '../../api/client'
 
 export const Testimonials = () => {
-  const reviews = [
-    {
-      name: 'Priya Sharma',
-      role: 'Regular Customer, Lucknow',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-      rating: 5,
-      comment: 'Dastak is genuinely the fastest food delivery app I have ever used. My biryani arrived piping hot in just 16 minutes with tamper-proof packaging!',
-    },
-    {
-      name: 'Amitabh Verma',
-      role: 'Owner, Bawarchi Restaurant',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-      rating: 5,
-      comment: 'Our daily online orders jumped 4x after joining Dastak Partner. Weekly settlements are 100% on time without hidden platform deduction cuts.',
-    },
-    {
-      name: 'Rahul K. Yadav',
-      role: 'Fleet Rider Captain',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      rating: 5,
-      comment: 'I earn over ₹28,000 monthly with complete flexibility of my college schedule. Milestone bonus and insurance give my family true peace of mind.',
-    },
-  ]
+  const [reviews, setReviews] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await apiClient.get('/testimonials')
+        setReviews(res.data?.data || res.data || [])
+      } catch {
+        setReviews([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
+
+  // No real reviews yet → hide the whole section (no dummy testimonials).
+  if (!loading && reviews.length === 0) return null
 
   return (
     <section className="py-20 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800">
@@ -34,37 +31,35 @@ export const Testimonials = () => {
             Trusted Community
           </span>
           <h2 className="text-3xl sm:text-4xl font-black text-[#113BD0] dark:text-white tracking-tight">
-            Loved By <span className="text-gradient-brand">Thousands of Foodies</span>
+            Loved By <span className="text-gradient-brand">Our Foodies</span>
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
-            Hear directly from our customers, restaurant partners, and delivery heroes.
+            Real reviews from verified Dastak customers.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {reviews.map((r, idx) => (
+          {reviews.map((r) => (
             <div
-              key={idx}
+              key={r.id}
               className="p-6 sm:p-8 rounded-3xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between space-y-6 relative"
             >
               <div className="space-y-4">
                 <div className="flex items-center gap-1">
-                  {[...Array(r.rating)].map((_, i) => (
+                  {[...Array(Math.max(1, r.rating || 5))].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-amber-500 text-amber-500" />
                   ))}
                 </div>
 
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed italic">
-                  "{r.comment}"
+                  "{r.text}"
                 </p>
               </div>
 
               <div className="flex items-center gap-3 pt-4 border-t border-slate-200/80 dark:border-slate-700">
-                <img
-                  src={r.avatar}
-                  alt={r.name}
-                  className="w-11 h-11 rounded-full object-cover ring-2 ring-[#FF5200]/30"
-                />
+                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#FF5200] to-[#113BD0] text-white flex items-center justify-center font-black text-lg ring-2 ring-[#FF5200]/30 shrink-0">
+                  {(r.name || 'D').charAt(0).toUpperCase()}
+                </div>
                 <div>
                   <h4 className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-1">
                     <span>{r.name}</span>

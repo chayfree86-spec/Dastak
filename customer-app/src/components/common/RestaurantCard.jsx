@@ -3,21 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Star, Clock, MapPin, Store, ShieldCheck, Tag } from 'lucide-react'
 import { useLanguage } from '../../context/LanguageContext'
 
+// Only the restaurant's REAL uploaded banner/logo — no stock/placeholder photos.
 const getRestaurantBanner = (restaurant) => {
-  if (restaurant.banner && !restaurant.banner.includes('placeholder')) {
-    return restaurant.banner
-  }
-  const name = (restaurant.name || '').toLowerCase()
-  if (name.includes('biryani')) {
-    return 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('chai') || name.includes('chaupal') || name.includes('tea')) {
-    return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('burger') || name.includes('fast food')) {
-    return 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&auto=format&fit=crop&q=75'
-  }
-  return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&auto=format&fit=crop&q=75'
+  const img = restaurant.banner || restaurant.logo
+  if (img && !String(img).includes('placeholder')) return img
+  return null
 }
 
 export const RestaurantCard = ({ restaurant }) => {
@@ -27,7 +17,7 @@ export const RestaurantCard = ({ restaurant }) => {
   if (!restaurant) return null
 
   const isOpen = restaurant.is_open !== false
-  const rating = Number(restaurant.rating) || 4.8
+  const rating = Number(restaurant.rating) || 0
   const timeMin = restaurant.preparation_time_minutes || 25
   const isPureVeg = Boolean(restaurant.is_pure_veg)
   const bannerUrl = getRestaurantBanner(restaurant)
@@ -47,19 +37,21 @@ export const RestaurantCard = ({ restaurant }) => {
     >
       {/* Banner Hero with Aspect Ratio */}
       <div className="relative aspect-[16/9] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-        <img
-          src={bannerUrl}
-          alt={restaurant.name}
-          width="360"
-          height="202"
-          className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
-          loading="lazy"
-          decoding="async"
-          onError={(e) => {
-            e.target.onerror = null
-            e.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&auto=format&fit=crop&q=75'
-          }}
-        />
+        {bannerUrl ? (
+          <img
+            src={bannerUrl}
+            alt={restaurant.name}
+            width="360"
+            height="202"
+            className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#113BD0]/10 to-[#FF5200]/10 text-[#113BD0] dark:text-blue-400">
+            <Store className="w-10 h-10" />
+          </div>
+        )}
 
         {/* Gradient Shadow Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -88,15 +80,19 @@ export const RestaurantCard = ({ restaurant }) => {
 
         {/* Bottom Banner Info: Discount offer & Rating */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
-          <div className="flex items-center gap-1 bg-[#113BD0]/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black shadow-md whitespace-nowrap">
-            <Tag className="w-3 h-3 shrink-0" />
-            <span>50% {t.offUpTo || 'OFF UP TO'} ₹100</span>
-          </div>
+          {restaurant.offer_text ? (
+            <div className="flex items-center gap-1 bg-[#113BD0]/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black shadow-md whitespace-nowrap">
+              <Tag className="w-3 h-3 shrink-0" />
+              <span>{restaurant.offer_text}</span>
+            </div>
+          ) : <span />}
 
-          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1 rounded-xl border border-slate-200/60 dark:border-slate-700 shadow-md flex items-center gap-1 text-xs font-black text-slate-900 dark:text-slate-100 shrink-0 whitespace-nowrap">
-            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-            <span>{rating.toFixed(1)}</span>
-          </div>
+          {rating > 0 && (
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1 rounded-xl border border-slate-200/60 dark:border-slate-700 shadow-md flex items-center gap-1 text-xs font-black text-slate-900 dark:text-slate-100 shrink-0 whitespace-nowrap">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+              <span>{rating.toFixed(1)}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -107,7 +103,7 @@ export const RestaurantCard = ({ restaurant }) => {
             {restaurant.name}
           </h3>
           <p className="text-xs text-slate-600 dark:text-slate-400 truncate mt-0.5 font-medium">
-            {restaurant.description || restaurant.address_line1 || 'Civil Lines, Kanpur'}
+            {restaurant.description || restaurant.address_line1 || restaurant.city || ''}
           </p>
         </div>
 
@@ -119,7 +115,7 @@ export const RestaurantCard = ({ restaurant }) => {
           </div>
           <div className="flex items-center gap-1.5 min-w-0 truncate justify-end">
             <MapPin className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
-            <span className="truncate">{restaurant.city || 'Kanpur'}</span>
+            <span className="truncate">{restaurant.city || ''}</span>
           </div>
         </div>
       </div>

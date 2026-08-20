@@ -19,6 +19,7 @@ import CustomerList from './pages/customers/CustomerList'
 import CustomerDetails from './pages/customers/CustomerDetails'
 import FinanceDashboard from './pages/finance/FinanceDashboard'
 import CouponList from './pages/marketing/CouponList'
+import FoodCategoriesPage from './pages/marketing/FoodCategoriesPage'
 import ReportsDashboard from './pages/reports/ReportsDashboard'
 import SupportTickets from './pages/support/SupportTickets'
 import SettingsPage from './pages/settings/SettingsPage'
@@ -81,6 +82,7 @@ export const App = () => {
                 <Route path="customers/:id" element={<CustomerDetails />} />
                 <Route path="finance" element={<FinanceDashboard />} />
                 <Route path="marketing" element={<CouponList />} />
+                <Route path="food-categories" element={<FoodCategoriesPage />} />
                 <Route path="reports" element={<ReportsDashboard />} />
                 <Route path="system-logs" element={<SystemLogDashboard />} />
                 <Route path="support" element={<SupportTickets />} />

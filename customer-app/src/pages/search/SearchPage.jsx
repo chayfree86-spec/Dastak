@@ -56,7 +56,7 @@ export const SearchPage = () => {
 
       setLoading(true)
       try {
-        const res = await searchApi.search(searchTerm.trim(), { lang })
+        const res = await searchApi.search(searchTerm.trim())
         setResults({
           intent: res.data?.intent || null,
           dishes: res.data?.dishes || [],

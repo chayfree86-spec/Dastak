@@ -1,93 +1,45 @@
 import React, { useState, useEffect } from 'react'
-import { Star, Clock, Tag, ArrowRight, Award } from 'lucide-react'
+import { Star, Clock, ArrowRight, Award, Store } from 'lucide-react'
 import { apiClient } from '../../api/client'
 import { APP_URLS } from '../../config/appUrls'
 
-const DEFAULT_RESTAURANTS = [
-  {
-    id: 1,
-    name: 'Biryani Central',
-    cuisine: 'Awadhi & Dum Biryani',
-    rating: 4.8,
-    reviews: '1.2k+',
-    time: '18-22 mins',
-    priceForTwo: '₹350 for two',
-    discount: '50% OFF up to ₹100',
-    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop&q=80',
-    isPureVeg: false,
-    featured: true,
-  },
-  {
-    id: 2,
-    name: 'Royal Spice Kitchen',
-    cuisine: 'North Indian, Mughlai & Rolls',
-    rating: 4.7,
-    reviews: '850+',
-    time: '20-25 mins',
-    priceForTwo: '₹400 for two',
-    discount: 'FLAT ₹75 OFF',
-    image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&auto=format&fit=crop&q=80',
-    isPureVeg: false,
-    featured: true,
-  },
-  {
-    id: 3,
-    name: 'Punjabi Tadka Express',
-    cuisine: 'Punjabi, Paneer Specials & Breads',
-    rating: 4.6,
-    reviews: '2.1k+',
-    time: '15-20 mins',
-    priceForTwo: '₹300 for two',
-    discount: 'FREE DELIVERY',
-    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&auto=format&fit=crop&q=80',
-    isPureVeg: true,
-    featured: true,
-  },
-  {
-    id: 4,
-    name: 'South Express Cafe',
-    cuisine: 'Dosa, Idli, Vada & Filter Coffee',
-    rating: 4.9,
-    reviews: '3.4k+',
-    time: '15-18 mins',
-    priceForTwo: '₹250 for two',
-    discount: '20% OFF',
-    image: 'https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?w=600&auto=format&fit=crop&q=80',
-    isPureVeg: true,
-    featured: true,
-  },
-]
-
 export const FeaturedRestaurants = () => {
-  const [restaurants, setRestaurants] = useState(DEFAULT_RESTAURANTS)
+  const [restaurants, setRestaurants] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
-        const res = await apiClient.get('/restaurants/featured')
-        const data = res.data?.data || res.data
-        if (Array.isArray(data) && data.length > 0) {
-          const mapped = data.map((r, idx) => ({
-            id: r.id || idx + 1,
-            name: r.name || 'Partner Kitchen',
-            cuisine: r.cuisine_types || r.cuisines || 'Multi-Cuisine',
-            rating: Number(r.rating || 4.7).toFixed(1),
-            reviews: `${r.reviews_count || (150 + idx * 80)}+`,
-            time: `${r.delivery_time_mins || 20} mins`,
-            priceForTwo: `₹${r.cost_for_two || 350} for two`,
-            discount: r.active_discount || (idx % 2 === 0 ? '50% OFF up to ₹100' : 'FLAT ₹75 OFF'),
-            image: r.banner_url || r.logo_url || DEFAULT_RESTAURANTS[idx % DEFAULT_RESTAURANTS.length].image,
+        const res = await apiClient.get('/restaurants', { params: { per_page: 8 } })
+        const data = res.data?.data || res.data || []
+        // Map ONLY real backend fields — nothing fabricated.
+        const mapped = (Array.isArray(data) ? data : [])
+          .filter((r) => r.is_active !== false)
+          .slice(0, 4)
+          .map((r) => ({
+            id: r.id,
+            slug: r.slug || r.id,
+            name: r.name,
+            cuisine: r.description || r.city || '',
+            rating: Number(r.rating) || 0,
+            reviews: Number(r.total_ratings) || 0,
+            time: r.preparation_time_minutes ? `${r.preparation_time_minutes} mins` : null,
+            image: r.banner || r.logo || null,
             isPureVeg: Boolean(r.is_pure_veg),
-            featured: true,
+            isOpen: r.is_open !== false,
           }))
-          setRestaurants(mapped)
-        }
+        setRestaurants(mapped)
       } catch {
-        // Fallback to rich defaults
+        setRestaurants([])
+      } finally {
+        setLoading(false)
       }
     }
     fetchRestaurants()
   }, [])
+
+  // Hide the whole section when there is no real data (no dummy filler).
+  if (!loading && restaurants.length === 0) return null
 
   return (
     <section id="restaurants" className="py-20 bg-white dark:bg-slate-900">
@@ -121,49 +73,40 @@ export const FeaturedRestaurants = () => {
           {restaurants.map((rest) => (
             <a
               key={rest.id}
-              href={`${APP_URLS.customer}/restaurants/${rest.id}`}
+              href={`${APP_URLS.customer}/restaurants/${rest.slug}`}
               className="group rounded-3xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 overflow-hidden shadow-sm hover:shadow-2xl hover:border-[#FF5200]/40 transition-all duration-300 flex flex-col hover:-translate-y-1.5"
             >
-              {/* Image Container with Badges */}
+              {/* Image / branded placeholder */}
               <div className="relative h-48 w-full overflow-hidden bg-slate-200 dark:bg-slate-700">
-                <img
-                  src={rest.image}
-                  alt={rest.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    e.target.onerror = null
-                    e.target.src = DEFAULT_RESTAURANTS[0].image
-                  }}
-                />
-
-                {/* Dark Vignette Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-                {/* Discount Tag */}
-                {rest.discount && (
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-xl bg-[#FF5200] text-white text-[10px] font-black tracking-wider uppercase shadow-md flex items-center gap-1">
-                    <Tag className="w-3 h-3" />
-                    <span>{rest.discount}</span>
+                {rest.image ? (
+                  <img
+                    src={rest.image}
+                    alt={rest.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#113BD0]/10 to-[#FF5200]/10 text-[#113BD0] dark:text-blue-400">
+                    <Store className="w-10 h-10" />
                   </div>
                 )}
 
-                {/* Pure Veg Badge */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
                 {rest.isPureVeg && (
                   <div className="absolute top-3 right-3 px-2 py-0.5 rounded-lg bg-emerald-600 text-white text-[10px] font-bold shadow-md">
                     🌱 Pure Veg
                   </div>
                 )}
 
-                {/* Delivery Time & Price on Image Bottom */}
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs font-bold">
-                  <span className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg">
-                    <Clock className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{rest.time}</span>
-                  </span>
-                  <span className="bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg">
-                    {rest.priceForTwo}
-                  </span>
-                </div>
+                {rest.time && (
+                  <div className="absolute bottom-3 left-3 text-white text-xs font-bold">
+                    <span className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg">
+                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{rest.time}</span>
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Card Body */}
@@ -173,18 +116,24 @@ export const FeaturedRestaurants = () => {
                     <h3 className="text-base font-black text-slate-900 dark:text-white truncate group-hover:text-[#FF5200] transition-colors">
                       {rest.name}
                     </h3>
-                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-black shrink-0">
-                      <Star className="w-3 h-3 fill-emerald-600 dark:fill-emerald-400" />
-                      <span>{rest.rating}</span>
-                    </div>
+                    {rest.rating > 0 && (
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 text-xs font-black shrink-0">
+                        <Star className="w-3 h-3 fill-emerald-600 dark:fill-emerald-400" />
+                        <span>{rest.rating.toFixed(1)}</span>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 truncate">
-                    {rest.cuisine}
-                  </p>
+                  {rest.cuisine && (
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 truncate">
+                      {rest.cuisine}
+                    </p>
+                  )}
                 </div>
 
                 <div className="pt-3 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
-                  <span className="text-[11px] text-slate-400">{rest.reviews} reviews</span>
+                  <span className="text-[11px] text-slate-400">
+                    {rest.reviews > 0 ? `${rest.reviews} reviews` : (rest.isOpen ? 'Open now' : 'Closed')}
+                  </span>
                   <span className="text-[#FF5200] group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
                     <span>View Menu</span>
                     <ArrowRight className="w-3 h-3" />
