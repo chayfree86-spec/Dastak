@@ -49,7 +49,7 @@ export const GpsEnableModal = ({ isOpen, onClose, onOpenPicker }) => {
       {/* Dialog Box */}
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 p-6 z-10 animate-in zoom-in-95 duration-200 overflow-hidden">
         {/* Decorative Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-[#2845D6] to-emerald-500" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-[#113BD0] to-emerald-500" />
 
         {/* Close Button */}
         <button
@@ -66,7 +66,7 @@ export const GpsEnableModal = ({ isOpen, onClose, onOpenPicker }) => {
             <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-500 flex items-center justify-center border border-amber-200/60 dark:border-amber-800/60 shadow-xs">
               <MapPinOff className="w-8 h-8 animate-pulse" />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#2845D6] text-white flex items-center justify-center shadow-md">
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#113BD0] text-white flex items-center justify-center shadow-md">
               <Compass className="w-3.5 h-3.5 animate-spin duration-3000" />
             </div>
           </div>
@@ -97,7 +97,7 @@ export const GpsEnableModal = ({ isOpen, onClose, onOpenPicker }) => {
               2
             </div>
             <div className="text-slate-700 dark:text-slate-300 font-medium">
-              Tap the <strong className="text-[#2845D6] dark:text-blue-400 font-bold">"Check GPS & Retry"</strong> button below.
+              Tap the <strong className="text-[#113BD0] dark:text-blue-400 font-bold">"Check GPS & Retry"</strong> button below.
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ export const GpsEnableModal = ({ isOpen, onClose, onOpenPicker }) => {
             type="button"
             onClick={handleRetry}
             disabled={checking}
-            className="w-full py-3 px-4 rounded-xl bg-[#2845D6] hover:bg-[#1f37b5] active:scale-[0.99] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-[#2845D6]/20 transition-all cursor-pointer disabled:opacity-60"
+            className="w-full py-3 px-4 rounded-xl bg-[#113BD0] hover:bg-[#1f37b5] active:scale-[0.99] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-[#113BD0]/20 transition-all cursor-pointer disabled:opacity-60"
           >
             <RefreshCw className={`w-4 h-4 ${checking ? 'animate-spin' : ''}`} />
             <span>{checking ? 'Checking Device GPS...' : 'Check GPS & Retry'}</span>

@@ -13,10 +13,10 @@ export const StatusBadge = ({ status, size = 'sm' }) => {
     },
     CONFIRMED: {
       bg: 'bg-blue-50 dark:bg-blue-950/40',
-      text: 'text-[#2845D6] dark:text-blue-300',
+      text: 'text-[#113BD0] dark:text-blue-300',
       border: 'border-blue-200/80 dark:border-blue-800/40',
       label: 'ACCEPTED',
-      dot: 'bg-[#2845D6] dark:bg-blue-400',
+      dot: 'bg-[#113BD0] dark:bg-blue-400',
     },
     PREPARING: {
       bg: 'bg-indigo-50 dark:bg-indigo-950/40',

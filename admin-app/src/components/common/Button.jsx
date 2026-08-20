@@ -17,12 +17,12 @@ export const Button = ({
   const baseStyles = 'relative group overflow-hidden inline-flex items-center justify-center font-bold rounded-xl transition-all duration-300 outline-none focus:outline-none border-0 ring-0 focus:ring-0 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] select-none cursor-pointer'
 
   const variants = {
-    primary: 'bg-[#2845D6] hover:bg-[#F97316] text-white shadow-sm hover:shadow-md hover:shadow-orange-500/20',
+    primary: 'bg-[#113BD0] hover:bg-[#F97316] text-white shadow-sm hover:shadow-md hover:shadow-orange-500/20',
     secondary: 'bg-slate-100 hover:bg-[#F97316] text-slate-800 dark:bg-slate-700/80 dark:text-slate-100 hover:text-white dark:hover:text-white',
     outline: 'bg-transparent hover:bg-[#F97316] text-slate-700 dark:text-slate-200 hover:text-white border border-slate-200 dark:border-slate-700 hover:border-[#F97316]',
     danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
     ghost: 'bg-transparent hover:bg-[#F97316] text-slate-600 dark:text-slate-300 hover:text-white',
-    accent: 'bg-[#F97316] hover:bg-[#2845D6] text-white shadow-sm hover:shadow-md hover:shadow-blue-500/20',
+    accent: 'bg-[#F97316] hover:bg-[#113BD0] text-white shadow-sm hover:shadow-md hover:shadow-blue-500/20',
   }
 
   // Slide fill colors per variant
@@ -32,7 +32,7 @@ export const Button = ({
     outline: 'bg-gradient-to-r from-[#F97316] to-[#EA580C]',
     danger: 'bg-gradient-to-r from-rose-700 to-rose-800',
     ghost: 'bg-gradient-to-r from-[#F97316] to-[#EA580C]',
-    accent: 'bg-gradient-to-r from-[#2845D6] to-[#1E35B0]',
+    accent: 'bg-gradient-to-r from-[#113BD0] to-[#1E35B0]',
   }
 
   const sizes = {

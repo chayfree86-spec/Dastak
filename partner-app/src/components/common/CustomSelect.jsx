@@ -52,11 +52,11 @@ export const CustomSelect = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-11 sm:h-12 flex items-center justify-between text-left text-xs font-bold rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed ${
+        className={`w-full h-11 sm:h-12 flex items-center justify-between text-left text-xs font-bold rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed ${
           error
             ? 'border-rose-500'
             : isOpen
-            ? 'border-[#2845D6]'
+            ? 'border-[#113BD0]'
             : 'border-slate-200 dark:border-slate-700'
         }`}
       >
@@ -65,7 +65,7 @@ export const CustomSelect = ({
         </span>
         <ChevronDown
           className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-[#2845D6]' : ''
+            isOpen ? 'rotate-180 text-[#113BD0]' : ''
           }`}
         />
       </button>
@@ -80,7 +80,7 @@ export const CustomSelect = ({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search..."
-                className="w-full text-xs font-semibold pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-[#2845D6]"
+                className="w-full text-xs font-semibold pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:border-[#113BD0]"
                 autoFocus
               />
             </div>
@@ -98,7 +98,7 @@ export const CustomSelect = ({
                     onClick={() => handleSelect(opt.value)}
                     className={`w-full flex items-center justify-between px-3 py-2 text-xs font-bold rounded-lg text-left transition-colors ${
                       isSelected
-                        ? 'bg-[#2845D6] text-white'
+                        ? 'bg-[#113BD0] text-white'
                         : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                   >

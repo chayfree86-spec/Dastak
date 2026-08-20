@@ -151,7 +151,7 @@ export const MenuManager = ({ restaurantId }) => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search menu items by name..."
-                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0]"
               />
             </div>
           </div>
@@ -182,7 +182,7 @@ export const MenuManager = ({ restaurantId }) => {
                     Sub-category
                   </Button>
                 )}
-                <button type="button" onClick={() => setCatModal({ parentId: activeCategory.parent_id ?? null, category: activeCategory })} className="p-1.5 rounded-lg text-slate-400 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700" title="Edit category">
+                <button type="button" onClick={() => setCatModal({ parentId: activeCategory.parent_id ?? null, category: activeCategory })} className="p-1.5 rounded-lg text-slate-400 hover:text-[#113BD0] hover:bg-slate-100 dark:hover:bg-slate-700" title="Edit category">
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button type="button" onClick={() => setConfirm({ type: 'category', id: activeCategory.id, label: activeCategory.category })} className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40" title="Delete category">
@@ -251,7 +251,7 @@ export const MenuManager = ({ restaurantId }) => {
                 checked={item.is_available}
                 onChange={() => handleToggleAvail(item)}
               />
-              <button type="button" onClick={() => setItemModal({ item })} className="p-1.5 rounded-lg text-slate-400 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700" title="Edit item">
+              <button type="button" onClick={() => setItemModal({ item })} className="p-1.5 rounded-lg text-slate-400 hover:text-[#113BD0] hover:bg-slate-100 dark:hover:bg-slate-700" title="Edit item">
                 <Edit2 className="w-4 h-4" />
               </button>
               <button type="button" onClick={() => setConfirm({ type: 'item', id: item.id, label: item.name })} className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40" title="Delete item">
@@ -544,7 +544,7 @@ const ItemModal = ({ restaurantId, tree, item, onClose, onSaved }) => {
                   onClick={() => handleLangChange('EN')}
                   className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all ${
                     lang === 'EN'
-                      ? 'bg-[#2845D6] text-white shadow-2xs'
+                      ? 'bg-[#113BD0] text-white shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-250'
                   }`}
                 >
@@ -580,7 +580,7 @@ const ItemModal = ({ restaurantId, tree, item, onClose, onSaved }) => {
                     key={idx}
                     type="button"
                     onClick={() => applySuggestion(sug)}
-                    className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-850 hover:bg-[#2845D6] dark:hover:bg-[#2845D6] hover:text-white dark:hover:text-white border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors shadow-2xs"
+                    className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-850 hover:bg-[#113BD0] dark:hover:bg-[#113BD0] hover:text-white dark:hover:text-white border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors shadow-2xs"
                   >
                     {sug}
                   </button>

@@ -28,6 +28,7 @@ const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 
 import { PwaInstallModal } from './components/pwa/PwaInstallModal'
 import { usePwaUpdate } from './hooks/usePwaUpdate'
+import AuthGuard from './components/auth/AuthGuard'
 
 const PageLoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[40vh]">
@@ -61,7 +62,13 @@ export function App() {
                   <Suspense fallback={<PageLoadingFallback />}>
                     <Routes>
                       <Route path="/login" element={<LoginPage />} />
-                      <Route element={<CustomerLayout />}>
+                      <Route
+                        element={
+                          <AuthGuard>
+                            <CustomerLayout />
+                          </AuthGuard>
+                        }
+                      >
                         <Route path="/" element={<HomePage />} />
                         <Route path="/search" element={<SearchPage />} />
                         <Route path="/restaurants" element={<RestaurantsPage />} />

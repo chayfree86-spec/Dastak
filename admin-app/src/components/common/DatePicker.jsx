@@ -70,8 +70,8 @@ export const DatePicker = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-11 sm:h-10 flex items-center justify-between text-left text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] ${
-          error ? 'border-rose-500' : isOpen ? 'border-[#2845D6]' : 'border-slate-200 dark:border-slate-700'
+        className={`w-full h-11 sm:h-10 flex items-center justify-between text-left text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] ${
+          error ? 'border-rose-500' : isOpen ? 'border-[#113BD0]' : 'border-slate-200 dark:border-slate-700'
         }`}
       >
         <span className={value ? 'font-medium' : 'text-slate-400 dark:text-slate-500'}>
@@ -125,9 +125,9 @@ export const DatePicker = ({
                   onClick={() => handleSelectDay(day)}
                   className={`w-7 h-7 text-xs font-medium rounded-lg flex items-center justify-center transition-colors ${
                     selected
-                      ? 'bg-[#2845D6] text-white font-bold'
+                      ? 'bg-[#113BD0] text-white font-bold'
                       : today
-                      ? 'bg-slate-100 dark:bg-slate-700 text-[#2845D6] dark:text-blue-400 font-semibold'
+                      ? 'bg-slate-100 dark:bg-slate-700 text-[#113BD0] dark:text-blue-400 font-semibold'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >

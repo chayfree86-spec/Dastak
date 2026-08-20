@@ -56,11 +56,11 @@ export const ImageUpload = ({
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className={`w-full h-36 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#2845D6] dark:hover:border-blue-500 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex flex-col items-center justify-center p-4 cursor-pointer text-center ${
+          className={`w-full h-36 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#113BD0] dark:hover:border-blue-500 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex flex-col items-center justify-center p-4 cursor-pointer text-center ${
             error ? 'border-rose-400 bg-rose-50/20' : ''
           }`}
         >
-          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400 flex items-center justify-center mb-2">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400 flex items-center justify-center mb-2">
             <UploadCloud className="w-5 h-5" />
           </div>
           <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">

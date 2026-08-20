@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Sparkles,
   ChevronRight,
   Layers,
 } from 'lucide-react'
@@ -240,7 +239,7 @@ export const MenuPage = () => {
           <button
             type="button"
             onClick={() => setItemModal({})}
-            className="h-11 sm:h-12 rounded-xl sm:rounded-2xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none"
+            className="h-11 sm:h-12 rounded-xl sm:rounded-2xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none"
           >
             <PlusCircle className="w-4 h-4" />
             <span>+ Add Item</span>
@@ -280,7 +279,7 @@ export const MenuPage = () => {
               placeholder="Search items by name, code or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-10 h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-[#2845D6] focus:ring-2 focus:ring-blue-500/20 transition-all"
+              className="w-full pl-10 pr-10 h-11 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-[#113BD0] focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
             {search && (
               <button
@@ -320,7 +319,7 @@ export const MenuPage = () => {
                 onClick={() => setInStockOnlyFilter((prev) => !prev)}
                 className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer select-none ${
                   inStockOnlyFilter
-                    ? 'bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-300 border-blue-300 dark:border-blue-700 shadow-2xs'
+                    ? 'bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-300 border-blue-300 dark:border-blue-700 shadow-2xs'
                     : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                 }`}
               >
@@ -450,7 +449,7 @@ export const MenuPage = () => {
                     <button
                       type="button"
                       onClick={() => setItemModal({ item })}
-                      className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all select-none cursor-pointer"
+                      className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all select-none cursor-pointer"
                       title="Edit Item"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -603,7 +602,7 @@ const CategoryModal = ({ parentId, category, parentOptions, onClose, onSaved }) 
           <button
             type="submit"
             disabled={loading}
-            className="h-12 rounded-xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all"
+            className="h-12 rounded-xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all"
           >
             {loading ? 'Saving...' : 'Save Category'}
           </button>
@@ -847,7 +846,7 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
                   onClick={() => handleLangChange('EN')}
                   className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all ${
                     lang === 'EN'
-                      ? 'bg-[#2845D6] text-white shadow-2xs'
+                      ? 'bg-[#113BD0] text-white shadow-2xs'
                       : 'text-slate-500 dark:text-slate-300 hover:text-slate-800'
                   }`}
                 >
@@ -885,7 +884,7 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
                     key={idx}
                     type="button"
                     onClick={() => applySuggestion(sug)}
-                    className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 hover:bg-[#2845D6] hover:text-white border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors shadow-2xs"
+                    className="px-2 py-0.5 rounded-lg bg-white dark:bg-slate-700 hover:bg-[#113BD0] hover:text-white border border-slate-200 dark:border-slate-600 text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors shadow-2xs"
                   >
                     {sug}
                   </button>
@@ -1007,7 +1006,7 @@ const ItemModal = ({ tree, item, onClose, onSaved }) => {
           <button
             type="submit"
             disabled={loading}
-            className="h-12 rounded-xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer"
+            className="h-12 rounded-xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer"
           >
             {loading ? 'Saving...' : isEdit ? 'Update Item' : 'Save Item'}
           </button>

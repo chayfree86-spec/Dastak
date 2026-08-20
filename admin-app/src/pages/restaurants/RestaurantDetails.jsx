@@ -62,50 +62,22 @@ export const RestaurantDetails = () => {
 
   const { data: settlements, loading: settlementsLoading, retry: retrySettlements } = useApi(
     () => restaurantsApi.getRestaurantSettlements(id),
-    [id],
-    { initialData: [] }
+    [id]
   )
 
   const { data: restaurant, loading, error, retry, setData: setRestaurantData } = useApi(
     () => restaurantsApi.getRestaurantDetails(id),
-    [id],
-    { initialData: null }
+    [id]
   )
 
   const { data: menuData, loading: menuLoading } = useApi(
     () => restaurantsApi.getRestaurantMenu(id),
-    [id],
-    {
-      initialData: [
-        {
-          category: 'Biryani Specials',
-          items: [
-            { id: 'M1', name: 'Hyderabadi Dum Biryani', is_veg: false, price: 340.00, discount_price: 299.00, is_available: true, prep_time: '25 mins', variants: ['Half', 'Full'], addons: ['Extra Raita', 'Mirchi Ka Salan'] },
-            { id: 'M2', name: 'Lucknowi Paneer Biryani', is_veg: true, price: 280.00, discount_price: 260.00, is_available: true, prep_time: '20 mins', variants: ['Regular', 'Large'], addons: ['Extra Gravy'] },
-            { id: 'M3', name: 'Kolkata Chicken Biryani', is_veg: false, price: 360.00, discount_price: 360.00, is_available: false, prep_time: '30 mins', variants: ['Standard'], addons: ['Extra Boiled Egg'] },
-          ],
-        },
-        {
-          category: 'Starters & Kebabs',
-          items: [
-            { id: 'M4', name: 'Chicken Tikka Kebab (6 Pcs)', is_veg: false, price: 290.00, discount_price: 270.00, is_available: true, prep_time: '18 mins', variants: [], addons: ['Mint Chutney'] },
-            { id: 'M5', name: 'Dahi Ke Kebab (4 Pcs)', is_veg: true, price: 220.00, discount_price: 220.00, is_available: true, prep_time: '15 mins', variants: [], addons: [] },
-          ],
-        },
-      ],
-    }
+    [id]
   )
 
   const { data: ordersData, loading: ordersLoading } = useApi(
     () => restaurantsApi.getRestaurantOrders(id, { limit: 5 }),
-    [id],
-    {
-      initialData: [
-        { id: 'D4829', customer: 'Aarav Sharma', amount: 640.00, status: 'NEW', time: new Date().toISOString() },
-        { id: 'D4815', customer: 'Deepak Rao', amount: 820.00, status: 'DELIVERED', time: new Date(Date.now() - 3600000).toISOString() },
-        { id: 'D4790', customer: 'Kunal Kapoor', amount: 490.00, status: 'DELIVERED', time: new Date(Date.now() - 86400000).toISOString() },
-      ],
-    }
+    [id]
   )
 
   // Settings Tab States
@@ -559,9 +531,9 @@ export const RestaurantDetails = () => {
         center: { lat, lng },
         radius: radiusKm * 1000,
         map,
-        strokeColor: '#2845D6',
+        strokeColor: '#113BD0',
         strokeWeight: 2,
-        fillColor: '#2845D6',
+        fillColor: '#113BD0',
         fillOpacity: 0.15,
       })
       circleRef.current = circle
@@ -744,7 +716,7 @@ export const RestaurantDetails = () => {
   if (loading && !restaurant) {
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-3">
-        <div className="w-10 h-10 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin" />
         <p className="text-xs font-semibold text-slate-500">Loading restaurant details...</p>
       </div>
     )
@@ -767,7 +739,7 @@ export const RestaurantDetails = () => {
       {/* Restaurant Header Card */}
       <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#2845D6]/10 text-[#2845D6] dark:bg-blue-900/40 dark:text-blue-400 text-2xl font-black flex items-center justify-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-[#113BD0]/10 text-[#113BD0] dark:bg-blue-900/40 dark:text-blue-400 text-2xl font-black flex items-center justify-center shadow-xs">
             {restaurant?.name?.charAt(0) || 'R'}
           </div>
           <div>
@@ -852,7 +824,7 @@ export const RestaurantDetails = () => {
                 <button
                   type="button"
                   onClick={handleOpenAddressModal}
-                  className="flex items-center gap-1 text-[11px] font-bold text-[#2845D6] dark:text-blue-400 hover:underline cursor-pointer"
+                  className="flex items-center gap-1 text-[11px] font-bold text-[#113BD0] dark:text-blue-400 hover:underline cursor-pointer"
                 >
                   <Edit2 className="w-3 h-3" />
                   <span>Edit Address</span>
@@ -883,7 +855,7 @@ export const RestaurantDetails = () => {
               <div className="space-y-2.5 text-xs">
                 <div>
                   <span className="text-slate-400 block">Dastak Commission:</span>
-                  <span className="text-base font-black text-[#2845D6] dark:text-blue-400">{restaurant?.commission}%</span>
+                  <span className="text-base font-black text-[#113BD0] dark:text-blue-400">{restaurant?.commission}%</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Settlement Cycle:</span>
@@ -902,7 +874,7 @@ export const RestaurantDetails = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-[#2845D6]" />
+                  <MapPin className="w-4 h-4 text-[#113BD0]" />
                   Delivery Area Coverage Map
                 </h3>
                 <p className="text-[11px] text-slate-400">
@@ -925,7 +897,7 @@ export const RestaurantDetails = () => {
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex justify-between">
                       <span>Delivery Radius</span>
-                      <span className="font-bold text-[#2845D6]">{mapRadius} KM</span>
+                      <span className="font-bold text-[#113BD0]">{mapRadius} KM</span>
                     </label>
                     <input
                       type="range"
@@ -933,7 +905,7 @@ export const RestaurantDetails = () => {
                       max="30"
                       value={mapRadius}
                       onChange={handleMapRadiusChange}
-                      className="w-full accent-[#2845D6] cursor-pointer"
+                      className="w-full accent-[#113BD0] cursor-pointer"
                     />
                     <div className="flex justify-between text-[9px] text-slate-400 font-medium">
                       <span>1 KM</span>
@@ -956,7 +928,7 @@ export const RestaurantDetails = () => {
                     </div>
                     {mapDetectedAddress && (
                       <div className="p-2.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900 text-[11px] space-y-1">
-                        <span className="text-[10px] font-bold text-[#2845D6] dark:text-blue-400 uppercase tracking-wider block">Auto-Detected Address</span>
+                        <span className="text-[10px] font-bold text-[#113BD0] dark:text-blue-400 uppercase tracking-wider block">Auto-Detected Address</span>
                         <p className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{mapDetectedAddress}</p>
                         <span className="text-[10px] text-slate-500 dark:text-slate-400 block">{mapDetectedCity}</span>
                       </div>
@@ -971,7 +943,7 @@ export const RestaurantDetails = () => {
                       variant="primary"
                       size="sm"
                       icon={Navigation}
-                      className="w-full bg-[#2845D6] hover:bg-[#1f37b0] text-white font-bold"
+                      className="w-full bg-[#113BD0] hover:bg-[#1f37b0] text-white font-bold"
                       onClick={detectCurrentLocation}
                       loading={locating}
                     >
@@ -982,7 +954,7 @@ export const RestaurantDetails = () => {
                       variant="outline"
                       size="sm"
                       icon={MapPin}
-                      className="w-full border-blue-200 text-[#2845D6] hover:bg-blue-50 dark:hover:bg-blue-950 font-bold"
+                      className="w-full border-blue-200 text-[#113BD0] hover:bg-blue-50 dark:hover:bg-blue-950 font-bold"
                       onClick={() => resolveAddressFromMapPin(mapLat, mapLng)}
                       loading={pinResolving}
                     >
@@ -1035,7 +1007,7 @@ export const RestaurantDetails = () => {
                         type="button"
                         onClick={() => rotate3D(-1)}
                         title="Rotate View Left (-45°)"
-                        className="p-1.5 rounded-md text-slate-600 dark:text-slate-200 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-md text-slate-600 dark:text-slate-200 hover:text-[#113BD0] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
                       </button>
@@ -1044,7 +1016,7 @@ export const RestaurantDetails = () => {
                         type="button"
                         onClick={() => rotate3D(1)}
                         title="Rotate View Right (+45°)"
-                        className="p-1.5 rounded-md text-slate-600 dark:text-slate-200 hover:text-[#2845D6] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-md text-slate-600 dark:text-slate-200 hover:text-[#113BD0] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                       >
                         <RotateCw className="w-3.5 h-3.5" />
                       </button>
@@ -1057,8 +1029,8 @@ export const RestaurantDetails = () => {
                     title={is3DMode ? "Switch to 2D Roadmap View" : "Enable 3D Aerial Satellite View"}
                     className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border shadow-md font-bold text-xs transition-all cursor-pointer ${
                       is3DMode
-                        ? 'bg-[#2845D6] text-white border-[#2845D6] ring-2 ring-[#2845D6]/30 shadow-blue-500/20'
-                        : 'bg-white/95 dark:bg-slate-800/95 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2845D6] hover:bg-white'
+                        ? 'bg-[#113BD0] text-white border-[#113BD0] ring-2 ring-[#113BD0]/30 shadow-blue-500/20'
+                        : 'bg-white/95 dark:bg-slate-800/95 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#113BD0] hover:bg-white'
                     }`}
                   >
                     <Box className={`w-3.5 h-3.5 ${is3DMode ? 'animate-pulse' : ''}`} />
@@ -1069,7 +1041,7 @@ export const RestaurantDetails = () => {
                     type="button"
                     onClick={toggleFullscreen}
                     title="View map in fullscreen"
-                    className="p-2 rounded-lg bg-white/95 dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-200 hover:text-[#2845D6] hover:bg-white transition-colors cursor-pointer"
+                    className="p-2 rounded-lg bg-white/95 dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700 shadow-md text-slate-600 dark:text-slate-200 hover:text-[#113BD0] hover:bg-white transition-colors cursor-pointer"
                   >
                     <Maximize2 className="w-4 h-4" />
                   </button>
@@ -1089,7 +1061,7 @@ export const RestaurantDetails = () => {
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Recent Restaurant Orders</h3>
           <DataTable
             columns={[
-              { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
+              { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#113BD0]">#{r.id}</span> },
               { key: 'customer', header: 'Customer' },
               { key: 'amount', header: 'Amount', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
               { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} size="xs" /> },
@@ -1113,7 +1085,7 @@ export const RestaurantDetails = () => {
           </div>
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Dastak Commission</span>
-            <div className="text-2xl font-black text-[#2845D6] dark:text-blue-400 mt-2">
+            <div className="text-2xl font-black text-[#113BD0] dark:text-blue-400 mt-2">
               {formatCurrency((restaurant?.lifetime_sales || 0) * ((restaurant?.commission || 15) / 100))}
             </div>
           </div>
@@ -1163,7 +1135,7 @@ export const RestaurantDetails = () => {
             </div>
             <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Avg. Order Value (AOV)</span>
-              <div className="text-xl font-black text-[#2845D6] dark:text-blue-400 mt-1">
+              <div className="text-xl font-black text-[#113BD0] dark:text-blue-400 mt-1">
                 {formatCurrency(restaurant?.total_orders > 0 ? (restaurant.lifetime_sales / restaurant.total_orders) : 0)}
               </div>
               <span className="text-[10px] text-slate-400 block mt-1">Based on lifetime orders</span>
@@ -1184,7 +1156,7 @@ export const RestaurantDetails = () => {
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Recent Order Performance</h3>
               <DataTable
                 columns={[
-                  { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
+                  { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#113BD0]">#{r.id}</span> },
                   { key: 'customer', header: 'Customer' },
                   { key: 'amount', header: 'Amount', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
                   { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} size="xs" /> },
@@ -1209,7 +1181,7 @@ export const RestaurantDetails = () => {
                         <span className="text-slate-400 font-mono">{count} items</span>
                       </div>
                       <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                        <div className="h-full bg-[#2845D6] rounded-full" style={{ width: `${percent}%` }} />
+                        <div className="h-full bg-[#113BD0] rounded-full" style={{ width: `${percent}%` }} />
                       </div>
                     </div>
                   );
@@ -1333,7 +1305,7 @@ export const RestaurantDetails = () => {
                             updated[idx].is_closed = !e.target.checked;
                             setHoursList(updated);
                           }}
-                          className="rounded text-[#2845D6] focus:ring-[#2845D6]"
+                          className="rounded text-[#113BD0] focus:ring-[#113BD0]"
                         />
                         <span className={`font-bold ${day.is_closed ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-slate-200'}`}>
                           {dayNames[day.day_of_week]}
@@ -1479,7 +1451,7 @@ export const RestaurantDetails = () => {
                 type="button"
                 onClick={handleAutoPopulateFromPin}
                 disabled={pinResolving}
-                className="text-[11px] font-bold text-[#2845D6] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                className="text-[11px] font-bold text-[#113BD0] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
               >
                 <Navigation className={`w-3 h-3 ${pinResolving ? 'animate-spin' : ''}`} />
                 <span>{pinResolving ? 'Resolving...' : 'Auto-Fill from Map Pin'}</span>

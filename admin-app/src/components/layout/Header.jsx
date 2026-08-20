@@ -99,7 +99,7 @@ export const Header = ({ onOpenMobileSidebar, title, breadcrumbs = [] }) => {
               aria-expanded={profileOpen}
               className="flex items-center gap-2.5 p-1.5 sm:px-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-[#2845D6] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+              <div className="w-8 h-8 rounded-full bg-[#113BD0] text-white flex items-center justify-center font-bold text-xs shadow-xs">
                 {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
               </div>
               <div className="hidden md:flex flex-col text-left">

@@ -52,9 +52,9 @@ export const OrderList = () => {
   }, [silentRefresh])
 
   const orderTabs = [
-    { id: 'NEW', label: 'New', badge: 3 },
+    { id: 'NEW', label: 'New' },
     { id: 'ACCEPTED', label: 'Accepted' },
-    { id: 'PREPARING', label: 'Preparing', badge: 5 },
+    { id: 'PREPARING', label: 'Preparing' },
     { id: 'READY', label: 'Food Ready' },
     { id: 'ASSIGNED', label: 'Assigned' },
     { id: 'PICKED_UP', label: 'Picked Up' },
@@ -70,7 +70,7 @@ export const OrderList = () => {
       key: 'id',
       header: 'Order ID',
       render: (row) => (
-        <span className="font-mono font-bold text-[#2845D6] dark:text-blue-400 hover:underline">
+        <span className="font-mono font-bold text-[#113BD0] dark:text-blue-400 hover:underline">
           #{row.id}
         </span>
       ),
@@ -126,7 +126,7 @@ export const OrderList = () => {
             e.stopPropagation()
             setSelectedOrderId(row.id)
           }}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-[#2845D6] dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-[#113BD0] dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           title="Inspect Details"
         >
           <Eye className="w-4 h-4" />
@@ -159,7 +159,7 @@ export const OrderList = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by Order ID (e.g. D4829), customer or restaurant..."
-            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0]"
           />
         </div>
 
@@ -206,7 +206,7 @@ export const OrderList = () => {
       <div className="md:hidden space-y-2.5">
         {loading ? (
           <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-slate-400 font-medium">Loading orders...</p>
           </div>
         ) : !data || data.length === 0 ? (
@@ -221,7 +221,7 @@ export const OrderList = () => {
               className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer space-y-2.5"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-sm text-[#2845D6] dark:text-blue-400">
+                <span className="font-mono font-bold text-sm text-[#113BD0] dark:text-blue-400">
                   #{order.id}
                 </span>
                 <div className="flex items-center gap-1.5">

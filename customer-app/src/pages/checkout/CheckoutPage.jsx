@@ -132,7 +132,7 @@ export const CheckoutPage = () => {
             <button
               type="button"
               onClick={() => setLocationModalOpen(true)}
-              className="text-xs font-bold text-[#2845D6] dark:text-blue-400 hover:underline cursor-pointer"
+              className="text-xs font-bold text-[#113BD0] dark:text-blue-400 hover:underline cursor-pointer"
             >
               {t.changeLocation}
             </button>
@@ -164,7 +164,7 @@ export const CheckoutPage = () => {
             value={specialInstructions}
             onChange={(e) => setSpecialInstructions(e.target.value)}
             placeholder={lang === 'hi' ? 'उदा. डोरबेल बजाएं, गेट पर रखें, एक्स्ट्रा नैपकिन रखें' : 'e.g. Ring doorbell, leave at gate, keep extra napkins'}
-            className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+            className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
           />
         </div>
 
@@ -202,11 +202,11 @@ export const CheckoutPage = () => {
               onClick={() => setPaymentMode('ONLINE')}
               className={`p-4 rounded-2xl border-2 transition-all flex items-center gap-3 cursor-pointer ${
                 paymentMode === 'ONLINE'
-                  ? 'bg-blue-50/70 dark:bg-slate-800 border-[#2845D6] ring-2 ring-blue-500/15'
+                  ? 'bg-blue-50/70 dark:bg-slate-800 border-[#113BD0] ring-2 ring-blue-500/15'
                   : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300'
               }`}
             >
-              <div className="w-10 h-10 rounded-xl bg-[#2845D6] text-white flex items-center justify-center font-black shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#113BD0] text-white flex items-center justify-center font-black shrink-0">
                 <CreditCard className="w-5 h-5" />
               </div>
               <div className="min-w-0">

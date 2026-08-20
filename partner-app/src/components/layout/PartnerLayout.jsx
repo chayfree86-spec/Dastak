@@ -154,7 +154,7 @@ export const PartnerLayout = () => {
               className={({ isActive }) =>
                 `flex items-center justify-between px-3.5 py-3 rounded-2xl font-bold text-xs transition-all ${
                   isActive
-                    ? 'bg-[#2845D6] text-white shadow-md shadow-blue-500/20'
+                    ? 'bg-[#113BD0] text-white shadow-md shadow-blue-500/20'
                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/60 hover:text-slate-900 dark:hover:text-white'
                 }`
               }
@@ -196,7 +196,7 @@ export const PartnerLayout = () => {
               onClick={toggleSound}
               className={`flex items-center justify-between p-2 rounded-xl border text-xs font-bold transition-colors ${
                 soundEnabled
-                  ? 'bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 border-blue-200 dark:border-blue-800'
                   : 'bg-slate-50 dark:bg-slate-700/60 text-slate-400 border-slate-200/80 dark:border-slate-600'
               }`}
             >
@@ -231,7 +231,7 @@ export const PartnerLayout = () => {
         <header className="sticky top-0 z-30 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-700 px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 transition-colors duration-200">
           {/* Mobile Brand Indicator (Single clean restaurant name and avatar) */}
           <div className="flex items-center gap-2.5 md:hidden min-w-0">
-            <div className="w-9 h-9 rounded-2xl bg-[#2845D6] text-white flex items-center justify-center font-black text-sm shadow-xs shrink-0">
+            <div className="w-9 h-9 rounded-2xl bg-[#113BD0] text-white flex items-center justify-center font-black text-sm shadow-xs shrink-0">
               D
             </div>
             <div className="min-w-0">
@@ -294,7 +294,7 @@ export const PartnerLayout = () => {
               aria-label={soundEnabled ? 'Order Audio Chime is ON. Click to mute.' : 'Order Audio Chime is OFF. Click to unmute.'}
               className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                 soundEnabled
-                  ? 'bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 border-blue-200 dark:border-blue-800'
                   : 'bg-slate-100 dark:bg-slate-700 text-slate-500 border-slate-200 dark:border-slate-600'
               }`}
             >
@@ -438,7 +438,7 @@ export const PartnerLayout = () => {
             {/* Header: Restaurant Profile & Close Button */}
             <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#2845D6] text-white flex items-center justify-center font-black text-base shadow-xs shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-[#113BD0] text-white flex items-center justify-center font-black text-base shadow-xs shrink-0">
                   {restaurant?.name ? restaurant.name.charAt(0).toUpperCase() : 'D'}
                 </div>
                 <div className="min-w-0">
@@ -518,7 +518,7 @@ export const PartnerLayout = () => {
                         className={({ isActive }) =>
                           `p-3 rounded-2xl border flex flex-col items-center justify-center gap-2 text-center transition-all select-none ${
                             isActive
-                              ? 'bg-[#2845D6] text-white border-[#2845D6] shadow-md shadow-blue-500/25'
+                              ? 'bg-[#113BD0] text-white border-[#113BD0] shadow-md shadow-blue-500/25'
                               : 'bg-slate-50 dark:bg-slate-700/50 border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
                           }`
                         }

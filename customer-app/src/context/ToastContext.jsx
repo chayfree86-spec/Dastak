@@ -59,7 +59,7 @@ export const ToastProvider = ({ children }) => {
               ) : t.type === 'error' ? (
                 <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               ) : (
-                <Info className="w-5 h-5 text-[#2845D6] dark:text-blue-400 shrink-0 mt-0.5" />
+                <Info className="w-5 h-5 text-[#113BD0] dark:text-blue-400 shrink-0 mt-0.5" />
               )}
               <div>
                 <h5 className="font-black text-xs">{t.title}</h5>

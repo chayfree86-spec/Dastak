@@ -42,16 +42,17 @@ export const FinanceDashboard = () => {
   const [newCommissionRate, setNewCommissionRate] = useState('')
 
   // Delivery Rule State
-  const [deliveryRules, setDeliveryRules] = useState([
-    { id: 1, type: 'Distance Tier 1', min_km: 0, max_km: 4, fee: 35.00 },
-    { id: 2, type: 'Distance Tier 2', min_km: 4, max_km: 8, fee: 55.00 },
-    { id: 3, type: 'Distance Tier 3', min_km: 8, max_km: 15, fee: 85.00 },
-    { id: 4, type: 'Free Delivery', min_order: 500.00, fee: 0.00 },
-  ])
+  const [deliveryRules, setDeliveryRules] = useState([])
 
   const { data: summary, loading: summaryLoading, retry: retrySummary, silentRefresh: silentRefreshSummary } = useApi(
     () => financeApi.getFinanceSummary()
   )
+
+  useEffect(() => {
+    if (summary?.delivery_rules && Array.isArray(summary.delivery_rules)) {
+      setDeliveryRules(summary.delivery_rules)
+    }
+  }, [summary])
 
   const { data: settlements, loading: settleLoading, retry: retrySettlements, silentRefresh: silentRefreshSettlements } = useApi(
     () => financeApi.getSettlements({ cycle: cycleFilter !== 'ALL' ? cycleFilter : undefined }),
@@ -112,7 +113,7 @@ export const FinanceDashboard = () => {
     {
       key: 'id',
       header: 'Settlement ID',
-      render: (row) => <span className="font-mono font-bold text-[#2845D6] dark:text-blue-400">#{row.id}</span>,
+      render: (row) => <span className="font-mono font-bold text-[#113BD0] dark:text-blue-400">#{row.id}</span>,
     },
     {
       key: 'restaurant_name',
@@ -141,7 +142,7 @@ export const FinanceDashboard = () => {
       header: 'Commission (-)',
       align: 'right',
       render: (row) => (
-        <span className="font-semibold text-[#2845D6] dark:text-blue-400">
+        <span className="font-semibold text-[#113BD0] dark:text-blue-400">
           -{formatCurrency(row.commission_deducted)}
         </span>
       ),
@@ -191,7 +192,7 @@ export const FinanceDashboard = () => {
       key: 'commission',
       header: 'Commission %',
       render: (row) => (
-        <span className="text-sm font-black text-[#2845D6] dark:text-blue-400">{row.commission}%</span>
+        <span className="text-sm font-black text-[#113BD0] dark:text-blue-400">{row.commission}%</span>
       ),
     },
     {
@@ -298,7 +299,7 @@ export const FinanceDashboard = () => {
         </div>
         <div>
           <span className="text-slate-400 block text-[11px]">Online UPI / Card:</span>
-          <span className="font-bold text-[#2845D6] dark:text-blue-400 text-sm">
+          <span className="font-bold text-[#113BD0] dark:text-blue-400 text-sm">
             {formatCurrency(summary?.online_payments)}
           </span>
         </div>
@@ -337,7 +338,7 @@ export const FinanceDashboard = () => {
           <div className="md:hidden space-y-2.5">
             {settleLoading ? (
               <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
                 <p className="text-xs text-slate-400 font-medium">Loading settlements...</p>
               </div>
             ) : !settlements || settlements.length === 0 ? (
@@ -353,7 +354,7 @@ export const FinanceDashboard = () => {
                   {/* Header: ID, Restaurant & Status */}
                   <div className="flex items-center justify-between">
                     <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                      <div className="flex items-center gap-1.5 font-mono font-bold text-[#113BD0] dark:text-blue-400">
                         <span>#{settle.id}</span>
                         <span className="font-semibold text-slate-900 dark:text-slate-100 font-sans truncate">
                           &bull; {settle.restaurant_name}
@@ -376,7 +377,7 @@ export const FinanceDashboard = () => {
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-400 block">Comm (-)</span>
-                      <span className="font-semibold text-[#2845D6] dark:text-blue-400 text-xs">
+                      <span className="font-semibold text-[#113BD0] dark:text-blue-400 text-xs">
                         -{formatCurrency(settle.commission_deducted)}
                       </span>
                     </div>
@@ -445,7 +446,7 @@ export const FinanceDashboard = () => {
           <div className="md:hidden space-y-2.5">
             {commLoading ? (
               <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
                 <p className="text-xs text-slate-400 font-medium">Loading commissions...</p>
               </div>
             ) : !commissions || commissions.length === 0 ? (
@@ -466,7 +467,7 @@ export const FinanceDashboard = () => {
                   <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60">
                     <div>
                       <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Commission</span>
-                      <span className="text-base font-black text-[#2845D6] dark:text-blue-400">{comm.commission}%</span>
+                      <span className="text-base font-black text-[#113BD0] dark:text-blue-400">{comm.commission}%</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Effective Date</span>
@@ -518,7 +519,7 @@ export const FinanceDashboard = () => {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-lg font-black text-[#2845D6] dark:text-blue-400">
+                  <span className="text-lg font-black text-[#113BD0] dark:text-blue-400">
                     {rule.fee === 0 ? 'FREE' : formatCurrency(rule.fee)}
                   </span>
                 </div>
@@ -553,7 +554,7 @@ export const FinanceDashboard = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Commission Deducted:</span>
-                <span className="font-bold text-[#2845D6]">-{formatCurrency(settleModalItem.commission_deducted)}</span>
+                <span className="font-bold text-[#113BD0]">-{formatCurrency(settleModalItem.commission_deducted)}</span>
               </div>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between font-black text-sm text-emerald-600 dark:text-emerald-400">
                 <span>Total Payout Amount:</span>
@@ -591,7 +592,7 @@ export const FinanceDashboard = () => {
           maxWidth="max-w-md"
         >
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 text-xs text-[#2845D6] dark:text-blue-300 font-medium">
+            <div className="p-3.5 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 text-xs text-[#113BD0] dark:text-blue-300 font-medium">
               Note: This will only affect new orders placed after this change.
             </div>
 

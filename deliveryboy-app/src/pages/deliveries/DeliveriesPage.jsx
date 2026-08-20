@@ -81,7 +81,7 @@ export const DeliveriesPage = () => {
             onClick={() => setTab('active')}
             className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
               tab === 'active'
-                ? 'bg-[#2845D6] text-white shadow-xs'
+                ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -92,7 +92,7 @@ export const DeliveriesPage = () => {
             onClick={() => setTab('completed')}
             className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
               tab === 'completed'
-                ? 'bg-[#2845D6] text-white shadow-xs'
+                ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -103,7 +103,7 @@ export const DeliveriesPage = () => {
             onClick={() => setTab('all')}
             className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
               tab === 'all'
-                ? 'bg-[#2845D6] text-white shadow-xs'
+                ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -150,7 +150,7 @@ export const DeliveriesPage = () => {
                   <div
                     key={item.id}
                     onClick={() => setSelectedOrder(item)}
-                    className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-[#2845D6]/50 dark:hover:border-blue-500/50 transition-all cursor-pointer space-y-3"
+                    className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-[#113BD0]/50 dark:hover:border-blue-500/50 transition-all cursor-pointer space-y-3"
                   >
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-3">
                       <div className="space-y-0.5">
@@ -275,7 +275,7 @@ export const DeliveriesPage = () => {
               <span className="font-black text-slate-900 dark:text-slate-100">
                 Total Bill Amount:
               </span>
-              <span className="text-base font-black text-[#2845D6] dark:text-blue-400">
+              <span className="text-base font-black text-[#113BD0] dark:text-blue-400">
                 {formatCurrency(selectedOrder.bill?.total_amount || selectedOrder.total_amount)}
               </span>
             </div>

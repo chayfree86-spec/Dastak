@@ -13,7 +13,7 @@ export const Tabs = ({ tabs = [], activeTab, onChange, className = '', variant =
                 onClick={() => onChange(tab.id)}
                 className={`py-3 px-1 border-b-2 font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors relative whitespace-nowrap ${
                   isActive
-                    ? 'border-[#2845D6] text-[#2845D6] dark:text-blue-400 font-bold'
+                    ? 'border-[#113BD0] text-[#113BD0] dark:text-blue-400 font-bold'
                     : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
@@ -23,7 +23,7 @@ export const Tabs = ({ tabs = [], activeTab, onChange, className = '', variant =
                   <span
                     className={`ml-1.5 px-2 py-0.5 text-[11px] rounded-full font-bold ${
                       isActive
-                        ? 'bg-[#2845D6]/15 text-[#2845D6] dark:bg-blue-900/40 dark:text-blue-300'
+                        ? 'bg-[#113BD0]/15 text-[#113BD0] dark:bg-blue-900/40 dark:text-blue-300'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                     }`}
                   >
@@ -50,7 +50,7 @@ export const Tabs = ({ tabs = [], activeTab, onChange, className = '', variant =
             onClick={() => onChange(tab.id)}
             className={`flex items-center gap-2 px-3.5 h-10 sm:h-8 rounded-xl sm:rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 shrink-0 cursor-pointer active:scale-95 ${
               isActive
-                ? 'bg-white dark:bg-slate-700 text-[#2845D6] dark:text-blue-400 shadow-xs font-bold'
+                ? 'bg-white dark:bg-slate-700 text-[#113BD0] dark:text-blue-400 shadow-xs font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -60,7 +60,7 @@ export const Tabs = ({ tabs = [], activeTab, onChange, className = '', variant =
               <span
                 className={`ml-1 px-1.5 py-0.5 text-[10px] rounded-full font-bold ${
                   isActive
-                    ? 'bg-[#2845D6]/15 text-[#2845D6] dark:bg-blue-900/40 dark:text-blue-300'
+                    ? 'bg-[#113BD0]/15 text-[#113BD0] dark:bg-blue-900/40 dark:text-blue-300'
                     : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300'
                 }`}
               >

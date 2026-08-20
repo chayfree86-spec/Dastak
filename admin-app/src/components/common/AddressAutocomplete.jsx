@@ -158,7 +158,7 @@ export const AddressAutocomplete = forwardRef(({
 
       <div className="relative flex items-center">
         <div className="absolute left-3 text-slate-400 dark:text-slate-500 pointer-events-none">
-          <MapPin className="w-4 h-4 text-[#2845D6] dark:text-blue-400" />
+          <MapPin className="w-4 h-4 text-[#113BD0] dark:text-blue-400" />
         </div>
 
         <input
@@ -179,7 +179,7 @@ export const AddressAutocomplete = forwardRef(({
           placeholder={placeholder}
           autoFocus={autoFocus}
           autoComplete="off"
-          className={`w-full text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed pl-9 pr-14 py-2 ${
+          className={`w-full text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed pl-9 pr-14 py-2 ${
             error
               ? 'border-rose-500 focus:ring-rose-500/30 focus:border-rose-500'
               : 'border-slate-200 dark:border-slate-700'
@@ -188,7 +188,7 @@ export const AddressAutocomplete = forwardRef(({
 
         <div className="absolute right-2.5 flex items-center gap-1">
           {loading && (
-            <Loader2 className="w-4 h-4 text-[#2845D6] dark:text-blue-400 animate-spin" />
+            <Loader2 className="w-4 h-4 text-[#113BD0] dark:text-blue-400 animate-spin" />
           )}
           {!loading && query && !disabled && (
             <button
@@ -221,11 +221,11 @@ export const AddressAutocomplete = forwardRef(({
               onMouseEnter={() => setActiveIndex(idx)}
               className={`w-full text-left px-3 py-2.5 flex items-start gap-2.5 transition-colors cursor-pointer ${
                 activeIndex === idx
-                  ? 'bg-[#2845D6]/10 dark:bg-blue-900/30 text-slate-900 dark:text-slate-100'
+                  ? 'bg-[#113BD0]/10 dark:bg-blue-900/30 text-slate-900 dark:text-slate-100'
                   : 'hover:bg-slate-50 dark:hover:bg-slate-700/40 text-slate-700 dark:text-slate-200'
               }`}
             >
-              <div className="mt-0.5 p-1 rounded-md bg-[#2845D6]/10 text-[#2845D6] dark:bg-blue-900/40 dark:text-blue-400 shrink-0">
+              <div className="mt-0.5 p-1 rounded-md bg-[#113BD0]/10 text-[#113BD0] dark:bg-blue-900/40 dark:text-blue-400 shrink-0">
                 <MapPin className="w-3.5 h-3.5" />
               </div>
               <div className="flex-1 min-w-0">

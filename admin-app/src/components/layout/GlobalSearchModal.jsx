@@ -66,7 +66,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
                 className="w-full flex items-center justify-between p-2.5 px-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 text-left transition-colors group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 group-hover:bg-[#2845D6]/10 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+                  <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 group-hover:bg-[#113BD0]/10 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
@@ -74,7 +74,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
                     <span className="text-[10px] text-slate-400">{item.category}</span>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
+                <ArrowRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
               </button>
             )
           })

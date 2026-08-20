@@ -205,7 +205,7 @@ export const LoginPage = () => {
       pos: { top: '8%', left: '7%' },
       speed: { x: 38, y: 32 },
       rotate: '-8deg',
-      color: 'text-[#2845D6] dark:text-blue-400',
+      color: 'text-[#113BD0] dark:text-blue-400',
       border: 'border-blue-200/70 dark:border-blue-900/40',
       shadow: 'shadow-blue-500/10',
       size: 'w-6 h-6',
@@ -253,7 +253,7 @@ export const LoginPage = () => {
       pos: { top: '34%', left: '33%' },
       speed: { x: 14, y: 12 },
       rotate: '-15deg',
-      color: 'text-[#2845D6] dark:text-blue-400',
+      color: 'text-[#113BD0] dark:text-blue-400',
       border: 'border-blue-200/80 dark:border-blue-900/50',
       shadow: 'shadow-blue-500/15',
       size: 'w-6 h-6',
@@ -316,7 +316,7 @@ export const LoginPage = () => {
       pos: { bottom: '10%', left: '8%' },
       speed: { x: 30, y: -34 },
       rotate: '10deg',
-      color: 'text-[#2845D6] dark:text-blue-400',
+      color: 'text-[#113BD0] dark:text-blue-400',
       border: 'border-blue-200/70 dark:border-blue-900/40',
       shadow: 'shadow-blue-500/10',
       size: 'w-6 h-6',
@@ -349,7 +349,7 @@ export const LoginPage = () => {
   ], [])
 
   return (
-    <div className="relative min-h-screen w-full bg-[#F8FAFC] dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 transition-colors duration-200 font-sans antialiased overflow-hidden selection:bg-[#2845D6] selection:text-white">
+    <div className="relative min-h-screen w-full bg-[#F8FAFC] dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 transition-colors duration-200 font-sans antialiased overflow-hidden selection:bg-[#113BD0] selection:text-white">
       {/* Theme Toggle Top Right */}
       <div className="absolute top-4 right-4 z-30">
         <button
@@ -412,12 +412,12 @@ export const LoginPage = () => {
       <div className="relative z-10 w-full max-w-md space-y-6">
         {/* Brand Banner Card */}
         <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#2845D6] via-blue-600 to-[#F97316] text-white flex items-center justify-center mx-auto shadow-xl shadow-blue-600/25">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#113BD0] via-blue-600 to-[#F97316] text-white flex items-center justify-center mx-auto shadow-xl shadow-blue-600/25">
             <Bike className="w-8 h-8" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              DASTAK <span className="text-[#2845D6] dark:text-blue-400">RIDER</span>
+              DASTAK <span className="text-[#113BD0] dark:text-blue-400">RIDER</span>
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">
               Delivery Partner Fleet App &bull; Device-Bound Session
@@ -506,7 +506,7 @@ export const LoginPage = () => {
                 </label>
                 <div className="relative flex items-center">
                   <div className="absolute left-3 flex items-center gap-1.5 text-slate-500 font-bold text-xs pointer-events-none">
-                    <Phone className="w-4 h-4 text-[#2845D6] dark:text-blue-400" />
+                    <Phone className="w-4 h-4 text-[#113BD0] dark:text-blue-400" />
                     <span>+91</span>
                   </div>
                   <input
@@ -520,7 +520,7 @@ export const LoginPage = () => {
                       setMobile(e.target.value.replace(/\D/g, ''))
                       setError('')
                     }}
-                    className="w-full h-11 pl-16 pr-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+                    className="w-full h-11 pl-16 pr-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
                   />
                 </div>
               </div>
@@ -530,7 +530,7 @@ export const LoginPage = () => {
                 variant="primary"
                 size="lg"
                 loading={loading}
-                className="w-full font-bold h-11 bg-[#2845D6] hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25 cursor-pointer"
+                className="w-full font-bold h-11 bg-[#113BD0] hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25 cursor-pointer"
                 icon={ArrowRight}
                 iconPosition="right"
               >
@@ -575,7 +575,7 @@ export const LoginPage = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <KeyRound className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400" />
+                    <KeyRound className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400" />
                     <span>6-Digit Verification Code</span> <span className="text-rose-500">*</span>
                   </label>
                   {generatedOtp && (
@@ -595,7 +595,7 @@ export const LoginPage = () => {
                         onClick={() => otpInputsRef[idx].current?.focus()}
                         className={`relative w-full h-11 rounded-xl flex items-center justify-center transition-all cursor-text ${
                           isFocused
-                            ? 'bg-white dark:bg-slate-800 border-2 border-[#2845D6] ring-4 ring-[#2845D6]/20 shadow-xs'
+                            ? 'bg-white dark:bg-slate-800 border-2 border-[#113BD0] ring-4 ring-[#113BD0]/20 shadow-xs'
                             : digit
                             ? 'bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 shadow-xs'
                             : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
@@ -616,11 +616,11 @@ export const LoginPage = () => {
                         />
 
                         {digit ? (
-                          <span className="text-base font-black text-[#2845D6] dark:text-blue-400 pointer-events-none">
+                          <span className="text-base font-black text-[#113BD0] dark:text-blue-400 pointer-events-none">
                             {digit}
                           </span>
                         ) : isFocused ? (
-                          <span className="w-0.5 h-4 bg-[#2845D6] animate-pulse pointer-events-none rounded-full" />
+                          <span className="w-0.5 h-4 bg-[#113BD0] animate-pulse pointer-events-none rounded-full" />
                         ) : (
                           <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600 pointer-events-none" />
                         )}
@@ -646,7 +646,7 @@ export const LoginPage = () => {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={loading}
-                  className="text-[#2845D6] dark:text-blue-400 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                  className="text-[#113BD0] dark:text-blue-400 hover:underline font-bold flex items-center gap-1 cursor-pointer"
                 >
                   <RefreshCw className="w-3 h-3" />
                   <span>New Code</span>
@@ -658,7 +658,7 @@ export const LoginPage = () => {
                 variant="primary"
                 size="lg"
                 loading={loading}
-                className="w-full font-bold h-11 bg-[#2845D6] hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25 cursor-pointer"
+                className="w-full font-bold h-11 bg-[#113BD0] hover:bg-blue-600 text-white shadow-lg shadow-blue-600/25 cursor-pointer"
                 icon={CheckCircle2}
               >
                 Verify & Start Shift

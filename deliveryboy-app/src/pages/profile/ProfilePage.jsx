@@ -59,7 +59,7 @@ export const ProfilePage = () => {
       {/* 1. Header Card */}
       <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-blue-500/20 shrink-0">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-blue-500/20 shrink-0">
             {user?.name?.charAt(0) || 'R'}
           </div>
           <div>
@@ -89,7 +89,7 @@ export const ProfilePage = () => {
             </span>
           </div>
 
-          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 text-center min-w-[70px]">
+          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 text-center min-w-[70px]">
             <div className="font-black text-sm">{totalDeliveries}</div>
             <span className="text-[9px] font-bold uppercase tracking-wider block text-slate-400">
               Trips
@@ -150,7 +150,7 @@ export const ProfilePage = () => {
                 disabled={!editing}
                 value={vehicleType}
                 onChange={(e) => setVehicleType(e.target.value)}
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#2845D6] disabled:bg-slate-50 dark:disabled:bg-slate-800"
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#113BD0] disabled:bg-slate-50 dark:disabled:bg-slate-800"
               >
                 <option value="MOTORCYCLE">Motorcycle / Bike</option>
                 <option value="SCOOTER">Scooter / Scooty</option>

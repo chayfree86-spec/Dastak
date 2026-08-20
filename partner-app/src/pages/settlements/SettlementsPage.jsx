@@ -101,7 +101,7 @@ export const SettlementsPage = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#2845D6]/10 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shadow-xs">
+            <div className="w-9 h-9 rounded-xl bg-[#113BD0]/10 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shadow-xs">
               <Wallet className="w-5 h-5" />
             </div>
             <span>Restaurant Settlements & Payouts</span>
@@ -154,7 +154,7 @@ export const SettlementsPage = () => {
         <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between text-slate-400 dark:text-slate-400 mb-1.5 sm:mb-2">
             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider">Orders</span>
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 flex items-center justify-center">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
@@ -165,10 +165,10 @@ export const SettlementsPage = () => {
         </div>
 
         {/* Payout Channel Info */}
-        <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#2845D6]/5 to-[#2845D6]/15 dark:from-blue-950/30 dark:to-blue-900/10 border border-[#2845D6]/20 dark:border-blue-800/40 shadow-xs relative overflow-hidden">
+        <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#113BD0]/5 to-[#113BD0]/15 dark:from-blue-950/30 dark:to-blue-900/10 border border-[#113BD0]/20 dark:border-blue-800/40 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-300 mb-1.5 sm:mb-2">
             <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider">Settlement</span>
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#2845D6]/20 text-[#2845D6] dark:text-blue-400 flex items-center justify-center">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#113BD0]/20 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
               <Building className="w-4 h-4" />
             </div>
           </div>
@@ -191,7 +191,7 @@ export const SettlementsPage = () => {
                 onClick={() => setActiveStatus(tab.id)}
                 className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#2845D6] text-white shadow-md shadow-blue-500/20'
+                    ? 'bg-[#113BD0] text-white shadow-md shadow-blue-500/20'
                     : 'bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
@@ -211,7 +211,7 @@ export const SettlementsPage = () => {
               placeholder="Search by Settlement # or Bank UTR..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-11 sm:h-12 pl-10 pr-4 bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-[#2845D6] focus:ring-2 focus:ring-blue-500/20"
+              className="w-full h-11 sm:h-12 pl-10 pr-4 bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-[#113BD0] focus:ring-2 focus:ring-blue-500/20"
             />
           </div>
 
@@ -295,7 +295,7 @@ export const SettlementsPage = () => {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 leading-tight group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 leading-tight group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
                       Settlement #{refNumber}
                     </h4>
                     <span
@@ -342,7 +342,7 @@ export const SettlementsPage = () => {
                   </span>
                 </div>
 
-                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 group-hover:bg-[#2845D6] group-hover:text-white dark:group-hover:bg-blue-600 text-slate-400 flex items-center justify-center transition-all shrink-0">
+                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 group-hover:bg-[#113BD0] group-hover:text-white dark:group-hover:bg-blue-600 text-slate-400 flex items-center justify-center transition-all shrink-0">
                   <ArrowUpRight className="w-4 h-4" />
                 </div>
               </div>
@@ -414,7 +414,7 @@ export const SettlementsPage = () => {
             {/* Payout Banking Details */}
             {(selectedSettlement.payout_reference || selectedSettlement.payout_method) && (
               <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40 text-xs space-y-1">
-                <div className="flex items-center gap-1.5 text-[#2845D6] dark:text-blue-400 font-black uppercase text-[10px] tracking-wider">
+                <div className="flex items-center gap-1.5 text-[#113BD0] dark:text-blue-400 font-black uppercase text-[10px] tracking-wider">
                   <CreditCard className="w-3.5 h-3.5" />
                   <span>Transfer Information</span>
                 </div>
@@ -435,7 +435,7 @@ export const SettlementsPage = () => {
               <button
                 type="button"
                 onClick={() => setSelectedSettlement(null)}
-                className="w-full h-12 rounded-xl sm:rounded-2xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none"
+                className="w-full h-12 rounded-xl sm:rounded-2xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white font-black text-xs sm:text-sm flex items-center justify-center shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none"
               >
                 Close Statement
               </button>

@@ -30,7 +30,7 @@ export const ConfirmDialog = ({
         )
       case 'info':
         return (
-          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center text-[#2845D6] dark:text-blue-400 mx-auto mb-4">
+          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center text-[#113BD0] dark:text-blue-400 mx-auto mb-4">
             <Info className="w-6 h-6" />
           </div>
         )

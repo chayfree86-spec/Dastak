@@ -25,7 +25,7 @@ import { useTheme } from '../../context/ThemeContext'
 import { hasPermission, ROLE_LABELS, normalizeRole } from '../../utils/permissions'
 
 const navigationItems = [
-  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, permission: 'DASHBOARD', color: 'bg-blue-50 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400' },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, permission: 'DASHBOARD', color: 'bg-blue-50 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400' },
   { label: 'Orders', path: '/orders', icon: ShoppingBag, permission: 'ORDERS', color: 'bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400' },
   { label: 'Restaurants', path: '/restaurants', icon: Store, permission: 'RESTAURANTS', color: 'bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400' },
   { label: 'Delivery Boys', path: '/delivery-boys', icon: Bike, permission: 'DELIVERY_BOYS', color: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400' },
@@ -89,7 +89,7 @@ export const Sidebar = ({
                 title={collapsed ? item.label : undefined}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 relative group ${
                   isActive
-                    ? 'bg-[#2845D6] text-white shadow-sm shadow-[#2845D6]/20'
+                    ? 'bg-[#113BD0] text-white shadow-sm shadow-[#113BD0]/20'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-slate-100'
                 } ${collapsed ? 'justify-center px-0' : ''}`}
               >
@@ -150,7 +150,7 @@ export const Sidebar = ({
                     e.target.src = '/logo-horizontal.png'
                   }}
                 />
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#2845D6]/10 text-[#2845D6] dark:bg-blue-900/40 dark:text-blue-300">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#113BD0]/10 text-[#113BD0] dark:bg-blue-900/40 dark:text-blue-300">
                   {ROLE_LABELS[normalizeRole(user?.role || role)] || 'Super Admin'}
                 </span>
               </div>
@@ -178,7 +178,7 @@ export const Sidebar = ({
                       onClick={onCloseMobile}
                       className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all duration-200 active:scale-95 border ${
                         isActive
-                          ? 'bg-[#2845D6] text-white border-[#2845D6] shadow-md shadow-[#2845D6]/25 ring-2 ring-[#2845D6]/30'
+                          ? 'bg-[#113BD0] text-white border-[#113BD0] shadow-md shadow-[#113BD0]/25 ring-2 ring-[#113BD0]/30'
                           : 'bg-slate-50 dark:bg-slate-700/40 border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >

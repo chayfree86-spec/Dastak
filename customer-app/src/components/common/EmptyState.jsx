@@ -12,7 +12,7 @@ export const EmptyState = ({
   return (
     <div className="p-8 sm:p-12 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-sm transition-colors duration-200">
       {Icon && (
-        <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
+        <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-slate-800 text-[#113BD0] dark:text-blue-400 flex items-center justify-center mx-auto shadow-inner">
           <Icon className="w-8 h-8" />
         </div>
       )}

@@ -64,7 +64,7 @@ export const TicketDetailsModal = ({
           <div className="flex items-center gap-3">
             <span className="text-slate-400">Customer: <strong className="text-slate-800 dark:text-slate-200">{ticket.customer_name}</strong></span>
             {ticket.order_id && (
-              <span className="text-slate-400">Related Order: <strong className="text-[#2845D6] dark:text-blue-400 font-mono">#{ticket.order_id}</strong></span>
+              <span className="text-slate-400">Related Order: <strong className="text-[#113BD0] dark:text-blue-400 font-mono">#{ticket.order_id}</strong></span>
             )}
           </div>
 
@@ -111,7 +111,7 @@ export const TicketDetailsModal = ({
             onChange={(e) => setReplyText(e.target.value)}
             placeholder="Type your official administrative resolution or response..."
             rows={3}
-            className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0]"
           />
 
           <div className="flex items-center justify-end gap-2">

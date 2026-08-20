@@ -40,72 +40,7 @@ export const OrderDetailsDrawer = ({
 
   const { data: order, loading, error, retry } = useApi(
     () => ordersApi.getOrderDetails(orderId),
-    [orderId],
-    {
-      initialData: {
-        id: orderId || 'D4829',
-        created_at: new Date(Date.now() - 35 * 60000).toISOString(),
-        status: 'PREPARING',
-        payment_method: 'ONLINE_PAYMENT',
-        payment_status: 'PAID',
-        
-        customer: {
-          name: 'Aarav Sharma',
-          mobile: '9876543210',
-          address: 'Flat 402, Tower B, Green Valley Apartments, Sector 62',
-          landmark: 'Opposite Central Park',
-          city: 'Noida',
-        },
-
-        restaurant: {
-          id: 1,
-          name: 'Biryani Central',
-          address: 'Plot 42, Sector 18, Commercial Belt',
-          mobile: '9811223344',
-          commission_rate: 15,
-        },
-
-        delivery: {
-          delivery_boy_id: 'R104',
-          delivery_boy_name: 'Vikas Kumar',
-          mobile: '9899112233',
-          assignment_type: 'AUTO',
-          distance_km: 4.8,
-          pickup_time: null,
-          delivery_time: null,
-        },
-
-        items: [
-          { id: 1, name: 'Hyderabadi Dum Biryani', variant: 'Full', addons: ['Extra Raita'], quantity: 2, price: 299.00, total: 598.00 },
-          { id: 2, name: 'Chicken Tikka Kebab', variant: '6 Pcs', addons: ['Mint Chutney'], quantity: 1, price: 270.00, total: 270.00 },
-        ],
-
-        pricing: {
-          subtotal: 868.00,
-          discount: 100.00,
-          delivery_charge: 45.00,
-          tax: 43.40,
-          final_amount: 856.40,
-        },
-
-        business_summary: {
-          restaurant_commission: 130.20,
-          delivery_boy_earning: 45.00,
-          dastak_net_earning: 130.20,
-          settlement_status: 'PENDING',
-        },
-
-        timeline: [
-          { title: 'Order Placed', timestamp: new Date(Date.now() - 35 * 60000).toISOString(), status: 'completed', description: 'Paid via UPI' },
-          { title: 'Restaurant Accepted', timestamp: new Date(Date.now() - 32 * 60000).toISOString(), status: 'completed', description: 'Estimated prep time 25 mins' },
-          { title: 'Food Preparing', timestamp: new Date(Date.now() - 25 * 60000).toISOString(), status: 'current', description: 'Kitchen is preparing your order' },
-          { title: 'Food Ready for Pickup', timestamp: null, status: 'upcoming', description: 'Awaiting packing' },
-          { title: 'Rider Assigned', timestamp: new Date(Date.now() - 15 * 60000).toISOString(), status: 'upcoming', description: 'Vikas Kumar assigned' },
-          { title: 'Order Picked Up', timestamp: null, status: 'upcoming', description: 'En route to customer' },
-          { title: 'Delivered', timestamp: null, status: 'upcoming', description: 'Customer doorstep delivery' },
-        ],
-      },
-    }
+    [orderId]
   )
 
   const handleUpdateStatus = async (nextStatus) => {
@@ -168,7 +103,7 @@ export const OrderDetailsDrawer = ({
           {/* Order Status Timeline */}
           <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#2845D6]" />
+              <Clock className="w-4 h-4 text-[#113BD0]" />
               <span>Live Order Journey & Timestamps</span>
             </h4>
             <Timeline steps={order?.timeline || []} />
@@ -179,7 +114,7 @@ export const OrderDetailsDrawer = ({
             {/* Customer Details */}
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
               <h5 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-[#2845D6]" />
+                <User className="w-3.5 h-3.5 text-[#113BD0]" />
                 <span>Customer</span>
               </h5>
               <div className="text-xs space-y-1.5">
@@ -195,14 +130,14 @@ export const OrderDetailsDrawer = ({
             {/* Restaurant Details */}
             <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
               <h5 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Store className="w-3.5 h-3.5 text-[#2845D6]" />
+                <Store className="w-3.5 h-3.5 text-[#113BD0]" />
                 <span>Restaurant</span>
               </h5>
               <div className="text-xs space-y-1.5">
                 <p className="font-bold text-slate-900 dark:text-slate-100">{order?.restaurant?.name}</p>
                 <p className="font-mono text-slate-600 dark:text-slate-400">{formatPhone(order?.restaurant?.mobile)}</p>
                 <p className="text-slate-500 dark:text-slate-400 leading-snug">{order?.restaurant?.address}</p>
-                <p className="text-[11px] text-[#2845D6] dark:text-blue-400 font-semibold">
+                <p className="text-[11px] text-[#113BD0] dark:text-blue-400 font-semibold">
                   Commission: {order?.restaurant?.commission_rate}%
                 </p>
               </div>
@@ -306,7 +241,7 @@ export const OrderDetailsDrawer = ({
                 <span>Settlement Status</span>
                 <StatusBadge status={order?.business_summary?.settlement_status} size="xs" />
               </div>
-              <div className="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between font-black text-[#2845D6] dark:text-blue-400 text-sm">
+              <div className="pt-2 border-t border-blue-200 dark:border-blue-800 flex justify-between font-black text-[#113BD0] dark:text-blue-400 text-sm">
                 <span>Dastak Net Earning</span>
                 <span>{formatCurrency(order?.business_summary?.dastak_net_earning)}</span>
               </div>

@@ -141,7 +141,7 @@ export const DeliveryLayout = () => {
         <div className="p-4 border-b border-slate-100 dark:border-slate-700/60 space-y-3">
           <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-xl bg-[#2845D6] text-white flex items-center justify-center font-black text-sm shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#113BD0] text-white flex items-center justify-center font-black text-sm shrink-0">
                 {user?.name?.charAt(0) || 'R'}
               </div>
               <div className="min-w-0">
@@ -194,7 +194,7 @@ export const DeliveryLayout = () => {
                 className={({ isActive }) =>
                   `flex items-center justify-between p-3 rounded-2xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#2845D6] text-white shadow-md shadow-blue-600/20 font-black'
+                      ? 'bg-[#113BD0] text-white shadow-md shadow-blue-600/20 font-black'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50'
                   }`
                 }
@@ -215,7 +215,7 @@ export const DeliveryLayout = () => {
                         className={`text-[10px] font-black px-2 py-0.5 rounded-md shrink-0 ${
                           isActive
                             ? 'bg-white/20 text-white'
-                            : item.badgeColor || 'bg-blue-100 dark:bg-blue-950 text-[#2845D6]'
+                            : item.badgeColor || 'bg-blue-100 dark:bg-blue-950 text-[#113BD0]'
                         }`}
                       >
                         {item.badge}
@@ -236,7 +236,7 @@ export const DeliveryLayout = () => {
               onClick={toggleSound}
               className={`flex-1 p-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                 soundEnabled
-                  ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#2845D6] dark:text-blue-400'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#113BD0] dark:text-blue-400'
                   : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
               }`}
               title="Toggle Audio Tone"
@@ -273,7 +273,7 @@ export const DeliveryLayout = () => {
         {/* Mobile Header Bar */}
         <header className="md:hidden sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 px-4 sm:px-5 py-3.5 sm:py-4 flex items-center justify-between gap-3 shadow-xs">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#2845D6] via-indigo-600 to-[#F97316] text-white flex items-center justify-center font-black shadow-md shadow-blue-500/25 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#113BD0] via-indigo-600 to-[#F97316] text-white flex items-center justify-center font-black shadow-md shadow-blue-500/25 shrink-0">
               <Bike className="w-5 h-5" />
             </div>
             <div className="min-w-0">

@@ -40,7 +40,7 @@ export const AmountInput = forwardRef(({
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder}
-          className={`w-full h-11 sm:h-12 text-xs font-bold rounded-xl border bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 pl-8 pr-3.5 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] dark:focus:border-blue-500 disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed ${
+          className={`w-full h-11 sm:h-12 text-xs font-bold rounded-xl border bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 pl-8 pr-3.5 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] dark:focus:border-blue-500 disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed ${
             error
               ? 'border-rose-500 focus:ring-rose-500/30 focus:border-rose-500'
               : 'border-slate-200 dark:border-slate-700'

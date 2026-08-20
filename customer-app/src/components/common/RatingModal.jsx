@@ -125,7 +125,7 @@ export const RatingModal = ({ isOpen, onClose, order, onReviewSuccess }) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-[#2845D6] to-indigo-700 text-white flex items-center justify-between gap-3 shrink-0">
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-[#113BD0] to-indigo-700 text-white flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center text-white shrink-0 shadow-inner">
               <Star className="w-5 h-5 fill-amber-300 text-amber-300" />
@@ -169,7 +169,7 @@ export const RatingModal = ({ isOpen, onClose, order, onReviewSuccess }) => {
               {/* 1. Restaurant / Food Rating */}
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 space-y-2.5">
                 <div className="flex items-center gap-2">
-                  <Store className="w-4 h-4 text-[#2845D6] dark:text-blue-400 shrink-0" />
+                  <Store className="w-4 h-4 text-[#113BD0] dark:text-blue-400 shrink-0" />
                   <span className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider">
                     {t.foodRatingTitle || 'Restaurant & Food Quality'}
                   </span>
@@ -267,7 +267,7 @@ export const RatingModal = ({ isOpen, onClose, order, onReviewSuccess }) => {
                         onClick={() => toggleTag(tag.label)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer select-none ${
                           isSelected
-                            ? 'bg-[#2845D6] text-white shadow-xs scale-102'
+                            ? 'bg-[#113BD0] text-white shadow-xs scale-102'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                         }`}
                       >
@@ -295,7 +295,7 @@ export const RatingModal = ({ isOpen, onClose, order, onReviewSuccess }) => {
                     'Write a comment about food quality or delivery service (optional)...'
                   }
                   rows={3}
-                  className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#2845D6] dark:focus:border-blue-500 transition-colors resize-none placeholder:text-slate-400"
+                  className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#113BD0] dark:focus:border-blue-500 transition-colors resize-none placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -313,7 +313,7 @@ export const RatingModal = ({ isOpen, onClose, order, onReviewSuccess }) => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="px-5 py-2.5 rounded-2xl bg-[#2845D6] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-blue-600/25 active:scale-95 transition-all cursor-pointer"
+                className="px-5 py-2.5 rounded-2xl bg-[#113BD0] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-blue-600/25 active:scale-95 transition-all cursor-pointer"
               >
                 {submitting ? (
                   <>

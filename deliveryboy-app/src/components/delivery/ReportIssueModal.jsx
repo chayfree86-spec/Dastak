@@ -65,7 +65,7 @@ export const ReportIssueModal = ({ isOpen, onClose, order }) => {
                 key={r}
                 className={`p-3 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
                   reason === r
-                    ? 'bg-blue-50/60 dark:bg-blue-950/40 border-[#2845D6] dark:border-blue-500 text-[#2845D6] dark:text-blue-300 font-bold'
+                    ? 'bg-blue-50/60 dark:bg-blue-950/40 border-[#113BD0] dark:border-blue-500 text-[#113BD0] dark:text-blue-300 font-bold'
                     : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium'
                 }`}
               >
@@ -74,7 +74,7 @@ export const ReportIssueModal = ({ isOpen, onClose, order }) => {
                   name="issue_reason"
                   checked={reason === r}
                   onChange={() => setReason(r)}
-                  className="w-4 h-4 text-[#2845D6] focus:ring-[#2845D6]"
+                  className="w-4 h-4 text-[#113BD0] focus:ring-[#113BD0]"
                 />
                 <span className="text-xs leading-snug">{r}</span>
               </label>
@@ -91,7 +91,7 @@ export const ReportIssueModal = ({ isOpen, onClose, order }) => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Explain briefly what happened..."
-            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/20 focus:border-[#2845D6]"
+            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/20 focus:border-[#113BD0]"
           />
         </div>
 

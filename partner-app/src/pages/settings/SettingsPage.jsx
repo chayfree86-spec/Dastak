@@ -21,7 +21,6 @@ import {
   Trash2,
   Square,
   Check,
-  Sparkles,
   FileAudio,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
@@ -331,7 +330,7 @@ export const SettingsPage = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-slate-800">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#2845D6]/10 text-[#2845D6] dark:text-blue-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#113BD0]/10 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
               <Store className="w-5 h-5" />
             </div>
             <span>Restaurant Settings & Operations</span>
@@ -353,7 +352,7 @@ export const SettingsPage = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 isActive
-                  ? 'bg-[#2845D6] text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-500/20'
+                  ? 'bg-[#113BD0] text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-500/20'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
@@ -541,7 +540,7 @@ export const SettingsPage = () => {
                           updated[index].open_time = e.target.value
                           setHours(updated)
                         }}
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#2845D6] disabled:opacity-40"
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#113BD0] disabled:opacity-40"
                       />
                       <span className="text-xs text-slate-400 font-bold">to</span>
                       <input
@@ -553,7 +552,7 @@ export const SettingsPage = () => {
                           updated[index].close_time = e.target.value
                           setHours(updated)
                         }}
-                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#2845D6] disabled:opacity-40"
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#113BD0] disabled:opacity-40"
                       />
                     </div>
 
@@ -729,7 +728,7 @@ export const SettingsPage = () => {
                       Plays a loud chime or your custom ringtone whenever a new order is received.
                     </p>
                   </div>
-                  <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#2845D6] dark:text-blue-400">
+                  <div className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-[#113BD0] dark:text-blue-400">
                     <Volume2 className="w-5 h-5" />
                   </div>
                 </div>
@@ -765,12 +764,12 @@ export const SettingsPage = () => {
                     onClick={() => setSoundType('default')}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       soundType === 'default'
-                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        ? 'border-[#113BD0] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-[#2845D6] dark:text-blue-300 flex items-center justify-center font-black shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-[#113BD0] dark:text-blue-300 flex items-center justify-center font-black shrink-0">
                         🔔
                       </div>
                       <div className="min-w-0">
@@ -783,7 +782,7 @@ export const SettingsPage = () => {
                       </div>
                     </div>
                     {soundType === 'default' && (
-                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -794,7 +793,7 @@ export const SettingsPage = () => {
                     onClick={() => setSoundType('buzzer')}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       soundType === 'buzzer'
-                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        ? 'border-[#113BD0] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
                     }`}
                   >
@@ -812,7 +811,7 @@ export const SettingsPage = () => {
                       </div>
                     </div>
                     {soundType === 'buzzer' && (
-                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -823,7 +822,7 @@ export const SettingsPage = () => {
                     onClick={() => setSoundType('digital')}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       soundType === 'digital'
-                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        ? 'border-[#113BD0] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
                     }`}
                   >
@@ -841,7 +840,7 @@ export const SettingsPage = () => {
                       </div>
                     </div>
                     {soundType === 'digital' && (
-                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -852,7 +851,7 @@ export const SettingsPage = () => {
                     onClick={() => setSoundType('marimba')}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       soundType === 'marimba'
-                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        ? 'border-[#113BD0] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
                     }`}
                   >
@@ -870,7 +869,7 @@ export const SettingsPage = () => {
                       </div>
                     </div>
                     {soundType === 'marimba' && (
-                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -881,7 +880,7 @@ export const SettingsPage = () => {
                     onClick={() => setSoundType('announcement')}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       soundType === 'announcement'
-                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        ? 'border-[#113BD0] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
                     }`}
                   >
@@ -899,7 +898,7 @@ export const SettingsPage = () => {
                       </div>
                     </div>
                     {soundType === 'announcement' && (
-                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -910,7 +909,7 @@ export const SettingsPage = () => {
                     onClick={() => setSoundType('warning')}
                     className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                       soundType === 'warning'
-                        ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                        ? 'border-[#113BD0] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
                         : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-slate-50/50 dark:bg-slate-900/40'
                     }`}
                   >
@@ -928,7 +927,7 @@ export const SettingsPage = () => {
                       </div>
                     </div>
                     {soundType === 'warning' && (
-                      <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
@@ -945,7 +944,7 @@ export const SettingsPage = () => {
                     <div
                       className={`p-4 rounded-2xl border-2 transition-all flex items-center justify-between gap-3 ${
                         soundType === 'custom'
-                          ? 'border-[#2845D6] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
+                          ? 'border-[#113BD0] bg-blue-50/50 dark:bg-blue-950/30 shadow-sm shadow-blue-500/10'
                           : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40'
                       }`}
                     >
@@ -953,7 +952,7 @@ export const SettingsPage = () => {
                         onClick={() => setSoundType('custom')}
                         className="flex items-center gap-3 min-w-0 cursor-pointer flex-1"
                       >
-                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 shrink-0">
+                        <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 shrink-0">
                           <FileAudio className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
@@ -961,7 +960,7 @@ export const SettingsPage = () => {
                             <span className="text-xs font-black text-slate-900 dark:text-slate-100 truncate">
                               {customSoundName || 'Custom Audio Alert'}
                             </span>
-                            <span className="px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 text-[#2845D6] dark:text-blue-300 text-[9px] font-black uppercase tracking-wider">
+                            <span className="px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 text-[#113BD0] dark:text-blue-300 text-[9px] font-black uppercase tracking-wider">
                               ACTIVE CUSTOM SOUND
                             </span>
                           </div>
@@ -973,7 +972,7 @@ export const SettingsPage = () => {
 
                       <div className="flex items-center gap-2 shrink-0">
                         {soundType === 'custom' && (
-                          <div className="w-5 h-5 rounded-full bg-[#2845D6] text-white flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-[#113BD0] text-white flex items-center justify-center">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
@@ -994,7 +993,7 @@ export const SettingsPage = () => {
 
                   {/* Upload Dropzone / Button */}
                   <div className="mt-3">
-                    <label className="relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#2845D6] dark:hover:border-blue-500 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-all cursor-pointer group">
+                    <label className="relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-[#113BD0] dark:hover:border-blue-500 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30 hover:bg-blue-50/30 dark:hover:bg-blue-950/20 transition-all cursor-pointer group">
                       <input
                         type="file"
                         accept="audio/*,.mp3,.wav,.ogg,.aac,.m4a,.flac,.webm"
@@ -1026,7 +1025,7 @@ export const SettingsPage = () => {
                         }}
                       />
 
-                      <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                         <Upload className="w-5 h-5" />
                       </div>
 
@@ -1060,7 +1059,7 @@ export const SettingsPage = () => {
                       <Volume1 className="w-4 h-4 text-slate-400" />
                       <span>Alert Volume</span>
                     </span>
-                    <span className="font-black text-[#2845D6] dark:text-blue-400">
+                    <span className="font-black text-[#113BD0] dark:text-blue-400">
                       {Math.round(volume * 100)}%
                     </span>
                   </div>
@@ -1072,7 +1071,7 @@ export const SettingsPage = () => {
                     step="5"
                     value={Math.round(volume * 100)}
                     onChange={(e) => setVolume(Number(e.target.value) / 100)}
-                    className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#2845D6]"
+                    className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#113BD0]"
                   />
                   <div className="flex justify-between text-[10px] text-slate-400 px-0.5">
                     <span>Soft (10%)</span>

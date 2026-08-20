@@ -15,20 +15,7 @@ export const DeliveryBoyIdCard = () => {
 
   const { data: rider, loading, error } = useApi(
     () => deliveryBoysApi.getDeliveryBoyDetails(id),
-    [id],
-    {
-      initialData: {
-        id: id || '1',
-        name: 'Rahul Pal',
-        mobile: '9876543211',
-        vehicle_type: 'MOTORCYCLE',
-        vehicle_number: 'UP 78 AB 1234',
-        license_number: 'DL-0420110012345',
-        aadhar_number: '123456789012',
-        pan_number: 'ABCDE1234F',
-        status: 'ACTIVE',
-      },
-    }
+    [id]
   )
 
   const handlePrint = () => {
@@ -49,7 +36,7 @@ export const DeliveryBoyIdCard = () => {
   if (loading) {
     return (
       <div className="h-[60vh] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-[#2845D6] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-[#113BD0] rounded-full animate-spin" />
       </div>
     )
   }
@@ -128,7 +115,7 @@ export const DeliveryBoyIdCard = () => {
         <div className="print-card-wrapper shadow-2xl rounded-[24px] overflow-hidden bg-white w-[340px] border border-slate-200/90 flex flex-col relative select-none">
           
           {/* Header Block with Original Brand Logo & Title */}
-          <div className="bg-[#2845D6] text-white px-5 py-3.5 flex items-center justify-between shrink-0 border-b border-white/10">
+          <div className="bg-[#113BD0] text-white px-5 py-3.5 flex items-center justify-between shrink-0 border-b border-white/10">
             <div className="flex items-center gap-2.5">
               <img 
                 src="/logo-dark.png" 
@@ -154,12 +141,12 @@ export const DeliveryBoyIdCard = () => {
             
             {/* Avatar & Basic Info */}
             <div className="flex flex-col items-center text-center">
-              <div className="w-15 h-15 rounded-full bg-[#2845D6] text-white text-2xl font-black flex items-center justify-center shadow-md ring-4 ring-blue-50 border-2 border-white uppercase select-none">
+              <div className="w-15 h-15 rounded-full bg-[#113BD0] text-white text-2xl font-black flex items-center justify-center shadow-md ring-4 ring-blue-50 border-2 border-white uppercase select-none">
                 {rider?.name?.[0] || 'R'}
               </div>
 
               <h2 className="text-base font-black text-slate-900 leading-tight mt-1.5">{rider?.name}</h2>
-              <div className="mt-0.5 inline-block px-2.5 py-0.5 bg-blue-50 text-[#2845D6] text-[9px] font-black uppercase tracking-wider rounded-full border border-blue-100">
+              <div className="mt-0.5 inline-block px-2.5 py-0.5 bg-blue-50 text-[#113BD0] text-[9px] font-black uppercase tracking-wider rounded-full border border-blue-100">
                 Authorized Rider
               </div>
             </div>

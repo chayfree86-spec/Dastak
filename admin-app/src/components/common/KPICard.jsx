@@ -12,7 +12,7 @@ export const KPICard = ({
   onClick,
 }) => {
   const colorMap = {
-    blue: 'bg-blue-50 text-[#2845D6] dark:bg-blue-950/60 dark:text-blue-400',
+    blue: 'bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400',
     orange: 'bg-orange-50 text-[#F97316] dark:bg-orange-950/60 dark:text-orange-400',
     emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
     purple: 'bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400',
@@ -37,7 +37,7 @@ export const KPICard = ({
     <div
       onClick={onClick}
       className={`p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${
-        onClick ? 'cursor-pointer hover:border-[#2845D6]/40' : ''
+        onClick ? 'cursor-pointer hover:border-[#113BD0]/40' : ''
       }`}
     >
       <div className="flex items-start justify-between gap-3 mb-2">

@@ -32,7 +32,7 @@ export const BottomNav = () => {
               className={({ isActive }) =>
                 `relative flex flex-col items-center justify-center py-1 px-2.5 sm:px-4 rounded-2xl min-w-[56px] sm:min-w-[68px] transition-all touch-manipulation ${
                   isActive
-                    ? 'text-[#2845D6] dark:text-blue-400 font-black'
+                    ? 'text-[#113BD0] dark:text-blue-400 font-black'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-semibold'
                 }`
               }
@@ -55,7 +55,7 @@ export const BottomNav = () => {
                     {item.label}
                   </span>
                   {isActive && (
-                    <span className="w-1 h-1 rounded-full bg-[#2845D6] dark:bg-blue-400 mt-0.5" />
+                    <span className="w-1 h-1 rounded-full bg-[#113BD0] dark:bg-blue-400 mt-0.5" />
                   )}
                 </>
               )}

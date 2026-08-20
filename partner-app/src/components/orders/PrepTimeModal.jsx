@@ -41,7 +41,7 @@ export const PrepTimeModal = ({ isOpen, onClose, order, onConfirm, loading }) =>
     >
       <div className="space-y-5">
         <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800/40 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#2845D6] text-white flex items-center justify-center shrink-0 shadow-xs">
+          <div className="w-10 h-10 rounded-xl bg-[#113BD0] text-white flex items-center justify-center shrink-0 shadow-xs">
             <ChefHat className="w-5 h-5" />
           </div>
           <div>
@@ -63,7 +63,7 @@ export const PrepTimeModal = ({ isOpen, onClose, order, onConfirm, loading }) =>
                 onClick={() => handleSelectPreset(mins)}
                 className={`p-3.5 rounded-2xl border font-black text-center transition-all cursor-pointer select-none active:scale-95 ${
                   isSelected
-                    ? 'bg-[#2845D6] text-white border-[#2845D6] ring-2 ring-blue-500/20 shadow-md shadow-blue-500/20'
+                    ? 'bg-[#113BD0] text-white border-[#113BD0] ring-2 ring-blue-500/20 shadow-md shadow-blue-500/20'
                     : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
@@ -82,7 +82,7 @@ export const PrepTimeModal = ({ isOpen, onClose, order, onConfirm, loading }) =>
             onClick={() => setIsCustom(true)}
             className={`p-3 rounded-2xl border transition-all ${
               isCustom
-                ? 'border-[#2845D6] ring-2 ring-blue-500/20 bg-white dark:bg-slate-800'
+                ? 'border-[#113BD0] ring-2 ring-blue-500/20 bg-white dark:bg-slate-800'
                 : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60'
             }`}
           >
@@ -97,7 +97,7 @@ export const PrepTimeModal = ({ isOpen, onClose, order, onConfirm, loading }) =>
                   value={customTime}
                   onFocus={() => setIsCustom(true)}
                   onChange={handleCustomChange}
-                  className="w-20 p-1.5 px-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-center text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#2845D6]"
+                  className="w-20 p-1.5 px-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-center text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#113BD0]"
                 />
                 <span className="text-xs font-bold text-slate-400">min</span>
               </div>
@@ -119,7 +119,7 @@ export const PrepTimeModal = ({ isOpen, onClose, order, onConfirm, loading }) =>
             type="button"
             onClick={handleConfirm}
             disabled={loading}
-            className="w-full h-12 rounded-xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-sm flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none disabled:opacity-50"
+            className="w-full h-12 rounded-xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white font-black text-sm flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none disabled:opacity-50"
           >
             <Check className="w-4 h-4 stroke-[2.5]" />
             <span>Confirm & Accept</span>

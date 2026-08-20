@@ -79,7 +79,7 @@ export const HomePage = () => {
         code: c.code,
         badge: 'LIVE PROMO',
         gradient: idx % 3 === 0
-          ? 'from-[#2845D6] via-indigo-600 to-blue-800'
+          ? 'from-[#113BD0] via-indigo-600 to-blue-800'
           : idx % 3 === 1
           ? 'from-amber-600 via-orange-600 to-rose-700'
           : 'from-emerald-600 via-teal-700 to-slate-900',
@@ -99,7 +99,7 @@ export const HomePage = () => {
           subtitle: t.banner1Subtitle || 'On your first 3 food orders',
           code: 'WELCOME50',
           badge: t.banner1Badge || 'LIMITED OFFER',
-          gradient: 'from-[#2845D6] via-indigo-600 to-blue-800',
+          gradient: 'from-[#113BD0] via-indigo-600 to-blue-800',
           bgImage: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=70',
           query: 'biryani',
         },
@@ -270,7 +270,7 @@ export const HomePage = () => {
               aria-label={`Order now with promo: ${promoBanners[activeBannerIndex].title}`}
             >
               <span>{t.orderNow || 'Order Now'}</span>
-              <ArrowRight className="w-4 h-4 text-[#2845D6]" />
+              <ArrowRight className="w-4 h-4 text-[#113BD0]" />
             </button>
 
             {/* Carousel Dots */}
@@ -305,7 +305,7 @@ export const HomePage = () => {
           <button
             type="button"
             onClick={() => scrollCategories(-240)}
-            className="hidden sm:flex absolute sm:-left-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
+            className="hidden sm:flex absolute sm:-left-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#113BD0] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
             title="Previous Categories"
             aria-label="Scroll to previous categories"
           >
@@ -325,7 +325,7 @@ export const HomePage = () => {
                 className="flex flex-col items-center gap-2 shrink-0 cursor-pointer group select-none text-center"
                 aria-label={`Explore ${cat.name} category`}
               >
-                <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 p-1.5 group-hover:border-[#2845D6] group-hover:scale-105 transition-all duration-300 shadow-xs group-hover:shadow-lg group-hover:shadow-blue-500/15 shrink-0">
+                <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-3xl bg-white dark:bg-slate-900 border-2 border-slate-200/80 dark:border-slate-800 p-1.5 group-hover:border-[#113BD0] group-hover:scale-105 transition-all duration-300 shadow-xs group-hover:shadow-lg group-hover:shadow-blue-500/15 shrink-0">
                   <img
                     src={cat.image}
                     alt={cat.name}
@@ -336,7 +336,7 @@ export const HomePage = () => {
                     decoding="async"
                   />
                 </div>
-                <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+                <span className="text-xs sm:text-sm font-black text-slate-800 dark:text-slate-200 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
                   {cat.name}
                 </span>
               </button>
@@ -347,7 +347,7 @@ export const HomePage = () => {
           <button
             type="button"
             onClick={() => scrollCategories(240)}
-            className="hidden sm:flex absolute sm:-right-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#2845D6] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
+            className="hidden sm:flex absolute sm:-right-3.5 top-11 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-[#113BD0] hover:text-white dark:hover:bg-blue-600 hover:border-transparent items-center justify-center transition-all shadow-md active:scale-90 cursor-pointer"
             title="Next Categories"
             aria-label="Scroll to next categories"
           >
@@ -392,7 +392,7 @@ export const HomePage = () => {
           <button
             type="button"
             onClick={() => navigate('/search')}
-            className="text-xs font-bold text-[#2845D6] dark:text-blue-400 hover:underline flex items-center gap-0.5 cursor-pointer"
+            className="text-xs font-bold text-[#113BD0] dark:text-blue-400 hover:underline flex items-center gap-0.5 cursor-pointer"
             aria-label="See all popular dishes"
           >
             <span>{t.seeAll || 'See All'}</span>
@@ -427,7 +427,7 @@ export const HomePage = () => {
       <section className="space-y-3.5 pt-2" aria-label="Nearby Restaurants">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Store className="w-5 h-5 text-[#2845D6]" />
+            <Store className="w-5 h-5 text-[#113BD0]" />
             <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               {t.restaurantsNearYou}
             </h2>
@@ -458,7 +458,7 @@ export const HomePage = () => {
               key={dish}
               type="button"
               onClick={() => navigate(`/search?q=${encodeURIComponent(dish)}`)}
-              className="px-3 py-1 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-200 shadow-md hover:border-[#2845D6] dark:hover:border-blue-500 shrink-0 transition-all active:scale-95 cursor-pointer"
+              className="px-3 py-1 rounded-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-200 shadow-md hover:border-[#113BD0] dark:hover:border-blue-500 shrink-0 transition-all active:scale-95 cursor-pointer"
               aria-label={`Search for ${dish}`}
             >
               {dish}

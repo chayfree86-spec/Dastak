@@ -500,7 +500,7 @@ export const OrderTrackingPage = () => {
       <button
         type="button"
         onClick={() => navigate('/orders')}
-        className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2845D6] dark:hover:text-blue-400 transition-colors cursor-pointer"
+        className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#113BD0] dark:hover:text-blue-400 transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>{lang === 'hi' ? 'ऑर्डर्स पर वापस जाएं' : 'Back to Orders'}</span>
@@ -578,7 +578,7 @@ export const OrderTrackingPage = () => {
               <button
                 type="button"
                 onClick={() => setRatingModalOpen(true)}
-                className="px-5 py-2.5 rounded-2xl bg-[#2845D6] hover:bg-blue-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 active:scale-95 transition-all cursor-pointer shrink-0"
+                className="px-5 py-2.5 rounded-2xl bg-[#113BD0] hover:bg-blue-700 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 <Star className="w-4 h-4 fill-amber-300 text-amber-300" />
                 <span>{t.rateOrder || (lang === 'hi' ? 'रेटिंग दें' : 'Rate Order')}</span>
@@ -655,7 +655,7 @@ export const OrderTrackingPage = () => {
         {deliveryBoy.name ? (
           <div className="p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shrink-0">
                 <Bike className="w-5 h-5" />
               </div>
               <div className="min-w-0">
@@ -714,7 +714,7 @@ export const OrderTrackingPage = () => {
               onClick={() => makePhoneCall(restaurant.phone)}
               className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 cursor-pointer shrink-0"
             >
-              <Phone className="w-3.5 h-3.5 text-[#2845D6]" />
+              <Phone className="w-3.5 h-3.5 text-[#113BD0]" />
               <span>{t.callKitchen || (lang === 'hi' ? 'किचन को कॉल करें' : 'Call Kitchen')}</span>
             </button>
           )}
@@ -777,7 +777,7 @@ export const OrderTrackingPage = () => {
           </div>
           <div className="flex justify-between items-center text-sm font-black text-slate-900 dark:text-slate-100 pt-1.5 border-t border-slate-100 dark:border-slate-800">
             <span>{t.grandTotal} ({order.payment_mode === 'COD' ? (lang === 'hi' ? 'कैश ऑन डिलीवरी' : 'Cash on Delivery') : (lang === 'hi' ? 'ऑनलाइन भुगतान' : 'Online Paid')})</span>
-            <span className="text-base text-[#2845D6] dark:text-blue-400">
+            <span className="text-base text-[#113BD0] dark:text-blue-400">
               {formatCurrency(bill.total_amount || order.total_amount)}
             </span>
           </div>

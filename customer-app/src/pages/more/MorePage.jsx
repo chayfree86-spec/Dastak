@@ -42,7 +42,7 @@ export const MorePage = () => {
       {/* Header */}
       <div>
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
-          <Menu className="w-7 h-7 text-[#2845D6] dark:text-blue-400" />
+          <Menu className="w-7 h-7 text-[#113BD0] dark:text-blue-400" />
           <span>{lang === 'hi' ? 'अन्य विकल्प' : 'More Options'}</span>
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
@@ -55,7 +55,7 @@ export const MorePage = () => {
       {/* User Profile Summary Card */}
       <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
             {user?.name ? user.name[0].toUpperCase() : 'C'}
           </div>
           <div className="min-w-0 space-y-0.5">
@@ -93,7 +93,7 @@ export const MorePage = () => {
           className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer group"
         >
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0] dark:text-blue-400 group-hover:scale-110 transition-transform">
               <Receipt className="w-5 h-5" />
             </div>
             <div>
@@ -168,7 +168,7 @@ export const MorePage = () => {
               </p>
             </div>
           </div>
-          <span className="text-xs font-black text-[#2845D6] dark:text-blue-400 bg-blue-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
+          <span className="text-xs font-black text-[#113BD0] dark:text-blue-400 bg-blue-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
             {lang === 'en' ? 'Switch to हिंदी' : 'Switch to English'}
           </span>
         </div>
@@ -202,7 +202,7 @@ export const MorePage = () => {
           className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#2845D6]">
+            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0]">
               <HelpCircle className="w-5 h-5" />
             </div>
             <div>

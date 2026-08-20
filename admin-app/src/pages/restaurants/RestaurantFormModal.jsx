@@ -379,9 +379,9 @@ export const RestaurantFormModal = ({
                   type="button"
                   onClick={handleAutoFetchLocation}
                   disabled={gpsLocating}
-                  className="px-2 py-0.5 text-[9px] font-bold bg-[#2845D6]/10 hover:bg-[#2845D6]/20 text-[#2845D6] dark:bg-blue-900/30 dark:text-blue-400 rounded-md transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                  className="px-2 py-0.5 text-[9px] font-bold bg-[#113BD0]/10 hover:bg-[#113BD0]/20 text-[#113BD0] dark:bg-blue-900/30 dark:text-blue-400 rounded-md transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full bg-[#2845D6] ${gpsLocating ? 'animate-ping' : 'animate-pulse'}`}></span>
+                  <span className={`w-1.5 h-1.5 rounded-full bg-[#113BD0] ${gpsLocating ? 'animate-ping' : 'animate-pulse'}`}></span>
                   {gpsLocating ? 'Detecting GPS (12s)...' : 'Auto-Detect GPS'}
                 </button>
                 {address.trim().length > 3 && (
@@ -426,8 +426,8 @@ export const RestaurantFormModal = ({
                 title={is3DMode ? "Switch to 2D Roadmap View" : "Enable 3D Aerial Satellite View"}
                 className={`absolute top-2 right-2 z-[1000] flex items-center gap-1 px-2 py-1 rounded-md border shadow-md font-bold text-[10px] transition-all cursor-pointer select-none ${
                   is3DMode
-                    ? 'bg-[#2845D6] text-white border-[#2845D6] ring-2 ring-[#2845D6]/30 shadow-blue-500/20'
-                    : 'bg-white/95 dark:bg-slate-800/95 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#2845D6] hover:bg-white'
+                    ? 'bg-[#113BD0] text-white border-[#113BD0] ring-2 ring-[#113BD0]/30 shadow-blue-500/20'
+                    : 'bg-white/95 dark:bg-slate-800/95 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#113BD0] hover:bg-white'
                 }`}
               >
                 <Box className={`w-3 h-3 ${is3DMode ? 'animate-pulse' : ''}`} />

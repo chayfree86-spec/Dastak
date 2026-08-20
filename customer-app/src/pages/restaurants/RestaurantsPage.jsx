@@ -62,7 +62,7 @@ export const RestaurantsPage = () => {
       {/* Header */}
       <div>
         <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2">
-          <Store className="w-6 h-6 text-[#2845D6] dark:text-blue-400" />
+          <Store className="w-6 h-6 text-[#113BD0] dark:text-blue-400" />
           <span>{t.allPartnerRestaurants || (lang === 'hi' ? 'सभी पार्टनर रेस्टोरेंट' : 'All Partner Restaurants')}</span>
         </h2>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
@@ -72,7 +72,7 @@ export const RestaurantsPage = () => {
 
       {/* Top In-Flow Search Input Bar */}
       <div className="p-2.5 sm:p-3 rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center gap-2">
-        <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 ml-1 shrink-0" />
+        <Search className="w-4 h-4 text-[#113BD0] dark:text-blue-400 ml-1 shrink-0" />
         <input
           type="text"
           value={searchQuery}

@@ -129,7 +129,7 @@ export const SettingsPage = () => {
           {/* Sound Alert Option */}
           <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#2845D6] dark:text-blue-400">
+              <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400">
                 {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
               </div>
               <div>

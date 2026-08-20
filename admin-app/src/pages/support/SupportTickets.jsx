@@ -38,7 +38,7 @@ export const SupportTickets = () => {
     {
       key: 'id',
       header: 'Ticket ID',
-      render: (row) => <span className="font-mono font-bold text-[#2845D6] dark:text-blue-400">#{row.id}</span>,
+      render: (row) => <span className="font-mono font-bold text-[#113BD0] dark:text-blue-400">#{row.id}</span>,
     },
     {
       key: 'customer_name',
@@ -120,7 +120,7 @@ export const SupportTickets = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search tickets by customer name or issue..."
-            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0]"
           />
         </div>
       </div>
@@ -143,7 +143,7 @@ export const SupportTickets = () => {
       <div className="md:hidden space-y-2.5">
         {loading ? (
           <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-slate-400 font-medium">Loading support tickets...</p>
           </div>
         ) : !data || data.length === 0 ? (
@@ -159,7 +159,7 @@ export const SupportTickets = () => {
             >
               {/* Header: ID, Customer & Status */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                <div className="flex items-center gap-1.5 font-mono font-bold text-[#113BD0] dark:text-blue-400">
                   <span>#{ticket.id}</span>
                   <span className="font-sans font-bold text-slate-900 dark:text-slate-100">
                     &bull; {ticket.customer_name}

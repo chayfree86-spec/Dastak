@@ -88,7 +88,7 @@ export const RestaurantCard = ({ restaurant }) => {
 
         {/* Bottom Banner Info: Discount offer & Rating */}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
-          <div className="flex items-center gap-1 bg-[#2845D6]/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black shadow-md whitespace-nowrap">
+          <div className="flex items-center gap-1 bg-[#113BD0]/90 backdrop-blur-md text-white px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black shadow-md whitespace-nowrap">
             <Tag className="w-3 h-3 shrink-0" />
             <span>50% {t.offUpTo || 'OFF UP TO'} ₹100</span>
           </div>
@@ -103,7 +103,7 @@ export const RestaurantCard = ({ restaurant }) => {
       {/* Details Footer */}
       <div className="p-3.5 sm:p-4 space-y-2">
         <div className="min-w-0">
-          <h3 className="text-base font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors truncate">
+          <h3 className="text-base font-black text-slate-900 dark:text-slate-100 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors truncate">
             {restaurant.name}
           </h3>
           <p className="text-xs text-slate-600 dark:text-slate-400 truncate mt-0.5 font-medium">
@@ -114,7 +114,7 @@ export const RestaurantCard = ({ restaurant }) => {
         {/* Meta Footer: Delivery Time & Location */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-bold gap-2">
           <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-            <Clock className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400 shrink-0" />
+            <Clock className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400 shrink-0" />
             <span>{timeMin}-{timeMin + 10} min</span>
           </div>
           <div className="flex items-center gap-1.5 min-w-0 truncate justify-end">

@@ -87,7 +87,7 @@ export const CustomerLayout = () => {
   const isAuthPage = location.pathname === '/login'
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-[#2845D6] selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-[#113BD0] selection:text-white">
       {/* 1. Header (Full Width Web Header - Hidden on Auth / Login pages) */}
       {!isAuthPage && (
         <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs h-14 sm:h-16 flex items-center">
@@ -144,7 +144,7 @@ export const CustomerLayout = () => {
                 title="Toggle English / हिंदी"
                 aria-label="Toggle language between English and Hindi"
               >
-                <Globe className="w-3.5 h-3.5 text-[#2845D6]" />
+                <Globe className="w-3.5 h-3.5 text-[#113BD0]" />
                 <span>{lang === 'en' ? 'हिंदी' : 'English'}</span>
               </button>
 

@@ -125,10 +125,10 @@ export const LiveMapTracker = ({
         <div className="relative z-10 flex items-start justify-between gap-3">
           <div className="p-3 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-700 text-xs shadow-md space-y-1">
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-              <Navigation className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400" />
+              <Navigation className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400" />
               <span>GPS Telemetry Coordinates</span>
             </div>
-            <div className="font-mono font-bold text-[#2845D6] dark:text-emerald-400 text-sm">
+            <div className="font-mono font-bold text-[#113BD0] dark:text-emerald-400 text-sm">
               {simLat}° N, {simLng}° E
             </div>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
@@ -165,13 +165,13 @@ export const LiveMapTracker = ({
             <div className="relative flex flex-col items-center">
               {/* Radar pulse wave */}
               <div className="absolute w-24 h-24 rounded-full bg-blue-500/25 dark:bg-blue-500/20 animate-ping pointer-events-none" />
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-blue-500 text-white shadow-xl shadow-blue-500/30 border-2 border-white dark:border-slate-800 flex items-center justify-center relative">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-blue-500 text-white shadow-xl shadow-blue-500/30 border-2 border-white dark:border-slate-800 flex items-center justify-center relative">
                 <Bike className="w-7 h-7 animate-bounce" />
                 <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
               </div>
               <div className="mt-2 px-3 py-1 rounded-full bg-white/95 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-900 dark:text-white shadow-md flex items-center gap-1.5">
                 <span>{entityName}</span>
-                <span className="text-[#2845D6] dark:text-emerald-400 font-mono">({simSpeed} km/h)</span>
+                <span className="text-[#113BD0] dark:text-emerald-400 font-mono">({simSpeed} km/h)</span>
               </div>
             </div>
           ) : (
@@ -215,10 +215,10 @@ export const LiveMapTracker = ({
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Radio className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400 animate-pulse" />
+              <Radio className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400 animate-pulse" />
               <span>Active Trip Routing</span>
             </h5>
-            <span className="font-mono text-xs font-bold text-[#2845D6] dark:text-blue-400">
+            <span className="font-mono text-xs font-bold text-[#113BD0] dark:text-blue-400">
               Order #{activeOrder.id}
             </span>
           </div>

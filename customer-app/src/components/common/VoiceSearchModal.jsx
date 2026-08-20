@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Mic, MicOff, RefreshCw, Keyboard, Volume2, Sparkles, AudioWaveform } from 'lucide-react'
+import { Mic, MicOff, RefreshCw, Keyboard, Volume2, AudioWaveform } from 'lucide-react'
 import Modal from './Modal'
 import Button from './Button'
 import { SpeechSearchListener } from '../../utils/speech'

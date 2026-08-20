@@ -4,10 +4,17 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "npm --prefix admin-app run dev",
+    "dev:landing": "npm --prefix landing-page run dev",
     "dev:admin": "npm --prefix admin-app run dev",
     "dev:customer": "npm --prefix customer-app run dev",
     "dev:partner": "npm --prefix partner-app run dev",
     "dev:delivery": "npm --prefix deliveryboy-app run dev",
+    "build:all": "npm --prefix landing-page run build && npm --prefix admin-app run build && npm --prefix customer-app run build && npm --prefix partner-app run build && npm --prefix deliveryboy-app run build",
+    "build:landing": "npm --prefix landing-page run build",
+    "build:admin": "npm --prefix admin-app run build",
+    "build:customer": "npm --prefix customer-app run build",
+    "build:partner": "npm --prefix partner-app run build",
+    "build:delivery": "npm --prefix deliveryboy-app run build",
     "simulate": "node simulation/runner.js"
   }
 }

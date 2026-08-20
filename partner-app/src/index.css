@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --brand-blue: #2845D6;
+    --brand-blue: #113BD0;
     --brand-orange: #F97316;
     --brand-dark: #102A43;
     --brand-secondary: #64748B;
@@ -74,7 +74,7 @@
 
 /* Modern text and UI selection styling for Light & Dark Mode */
 ::selection {
-  background-color: #2845D6;
+  background-color: #113BD0;
   color: #ffffff;
 }
 

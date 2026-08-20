@@ -209,14 +209,14 @@ export const ZoneFormModal = ({ isOpen, onClose, zone, onSaveSuccess, existingAr
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                <Compass className="w-4 h-4 text-[#2845D6]" />
+                <Compass className="w-4 h-4 text-[#113BD0]" />
                 <span>Zone Center Coordinates</span>
               </div>
               <button
                 type="button"
                 onClick={handleAutoLocate}
                 disabled={locating}
-                className="flex items-center gap-1 text-[11px] font-bold text-[#2845D6] dark:text-blue-400 hover:underline cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1 text-[11px] font-bold text-[#113BD0] dark:text-blue-400 hover:underline cursor-pointer disabled:opacity-50"
               >
                 <Navigation className={`w-3 h-3 ${locating ? 'animate-spin' : ''}`} />
                 <span>{locating ? 'Detecting GPS (12s)...' : 'Auto Detect GPS'}</span>

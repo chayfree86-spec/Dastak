@@ -403,7 +403,7 @@ export const SettingsPage = () => {
             {/* Loading Indicator */}
             {loadingZones && (
               <div className="py-8 flex items-center justify-center">
-                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin" />
+                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin" />
               </div>
             )}
 
@@ -428,7 +428,7 @@ export const SettingsPage = () => {
                             {area.city}
                           </span>
                         )}
-                        <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400 rounded-md font-mono">
+                        <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400 rounded-md font-mono">
                           {area.radius_km || 10} KM Radius
                         </span>
                       </div>

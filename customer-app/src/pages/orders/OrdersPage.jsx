@@ -209,7 +209,7 @@ export const OrdersPage = () => {
                 key={order.id || order.order_number}
                 className={`rounded-3xl bg-white dark:bg-slate-900 border shadow-xs hover:shadow-md transition-all overflow-hidden ${
                   isActive
-                    ? 'border-[#2845D6]/40 ring-2 ring-blue-500/10'
+                    ? 'border-[#113BD0]/40 ring-2 ring-blue-500/10'
                     : 'border-slate-200/80 dark:border-slate-800'
                 }`}
               >
@@ -255,7 +255,7 @@ export const OrdersPage = () => {
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1 min-w-0">
                       <h4 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                        <Store className="w-3.5 h-3.5 text-[#2845D6]" />
+                        <Store className="w-3.5 h-3.5 text-[#113BD0]" />
                         <span>{rest.name || 'Dastak Partner Kitchen'}</span>
                       </h4>
                       <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">

@@ -120,7 +120,7 @@ export const ReportsPage = () => {
       {/* Header */}
       <div>
         <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
-          <Receipt className="w-6 h-6 text-[#2845D6] dark:text-blue-400" />
+          <Receipt className="w-6 h-6 text-[#113BD0] dark:text-blue-400" />
           <span>{lang === 'hi' ? 'पुराने ऑर्डर और खर्च रिपोर्ट' : 'Past Orders & Spending Report'}</span>
         </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
@@ -137,7 +137,7 @@ export const ReportsPage = () => {
           {/* 1. Bento KPI Stats Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* Total Spent */}
-            <div className="p-4 rounded-3xl bg-gradient-to-br from-[#2845D6] to-indigo-700 text-white shadow-lg shadow-blue-600/20 space-y-1">
+            <div className="p-4 rounded-3xl bg-gradient-to-br from-[#113BD0] to-indigo-700 text-white shadow-lg shadow-blue-600/20 space-y-1">
               <span className="text-[9px] font-black uppercase tracking-wider text-blue-200 block">
                 {lang === 'hi' ? 'कुल खर्च' : 'TOTAL SPENT'}
               </span>
@@ -195,7 +195,7 @@ export const ReportsPage = () => {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <h3 className="text-base font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#2845D6]" />
+                <Clock className="w-4 h-4 text-[#113BD0]" />
                 <span>{lang === 'hi' ? 'पुराने ऑर्डर्स का इतिहास' : 'Past Orders History'}</span>
               </h3>
 
@@ -212,7 +212,7 @@ export const ReportsPage = () => {
                     onClick={() => setFilterTab(tab.id)}
                     className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                       filterTab === tab.id
-                        ? 'bg-[#2845D6] text-white shadow-xs'
+                        ? 'bg-[#113BD0] text-white shadow-xs'
                         : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
                     }`}
                   >
@@ -244,7 +244,7 @@ export const ReportsPage = () => {
                       {/* Order Top Bar */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+                          <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
                             <Store className="w-5 h-5" />
                           </div>
                           <div className="min-w-0">
@@ -320,7 +320,7 @@ export const ReportsPage = () => {
                               <button
                                 type="button"
                                 onClick={() => handleReorder(o)}
-                                className="min-h-[40px] px-2 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#2845D6] dark:text-blue-400 text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                                className="min-h-[40px] px-2 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[#113BD0] dark:text-blue-400 text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                               >
                                 <RotateCcw className="w-3.5 h-3.5 shrink-0" />
                                 <span className="truncate">{t.orderAgain || (lang === 'hi' ? 'फिर ऑर्डर करें' : 'Re-Order')}</span>
@@ -331,7 +331,7 @@ export const ReportsPage = () => {
                           <button
                             type="button"
                             onClick={() => navigate(`/orders/${o.order_number}`)}
-                            className="min-h-[40px] px-3 py-2 rounded-2xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white text-xs font-black shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                            className="min-h-[40px] px-3 py-2 rounded-2xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white text-xs font-black shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95"
                           >
                             <span>{lang === 'hi' ? 'रसीद देखें' : 'Receipt'}</span>
                             <ArrowRight className="w-3.5 h-3.5 shrink-0" />

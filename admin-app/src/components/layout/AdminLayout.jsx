@@ -67,7 +67,7 @@ export const AdminLayout = () => {
       <button
         type="button"
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-[#2845D6] text-white shadow-2xl shadow-[#2845D6]/40 border border-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
+        className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-[#113BD0] text-white shadow-2xl shadow-[#113BD0]/40 border border-white/20 active:scale-95 transition-all duration-200 cursor-pointer"
         aria-label="Open Navigation Menu"
       >
         <Menu className="w-5 h-5 text-white" />

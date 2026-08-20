@@ -102,10 +102,10 @@ export const HomePage = () => {
           type="button"
           onClick={handleRefresh}
           disabled={refreshing}
-          className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-[#2845D6] dark:hover:text-blue-400 shadow-xs flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer"
+          className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-[#113BD0] dark:hover:text-blue-400 shadow-xs flex items-center gap-1.5 text-xs font-bold transition-all cursor-pointer"
           title="Refresh Data"
         >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#2845D6]' : ''}`} />
+          <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#113BD0]' : ''}`} />
           <span className="hidden sm:inline">Refresh</span>
         </button>
       </div>
@@ -120,7 +120,7 @@ export const HomePage = () => {
           {activeOrder ? (
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#2845D6] dark:text-blue-400 flex items-center gap-1.5">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#113BD0] dark:text-blue-400 flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-amber-500" />
                   <span>CURRENT ACTIVE TRIP</span>
                 </h3>
@@ -132,7 +132,7 @@ export const HomePage = () => {
             </div>
           ) : (
             <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 text-center space-y-4 shadow-xs">
-              <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 flex items-center justify-center mx-auto shadow-xs">
                 <Package className="w-8 h-8" />
               </div>
               <div className="space-y-1.5 max-w-md mx-auto">
@@ -152,10 +152,10 @@ export const HomePage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div
               onClick={() => navigate('/deliveries')}
-              className="p-4 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 hover:border-[#2845D6]/40 transition-all flex items-center justify-between cursor-pointer shadow-xs"
+              className="p-4 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 hover:border-[#113BD0]/40 transition-all flex items-center justify-between cursor-pointer shadow-xs"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-[#2845D6] dark:text-blue-400">
+                <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400">
                   <Package className="w-5 h-5" />
                 </div>
                 <div>
@@ -172,7 +172,7 @@ export const HomePage = () => {
 
             <div
               onClick={() => navigate('/cod')}
-              className="p-4 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 hover:border-[#2845D6]/40 transition-all flex items-center justify-between cursor-pointer shadow-xs"
+              className="p-4 rounded-2xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 hover:border-[#113BD0]/40 transition-all flex items-center justify-between cursor-pointer shadow-xs"
             >
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400">
@@ -269,7 +269,7 @@ export const HomePage = () => {
                     {todayDeliveries} <span className="text-xs font-semibold text-slate-400">Orders</span>
                   </div>
                 </div>
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shrink-0">
                   <Package className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
               </div>
@@ -297,7 +297,7 @@ export const HomePage = () => {
           {/* Dispatch Helpline Card */}
           <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-200/60 dark:border-slate-700 text-xs flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <PhoneCall className="w-4 h-4 text-[#2845D6] dark:text-blue-400 shrink-0" />
+              <PhoneCall className="w-4 h-4 text-[#113BD0] dark:text-blue-400 shrink-0" />
               <div>
                 <span className="font-bold text-slate-800 dark:text-slate-200 block">
                   Central Fleet Dispatch
@@ -309,7 +309,7 @@ export const HomePage = () => {
             </div>
             <a
               href="tel:+919876543210"
-              className="px-3 py-1.5 rounded-xl bg-[#2845D6] hover:bg-[#F97316] text-white font-bold text-[11px] transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-[#113BD0] hover:bg-[#F97316] text-white font-bold text-[11px] transition-colors"
             >
               Call Hub
             </a>

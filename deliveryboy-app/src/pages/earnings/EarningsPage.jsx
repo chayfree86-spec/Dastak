@@ -67,7 +67,7 @@ export const EarningsPage = () => {
             onClick={() => setPeriod('today')}
             className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
               period === 'today'
-                ? 'bg-[#2845D6] text-white shadow-xs'
+                ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -78,7 +78,7 @@ export const EarningsPage = () => {
             onClick={() => setPeriod('week')}
             className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
               period === 'week'
-                ? 'bg-[#2845D6] text-white shadow-xs'
+                ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -89,7 +89,7 @@ export const EarningsPage = () => {
             onClick={() => setPeriod('month')}
             className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
               period === 'month'
-                ? 'bg-[#2845D6] text-white shadow-xs'
+                ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
@@ -103,7 +103,7 @@ export const EarningsPage = () => {
       ) : (
         <div className="space-y-4">
           {/* 2. Big Highlight Card */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-tr from-[#2845D6] to-[#1E3A8A] text-white shadow-xl space-y-4">
+          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-tr from-[#113BD0] to-[#1E3A8A] text-white shadow-xl space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-blue-200">
                 {period === 'today'
@@ -164,7 +164,7 @@ export const EarningsPage = () => {
 
           {/* 4. Payout Policy Banner */}
           <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-slate-800/60 border border-blue-200/70 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-400 flex items-start gap-3">
-            <Shield className="w-5 h-5 text-[#2845D6] dark:text-blue-400 shrink-0 mt-0.5" />
+            <Shield className="w-5 h-5 text-[#113BD0] dark:text-blue-400 shrink-0 mt-0.5" />
             <p className="leading-relaxed">
               <strong>Weekly Settlement Cycle:</strong> Fleet payouts are calculated and deposited directly to your registered bank account every Monday.
             </p>

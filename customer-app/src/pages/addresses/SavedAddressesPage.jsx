@@ -105,7 +105,7 @@ export const SavedAddressesPage = () => {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2845D6] dark:hover:text-blue-400 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#113BD0] dark:hover:text-blue-400 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{lang === 'hi' ? 'वापस' : 'Back'}</span>
@@ -137,15 +137,15 @@ export const SavedAddressesPage = () => {
 
       {/* 1. Active Delivery Address Banner */}
       {activeAddress && (
-        <div className="p-5 rounded-3xl bg-blue-50/70 dark:bg-slate-900 border-2 border-[#2845D6] dark:border-blue-500 shadow-md space-y-3">
+        <div className="p-5 rounded-3xl bg-blue-50/70 dark:bg-slate-900 border-2 border-[#113BD0] dark:border-blue-500 shadow-md space-y-3">
           <div className="flex items-start justify-between gap-3 text-xs">
             <div className="flex items-start gap-3.5 min-w-0">
-              <div className="p-3 rounded-2xl bg-[#2845D6] text-white shrink-0 shadow-md">
+              <div className="p-3 rounded-2xl bg-[#113BD0] text-white shrink-0 shadow-md">
                 <Home className="w-5 h-5" />
               </div>
               <div className="space-y-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-[#2845D6] text-white px-2.5 py-0.5 rounded-md">
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-[#113BD0] text-white px-2.5 py-0.5 rounded-md">
                     {lang === 'hi' ? 'सक्रिय डिलीवरी लोकेशन' : 'ACTIVE DELIVERY LOCATION'}
                   </span>
                   {activeAddress.is_default && (
@@ -186,7 +186,7 @@ export const SavedAddressesPage = () => {
                 onClick={(e) => handleOpenEdit(e, activeAddress)}
                 className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
-                <Edit3 className="w-3.5 h-3.5 text-[#2845D6]" />
+                <Edit3 className="w-3.5 h-3.5 text-[#113BD0]" />
                 <span>{lang === 'hi' ? 'संपादित करें' : 'Edit Details'}</span>
               </button>
 
@@ -205,7 +205,7 @@ export const SavedAddressesPage = () => {
             <button
               type="button"
               onClick={() => setLocationModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-[#2845D6] text-white font-bold hover:bg-[#1E3A8A] flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-3 py-1.5 rounded-xl bg-[#113BD0] text-white font-bold hover:bg-[#1E3A8A] flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Navigation className="w-3.5 h-3.5" />
               <span>Change Location</span>
@@ -246,7 +246,7 @@ export const SavedAddressesPage = () => {
                 }}
                 className={`p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border transition-all duration-200 shadow-xs hover:shadow-md cursor-pointer flex flex-col justify-between gap-3 text-xs ${
                   isSelected
-                    ? 'border-[#2845D6] ring-2 ring-blue-500/20'
+                    ? 'border-[#113BD0] ring-2 ring-blue-500/20'
                     : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300'
                 }`}
               >
@@ -286,7 +286,7 @@ export const SavedAddressesPage = () => {
                   </div>
 
                   {isSelected && (
-                    <div className="w-6 h-6 rounded-full bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                       <Check className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -302,7 +302,7 @@ export const SavedAddressesPage = () => {
                       className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
                       title="Edit Address Details"
                     >
-                      <Edit3 className="w-3.5 h-3.5 text-[#2845D6]" />
+                      <Edit3 className="w-3.5 h-3.5 text-[#113BD0]" />
                       <span>Edit</span>
                     </button>
 
@@ -360,7 +360,7 @@ export const SavedAddressesPage = () => {
                 onChange={(e) =>
                   setEditingAddress((prev) => ({ ...prev, address: e.target.value }))
                 }
-                className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+                className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
                 required
               />
             </div>
@@ -377,7 +377,7 @@ export const SavedAddressesPage = () => {
                     setEditingAddress((prev) => ({ ...prev, landmark: e.target.value }))
                   }
                   placeholder="Near Temple / School"
-                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
                 />
               </div>
 
@@ -395,7 +395,7 @@ export const SavedAddressesPage = () => {
                       }
                       className={`flex-1 py-2 rounded-xl font-black text-xs transition-all cursor-pointer ${
                         editingAddress.type === t
-                          ? 'bg-[#2845D6] text-white shadow-xs'
+                          ? 'bg-[#113BD0] text-white shadow-xs'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                       }`}
                     >
@@ -418,7 +418,7 @@ export const SavedAddressesPage = () => {
                     setEditingAddress((prev) => ({ ...prev, customer_name: e.target.value }))
                   }
                   placeholder="Your Name"
-                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
                 />
               </div>
 
@@ -433,7 +433,7 @@ export const SavedAddressesPage = () => {
                     setEditingAddress((prev) => ({ ...prev, customer_phone: e.target.value }))
                   }
                   placeholder="10-digit mobile"
-                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+                  className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
                 />
               </div>
             </div>
@@ -446,7 +446,7 @@ export const SavedAddressesPage = () => {
                 onChange={(e) =>
                   setEditingAddress((prev) => ({ ...prev, is_default: e.target.checked }))
                 }
-                className="w-4 h-4 rounded text-[#2845D6] focus:ring-[#2845D6]"
+                className="w-4 h-4 rounded text-[#113BD0] focus:ring-[#113BD0]"
               />
               <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
                 Set as my Default Delivery Address

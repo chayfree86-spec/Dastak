@@ -41,7 +41,7 @@ export const LoginPage = () => {
 
   // Steps: 'mobile' | 'otp' | 'active_elsewhere'
   const [step, setStep] = useState('mobile')
-  const [mobile, setMobile] = useState('9876543210')
+  const [mobile, setMobile] = useState('')
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
   const [generatedOtp, setGeneratedOtp] = useState('')
   const [sessionId, setSessionId] = useState('')

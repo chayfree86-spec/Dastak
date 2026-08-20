@@ -526,7 +526,7 @@ export const SystemLogDashboard = () => {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-[#2845D6] text-white shadow-xs shadow-[#2845D6]/25'
+                  ? 'bg-[#113BD0] text-white shadow-xs shadow-[#113BD0]/25'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
@@ -545,7 +545,7 @@ export const SystemLogDashboard = () => {
               placeholder="Search Event, User, IP, Device..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+              className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
             />
           </div>
 
@@ -608,7 +608,7 @@ export const SystemLogDashboard = () => {
               {loadingLogs ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-400">
-                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#2845D6]" />
+                    <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-[#113BD0]" />
                     <span>Loading system logs...</span>
                   </td>
                 </tr>
@@ -801,7 +801,7 @@ export const SystemLogDashboard = () => {
                     {selectedLog.related_entity.type === 'Order' && (
                       <a
                         href={`/orders?search=${selectedLog.related_entity.order_number}`}
-                        className="px-3 py-1.5 rounded-lg bg-[#2845D6] text-white font-bold text-xs flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-lg bg-[#113BD0] text-white font-bold text-xs flex items-center gap-1"
                       >
                         <span>Open Order</span>
                         <ExternalLink className="w-3 h-3" />

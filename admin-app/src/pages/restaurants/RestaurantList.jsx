@@ -34,63 +34,7 @@ export const RestaurantList = () => {
         page: currentPage,
         per_page: 10,
       }),
-    [search, statusFilter, cycleFilter, currentPage],
-    {
-      initialData: [
-        {
-          id: 1,
-          name: 'Biryani Central',
-          owner_name: 'Rajesh Sharma',
-          mobile: '9876543210',
-          city: 'Delhi NCR',
-          commission: 15,
-          settlement_cycle: 'WEEKLY',
-          status: 'ACTIVE',
-          is_online: true,
-          total_orders: 1420,
-          rating: 4.6,
-        },
-        {
-          id: 2,
-          name: 'Royal Spice Kitchen',
-          owner_name: 'Farhan Ali',
-          mobile: '9811223344',
-          city: 'Delhi NCR',
-          commission: 18,
-          settlement_cycle: 'WEEKLY',
-          status: 'ACTIVE',
-          is_online: true,
-          total_orders: 980,
-          rating: 4.4,
-        },
-        {
-          id: 3,
-          name: 'Punjabi Tadka',
-          owner_name: 'Harpreet Singh',
-          mobile: '9899887766',
-          city: 'Delhi NCR',
-          commission: 15,
-          settlement_cycle: 'DAILY',
-          status: 'ACTIVE',
-          is_online: false,
-          total_orders: 2150,
-          rating: 4.7,
-        },
-        {
-          id: 4,
-          name: 'South Express',
-          owner_name: 'K. Raman',
-          mobile: '9871122334',
-          city: 'Noida',
-          commission: 12,
-          settlement_cycle: 'MONTHLY',
-          status: 'SUSPENDED',
-          is_online: false,
-          total_orders: 430,
-          rating: 3.9,
-        },
-      ],
-    }
+    [search, statusFilter, cycleFilter, currentPage]
   )
 
   useEffect(() => {
@@ -122,7 +66,7 @@ export const RestaurantList = () => {
       header: 'Restaurant',
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
             {row.name.charAt(0)}
           </div>
           <div>
@@ -131,7 +75,7 @@ export const RestaurantList = () => {
                 e.stopPropagation()
                 navigate(`/restaurants/${row.id}`)
               }}
-              className="font-bold text-slate-900 dark:text-slate-100 hover:text-[#2845D6] dark:hover:text-blue-400 cursor-pointer block"
+              className="font-bold text-slate-900 dark:text-slate-100 hover:text-[#113BD0] dark:hover:text-blue-400 cursor-pointer block"
             >
               {row.name}
             </span>
@@ -198,7 +142,7 @@ export const RestaurantList = () => {
           <button
             type="button"
             onClick={() => navigate(`/restaurants/${row.id}`)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-[#2845D6] dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-[#113BD0] dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             title="View Details & Menu"
           >
             <Eye className="w-4 h-4" />
@@ -267,7 +211,7 @@ export const RestaurantList = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by restaurant name, owner, or mobile..."
-            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full h-11 sm:h-10 pl-9 pr-4 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0]"
           />
         </div>
 
@@ -330,7 +274,7 @@ export const RestaurantList = () => {
       <div className="md:hidden space-y-2.5">
         {loading ? (
           <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-slate-400 font-medium">Loading restaurants...</p>
           </div>
         ) : !data || data.length === 0 ? (
@@ -347,7 +291,7 @@ export const RestaurantList = () => {
               {/* Header: Name, Logo Initial, Rating & Status Badges */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400 font-bold text-xs flex items-center justify-center shrink-0">
                     {rest.name ? rest.name.charAt(0).toUpperCase() : 'R'}
                   </div>
                   <div className="min-w-0">
@@ -379,7 +323,7 @@ export const RestaurantList = () => {
               {/* Footer: Commission, Settlement & Actions */}
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/60 text-xs">
                 <div className="flex items-center gap-2 text-[11px]">
-                  <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#2845D6] dark:text-blue-400 font-bold">
+                  <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#113BD0] dark:text-blue-400 font-bold">
                     {rest.commission}% Comm
                   </span>
                   <span className="text-slate-400 font-medium">

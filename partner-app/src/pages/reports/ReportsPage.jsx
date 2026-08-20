@@ -69,7 +69,7 @@ export const ReportsPage = () => {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-slate-800">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#2845D6]/10 text-[#2845D6] dark:text-blue-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-[#113BD0]/10 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
               <BarChart3 className="w-5 h-5" />
             </div>
             <span>Sales & Revenue Reports</span>
@@ -101,7 +101,7 @@ export const ReportsPage = () => {
               onClick={() => setActiveRange(r.id)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeRange === r.id
-                  ? 'bg-[#2845D6] text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-500/20'
+                  ? 'bg-[#113BD0] text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-500/20'
                   : 'bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
@@ -180,7 +180,7 @@ export const ReportsPage = () => {
             <div className="lg:col-span-2 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-[#2845D6]" />
+                  <Calendar className="w-3.5 h-3.5 text-[#113BD0]" />
                   <span>Daily Sales Breakdown</span>
                 </h3>
                 <span className="text-[11px] font-bold text-slate-400">
@@ -320,7 +320,7 @@ export const ReportsPage = () => {
               {/* Payout Schedule Information Banner */}
               <div className="p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold">
-                  <Clock className="w-4 h-4 text-[#2845D6] dark:text-blue-400" />
+                  <Clock className="w-4 h-4 text-[#113BD0] dark:text-blue-400" />
                   <span>Settlement Cycle</span>
                 </div>
                 <p className="text-[11px] text-blue-800/80 dark:text-blue-300 leading-relaxed">

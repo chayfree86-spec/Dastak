@@ -1,7 +1,17 @@
 import axios from 'axios'
 import { emitRealtimeEvent } from '../utils/realtimeSync'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.dastakdelivery.com/api/v1'
+export const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('dastak.cc')) {
+    return 'https://api.dastak.cc/api/v1'
+  }
+  return '/api/v1'
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

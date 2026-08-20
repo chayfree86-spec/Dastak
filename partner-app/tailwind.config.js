@@ -9,7 +9,7 @@ export default {
     extend: {
       colors: {
         brand: {
-          blue: '#2845D6',
+          blue: '#113BD0',
           orange: '#F97316',
           dark: '#102A43',
           secondary: '#64748B',
@@ -18,7 +18,7 @@ export default {
         },
         slate: {
           750: '#1e293b',
-          850: '#0f172a',
+          850: '#113BD0',
         },
         success: '#16A34A',
         warning: '#F59E0B',

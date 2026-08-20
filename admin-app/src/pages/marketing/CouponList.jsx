@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { PlusCircle, Search, Tag, Calendar, Percent, Trash2, Edit2, CheckCircle2, Ban, AlertCircle, Upload, Image as ImageIcon, Sparkles, Flame, ArrowRight } from 'lucide-react'
+import { PlusCircle, Search, Tag, Calendar, Percent, Trash2, Edit2, CheckCircle2, Ban, AlertCircle, Upload, Image as ImageIcon, Flame, ArrowRight } from 'lucide-react'
 import marketingApi from '../../api/marketing.api'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatDate } from '../../utils/formatters'
@@ -280,7 +280,7 @@ export const CouponList = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search coupons by promo code..."
-            className="w-full pl-9 pr-4 h-11 sm:h-10 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6]"
+            className="w-full pl-9 pr-4 h-11 sm:h-10 text-sm sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0]"
           />
         </div>
       </div>
@@ -302,7 +302,7 @@ export const CouponList = () => {
       <div className="md:hidden space-y-2.5">
         {loading ? (
           <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-slate-400 font-medium">Loading coupons...</p>
           </div>
         ) : !data || data.length === 0 ? (
@@ -480,7 +480,7 @@ export const CouponList = () => {
           <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-700/80">
             <div className="flex items-center justify-between">
               <label className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider flex items-center gap-1.5">
-                <ImageIcon className="w-4 h-4 text-[#2845D6]" />
+                <ImageIcon className="w-4 h-4 text-[#113BD0]" />
                 <span>Customer App Promo Banner Image</span>
               </label>
               <span className="text-[11px] text-slate-400 font-medium">Shown on Home Carousel</span>
@@ -506,7 +506,7 @@ export const CouponList = () => {
                     onClick={() => setImageUrl(preset.url)}
                     className={`py-1.5 px-2 rounded-xl text-[11px] font-bold border transition-all cursor-pointer truncate ${
                       imageUrl === preset.url
-                        ? 'bg-[#2845D6] text-white border-[#2845D6] shadow-xs'
+                        ? 'bg-[#113BD0] text-white border-[#113BD0] shadow-xs'
                         : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300'
                     }`}
                   >
@@ -523,8 +523,8 @@ export const CouponList = () => {
                 <label className="text-[11px] font-black uppercase text-slate-500 dark:text-slate-400">
                   Upload Local Image
                 </label>
-                <label className="flex items-center justify-center gap-2 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-[#2845D6] cursor-pointer transition-colors text-xs font-bold text-slate-600 dark:text-slate-300">
-                  <Upload className="w-4 h-4 text-[#2845D6]" />
+                <label className="flex items-center justify-center gap-2 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-[#113BD0] cursor-pointer transition-colors text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <Upload className="w-4 h-4 text-[#113BD0]" />
                   <span>Choose Image File...</span>
                   <input
                     type="file"
@@ -609,7 +609,7 @@ export const CouponList = () => {
                 <div className="relative z-10">
                   <span className="px-3 py-1.5 rounded-xl bg-white text-slate-900 font-black text-[11px] shadow-sm flex items-center gap-1">
                     <span>Order Now</span>
-                    <ArrowRight className="w-3 h-3 text-[#2845D6]" />
+                    <ArrowRight className="w-3 h-3 text-[#113BD0]" />
                   </span>
                 </div>
               </div>

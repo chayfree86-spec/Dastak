@@ -35,7 +35,7 @@ export const Timeline = ({ steps = [], className = '' }) => {
                   : isCancelled
                   ? 'bg-rose-500 text-white ring-4 ring-rose-50 dark:ring-rose-950/40'
                   : isCurrent
-                  ? 'bg-[#2845D6] text-white ring-4 ring-blue-100 dark:ring-blue-950/50 animate-pulse'
+                  ? 'bg-[#113BD0] text-white ring-4 ring-blue-100 dark:ring-blue-950/50 animate-pulse'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-300 dark:border-slate-700'
               }`}
             >
@@ -56,7 +56,7 @@ export const Timeline = ({ steps = [], className = '' }) => {
                 <h5
                   className={`text-xs font-bold ${
                     isCurrent
-                      ? 'text-[#2845D6] dark:text-blue-400'
+                      ? 'text-[#113BD0] dark:text-blue-400'
                       : isCompleted
                       ? 'text-slate-900 dark:text-slate-100'
                       : 'text-slate-500 dark:text-slate-400'

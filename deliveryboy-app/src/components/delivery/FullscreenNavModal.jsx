@@ -185,7 +185,7 @@ export const FullscreenNavModal = ({
 
     // Outer vibrant route line
     L.polyline(activeRouteCoordinates, {
-      color: isHeadingToCustomer ? '#F97316' : '#2845D6',
+      color: isHeadingToCustomer ? '#F97316' : '#113BD0',
       weight: 7,
       opacity: 0.9,
       lineCap: 'round',
@@ -205,8 +205,8 @@ export const FullscreenNavModal = ({
     const riderIconHtml = `
       <div class="relative flex flex-col items-center -translate-x-1/2 -translate-y-1/2 select-none">
         <span class="absolute w-14 h-14 rounded-full bg-blue-500/30 animate-ping pointer-events-none"></span>
-        <span class="absolute w-10 h-10 rounded-full bg-[#2845D6]/30 animate-pulse pointer-events-none"></span>
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#1E3A8A] text-white flex items-center justify-center shadow-2xl border-2 border-white ring-4 ring-blue-500/30">
+        <span class="absolute w-10 h-10 rounded-full bg-[#113BD0]/30 animate-pulse pointer-events-none"></span>
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-[#1E3A8A] text-white flex items-center justify-center shadow-2xl border-2 border-white ring-4 ring-blue-500/30">
           <svg class="w-6 h-6 animate-bounce" style="animation-duration: 2s;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <circle cx="5.5" cy="17.5" r="3.5"/>
             <circle cx="18.5" cy="17.5" r="3.5"/>
@@ -244,7 +244,7 @@ export const FullscreenNavModal = ({
       `
       : `
         <div class="relative flex flex-col items-center -translate-x-1/2 -translate-y-1/2 select-none">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-indigo-600 text-white flex items-center justify-center shadow-2xl border-2 border-white ring-4 ring-blue-500/30">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-indigo-600 text-white flex items-center justify-center shadow-2xl border-2 border-white ring-4 ring-blue-500/30">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72m-13.5 8.651h.008v.008H3.75v-.008Zm0-3h.008v.008H3.75v-.008Zm0-3h.008v.008H3.75v-.008Z"/>
             </svg>
@@ -311,7 +311,7 @@ export const FullscreenNavModal = ({
             onClick={() => setActiveTarget('RESTAURANT')}
             className={`px-3.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer touch-manipulation ${
               activeTarget === 'RESTAURANT'
-                ? 'bg-[#2845D6] text-white shadow-md shadow-blue-600/30'
+                ? 'bg-[#113BD0] text-white shadow-md shadow-blue-600/30'
                 : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
@@ -355,7 +355,7 @@ export const FullscreenNavModal = ({
       <button
         type="button"
         onClick={handleCenterRider}
-        className="absolute bottom-40 right-3.5 z-20 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 text-[#2845D6] dark:text-blue-400 shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation"
+        className="absolute bottom-40 right-3.5 z-20 p-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 text-[#113BD0] dark:text-blue-400 shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer touch-manipulation"
         title="Recenter on Rider Location"
       >
         <Crosshair className="w-5 h-5" />
@@ -371,7 +371,7 @@ export const FullscreenNavModal = ({
                 className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white font-black shadow-md shrink-0 ${
                   isHeadingToCustomer
                     ? 'bg-gradient-to-tr from-[#F97316] to-amber-500'
-                    : 'bg-gradient-to-tr from-[#2845D6] to-indigo-600'
+                    : 'bg-gradient-to-tr from-[#113BD0] to-indigo-600'
                 }`}
               >
                 {isHeadingToCustomer ? <User className="w-6 h-6" /> : <Store className="w-6 h-6" />}
@@ -430,7 +430,7 @@ export const FullscreenNavModal = ({
             <button
               type="button"
               onClick={handleLaunchExternalGoogleMaps}
-              className="py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#2845D6] to-[#1E3A8A] hover:from-[#F97316] hover:to-[#EA580C] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer touch-manipulation truncate"
+              className="py-3 px-3.5 rounded-2xl bg-gradient-to-r from-[#113BD0] to-[#1E3A8A] hover:from-[#F97316] hover:to-[#EA580C] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer touch-manipulation truncate"
             >
               <Navigation className="w-4 h-4 fill-white shrink-0" />
               <span className="truncate">Google Maps GPS</span>

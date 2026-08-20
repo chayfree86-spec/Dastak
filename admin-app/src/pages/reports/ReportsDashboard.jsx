@@ -95,7 +95,7 @@ export const ReportsDashboard = () => {
       key: 'dastak_commission',
       header: 'Dastak Commission',
       align: 'right',
-      render: (row) => <span className="font-black text-[#2845D6] dark:text-blue-400">{formatCurrency(row.dastak_commission)}</span>,
+      render: (row) => <span className="font-black text-[#113BD0] dark:text-blue-400">{formatCurrency(row.dastak_commission)}</span>,
     },
     {
       key: 'cod_amount',
@@ -183,7 +183,7 @@ export const ReportsDashboard = () => {
       <div className="md:hidden space-y-2.5">
         {loading ? (
           <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-slate-400 font-medium">Loading report metrics...</p>
           </div>
         ) : !data || data.length === 0 ? (
@@ -202,7 +202,7 @@ export const ReportsDashboard = () => {
                   {formatDate(row.date)}
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#2845D6] dark:text-blue-400 font-bold text-[11px]">
+                  <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/50 text-[#113BD0] dark:text-blue-400 font-bold text-[11px]">
                     {row.total_orders} Orders
                   </span>
                   {row.cancelled_orders > 0 && (
@@ -223,7 +223,7 @@ export const ReportsDashboard = () => {
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-400 block">Commission</span>
-                  <span className="font-black text-[#2845D6] dark:text-blue-400 text-xs">
+                  <span className="font-black text-[#113BD0] dark:text-blue-400 text-xs">
                     {formatCurrency(row.dastak_commission)}
                   </span>
                 </div>

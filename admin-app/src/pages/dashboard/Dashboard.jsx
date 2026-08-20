@@ -61,7 +61,7 @@ export const Dashboard = () => {
       key: 'id',
       header: 'Order ID',
       render: (row) => (
-        <span className="font-mono font-bold text-[#2845D6] dark:text-blue-400 hover:underline">
+        <span className="font-mono font-bold text-[#113BD0] dark:text-blue-400 hover:underline">
           #{row.id}
         </span>
       ),
@@ -117,7 +117,7 @@ export const Dashboard = () => {
             e.stopPropagation()
             setSelectedOrderId(row.id)
           }}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-[#2845D6] dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-[#113BD0] dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           title="View Details"
         >
           <Eye className="w-4 h-4" />
@@ -142,7 +142,7 @@ export const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Top Banner & Quick Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-3xl bg-gradient-to-r from-[#2845D6] to-[#1E35B0] text-white shadow-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-3xl bg-gradient-to-r from-[#113BD0] to-[#1E35B0] text-white shadow-lg">
         <div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight">
             Real-Time Operations Monitor
@@ -258,7 +258,7 @@ export const Dashboard = () => {
       <div className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#2845D6]" />
+            <Activity className="w-4 h-4 text-[#113BD0]" />
             <span>Order Pipeline Overview</span>
           </h3>
           <Button variant="ghost" size="sm" onClick={() => navigate('/orders')}>
@@ -311,7 +311,7 @@ export const Dashboard = () => {
 
               <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100/80 dark:bg-blue-950/60 text-[#2845D6] dark:text-blue-400">
+                  <div className="p-2 rounded-lg bg-blue-100/80 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400">
                     <Bike className="w-4 h-4" />
                   </div>
                   <div>
@@ -319,7 +319,7 @@ export const Dashboard = () => {
                     <p className="text-[10px] text-slate-500 dark:text-slate-400">Ready for dispatch</p>
                   </div>
                 </div>
-                <span className="text-sm font-black text-[#2845D6] dark:text-blue-400">
+                <span className="text-sm font-black text-[#113BD0] dark:text-blue-400">
                   {liveOps?.riders_online || 0} / {liveOps?.total_riders || 0}
                 </span>
               </div>
@@ -350,7 +350,7 @@ export const Dashboard = () => {
         <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4 text-[#2845D6]" />
+              <ShoppingBag className="w-4 h-4 text-[#113BD0]" />
               <span>Recent Operational Orders</span>
             </h3>
           </div>
@@ -373,7 +373,7 @@ export const Dashboard = () => {
           <div className="md:hidden space-y-2.5">
             {ordersLoading ? (
               <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#2845D6] rounded-full animate-spin mx-auto mb-2" />
+                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
                 <p className="text-xs text-slate-400 font-medium">Loading orders...</p>
               </div>
             ) : !recentOrders || recentOrders.length === 0 ? (
@@ -388,7 +388,7 @@ export const Dashboard = () => {
                   className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer space-y-2.5"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-sm text-[#2845D6] dark:text-blue-400">
+                    <span className="font-mono font-bold text-sm text-[#113BD0] dark:text-blue-400">
                       #{order.id}
                     </span>
                     <div className="flex items-center gap-1.5">

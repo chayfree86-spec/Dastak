@@ -58,54 +58,12 @@ export const DeliveryBoyDetails = () => {
 
   const { data: rider, loading, error, retry } = useApi(
     () => deliveryBoysApi.getDeliveryBoyDetails(id),
-    [id],
-    {
-      initialData: {
-        id: id || 'R101',
-        name: 'Rahul Pal',
-        mobile: '9876543211',
-        emergency_contact: '9812345678',
-        email: 'rahul.pal@dastakfleet.in',
-        address: 'House No 12, Gali 4, Shanti Nagar, Kanpur',
-        vehicle_type: 'Motorcycle (Hero Splendor)',
-        vehicle_number: 'UP 78 AB 1234',
-        license_number: 'DL-1420180012345',
-        latitude: 26.4520000,
-        longitude: 80.3340000,
-        speed: 34.2,
-        heading: 140,
-        status: 'ACTIVE',
-        is_online: true,
-        rating: 4.8,
-        total_deliveries: 428,
-        completed_deliveries: 422,
-        failed_deliveries: 6,
-        lifetime_earnings: 28450.00,
-        today_earnings: 520.00,
-        cod_collected_pending: 1850.00,
-        current_active_order: {
-          id: 'D4827',
-          restaurant: 'Punjabi Tadka',
-          customer: 'Rohit Gupta',
-          address: 'Flat 301, Tower C, Lotus Boulevard, Sector 100',
-          amount: 920.00,
-          payment: 'ONLINE_PAYMENT',
-          assigned_at: new Date(Date.now() - 25 * 60000).toISOString(),
-        },
-      },
-    }
+    [id]
   )
 
   const { data: orderHistory, loading: historyLoading } = useApi(
     () => deliveryBoysApi.getOrderHistory(id, { limit: 5 }),
-    [id],
-    {
-      initialData: [
-        { id: 'D4820', restaurant: 'Biryani Central', customer: 'Vipin Jain', amount: 640.00, status: 'DELIVERED', trip_earning: 45.00, time: new Date(Date.now() - 3600000).toISOString() },
-        { id: 'D4811', restaurant: 'South Express', customer: 'Kiran Rao', amount: 320.00, status: 'DELIVERED', trip_earning: 40.00, time: new Date(Date.now() - 7200000).toISOString() },
-        { id: 'D4802', restaurant: 'Royal Spice Kitchen', customer: 'Gaurav Das', amount: 890.00, status: 'DELIVERED', trip_earning: 55.00, time: new Date(Date.now() - 14400000).toISOString() },
-      ],
-    }
+    [id]
   )
 
   const handleReconcileCod = async () => {
@@ -365,7 +323,7 @@ export const DeliveryBoyDetails = () => {
 
           <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Lifetime Earnings</span>
-            <div className="text-lg sm:text-2xl font-black text-[#2845D6] dark:text-blue-400 mt-0.5 sm:mt-1 truncate">
+            <div className="text-lg sm:text-2xl font-black text-[#113BD0] dark:text-blue-400 mt-0.5 sm:mt-1 truncate">
               {formatCurrency(rider?.lifetime_earnings)}
             </div>
             <span className="text-[10px] sm:text-[11px] text-slate-400 block truncate">All-time payouts</span>
@@ -413,7 +371,7 @@ export const DeliveryBoyDetails = () => {
               <div className="space-y-2">
                 <div>
                   <span className="text-slate-400 block">Order ID:</span>
-                  <span className="font-mono font-bold text-base text-[#2845D6] dark:text-blue-400">
+                  <span className="font-mono font-bold text-base text-[#113BD0] dark:text-blue-400">
                     {rider.current_active_order.id}
                   </span>
                 </div>
@@ -469,7 +427,7 @@ export const DeliveryBoyDetails = () => {
           <div className="hidden md:block">
             <DataTable
               columns={[
-                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
+                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#113BD0]">#{r.id}</span> },
                 { key: 'restaurant', header: 'Restaurant' },
                 { key: 'customer', header: 'Customer' },
                 { key: 'amount', header: 'Order Value', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
@@ -500,7 +458,7 @@ export const DeliveryBoyDetails = () => {
                   className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#113BD0] dark:text-blue-400">
                       <span>#{trip.id}</span>
                       <span className="text-[11px] font-normal text-slate-400">&bull; {formatDateTime(trip.time)}</span>
                     </div>
@@ -574,7 +532,7 @@ export const DeliveryBoyDetails = () => {
           {/* KYC Details */}
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-2">
-              <FileText className="w-4 h-4 text-[#2845D6]" />
+              <FileText className="w-4 h-4 text-[#113BD0]" />
               <span>Government Identity Proofs</span>
             </h3>
             <div className="grid grid-cols-2 gap-4 text-xs">
@@ -588,7 +546,7 @@ export const DeliveryBoyDetails = () => {
                     href={rider.aadhar_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#2845D6] hover:underline text-[10px] font-bold block mt-1"
+                    className="text-[#113BD0] hover:underline text-[10px] font-bold block mt-1"
                   >
                     View Hardcopy ➜
                   </a>
@@ -604,7 +562,7 @@ export const DeliveryBoyDetails = () => {
                     href={rider.pan_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#2845D6] hover:underline text-[10px] font-bold block mt-1"
+                    className="text-[#113BD0] hover:underline text-[10px] font-bold block mt-1"
                   >
                     View Hardcopy ➜
                   </a>
@@ -620,7 +578,7 @@ export const DeliveryBoyDetails = () => {
                     href={rider.license_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#2845D6] hover:underline text-[10px] font-bold block mt-1"
+                    className="text-[#113BD0] hover:underline text-[10px] font-bold block mt-1"
                   >
                     View Hardcopy ➜
                   </a>
@@ -689,7 +647,7 @@ export const DeliveryBoyDetails = () => {
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4 md:col-span-2">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/60 pb-2">
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Key className="w-4 h-4 text-[#2845D6]" />
+                <Key className="w-4 h-4 text-[#113BD0]" />
                 <span>App Login Credentials</span>
               </h3>
               <Button
@@ -732,7 +690,7 @@ export const DeliveryBoyDetails = () => {
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-4 lg:col-span-2">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Key className="w-4 h-4 text-[#2845D6]" />
+                <Key className="w-4 h-4 text-[#113BD0]" />
                 <span>Delivery Partner App Login Credentials</span>
               </h3>
               <p className="text-[11px] text-slate-400 mt-0.5">
@@ -753,7 +711,7 @@ export const DeliveryBoyDetails = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-3 p-4 rounded-xl border border-slate-100 dark:border-slate-700/60 bg-white dark:bg-slate-800/60">
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700 pb-1.5">
-                    <Mail className="w-3.5 h-3.5 text-[#2845D6]" />
+                    <Mail className="w-3.5 h-3.5 text-[#113BD0]" />
                     <span>Email Login Method</span>
                   </div>
                   <Input
@@ -815,7 +773,7 @@ export const DeliveryBoyDetails = () => {
 
             <div className="space-y-3 text-xs text-slate-600 dark:text-slate-300">
               <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 space-y-1">
-                <p className="font-bold text-[#2845D6] dark:text-blue-400">Two Login Methods Supported</p>
+                <p className="font-bold text-[#113BD0] dark:text-blue-400">Two Login Methods Supported</p>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
                   Riders can enter either their registered Email & Password, or their 10-digit Mobile Number & Security PIN in the Dastak Rider App.
                 </p>

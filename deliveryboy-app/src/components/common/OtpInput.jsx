@@ -44,7 +44,7 @@ export const OtpInput = ({ length = 4, value = '', onChange }) => {
           onChange={(e) => handleChange(e, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           autoFocus={index === 0}
-          className="w-12 h-14 sm:w-14 sm:h-16 text-center text-xl sm:text-2xl font-black rounded-2xl border-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#2845D6] dark:focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all shadow-xs"
+          className="w-12 h-14 sm:w-14 sm:h-16 text-center text-xl sm:text-2xl font-black rounded-2xl border-2 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#113BD0] dark:focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all shadow-xs"
         />
       ))}
     </div>

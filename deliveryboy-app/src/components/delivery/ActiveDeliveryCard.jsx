@@ -107,12 +107,12 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
   }
 
   return (
-    <div className="rounded-3xl bg-white dark:bg-slate-850 border-2 border-[#2845D6]/30 dark:border-blue-500/30 shadow-xl overflow-hidden flex flex-col justify-between transition-all">
+    <div className="rounded-3xl bg-white dark:bg-slate-850 border-2 border-[#113BD0]/30 dark:border-blue-500/30 shadow-xl overflow-hidden flex flex-col justify-between transition-all">
       {/* 1. Header Bar: Active Badge & Order Number & Timer */}
       <div className="p-4 sm:p-5 bg-gradient-to-r from-blue-50/90 to-indigo-50/80 dark:from-slate-900/90 dark:to-slate-850 border-b border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-3">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-lg bg-[#2845D6] text-white text-[10px] font-black uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 rounded-lg bg-[#113BD0] text-white text-[10px] font-black uppercase tracking-wider">
               ACTIVE TRIP
             </span>
             <span className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight">
@@ -121,7 +121,7 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
             <StatusBadge status={order.status} size="xs" />
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-            <Clock className="w-3.5 h-3.5 text-[#2845D6] dark:text-blue-400" />
+            <Clock className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400" />
             <span>Assigned {formatElapsedTime(order.placed_at || order.created_at)}</span>
           </div>
         </div>
@@ -198,7 +198,7 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
                   setNavTargetType('RESTAURANT')
                   setFullscreenNavOpen(true)
                 }}
-                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-[#2845D6] hover:bg-[#F97316] text-white shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
+                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-[#113BD0] hover:bg-[#F97316] text-white shadow-md shadow-blue-600/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
                 title="Open Fullscreen In-App Navigation Map"
               >
                 <Navigation className="w-4 h-4 fill-white" />
@@ -289,7 +289,7 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
                   setNavTargetType('CUSTOMER')
                   setFullscreenNavOpen(true)
                 }}
-                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#2845D6] text-white shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
+                className="w-full sm:w-auto px-3 sm:px-3.5 py-2.5 rounded-xl bg-[#F97316] hover:bg-[#113BD0] text-white shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5 font-bold text-xs cursor-pointer touch-manipulation"
                 title="Open Fullscreen In-App Navigation Map"
               >
                 <Navigation className="w-4 h-4 fill-white" />

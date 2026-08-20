@@ -2,7 +2,7 @@ import React from 'react'
 
 export const StatCard = ({ title, value, change, subtitle, icon: Icon, trend, color = 'blue' }) => {
   const colors = {
-    blue: 'bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 border-blue-100 dark:border-blue-800/40',
+    blue: 'bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 border-blue-100 dark:border-blue-800/40',
     orange: 'bg-orange-50 dark:bg-orange-950/40 text-[#F97316] dark:text-orange-400 border-orange-100 dark:border-orange-800/40',
     green: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/40',
     purple: 'bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-800/40',

@@ -53,7 +53,7 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
         {/* Customer Information */}
         <div className="p-4 rounded-2xl border border-slate-200/80 space-y-2">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <User className="w-3.5 h-3.5 text-[#2845D6]" />
+            <User className="w-3.5 h-3.5 text-[#113BD0]" />
             <span>Customer & Delivery Details</span>
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
@@ -95,7 +95,7 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
         {/* Items List */}
         <div className="space-y-2">
           <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Utensils className="w-3.5 h-3.5 text-[#2845D6]" />
+            <Utensils className="w-3.5 h-3.5 text-[#113BD0]" />
             <span>Items Ordered ({items.length})</span>
           </h4>
           <div className="rounded-2xl border border-slate-200/80 divide-y divide-slate-100 overflow-hidden">
@@ -186,14 +186,14 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
         {timeline.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[#2845D6]" />
+              <Clock className="w-3.5 h-3.5 text-[#113BD0]" />
               <span>Status History</span>
             </h4>
             <div className="p-3 rounded-2xl border border-slate-200/80 bg-white space-y-2 text-xs">
               {timeline.map((h, i) => (
                 <div key={i} className="flex items-center justify-between text-slate-600">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#2845D6]" />
+                    <span className="w-2 h-2 rounded-full bg-[#113BD0]" />
                     <span className="font-bold text-slate-800">{h.status || h.status_label}</span>
                     {h.comment && <span className="text-slate-400 text-[11px]">({h.comment})</span>}
                   </div>

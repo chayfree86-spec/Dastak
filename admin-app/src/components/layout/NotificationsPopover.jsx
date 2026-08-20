@@ -4,11 +4,7 @@ import { Link } from 'react-router-dom'
 
 export const NotificationsPopover = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'order', title: 'New Order Received', desc: 'Order #D4829 from Biryani House', time: '2m ago', unread: true, link: '/orders' },
-    { id: 2, type: 'rider', title: 'Rider Delayed', desc: 'Rider Rahul is delayed on Order #D4812', time: '12m ago', unread: true, link: '/orders' },
-    { id: 3, type: 'support', title: 'New Customer Ticket', desc: 'Customer complaint regarding missing item', time: '25m ago', unread: false, link: '/support' },
-  ])
+  const [notifications, setNotifications] = useState([])
   const popoverRef = useRef(null)
 
   useEffect(() => {
@@ -30,7 +26,7 @@ export const NotificationsPopover = () => {
   const getIcon = (type) => {
     switch (type) {
       case 'order':
-        return <ShoppingBag className="w-4 h-4 text-[#2845D6]" />
+        return <ShoppingBag className="w-4 h-4 text-[#113BD0]" />
       case 'rider':
         return <Bike className="w-4 h-4 text-[#F97316]" />
       default:
@@ -66,7 +62,7 @@ export const NotificationsPopover = () => {
               <button
                 type="button"
                 onClick={markAllAsRead}
-                className="text-[11px] text-[#2845D6] dark:text-blue-400 font-semibold hover:underline"
+                className="text-[11px] text-[#113BD0] dark:text-blue-400 font-semibold hover:underline"
               >
                 Mark all as read
               </button>

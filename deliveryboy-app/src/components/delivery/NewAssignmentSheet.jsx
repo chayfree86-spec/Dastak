@@ -31,7 +31,7 @@ export const NewAssignmentSheet = ({ order, onClose, onAcknowledge }) => {
     >
       <div className="space-y-4 p-1">
         {/* Animated Glow Header */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#2845D6] to-[#1E3A8A] text-white flex items-center justify-between shadow-lg">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#113BD0] to-[#1E3A8A] text-white flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center animate-bounce">
               <Zap className="w-6 h-6 text-amber-300" />
@@ -57,7 +57,7 @@ export const NewAssignmentSheet = ({ order, onClose, onAcknowledge }) => {
         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-3">
           {/* Pickup Step */}
           <div className="flex items-start gap-3">
-            <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-950 text-[#2845D6] dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+            <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
               1
             </div>
             <div className="min-w-0 flex-1">

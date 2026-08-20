@@ -84,10 +84,10 @@ export const MoreMenuPage = () => {
       {/* 1. Header Profile Banner */}
       <div
         onClick={() => navigate('/profile')}
-        className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between gap-3 cursor-pointer hover:border-[#2845D6]/40 transition-all"
+        className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between gap-3 cursor-pointer hover:border-[#113BD0]/40 transition-all"
       >
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-xl shadow-md shadow-blue-500/20 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black text-xl shadow-md shadow-blue-500/20 shrink-0">
             {user?.name?.charAt(0) || 'R'}
           </div>
           <div className="min-w-0">

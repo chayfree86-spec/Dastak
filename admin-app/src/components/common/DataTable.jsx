@@ -35,9 +35,9 @@ export default function DataTable({
       return <ArrowUpDown className="w-3 h-3 text-slate-400 opacity-60 ml-1" />
     }
     return sortDirection === 'asc' ? (
-      <ArrowUp className="w-3 h-3 text-[#2845D6] dark:text-blue-400 ml-1" />
+      <ArrowUp className="w-3 h-3 text-[#113BD0] dark:text-blue-400 ml-1" />
     ) : (
-      <ArrowDown className="w-3 h-3 text-[#2845D6] dark:text-blue-400 ml-1" />
+      <ArrowDown className="w-3 h-3 text-[#113BD0] dark:text-blue-400 ml-1" />
     )
   }
 

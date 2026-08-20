@@ -42,7 +42,7 @@ export const Input = forwardRef(({
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder}
-          className={`w-full h-11 sm:h-10 text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed ${
+          className={`w-full h-11 sm:h-10 text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-colors placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed ${
             Icon ? 'pl-9 pr-3.5' : 'px-3.5'
           } ${
             error

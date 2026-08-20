@@ -136,10 +136,10 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
           type="button"
           onClick={handleDetectGPS}
           disabled={detecting}
-          className="w-full p-4 rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 border-2 border-dashed border-[#2845D6] dark:border-blue-500 text-[#2845D6] dark:text-blue-400 font-black flex items-center justify-between gap-3 hover:bg-blue-100/70 active:scale-[0.99] transition-all cursor-pointer shadow-xs"
+          className="w-full p-4 rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 border-2 border-dashed border-[#113BD0] dark:border-blue-500 text-[#113BD0] dark:text-blue-400 font-black flex items-center justify-between gap-3 hover:bg-blue-100/70 active:scale-[0.99] transition-all cursor-pointer shadow-xs"
         >
           <div className="flex items-center gap-3 text-left">
-            <div className="w-10 h-10 rounded-2xl bg-[#2845D6] text-white flex items-center justify-center shrink-0 shadow-md">
+            <div className="w-10 h-10 rounded-2xl bg-[#113BD0] text-white flex items-center justify-center shrink-0 shadow-md">
               {detecting ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
@@ -164,7 +164,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
         {/* 2. Google Maps / Places Live Auto-Search Bar */}
         <div className="space-y-2">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#2845D6] dark:text-blue-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#113BD0] dark:text-blue-400" />
             <input
               type="text"
               value={searchQuery}
@@ -174,7 +174,7 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
               }}
               placeholder="Search area, apartment, street, or landmark (e.g. Civil Lines)..."
               autoFocus
-              className="w-full pl-10 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-[#2845D6] dark:focus:border-blue-500 shadow-inner"
+              className="w-full pl-10 pr-10 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-[#113BD0] dark:focus:border-blue-500 shadow-inner"
             />
             {isSearching ? (
               <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />
@@ -221,13 +221,13 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
 
         {/* 3. Selected Location Preview & Confirmation */}
         {selectedPlace && (
-          <div className="p-4 rounded-3xl bg-blue-50/70 dark:bg-slate-900 border-2 border-[#2845D6] dark:border-blue-500 shadow-md space-y-3 animate-in slide-in-from-bottom-2">
+          <div className="p-4 rounded-3xl bg-blue-50/70 dark:bg-slate-900 border-2 border-[#113BD0] dark:border-blue-500 shadow-md space-y-3 animate-in slide-in-from-bottom-2">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#2845D6] text-white flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#113BD0] text-white flex items-center justify-center shrink-0">
                 <MapPin className="w-5 h-5" />
               </div>
               <div className="min-w-0 space-y-0.5">
-                <span className="text-[10px] font-black uppercase text-[#2845D6] dark:text-blue-400 block tracking-wider">
+                <span className="text-[10px] font-black uppercase text-[#113BD0] dark:text-blue-400 block tracking-wider">
                   SELECTED LOCATION
                 </span>
                 <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm">
@@ -246,14 +246,14 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
                 value={flatNumber}
                 onChange={(e) => setFlatNumber(e.target.value)}
                 placeholder="House / Flat / Floor (Optional)"
-                className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+                className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
               />
               <input
                 type="text"
                 value={landmarkText}
                 onChange={(e) => setLandmarkText(e.target.value)}
                 placeholder="Nearby Landmark (Optional)"
-                className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+                className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
               />
             </div>
 

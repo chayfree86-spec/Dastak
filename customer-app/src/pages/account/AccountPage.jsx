@@ -48,7 +48,7 @@ export const AccountPage = () => {
       {/* User Info Card */}
       <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
             {user?.name ? user.name[0].toUpperCase() : 'C'}
           </div>
           <div className="min-w-0 space-y-0.5">
@@ -103,7 +103,7 @@ export const AccountPage = () => {
           className="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#2845D6]">
+            <div className="p-2 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0]">
               <Clock className="w-4 h-4" />
             </div>
             <div>
@@ -136,7 +136,7 @@ export const AccountPage = () => {
               </p>
             </div>
           </div>
-          <span className="text-xs font-black text-[#2845D6] dark:text-blue-400">
+          <span className="text-xs font-black text-[#113BD0] dark:text-blue-400">
             {lang === 'en' ? 'Switch to हिंदी' : 'Switch to English'}
           </span>
         </div>

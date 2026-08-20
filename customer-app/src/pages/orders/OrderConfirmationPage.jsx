@@ -11,7 +11,6 @@ import {
   Banknote,
   Receipt,
   UtensilsCrossed,
-  Sparkles,
   AlertTriangle,
   FastForward,
   RotateCcw,

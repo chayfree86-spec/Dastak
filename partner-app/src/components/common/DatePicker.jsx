@@ -85,11 +85,11 @@ export const DatePicker = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center justify-between text-left text-xs font-bold rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] ${
+        className={`flex items-center justify-between text-left text-xs font-bold rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] ${
           error
             ? 'border-rose-500'
             : isOpen
-            ? 'border-[#2845D6]'
+            ? 'border-[#113BD0]'
             : 'border-slate-200 dark:border-slate-700'
         } ${size === 'sm' ? 'py-1.5 px-2.5 text-xs' : 'py-2 px-3 text-xs'}`}
       >
@@ -144,9 +144,9 @@ export const DatePicker = ({
                   onClick={() => handleSelectDay(day)}
                   className={`w-7 h-7 text-xs font-bold rounded-lg flex items-center justify-center transition-colors ${
                     selected
-                      ? 'bg-[#2845D6] text-white font-black shadow-sm'
+                      ? 'bg-[#113BD0] text-white font-black shadow-sm'
                       : today
-                      ? 'bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 font-black'
+                      ? 'bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 font-black'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -167,7 +167,7 @@ export const DatePicker = ({
                 onChange(`${yyyy}-${mm}-${dd}`)
                 setIsOpen(false)
               }}
-              className="text-[11px] text-[#2845D6] dark:text-blue-400 hover:underline font-bold"
+              className="text-[11px] text-[#113BD0] dark:text-blue-400 hover:underline font-bold"
             >
               Today
             </button>

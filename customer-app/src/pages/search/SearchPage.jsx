@@ -108,7 +108,7 @@ export const SearchPage = () => {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#2845D6] dark:hover:text-blue-400 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-[#113BD0] dark:hover:text-blue-400 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{lang === 'hi' ? 'वापस' : 'Back'}</span>
@@ -125,7 +125,7 @@ export const SearchPage = () => {
       {intent && intent.has_quantity_intent && (
         <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-800/80 border border-blue-200 dark:border-blue-800/60 text-xs text-blue-900 dark:text-blue-200 flex items-center justify-between gap-2 animate-in fade-in">
           <div className="flex items-center gap-2">
-            <Search className="w-4 h-4 text-[#2845D6] dark:text-blue-400 shrink-0" />
+            <Search className="w-4 h-4 text-[#113BD0] dark:text-blue-400 shrink-0" />
             <span>
               Searching for: <strong className="capitalize">{intent.clean_query}</strong> (Quantity: {intent.quantity}x)
             </span>
@@ -141,7 +141,7 @@ export const SearchPage = () => {
             onClick={() => setActiveTab('dishes')}
             className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'dishes'
-                ? 'bg-[#2845D6] text-white shadow-md shadow-blue-600/20'
+                ? 'bg-[#113BD0] text-white shadow-md shadow-blue-600/20'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
             }`}
           >
@@ -154,7 +154,7 @@ export const SearchPage = () => {
             onClick={() => setActiveTab('restaurants')}
             className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'restaurants'
-                ? 'bg-[#2845D6] text-white shadow-md shadow-blue-600/20'
+                ? 'bg-[#113BD0] text-white shadow-md shadow-blue-600/20'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
             }`}
           >
@@ -208,7 +208,7 @@ export const SearchPage = () => {
       ) : (
         /* Empty / Initial State before typing */
         <div className="text-center py-12 space-y-3">
-          <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-slate-800 text-[#2845D6] dark:text-blue-400 flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-slate-800 text-[#113BD0] dark:text-blue-400 flex items-center justify-center mx-auto">
             <Search className="w-8 h-8" />
           </div>
           <h3 className="text-base font-black text-slate-800 dark:text-slate-200">

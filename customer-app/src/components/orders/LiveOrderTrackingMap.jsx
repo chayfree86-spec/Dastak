@@ -177,7 +177,7 @@ export const LiveOrderTrackingMap = ({
 
     // Background thick road route line
     L.polyline(activeRouteCoordinates, {
-      color: '#2845D6',
+      color: '#113BD0',
       weight: 6,
       opacity: 0.9,
       lineCap: 'round',
@@ -242,7 +242,7 @@ export const LiveOrderTrackingMap = ({
       <div class="relative flex flex-col items-center -translate-x-1/2 -translate-y-1/2 select-none group cursor-pointer">
         <!-- Live Ping Radar Circle -->
         <span class="absolute w-14 h-14 rounded-full bg-blue-500/30 animate-ping pointer-events-none"></span>
-        <span class="absolute w-10 h-10 rounded-full bg-[#2845D6]/20 animate-pulse pointer-events-none"></span>
+        <span class="absolute w-10 h-10 rounded-full bg-[#113BD0]/20 animate-pulse pointer-events-none"></span>
 
         <!-- Floating Info Pill on Rider -->
         <div class="mb-1 px-2 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black shadow-xl flex items-center gap-1 border border-white/20 whitespace-nowrap">
@@ -251,7 +251,7 @@ export const LiveOrderTrackingMap = ({
         </div>
 
         <!-- 3D Bike Badge with Elevation & Glow -->
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2845D6] via-blue-600 to-[#F97316] shadow-2xl shadow-blue-600/60 flex items-center justify-center text-white border-2 border-white ring-4 ring-blue-500/30 transition-transform hover:scale-110">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#113BD0] via-blue-600 to-[#F97316] shadow-2xl shadow-blue-600/60 flex items-center justify-center text-white border-2 border-white ring-4 ring-blue-500/30 transition-transform hover:scale-110">
           <svg class="w-6 h-6 animate-bounce" style="animation-duration: 2s;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <circle cx="5.5" cy="17.5" r="3.5"/>
             <circle cx="18.5" cy="17.5" r="3.5"/>
@@ -303,7 +303,7 @@ export const LiveOrderTrackingMap = ({
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
           <div>
             <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block leading-none flex items-center gap-1">
-              <Navigation className="w-2.5 h-2.5 text-[#2845D6]" />
+              <Navigation className="w-2.5 h-2.5 text-[#113BD0]" />
               <span>{isOutForDelivery ? 'OSRM LIVE ROUTE' : isDelivered ? 'DELIVERED' : 'KITCHEN READY'}</span>
             </span>
             <span className="text-xs font-black text-slate-900 dark:text-slate-100 leading-tight">
@@ -318,7 +318,7 @@ export const LiveOrderTrackingMap = ({
         <button
           type="button"
           onClick={handleCenterOnRider}
-          className="p-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-700 dark:text-slate-200 hover:text-[#2845D6] shadow-lg border border-slate-200/80 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="p-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-700 dark:text-slate-200 hover:text-[#113BD0] shadow-lg border border-slate-200/80 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all cursor-pointer"
           title="Center on Rider"
         >
           <Crosshair className="w-4 h-4" />
@@ -329,7 +329,7 @@ export const LiveOrderTrackingMap = ({
       <div className="absolute bottom-3 inset-x-3 z-10">
         <div className="p-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] flex items-center justify-center text-white shrink-0 shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] flex items-center justify-center text-white shrink-0 shadow-md">
               <Bike className="w-5 h-5 animate-pulse" />
             </div>
             <div className="min-w-0">

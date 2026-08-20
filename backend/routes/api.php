@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\Admin\UserManagementController;
 use App\Http\Controllers\Api\V1\Admin\ZoneAdminController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\SystemMaintenanceController;
 use App\Http\Controllers\Api\V1\GeocodeController;
 use App\Http\Controllers\Api\V1\Customer\CartController;
 use App\Http\Controllers\Api\V1\Customer\CustomerOrderController;
@@ -66,6 +67,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1')->group(function () {
+
+    // System Maintenance, Direct Migration Runner & Health
+    Route::prefix('system')->group(function () {
+        Route::match(['get', 'post'], '/run-migrations', [SystemMaintenanceController::class, 'runMigrations']);
+        Route::match(['get', 'post'], '/optimize-cache', [SystemMaintenanceController::class, 'optimizeCache']);
+        Route::match(['get', 'post'], '/clean-database', [SystemMaintenanceController::class, 'cleanDatabase']);
+        Route::get('/health', [SystemMaintenanceController::class, 'health']);
+    });
 
     // 1. Public Discovery & Catalog Routes
     Route::prefix('auth')->group(function () {
@@ -115,6 +124,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/restaurants/{slug}/menu', [RestaurantPublicController::class, 'getMenu']);
     Route::get('/restaurants/{slug}/reviews', [ReviewPublicController::class, 'getRestaurantReviews']);
     Route::get('/zones', [RestaurantPublicController::class, 'getZones']);
+    Route::get('/categories', [RestaurantPublicController::class, 'getCategories']);
     Route::get('/coupons', [CouponPublicController::class, 'index']);
     
     // Intelligent NLP Search & Suggestions

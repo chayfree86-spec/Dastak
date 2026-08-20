@@ -135,7 +135,7 @@ export const OrdersList = () => {
             placeholder="Search by Order # or Customer..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 h-11 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-[#2845D6] focus:ring-2 focus:ring-blue-500/20 shadow-xs"
+            className="w-full pl-10 pr-10 h-11 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-[#113BD0] focus:ring-2 focus:ring-blue-500/20 shadow-xs"
           />
           {searchQuery && (
             <button
@@ -159,7 +159,7 @@ export const OrdersList = () => {
               onClick={() => setActiveStatus(tab.id)}
               className={`px-3.5 h-9 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer select-none active:scale-95 flex items-center justify-center ${
                 isActive
-                  ? 'bg-[#2845D6] text-white shadow-md shadow-blue-500/20'
+                  ? 'bg-[#113BD0] text-white shadow-md shadow-blue-500/20'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >

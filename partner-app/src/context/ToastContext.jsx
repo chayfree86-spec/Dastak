@@ -48,7 +48,7 @@ export const ToastProvider = ({ children }) => {
               {t.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600" />}
               {t.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-600" />}
               {t.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-600" />}
-              {t.type === 'info' && <Info className="w-5 h-5 text-[#2845D6]" />}
+              {t.type === 'info' && <Info className="w-5 h-5 text-[#113BD0]" />}
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-xs font-bold leading-tight">{t.title}</h4>

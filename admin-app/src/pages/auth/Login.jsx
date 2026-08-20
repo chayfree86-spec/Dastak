@@ -197,7 +197,7 @@ export const Login = () => {
       pos: { top: '12%', left: '26%' },
       speed: { x: -22, y: -18 },
       rotate: '12deg',
-      color: 'text-[#2845D6] dark:text-blue-400',
+      color: 'text-[#113BD0] dark:text-blue-400',
       border: 'border-blue-200/70 dark:border-blue-900/40',
       shadow: 'shadow-blue-500/10',
       size: 'w-5 h-5',
@@ -296,7 +296,7 @@ export const Login = () => {
       pos: { bottom: '10%', left: '8%' },
       speed: { x: 30, y: -34 },
       rotate: '12deg',
-      color: 'text-[#2845D6] dark:text-blue-400',
+      color: 'text-[#113BD0] dark:text-blue-400',
       border: 'border-blue-200/70 dark:border-blue-900/40',
       shadow: 'shadow-blue-500/10',
       size: 'w-6 h-6',
@@ -329,7 +329,7 @@ export const Login = () => {
   ], [])
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-[#2845D6] selection:text-white transition-colors duration-200">
+    <div className="min-h-screen relative overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-[#113BD0] selection:text-white transition-colors duration-200">
       {/* Theme Toggle in Top Right */}
       <div className="absolute top-4 right-4 z-30">
         <button
@@ -429,7 +429,7 @@ export const Login = () => {
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Email or Mobile Number <span className="text-rose-500">*</span>
                 </label>
-                <span className="text-[10px] font-bold text-[#2845D6] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] font-bold text-[#113BD0] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-md">
                   {isEmail ? 'Email Login' : 'Mobile PIN Login'}
                 </span>
               </div>
@@ -437,9 +437,9 @@ export const Login = () => {
               <div className="relative">
                 <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                   {isEmail ? (
-                    <Mail className="w-4 h-4 text-[#2845D6]" />
+                    <Mail className="w-4 h-4 text-[#113BD0]" />
                   ) : (
-                    <Phone className="w-4 h-4 text-[#2845D6]" />
+                    <Phone className="w-4 h-4 text-[#113BD0]" />
                   )}
                 </div>
                 <input
@@ -451,7 +451,7 @@ export const Login = () => {
                     setIdentifier(e.target.value)
                     setErrorMsg('')
                   }}
-                  className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6] transition-all"
+                  className="w-full h-11 pl-10 pr-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0] transition-all"
                 />
               </div>
             </div>
@@ -466,7 +466,7 @@ export const Login = () => {
                   </label>
                   <Link
                     to="/forgot-password"
-                    className="text-[11px] font-semibold text-[#2845D6] dark:text-blue-400 hover:underline"
+                    className="text-[11px] font-semibold text-[#113BD0] dark:text-blue-400 hover:underline"
                   >
                     Forgot password?
                   </Link>
@@ -480,7 +480,7 @@ export const Login = () => {
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 pl-10 pr-10 rounded-xl bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6] transition-all"
+                    className="w-full h-11 pl-10 pr-10 rounded-xl bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0] transition-all"
                   />
                   <button
                     type="button"
@@ -496,7 +496,7 @@ export const Login = () => {
               <div className="space-y-1.5 pt-1 animate-in fade-in duration-150">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                    <KeyRound className="w-3.5 h-3.5 text-[#2845D6]" />
+                    <KeyRound className="w-3.5 h-3.5 text-[#113BD0]" />
                     <span>4-Digit Security PIN</span> <span className="text-rose-500">*</span>
                   </label>
                   <span className="text-[11px] text-slate-400 font-mono">4 Digits</span>
@@ -550,7 +550,7 @@ export const Login = () => {
               variant="primary"
               size="lg"
               loading={loading}
-              className="w-full mt-3 font-bold h-11 cursor-pointer shadow-md shadow-[#2845D6]/25"
+              className="w-full mt-3 font-bold h-11 cursor-pointer shadow-md shadow-[#113BD0]/25"
               icon={ArrowRight}
               iconPosition="right"
             >

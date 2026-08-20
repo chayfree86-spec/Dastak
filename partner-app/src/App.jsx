@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center gap-3">
-        <div className="w-10 h-10 border-3 border-[#2845D6] border-t-transparent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-3 border-[#113BD0] border-t-transparent rounded-full animate-spin" />
         <span className="text-xs font-bold text-slate-400">Loading Dastak Kitchen...</span>
       </div>
     )

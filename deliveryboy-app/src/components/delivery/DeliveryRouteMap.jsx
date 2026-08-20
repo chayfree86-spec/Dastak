@@ -123,10 +123,10 @@ export const DeliveryRouteMap = ({
     // 1. DELIVERY CIRCLE ZONE (3.0 km Radius around Restaurant)
     const deliveryZoneCircle = L.circle([restLat, restLng], {
       radius: 2500, // 2.5 km operational circle
-      color: '#2845D6',
+      color: '#113BD0',
       weight: 2,
       dashArray: '5, 5',
-      fillColor: '#2845D6',
+      fillColor: '#113BD0',
       fillOpacity: 0.05,
     }).addTo(group)
 
@@ -136,7 +136,7 @@ export const DeliveryRouteMap = ({
       html: `
         <div class="relative flex items-center justify-center">
           <span class="absolute w-9 h-9 rounded-full bg-blue-500/30 animate-ping"></span>
-          <div class="w-8 h-8 rounded-full bg-[#2845D6] text-white flex items-center justify-center shadow-xl border-2 border-white ring-2 ring-blue-500/50">
+          <div class="w-8 h-8 rounded-full bg-[#113BD0] text-white flex items-center justify-center shadow-xl border-2 border-white ring-2 ring-blue-500/50">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -155,10 +155,10 @@ export const DeliveryRouteMap = ({
       className: 'dastak-store-marker',
       html: `
         <div class="flex flex-col items-center">
-          <div class="px-2 py-0.5 rounded-md bg-[#2845D6] text-white text-[10px] font-black shadow-lg border border-white whitespace-nowrap mb-0.5">
+          <div class="px-2 py-0.5 rounded-md bg-[#113BD0] text-white text-[10px] font-black shadow-lg border border-white whitespace-nowrap mb-0.5">
             🏪 ${restaurant.name || 'Kitchen'}
           </div>
-          <div class="w-7 h-7 rounded-full bg-[#2845D6] text-white flex items-center justify-center shadow-lg border-2 border-white">
+          <div class="w-7 h-7 rounded-full bg-[#113BD0] text-white flex items-center justify-center shadow-lg border-2 border-white">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v18H3z" />
             </svg>
@@ -208,7 +208,7 @@ export const DeliveryRouteMap = ({
 
     // Base road polyline
     L.polyline(activeRouteCoordinates, {
-      color: isOutForDelivery ? '#F97316' : '#2845D6',
+      color: isOutForDelivery ? '#F97316' : '#113BD0',
       weight: 5,
       opacity: 0.9,
       lineCap: 'round',
@@ -258,7 +258,7 @@ export const DeliveryRouteMap = ({
           <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
           <div className="text-[10px] sm:text-[11px] font-black text-slate-900 dark:text-slate-100 flex items-center gap-1 sm:gap-1.5 truncate">
             <span className="truncate">Dastak Zone</span>
-            <span className="text-[#2845D6] dark:text-blue-400 font-black shrink-0">
+            <span className="text-[#113BD0] dark:text-blue-400 font-black shrink-0">
               • {distanceKm !== null ? `${distanceKm} km (~${etaMinutes}m)` : 'Local'}
             </span>
           </div>
@@ -272,7 +272,7 @@ export const DeliveryRouteMap = ({
         className="absolute bottom-14 sm:bottom-16 right-2.5 sm:right-3 z-10 p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer touch-manipulation"
         title="Focus My Location"
       >
-        <Crosshair className="w-4 h-4 text-[#2845D6]" />
+        <Crosshair className="w-4 h-4 text-[#113BD0]" />
       </button>
 
       {/* Bottom Floating Navigation Action: Clean local destination link */}
@@ -280,7 +280,7 @@ export const DeliveryRouteMap = ({
         <button
           type="button"
           onClick={onOpenFullscreen || handleOpenGoogleMaps}
-          className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-[#2845D6] to-[#1E3A8A] hover:from-[#F97316] hover:to-[#EA580C] text-white font-black text-[11px] sm:text-xs md:text-sm flex items-center justify-center gap-2 shadow-xl shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer touch-manipulation truncate"
+          className="flex-1 py-2.5 sm:py-3 px-3 sm:px-4 rounded-2xl bg-gradient-to-r from-[#113BD0] to-[#1E3A8A] hover:from-[#F97316] hover:to-[#EA580C] text-white font-black text-[11px] sm:text-xs md:text-sm flex items-center justify-center gap-2 shadow-xl shadow-blue-600/30 transition-all active:scale-[0.98] cursor-pointer touch-manipulation truncate"
         >
           <Navigation className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white shrink-0" />
           <span className="truncate">FULLSCREEN NAV MAP ({targetLabel.slice(0, 18)})</span>

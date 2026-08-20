@@ -52,11 +52,11 @@ export const CustomSelect = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-11 sm:h-10 flex items-center justify-between text-left text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#2845D6]/30 focus:border-[#2845D6] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed ${
+        className={`w-full h-11 sm:h-10 flex items-center justify-between text-left text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed ${
           error
             ? 'border-rose-500'
             : isOpen
-            ? 'border-[#2845D6]'
+            ? 'border-[#113BD0]'
             : 'border-slate-200 dark:border-slate-700'
         }`}
       >
@@ -97,7 +97,7 @@ export const CustomSelect = ({
                   onClick={() => handleSelect(opt.value)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left transition-colors cursor-pointer ${
                     opt.value === value
-                      ? 'bg-[#2845D6]/10 text-[#2845D6] dark:bg-[#2845D6]/20 dark:text-blue-400 font-semibold'
+                      ? 'bg-[#113BD0]/10 text-[#113BD0] dark:bg-[#113BD0]/20 dark:text-blue-400 font-semibold'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                   }`}
                 >

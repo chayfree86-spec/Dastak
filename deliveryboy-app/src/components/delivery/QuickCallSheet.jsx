@@ -72,7 +72,7 @@ export const QuickCallSheet = ({
           <div className="flex items-center gap-3 min-w-0">
             <div
               className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-white shrink-0 ${
-                isCustomer ? 'bg-[#F97316]' : 'bg-[#2845D6]'
+                isCustomer ? 'bg-[#F97316]' : 'bg-[#113BD0]'
               }`}
             >
               {isCustomer ? <User className="w-6 h-6" /> : <Store className="w-6 h-6" />}
@@ -152,7 +152,7 @@ export const QuickCallSheet = ({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="text-[11px] font-bold text-[#2845D6] dark:text-blue-400 hover:underline flex items-center gap-1"
+                className="text-[11px] font-bold text-[#113BD0] dark:text-blue-400 hover:underline flex items-center gap-1"
               >
                 {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>

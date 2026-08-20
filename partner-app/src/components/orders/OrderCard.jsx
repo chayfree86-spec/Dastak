@@ -133,7 +133,7 @@ export const OrderCard = ({
         <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400">
           <span>Ordered Items ({itemCount})</span>
           {order.estimated_delivery_minutes > 0 && (
-            <span className="text-[#2845D6] dark:text-blue-400 font-bold">
+            <span className="text-[#113BD0] dark:text-blue-400 font-bold">
               Prep Time: ~{order.estimated_delivery_minutes} mins
             </span>
           )}
@@ -146,7 +146,7 @@ export const OrderCard = ({
               <div key={idx} className="pt-2 first:pt-0 flex items-start justify-between gap-3 text-xs">
                 <div className="flex items-start gap-2.5 min-w-0">
                   {/* Quantity Badge */}
-                  <span className="px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 font-black text-xs shrink-0">
+                  <span className="px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 font-black text-xs shrink-0">
                     {item.quantity}×
                   </span>
 
@@ -242,7 +242,7 @@ export const OrderCard = ({
                 <button
                   type="button"
                   onClick={() => onAccept(order)}
-                  className="flex-1 h-12 rounded-xl bg-[#2845D6] hover:bg-[#1E3A8A] text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none"
+                  className="flex-1 h-12 rounded-xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-md shadow-blue-500/25 active:scale-98 transition-all cursor-pointer select-none"
                 >
                   <CheckCircle2 className="w-5 h-5 stroke-[2.4]" />
                   <span>Accept Order</span>
@@ -343,9 +343,9 @@ export const OrderCard = ({
             )}
 
             <div className="flex items-center gap-2.5 w-full">
-              <div className="flex-1 h-12 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50/80 dark:from-blue-950/40 dark:to-indigo-950/30 text-[#2845D6] dark:text-blue-300 border border-blue-200/90 dark:border-blue-800/50 px-3.5 flex items-center justify-between shadow-xs select-none">
+              <div className="flex-1 h-12 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50/80 dark:from-blue-950/40 dark:to-indigo-950/30 text-[#113BD0] dark:text-blue-300 border border-blue-200/90 dark:border-blue-800/50 px-3.5 flex items-center justify-between shadow-xs select-none">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-[#2845D6] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                  <div className="w-7 h-7 rounded-lg bg-[#113BD0] text-white flex items-center justify-center shrink-0 shadow-2xs">
                     <Bike className="w-4 h-4 animate-pulse" />
                   </div>
                   <div className="min-w-0">
@@ -359,7 +359,7 @@ export const OrderCard = ({
                 </div>
 
                 <div className="flex items-center gap-2 text-xs font-black shrink-0 text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-900/60 px-2.5 py-1 rounded-lg border border-blue-100 dark:border-blue-900/40 shadow-2xs">
-                  <span className="flex items-center gap-1 text-[#2845D6] dark:text-blue-400">
+                  <span className="flex items-center gap-1 text-[#113BD0] dark:text-blue-400">
                     <Clock className="w-3.5 h-3.5 stroke-[2.3]" />
                     ~{order.estimated_delivery_minutes || 15}m
                   </span>

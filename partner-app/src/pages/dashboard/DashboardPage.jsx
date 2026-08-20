@@ -43,7 +43,7 @@ export const DashboardPage = () => {
   return (
     <div className="space-y-6 w-full">
       {/* 1. Top Banner with Gradient & High Contrast */}
-      <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-[#102A43] via-[#1E3A8A] to-[#2845D6] text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden">
+      <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-[#102A43] via-[#1E3A8A] to-[#113BD0] text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden">
         {/* Background glow decoration */}
         <div className="absolute right-0 top-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
@@ -156,7 +156,7 @@ export const DashboardPage = () => {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
                     Total Active
                   </span>
-                  <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
                     <Clock className="w-4 h-4" />
                   </div>
                 </div>
@@ -215,14 +215,14 @@ export const DashboardPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
               <div
                 onClick={() => navigate('/new-orders')}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-[#2845D6] dark:hover:border-blue-500 shadow-xs hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-3 group"
+                className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-[#113BD0] dark:hover:border-blue-500 shadow-xs hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-3 group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-[#F97316] flex items-center justify-center shrink-0">
                     <Flame className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
                       New Order Queue
                     </h4>
                     <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
@@ -230,19 +230,19 @@ export const DashboardPage = () => {
                     </p>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#2845D6] transition-colors" />
+                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#113BD0] transition-colors" />
               </div>
 
               <div
                 onClick={() => navigate('/menu')}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-[#2845D6] dark:hover:border-blue-500 shadow-xs hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-3 group"
+                className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-[#113BD0] dark:hover:border-blue-500 shadow-xs hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-3 group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#2845D6] dark:text-blue-400 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shrink-0">
                     <UtensilsCrossed className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
                       Manage Menu & Stock
                     </h4>
                     <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
@@ -250,19 +250,19 @@ export const DashboardPage = () => {
                     </p>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#2845D6] transition-colors" />
+                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#113BD0] transition-colors" />
               </div>
 
               <div
                 onClick={() => navigate('/reports')}
-                className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-[#2845D6] dark:hover:border-blue-500 shadow-xs hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-3 group"
+                className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 hover:border-[#113BD0] dark:hover:border-blue-500 shadow-xs hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-3 group"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <BarChart3 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
                       Sales Reports
                     </h4>
                     <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium">
@@ -270,7 +270,7 @@ export const DashboardPage = () => {
                     </p>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#2845D6] transition-colors" />
+                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-[#113BD0] transition-colors" />
               </div>
             </div>
           </div>

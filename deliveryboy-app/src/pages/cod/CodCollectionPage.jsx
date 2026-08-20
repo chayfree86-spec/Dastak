@@ -225,7 +225,7 @@ export const CodCollectionPage = () => {
               Collected from today's orders
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-[#2845D6] text-white flex items-center justify-center shadow-md shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#113BD0] text-white flex items-center justify-center shadow-md shrink-0">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
@@ -260,7 +260,7 @@ export const CodCollectionPage = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by Order #, Customer Name, Phone or Dish..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2845D6]"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
             />
             {searchQuery && (
               <button
@@ -278,7 +278,7 @@ export const CodCollectionPage = () => {
             onClick={() => setCustomDateModalOpen(true)}
             className={`w-full sm:w-auto px-4 py-2.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               datePreset === 'custom'
-                ? 'bg-[#2845D6] text-white border-[#2845D6] shadow-md shadow-blue-600/20'
+                ? 'bg-[#113BD0] text-white border-[#113BD0] shadow-md shadow-blue-600/20'
                 : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
             }`}
           >
@@ -314,7 +314,7 @@ export const CodCollectionPage = () => {
                 }}
                 className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   datePreset === p.id
-                    ? 'bg-[#2845D6] text-white shadow-xs'
+                    ? 'bg-[#113BD0] text-white shadow-xs'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
@@ -361,7 +361,7 @@ export const CodCollectionPage = () => {
             COLLECTION ENTRIES ({filteredCollections.length} TRIPS)
           </span>
           {datePreset !== 'all' && (
-            <span className="text-[#2845D6] dark:text-blue-400 font-bold lowercase">
+            <span className="text-[#113BD0] dark:text-blue-400 font-bold lowercase">
               filtered by {datePreset}
             </span>
           )}
@@ -395,7 +395,7 @@ export const CodCollectionPage = () => {
                       <button
                         type="button"
                         onClick={() => handleCopyOrderNumber(item.order_number, item.id)}
-                        className="font-black text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5 hover:text-[#2845D6] dark:hover:text-blue-400"
+                        className="font-black text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5 hover:text-[#113BD0] dark:hover:text-blue-400"
                         title="Click to copy Order #"
                       >
                         <span>#{item.order_number}</span>
@@ -452,7 +452,7 @@ export const CodCollectionPage = () => {
                     {/* Column 2: Restaurant Source */}
                     <div className="space-y-1.5 p-3 rounded-2xl bg-slate-50/60 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                        <Store className="w-3 h-3 text-[#2845D6]" /> Kitchen Outlet
+                        <Store className="w-3 h-3 text-[#113BD0]" /> Kitchen Outlet
                       </span>
                       <h4 className="text-xs font-black text-slate-900 dark:text-slate-100">
                         {rest.name || 'Partner Kitchen'}
@@ -525,9 +525,9 @@ export const CodCollectionPage = () => {
                       <button
                         type="button"
                         onClick={() => setSelectedItem(item)}
-                        className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-[#2845D6] text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-[#113BD0] text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                       >
-                        <Eye className="w-3.5 h-3.5 text-[#2845D6]" />
+                        <Eye className="w-3.5 h-3.5 text-[#113BD0]" />
                         <span>View Receipt</span>
                       </button>
                     </div>
@@ -556,7 +556,7 @@ export const CodCollectionPage = () => {
               type="date"
               value={dateRange.from}
               onChange={(e) => setDateRange((prev) => ({ ...prev, from: e.target.value }))}
-              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:ring-2 focus:ring-[#2845D6] focus:outline-none"
+              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:ring-2 focus:ring-[#113BD0] focus:outline-none"
               required
             />
           </div>
@@ -569,7 +569,7 @@ export const CodCollectionPage = () => {
               type="date"
               value={dateRange.to}
               onChange={(e) => setDateRange((prev) => ({ ...prev, to: e.target.value }))}
-              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:ring-2 focus:ring-[#2845D6] focus:outline-none"
+              className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:ring-2 focus:ring-[#113BD0] focus:outline-none"
             />
           </div>
 
@@ -646,7 +646,7 @@ export const CodCollectionPage = () => {
 
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 space-y-1">
                 <span className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-1">
-                  <Store className="w-3 h-3 text-[#2845D6]" /> Kitchen Outlet
+                  <Store className="w-3 h-3 text-[#113BD0]" /> Kitchen Outlet
                 </span>
                 <h4 className="font-bold text-slate-900 dark:text-slate-100">
                   {selectedItem.restaurant?.name}

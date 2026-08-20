@@ -89,7 +89,7 @@ export const CartPage = () => {
           </h2>
           {restaurant && (
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
-              <Store className="w-4 h-4 text-[#2845D6]" />
+              <Store className="w-4 h-4 text-[#113BD0]" />
               <span>Ordering from <strong>{restaurant.name}</strong></span>
             </p>
           )}
@@ -202,13 +202,13 @@ export const CartPage = () => {
                   ? navigate(`/restaurant/${restaurant.slug}`)
                   : navigate('/restaurants')
               }
-              className="w-full py-3 px-4 rounded-2xl bg-blue-50/80 hover:bg-blue-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-[#2845D6] dark:text-blue-400 text-xs sm:text-sm font-black border border-dashed border-[#2845D6]/30 dark:border-blue-500/40 flex items-center justify-between transition-all cursor-pointer group"
+              className="w-full py-3 px-4 rounded-2xl bg-blue-50/80 hover:bg-blue-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-[#113BD0] dark:text-blue-400 text-xs sm:text-sm font-black border border-dashed border-[#113BD0]/30 dark:border-blue-500/40 flex items-center justify-between transition-all cursor-pointer group"
             >
               <span className="flex items-center gap-2">
                 <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
                 <span>Add More Items</span>
               </span>
-              <span className="text-xs font-bold text-slate-400 group-hover:text-[#2845D6] dark:group-hover:text-blue-400 transition-colors">
+              <span className="text-xs font-bold text-slate-400 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
                 {restaurant?.name ? `From ${restaurant.name} →` : 'Browse Menu →'}
               </span>
             </button>
@@ -219,7 +219,7 @@ export const CartPage = () => {
         <div className="lg:col-span-1 space-y-4 sticky top-20">
           <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-black uppercase tracking-wider text-xs sm:text-sm">
-              <Receipt className="w-4 h-4 text-[#2845D6] dark:text-blue-400" />
+              <Receipt className="w-4 h-4 text-[#113BD0] dark:text-blue-400" />
               <span>BILL DETAILS</span>
             </div>
 

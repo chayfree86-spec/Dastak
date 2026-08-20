@@ -30,7 +30,7 @@ export const ConfirmDialog = ({
         )
       case 'info':
         return (
-          <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-[#2845D6] dark:text-blue-400 mx-auto mb-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center text-[#113BD0] dark:text-blue-400 mx-auto mb-4">
             <Info className="w-6 h-6" />
           </div>
         )
@@ -73,7 +73,7 @@ export const ConfirmDialog = ({
                 ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/25'
                 : type === 'success'
                 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/25'
-                : 'bg-[#2845D6] hover:bg-[#1E3A8A] shadow-blue-500/25'
+                : 'bg-[#113BD0] hover:bg-[#1E3A8A] shadow-blue-500/25'
             }`}
           >
             {loading ? 'Processing...' : confirmText}

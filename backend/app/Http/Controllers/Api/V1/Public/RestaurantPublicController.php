@@ -7,11 +7,13 @@ use App\Http\Resources\ApiResponse;
 use App\Http\Resources\MenuCategoryResource;
 use App\Http\Resources\RestaurantResource;
 use App\Http\Resources\ZoneResource;
+use App\Models\MenuCategory;
 use App\Services\MenuService;
 use App\Services\RestaurantService;
 use App\Services\ZoneService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class RestaurantPublicController extends Controller
 {
@@ -65,15 +67,47 @@ class RestaurantPublicController extends Controller
         );
     }
 
+    public function getCategories(): JsonResponse
+    {
+        try {
+            $categories = Cache::remember('public_food_categories', 300, function () {
+                return MenuCategory::where('is_active', true)
+                    ->whereNull('parent_id')
+                    ->select('id', 'name', 'slug', 'image')
+                    ->withCount('items')
+                    ->orderBy('sort_order', 'asc')
+                    ->take(12)
+                    ->get();
+            });
+
+            return ApiResponse::success(
+                $categories,
+                'Food categories retrieved successfully.'
+            );
+        } catch (\Throwable $e) {
+            return ApiResponse::success(
+                [],
+                'Food categories retrieved.'
+            );
+        }
+    }
+
     public function getZones(): JsonResponse
     {
-        $zones = \Illuminate\Support\Facades\Cache::remember('public_active_zones', 300, function () {
-            return $this->zoneService->listZones(onlyActive: true);
-        });
+        try {
+            $zones = Cache::remember('public_active_zones', 300, function () {
+                return $this->zoneService->listZones(onlyActive: true);
+            });
 
-        return ApiResponse::success(
-            ZoneResource::collection($zones),
-            'Active service zones retrieved successfully.'
-        );
+            return ApiResponse::success(
+                ZoneResource::collection($zones),
+                'Active service zones retrieved successfully.'
+            );
+        } catch (\Throwable $e) {
+            return ApiResponse::success(
+                [],
+                'Active service zones retrieved.'
+            );
+        }
     }
 }

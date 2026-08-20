@@ -11,9 +11,9 @@ export default {
         dastak: {
           primary: '#FF5200',
           'primary-dark': '#E04800',
-          accent: '#2845D6',
+          accent: '#113BD0',
           'accent-hover': '#1E3A8A',
-          dark: '#0F172A',
+          dark: '#113BD0',
           'card-dark': '#1E293B',
           'border-dark': '#334155',
         },

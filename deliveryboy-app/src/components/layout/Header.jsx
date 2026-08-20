@@ -62,7 +62,7 @@ export const Header = () => {
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           {/* Brand Logo & Rider Greeting */}
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#2845D6] to-[#F97316] text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-500/20 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-500/20 shrink-0">
               <Bike className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -70,7 +70,7 @@ export const Header = () => {
                 <span className="text-xs font-black text-slate-900 dark:text-slate-100 truncate tracking-tight">
                   {riderProfile?.user?.name || user?.name || 'Dastak Rider'}
                 </span>
-                <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded-md bg-blue-100 dark:bg-blue-950 text-[#2845D6] dark:text-blue-400">
+                <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded-md bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400">
                   {riderProfile?.vehicle_number || 'FLEET'}
                 </span>
               </div>
@@ -89,7 +89,7 @@ export const Header = () => {
               onClick={toggleSound}
               className={`p-2 rounded-xl border transition-colors ${
                 soundEnabled
-                  ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#2845D6] dark:text-blue-400'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#113BD0] dark:text-blue-400'
                   : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
               }`}
               title={soundEnabled ? 'Order Audio Sound On' : 'Order Audio Sound Muted'}

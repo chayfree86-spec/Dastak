@@ -34,39 +34,12 @@ export const CustomerDetails = () => {
 
   const { data: customer, loading, error, retry } = useApi(
     () => customersApi.getCustomerDetails(id),
-    [id],
-    {
-      initialData: {
-        id: id || 'C101',
-        name: 'Aarav Sharma',
-        mobile: '9876543210',
-        email: 'aarav.sharma@gmail.com',
-        joined_date: '2025-11-10T10:00:00Z',
-        status: 'ACTIVE',
-        total_orders: 28,
-        total_spend: 14650.00,
-        average_order_value: 523.21,
-        latitude: 26.4500000,
-        longitude: 80.3320000,
-        zone_name: 'Kanpur Central Zone',
-        addresses: [
-          { id: 1, type: 'Home', address: 'Flat 402, Tower B, Ganga Heights, Civil Lines, Kanpur', is_default: true, latitude: 26.4500000, longitude: 80.3320000 },
-          { id: 2, type: 'Office', address: 'Plot 10, Mall Road Commercial Complex, Kanpur', is_default: false, latitude: 26.4610000, longitude: 80.3450000 },
-        ],
-      },
-    }
+    [id]
   )
 
   const { data: orders, loading: ordersLoading } = useApi(
     () => customersApi.getCustomerOrders(id, { limit: 10 }),
-    [id],
-    {
-      initialData: [
-        { id: 'D4829', restaurant: 'Biryani Central', amount: 640.00, payment: 'ONLINE_PAYMENT', status: 'NEW', time: new Date().toISOString() },
-        { id: 'D4750', restaurant: 'Burger & Beyond', amount: 550.00, payment: 'ONLINE_PAYMENT', status: 'DELIVERED', time: new Date(Date.now() - 3 * 86400000).toISOString() },
-        { id: 'D4680', restaurant: 'South Express', amount: 310.00, payment: 'COD', status: 'DELIVERED', time: new Date(Date.now() - 7 * 86400000).toISOString() },
-      ],
-    }
+    [id]
   )
 
   const handleToggleBlock = async () => {
@@ -174,7 +147,7 @@ export const CustomerDetails = () => {
 
         <div className="p-3 sm:p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-center sm:text-left">
           <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 block truncate">Lifetime Spend</span>
-          <div className="text-base sm:text-2xl font-black text-[#2845D6] dark:text-blue-400 mt-0.5 sm:mt-1 truncate">
+          <div className="text-base sm:text-2xl font-black text-[#113BD0] dark:text-blue-400 mt-0.5 sm:mt-1 truncate">
             {formatCurrency(customer?.total_spend)}
           </div>
         </div>
@@ -197,7 +170,7 @@ export const CustomerDetails = () => {
           <div className="hidden md:block">
             <DataTable
               columns={[
-                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#2845D6]">#{r.id}</span> },
+                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#113BD0]">#{r.id}</span> },
                 { key: 'restaurant', header: 'Restaurant' },
                 { key: 'amount', header: 'Amount', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
                 { key: 'payment', header: 'Payment', render: (r) => <StatusBadge status={r.payment} size="xs" /> },
@@ -227,7 +200,7 @@ export const CustomerDetails = () => {
                   className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#2845D6] dark:text-blue-400">
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#113BD0] dark:text-blue-400">
                       <span>#{ord.id}</span>
                       <span className="text-[11px] font-normal text-slate-400">&bull; {formatDateTime(ord.time)}</span>
                     </div>
@@ -274,7 +247,7 @@ export const CustomerDetails = () => {
             <div key={addr.id} className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-[#2845D6]" />
+                  <MapPin className="w-3.5 h-3.5 text-[#113BD0]" />
                   {addr.type}
                 </span>
                 {addr.is_default && (
