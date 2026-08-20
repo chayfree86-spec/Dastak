@@ -15,10 +15,15 @@ export default defineConfig({
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
-          'vendor-icons': ['lucide-react'],
+        // Function form (not the plain-object form) so it stays correct once
+        // routes are code-split via React.lazy() — object form can leave
+        // react/react-dom out of their intended chunk in that setup.
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('react-router-dom')) return 'vendor-router'
+          if (id.includes('lucide-react')) return 'vendor-icons'
+          if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/scheduler/')) return 'vendor-react'
+          return 'vendor'
         },
       },
     },
