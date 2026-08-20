@@ -1,0 +1,32 @@
+# Repo-root protection for the whole Hostinger account (public_html mirrors this repo 1:1).
+# Each app's own dist/.htaccess handles its SPA routing independently — this file
+# only blocks sensitive source files/folders from ever being web-reachable.
+
+RewriteEngine On
+
+# Never serve the .git folder (would leak full source + history)
+RewriteRule ^\.git(/.*)?$ - [F,L]
+
+# Never serve Claude Code / automation state folders
+RewriteRule ^\.claude(/.*)?$ - [F,L]
+RewriteRule ^\.agents(/.*)?$ - [F,L]
+
+<FilesMatch "^\.env">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "^(\.gitignore|\.gitattributes|composer\.lock|package-lock\.json)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
