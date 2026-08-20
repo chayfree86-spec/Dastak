@@ -20,7 +20,8 @@
 /public/storage
 /storage/*.key
 /storage/pail
-/vendor
+# NOTE: "/vendor" is intentionally NOT ignored — committed so Hostinger's Git
+# auto-deploy can serve it directly without running `composer install` on the server.
 _ide_helper.php
 Homestead.json
 Homestead.yaml
