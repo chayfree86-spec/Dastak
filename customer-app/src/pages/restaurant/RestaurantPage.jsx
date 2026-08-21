@@ -27,21 +27,11 @@ import { makePhoneCall } from '../../utils/geo'
 import { realtimeBus } from '../../utils/realtimeSync'
 import dataCache from '../../utils/dataCache'
 
+// Only the restaurant's REAL uploaded banner — no name-guessed stock photos.
 const getRestaurantBanner = (restaurant) => {
-  if (restaurant?.banner && !restaurant.banner.includes('placeholder')) {
-    return restaurant.banner
-  }
-  const name = (restaurant?.name || '').toLowerCase()
-  if (name.includes('biryani')) {
-    return 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=1000&auto=format&fit=crop&q=85'
-  }
-  if (name.includes('chai') || name.includes('chaupal') || name.includes('tea')) {
-    return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=1000&auto=format&fit=crop&q=85'
-  }
-  if (name.includes('burger') || name.includes('fast food')) {
-    return 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=1000&auto=format&fit=crop&q=85'
-  }
-  return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1000&auto=format&fit=crop&q=85'
+  const img = restaurant?.banner || restaurant?.logo || restaurant?.image
+  if (img && !String(img).includes('placeholder')) return img
+  return null
 }
 
 export const RestaurantPage = () => {
@@ -63,12 +53,16 @@ export const RestaurantPage = () => {
       setLoading(true)
     }
     try {
-      const res = await restaurantApi.getRestaurant(slug)
+      // Restaurant details + menu are independent — fetch in parallel (was sequential).
+      const [res, menuRes] = await Promise.all([
+        restaurantApi.getRestaurant(slug),
+        restaurantApi.getMenu(slug),
+      ])
+
       const restData = res?.data?.data || res?.data || res || {}
       setRestaurant(restData)
       dataCache.set(`restaurant_${slug}`, restData)
 
-      const menuRes = await restaurantApi.getMenu(slug)
       const rawMenu = menuRes?.data?.data || menuRes?.data || menuRes?.categories || menuRes || []
       const categoriesList = Array.isArray(rawMenu) ? rawMenu : (rawMenu.categories || [])
       setCategories(categoriesList)

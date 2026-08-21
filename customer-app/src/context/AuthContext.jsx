@@ -63,8 +63,8 @@ export const AuthProvider = ({ children }) => {
     return res
   }
 
-  const verifyDeviceOtp = async (sessionId, otp, name = null) => {
-    const res = await authApi.verifyOtp(sessionId, otp, name)
+  const verifyDeviceOtp = async (sessionId, otp, name = null, pin = null) => {
+    const res = await authApi.verifyOtp(sessionId, otp, name, pin)
     const authToken = res.data?.token || res.data?.data?.token
     const rawSessionToken = res.data?.session_token || res.data?.data?.session_token
     const authUser = res.data?.user || res.data?.data?.user

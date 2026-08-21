@@ -139,66 +139,70 @@ export const HomePage = () => {
     if (!isSilent && !dataCache.has('home_restaurants') && !dataCache.has('home_dishes')) {
       setLoading(true)
     }
-    try {
-      const restRes = await restaurantApi.getRestaurants({ per_page: 12 })
-      const restData = restRes.data?.data || restRes.data || []
+
+    // Fire every independent request in PARALLEL (was sequential = slow).
+    // allSettled so one failure never blocks the others.
+    const [restR, searchR, catR, suggR, couponR, ordersR] = await Promise.allSettled([
+      restaurantApi.getRestaurants({ per_page: 12 }),
+      searchApi.search('food', null, 12),
+      customerApi.getFoodCategories(),
+      searchApi.getSuggestions(''),
+      customerApi.getCoupons(),
+      isAuthenticated ? customerApi.getOrders({ status: 'active' }) : Promise.resolve(null),
+    ])
+
+    let restData = []
+    let dishes = []
+
+    if (restR.status === 'fulfilled') {
+      restData = restR.value.data?.data || restR.value.data || []
       setRestaurants(restData)
       dataCache.set('home_restaurants', restData)
+    }
 
-      const searchRes = await searchApi.search('food', null, 12)
-      const dishes = searchRes.data?.dishes || []
+    if (searchR.status === 'fulfilled') {
+      dishes = searchR.value.data?.dishes || []
       setPopularDishes(dishes)
       dataCache.set('home_dishes', dishes)
-
-      try {
-        const catRes = await customerApi.getFoodCategories()
-        const cats = catRes?.data || catRes || []
-        setCategories(cats)
-        dataCache.set('home_categories', cats)
-        dataCache.preloadImages(cats.map(c => c.image))
-      } catch (e) {}
-
-      try {
-        const suggRes = await searchApi.getSuggestions('')
-        const tags = suggRes?.data || suggRes || []
-        if (Array.isArray(tags) && tags.length > 0) {
-          setQuickFilterTags(tags)
-          dataCache.set('home_suggestions', tags)
-        }
-      } catch (e) {}
-
-      try {
-        const couponRes = await customerApi.getCoupons()
-        const coupons = (couponRes.data?.data || couponRes.data || []).filter(c => c.is_active !== false)
-        setLiveCoupons(coupons)
-        dataCache.set('home_coupons', coupons)
-        dataCache.preloadImages(coupons.map(c => c.image_url || c.banner_image || c.image))
-      } catch (e) {}
-
-      // Preload popular dish & restaurant banner images into browser cache
-      dataCache.preloadImages([
-        ...dishes.map(d => d.image),
-        ...restData.map(r => r.banner || r.logo),
-      ])
-
-      if (isAuthenticated) {
-        try {
-          const ordersRes = await customerApi.getOrders({ status: 'active' })
-          const orders = ordersRes.data?.data || ordersRes.data || []
-          const active = orders.find(
-            (o) =>
-              o.status !== 'DELIVERED' &&
-              o.status !== 'CANCELLED' &&
-              o.status !== 'REJECTED'
-          )
-          setActiveOrder(active || null)
-        } catch (e) {}
-      }
-    } catch (e) {
-      console.warn('Home data error:', e)
-    } finally {
-      setLoading(false)
     }
+
+    if (catR.status === 'fulfilled') {
+      const cats = catR.value?.data || catR.value || []
+      setCategories(cats)
+      dataCache.set('home_categories', cats)
+      dataCache.preloadImages(cats.map(c => c.image))
+    }
+
+    if (suggR.status === 'fulfilled') {
+      const tags = suggR.value?.data || suggR.value || []
+      if (Array.isArray(tags) && tags.length > 0) {
+        setQuickFilterTags(tags)
+        dataCache.set('home_suggestions', tags)
+      }
+    }
+
+    if (couponR.status === 'fulfilled') {
+      const coupons = (couponR.value.data?.data || couponR.value.data || []).filter(c => c.is_active !== false)
+      setLiveCoupons(coupons)
+      dataCache.set('home_coupons', coupons)
+      dataCache.preloadImages(coupons.map(c => c.image_url || c.banner_image || c.image))
+    }
+
+    if (ordersR.status === 'fulfilled' && ordersR.value) {
+      const orders = ordersR.value.data?.data || ordersR.value.data || []
+      const active = orders.find(
+        (o) => o.status !== 'DELIVERED' && o.status !== 'CANCELLED' && o.status !== 'REJECTED'
+      )
+      setActiveOrder(active || null)
+    }
+
+    // Preload popular dish & restaurant banner images into browser cache
+    dataCache.preloadImages([
+      ...dishes.map(d => d.image),
+      ...restData.map(r => r.banner || r.logo),
+    ])
+
+    setLoading(false)
   }
 
   // Interactive search tag filter handler connected to backend with 0ms cache
@@ -260,21 +264,23 @@ export const HomePage = () => {
 
     // 2. Tab Visibility / Focus revalidation
     const handleFocus = () => loadHomeData(true)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') loadHomeData(true)
+    }
     window.addEventListener('focus', handleFocus)
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        loadHomeData(true)
-      }
-    })
+    document.addEventListener('visibilitychange', handleVisibility)
 
-    // 3. 8-second Heartbeat Sync for multi-device cross-browser parity
+    // 3. Gentle background heartbeat for multi-device parity. Realtime events +
+    //    focus already cover fast refreshes, so this is a slow safety net (was
+    //    8s, which re-fired every home API constantly and made the app sluggish).
     const heartbeat = setInterval(() => {
-      loadHomeData(true)
-    }, 8000)
+      if (document.visibilityState === 'visible') loadHomeData(true)
+    }, 30000)
 
     return () => {
       unsubscribe()
       window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibility)
       clearInterval(heartbeat)
     }
   }, [isAuthenticated])

@@ -11,6 +11,7 @@ import {
   RefreshCw,
   KeyRound,
   CheckCircle2,
+  Navigation,
   UtensilsCrossed,
   ShoppingBag,
   Coffee,
@@ -29,7 +30,13 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useTheme } from '../../context/ThemeContext'
+import { useLocationContext } from '../../context/LocationContext'
 import Button from '../../components/common/Button'
+
+// Strong Indian mobile validation (DoT numbering): exactly 10 digits, first
+// digit 6-9, and not a single repeated digit (e.g. 9999999999).
+const isValidIndianMobile = (value) =>
+  /^[6-9]\d{9}$/.test(value) && !/^(\d)\1{9}$/.test(value)
 
 export const LoginPage = () => {
   const navigate = useNavigate()
@@ -38,11 +45,17 @@ export const LoginPage = () => {
 
   const { startVerification, resendOtp, verifyDeviceOtp, verifyDevicePin, isAuthenticated } = useAuth()
   const { isDark, toggleTheme } = useTheme()
+  const { detectCurrentLocation, saveAddressToBook } = useLocationContext()
   const toast = useToast()
 
-  // Steps: 'mobile' | 'otp' | 'active_elsewhere'
+  // Steps: 'mobile' | 'otp' | 'register' | 'register_address' | 'active_elsewhere'
   const [step, setStep] = useState('mobile')
   const [authMode, setAuthMode] = useState('pin') // 'pin' | 'otp'
+  // New-customer registration: create PIN + capture address
+  const [createPin, setCreatePin] = useState('')
+  const [confirmPin, setConfirmPin] = useState('')
+  const [suppressAutoNav, setSuppressAutoNav] = useState(false)
+  const [savingAddress, setSavingAddress] = useState(false)
   const [mobile, setMobile] = useState(() => {
     return localStorage.getItem('dastak_last_customer_mobile') || ''
   })
@@ -88,12 +101,13 @@ export const LoginPage = () => {
     }
   }, [])
 
-  // If already authenticated, redirect
+  // If already authenticated, redirect — unless we're mid-registration
+  // (new customer still needs to create PIN + set delivery address).
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !suppressAutoNav) {
       navigate(redirect, { replace: true })
     }
-  }, [isAuthenticated, navigate, redirect])
+  }, [isAuthenticated, navigate, redirect, suppressAutoNav])
 
   // Helper to prefill and store OTP
   const applyOtp = (rawOtp) => {
@@ -112,8 +126,8 @@ export const LoginPage = () => {
     setError('')
     const cleanMobile = mobile.replace(/\D/g, '')
 
-    if (cleanMobile.length < 10) {
-      setError('Please enter a valid 10-digit Indian mobile number.')
+    if (!isValidIndianMobile(cleanMobile)) {
+      setError('Please enter a valid 10-digit Indian mobile number (starting with 6, 7, 8 or 9).')
       return
     }
 
@@ -135,18 +149,22 @@ export const LoginPage = () => {
         setExistingUserName(data.user_name || '')
         setHasCustomPin(Boolean(data.has_custom_pin))
         setRequiresName(Boolean(data.requires_name))
+        // Auto-store the code silently; used behind the scenes until WhatsApp
+        // OTP is wired up (OTP box is hidden for now).
         applyOtp(data.otp)
-        setStep('otp')
 
         if (data.is_existing_user) {
-          // Default to 4-digit PIN mode for existing customer
+          // Existing customer → 4-digit PIN login
           setAuthMode('pin')
           setPinDigits(['', '', '', ''])
+          setStep('otp')
           toast.success('Welcome Back!', `Welcome back, ${data.user_name || 'Customer'}!`)
         } else {
-          // Registration OTP mode for new customer
-          setAuthMode('otp')
-          toast.info('New Registration', 'Please enter your full name and verify code.')
+          // New customer → create account with a PIN, then set address
+          setCreatePin('')
+          setConfirmPin('')
+          setStep('register')
+          toast.info('New Registration', 'Create your name and a 4-digit PIN.')
         }
       }
     } catch (err) {
@@ -300,6 +318,62 @@ export const LoginPage = () => {
       setError(err.response?.data?.message || err.message || 'Verification failed. Please check the code.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 7. New-customer registration: validate name + PIN, create the account with
+  //    the chosen PIN (using the silent auto-code), then go to the address step.
+  const handleRegister = async (e) => {
+    e?.preventDefault()
+    setError('')
+
+    if (!name.trim()) {
+      setError('Please enter your full name.')
+      if (nameInputRef.current) nameInputRef.current.focus()
+      return
+    }
+    if (!/^\d{4}$/.test(createPin)) {
+      setError('Please create a 4-digit numeric PIN.')
+      return
+    }
+    if (createPin !== confirmPin) {
+      setError('PIN and Confirm PIN do not match.')
+      return
+    }
+
+    setLoading(true)
+    setSuppressAutoNav(true) // stay on this page for the address step after auth
+    try {
+      await verifyDeviceOtp(sessionId, generatedOtp, name.trim(), createPin)
+      toast.success('Account Created', `Welcome to Dastak, ${name.trim()}!`)
+      setStep('register_address')
+    } catch (err) {
+      setSuppressAutoNav(false)
+      setError(err.response?.data?.message || err.message || 'Could not create your account. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const finishRegistration = () => {
+    setSuppressAutoNav(false)
+    navigate(redirect, { replace: true })
+  }
+
+  // 8. Registration address: fetch via GPS and persist so the new customer
+  //    already has a default delivery address saved.
+  const handleUseGpsAddress = async () => {
+    setError('')
+    setSavingAddress(true)
+    try {
+      const detected = await detectCurrentLocation()
+      await saveAddressToBook(detected)
+      toast.success('Address Saved', 'Your delivery location is set.')
+      finishRegistration()
+    } catch (err) {
+      setError('Could not detect your location. Please enable GPS or skip for now.')
+    } finally {
+      setSavingAddress(false)
     }
   }
 
@@ -532,6 +606,10 @@ export const LoginPage = () => {
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             {step === 'active_elsewhere' ? (
               'Active On Another Device'
+            ) : step === 'register' ? (
+              'New Customer Registration'
+            ) : step === 'register_address' ? (
+              'One Last Step'
             ) : step === 'otp' ? (
               isExistingUser ? (
                 <>
@@ -550,6 +628,10 @@ export const LoginPage = () => {
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             {step === 'active_elsewhere'
               ? 'Single-phone security policy is active'
+              : step === 'register'
+              ? `Create your name & 4-digit PIN for +91 ${mobile.replace(/\D/g, '')}`
+              : step === 'register_address'
+              ? 'Set your delivery location to finish'
               : step === 'otp'
               ? isExistingUser
                 ? authMode === 'pin'
@@ -627,13 +709,19 @@ export const LoginPage = () => {
                 </div>
                 <input
                   type="tel"
+                  name="mobile"
+                  autoComplete="tel"
                   required
                   autoFocus
                   maxLength={10}
                   placeholder="9876543210"
                   value={mobile}
                   onChange={(e) => {
-                    setMobile(e.target.value.replace(/\D/g, ''))
+                    let v = e.target.value.replace(/\D/g, '')
+                    if (v.length > 10) v = v.slice(-10) // strip +91 / 0 prefix on paste
+                    // Block a leading digit that isn't a valid Indian mobile start (6-9)
+                    if (v.length > 0 && !/[6-9]/.test(v[0])) v = ''
+                    setMobile(v)
                     setError('')
                   }}
                   className="w-full h-11 pl-16 pr-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
@@ -748,16 +836,8 @@ export const LoginPage = () => {
                 Change Number
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setAuthMode('otp')
-                  setError('')
-                }}
-                className="text-[#FF5200] hover:underline font-bold flex items-center gap-1 cursor-pointer"
-              >
-                Forgot PIN? Login with OTP
-              </button>
+              {/* OTP fallback hidden until WhatsApp OTP is integrated. */}
+              <span />
             </div>
 
             <Button
@@ -771,6 +851,139 @@ export const LoginPage = () => {
               Sign In with PIN
             </Button>
           </form>
+        )}
+
+        {/* STEP 2 (NEW CUSTOMER): NAME + CREATE 4-DIGIT PIN */}
+        {step === 'register' && (
+          <form onSubmit={handleRegister} className="space-y-4 animate-in fade-in">
+            <div className="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <User className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="text-xs font-black text-blue-900 dark:text-blue-100 block">New Customer Registration</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">+91 {mobile.replace(/\D/g, '')}</span>
+              </div>
+            </div>
+
+            {/* Full name */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-[#FF5200]" />
+                <span>Your Full Name</span> <span className="text-rose-500">*</span>
+              </label>
+              <input
+                ref={nameInputRef}
+                type="text"
+                name="reg-fullname"
+                autoComplete="off"
+                required
+                autoFocus
+                placeholder="Enter your full name"
+                value={name}
+                onChange={(e) => { setName(e.target.value); setError('') }}
+                className="w-full h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
+              />
+            </div>
+
+            {/* Create PIN */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-[#FF5200]" />
+                <span>Create 4-Digit PIN</span> <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="password"
+                name="reg-create-pin"
+                autoComplete="new-password"
+                inputMode="numeric"
+                maxLength={4}
+                required
+                placeholder="••••"
+                value={createPin}
+                onChange={(e) => { setCreatePin(e.target.value.replace(/\D/g, '').slice(0, 4)); setError('') }}
+                className="w-full h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold tracking-[0.4em] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
+              />
+            </div>
+
+            {/* Confirm PIN */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-[#FF5200]" />
+                <span>Confirm PIN</span> <span className="text-rose-500">*</span>
+              </label>
+              <input
+                type="password"
+                name="reg-confirm-pin"
+                autoComplete="new-password"
+                inputMode="numeric"
+                maxLength={4}
+                required
+                placeholder="••••"
+                value={confirmPin}
+                onChange={(e) => { setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setError('') }}
+                className="w-full h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold tracking-[0.4em] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
+              />
+              <p className="text-[11px] text-slate-400 font-medium">You'll use this PIN to sign in next time.</p>
+            </div>
+
+            <div className="flex items-center justify-between text-xs pt-1">
+              <button
+                type="button"
+                onClick={() => { setStep('mobile'); setError('') }}
+                className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-semibold cursor-pointer"
+              >
+                Change Number
+              </button>
+              <span />
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={loading}
+              className="w-full font-bold h-11 bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 cursor-pointer"
+              icon={ArrowRight}
+              iconPosition="right"
+            >
+              Create Account & Continue
+            </Button>
+          </form>
+        )}
+
+        {/* STEP 3 (NEW CUSTOMER): FETCH & SAVE DELIVERY ADDRESS */}
+        {step === 'register_address' && (
+          <div className="space-y-5 animate-in fade-in">
+            <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-center space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+                <Navigation className="w-6 h-6" />
+              </div>
+              <h4 className="text-sm font-black text-emerald-900 dark:text-emerald-200">Set Your Delivery Location</h4>
+              <p className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium leading-relaxed">
+                We'll use your current location as your default delivery address. You can change it anytime.
+              </p>
+            </div>
+
+            <Button
+              variant="primary"
+              size="lg"
+              loading={savingAddress}
+              onClick={handleUseGpsAddress}
+              className="w-full font-bold h-11 bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 cursor-pointer"
+              icon={Navigation}
+            >
+              Use My Current Location (GPS)
+            </Button>
+
+            <button
+              type="button"
+              onClick={finishRegistration}
+              className="w-full text-center text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
+            >
+              Skip for now — I'll add it later
+            </button>
+          </div>
         )}
 
         {/* STEP 2: 6-DIGIT OTP VERIFICATION (REGISTRATION OR FORGOT PIN FALLBACK) */}

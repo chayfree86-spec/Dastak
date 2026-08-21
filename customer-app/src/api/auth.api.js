@@ -21,13 +21,14 @@ export const authApi = {
     return res.data
   },
 
-  verifyOtp: async (sessionId, otp, name = null) => {
+  verifyOtp: async (sessionId, otp, name = null, pin = null) => {
     const res = await apiClient.post('/customer/auth/verify', {
       session_id: sessionId,
       otp,
       device_id: getDeviceId(),
       device_name: getDeviceName(),
       name,
+      pin,
     })
     return res.data
   },

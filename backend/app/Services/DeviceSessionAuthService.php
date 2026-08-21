@@ -35,13 +35,22 @@ class DeviceSessionAuthService
         ?string $deviceName = 'Mobile Device',
         string $devicePlatform = 'mobile'
     ): array {
-        $cleanMobile = preg_replace('/\D/', '', $mobile);
-        if (strlen($cleanMobile) < 10) {
+        // Normalize: strip non-digits and any +91 / leading-0 country prefix,
+        // keeping the core 10-digit subscriber number.
+        $digits = preg_replace('/\D/', '', $mobile);
+        if (strlen($digits) > 10) {
+            $digits = substr($digits, -10);
+        }
+        $cleanMobile = $digits;
+
+        // Strong Indian mobile validation (DoT numbering): exactly 10 digits,
+        // first digit 6-9, and not a single repeated digit (e.g. 9999999999).
+        // Blocks junk like 1234567890 / 0000000000 / landline-style numbers.
+        if (! preg_match('/^[6-9]\d{9}$/', $cleanMobile) || preg_match('/^(\d)\1{9}$/', $cleanMobile)) {
             throw ValidationException::withMessages([
-                'mobile' => ['Please enter a valid 10-digit Indian mobile number.'],
+                'mobile' => ['Please enter a valid 10-digit Indian mobile number (must start with 6, 7, 8 or 9).'],
             ]);
         }
-        $cleanMobile = substr($cleanMobile, -10); // Standard 10 digits
         $deviceHash = hash('sha256', trim($deviceId));
         $platform = in_array(strtolower($devicePlatform), ['desktop', 'web_pc', 'pc']) ? 'desktop' : 'mobile';
 
@@ -198,7 +207,8 @@ class DeviceSessionAuthService
         string $otp,
         string $deviceId,
         ?string $name = null,
-        ?string $deviceName = 'Device'
+        ?string $deviceName = 'Device',
+        ?string $pin = null
     ): array {
         $deviceHash = hash('sha256', trim($deviceId));
         $cleanOtp = trim($otp);
@@ -265,7 +275,7 @@ class DeviceSessionAuthService
             'otp_plain' => null,
         ]);
 
-        return DB::transaction(function () use ($session, $deviceHash, $deviceName, $name) {
+        return DB::transaction(function () use ($session, $deviceHash, $deviceName, $name, $pin) {
             $mobile = $session->mobile_number;
             $appType = $session->app_type;
             $platform = $session->device_platform ?: 'mobile';
@@ -289,6 +299,8 @@ class DeviceSessionAuthService
                     'mobile' => $mobile,
                     'email' => $mobile . '@dastak.local',
                     'password' => Hash::make(bin2hex(random_bytes(16))),
+                    // PIN chosen during registration (customer app). Null if not provided.
+                    'login_pin' => ($pin && ctype_digit($pin) && strlen($pin) === 4) ? Hash::make($pin) : null,
                     'status' => AccountStatus::ACTIVE,
                     'mobile_verified_at' => now(),
                     'last_login_at' => now(),
@@ -314,6 +326,10 @@ class DeviceSessionAuthService
                 $userUpdates = ['last_login_at' => now(), 'mobile_verified_at' => now()];
                 if (! empty(trim($name ?? '')) && (str_starts_with($user->name, 'Customer ') || empty($user->name))) {
                     $userUpdates['name'] = trim($name);
+                }
+                // Set the chosen PIN only if the account doesn't already have one.
+                if ($pin && ctype_digit($pin) && strlen($pin) === 4 && empty($user->login_pin)) {
+                    $userUpdates['login_pin'] = Hash::make($pin);
                 }
                 $user->update($userUpdates);
             }
@@ -468,7 +484,11 @@ class DeviceSessionAuthService
             );
 
             throw ValidationException::withMessages([
-                'pin' => ["Incorrect 4-digit PIN. Default PIN is the last 4 digits ({$defaultPin}) of your mobile number."],
+                'pin' => [
+                    ! empty($user->login_pin)
+                        ? 'Incorrect 4-digit PIN. Please try again.'
+                        : "Incorrect 4-digit PIN. Default PIN is the last 4 digits ({$defaultPin}) of your mobile number.",
+                ],
             ]);
         }
 

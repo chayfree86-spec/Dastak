@@ -70,6 +70,7 @@ class CustomerDeviceAuthController extends Controller
             'device_id' => ['required', 'string'],
             'name' => ['nullable', 'string', 'max:100'],
             'device_name' => ['nullable', 'string', 'max:150'],
+            'pin' => ['nullable', 'string', 'size:4'],
         ]);
 
         $result = $this->deviceAuthService->verifyOtp(
@@ -77,7 +78,8 @@ class CustomerDeviceAuthController extends Controller
             otp: $validated['otp'],
             deviceId: $validated['device_id'],
             name: $validated['name'] ?? null,
-            deviceName: $validated['device_name'] ?? 'Customer App'
+            deviceName: $validated['device_name'] ?? 'Customer App',
+            pin: $validated['pin'] ?? null
         );
 
         return ApiResponse::success([

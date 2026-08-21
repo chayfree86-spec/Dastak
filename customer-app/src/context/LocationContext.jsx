@@ -49,6 +49,20 @@ export const LocationProvider = ({ children }) => {
     localStorage.setItem('dastak_saved_addresses_list', JSON.stringify(addresses))
   }, [addresses])
 
+  // Keep the active address's contact tied to the real logged-in customer,
+  // overriding any stale/seeded name already stored (e.g. from localStorage).
+  useEffect(() => {
+    if (user?.name && activeAddress && activeAddress.customer_name !== user.name) {
+      const synced = {
+        ...activeAddress,
+        customer_name: user.name,
+        customer_phone: user.mobile || activeAddress.customer_phone || '',
+      }
+      setActiveAddress(synced)
+      localStorage.setItem('dastak_active_address', JSON.stringify(synced))
+    }
+  }, [user, activeAddress?.id])
+
   const loadAddresses = async () => {
     setLoading(true)
     try {
@@ -63,8 +77,10 @@ export const LocationProvider = ({ children }) => {
           ''
         return {
           ...a,
-          customer_name: a.contact_name || a.customer_name || a.name || 'Valued Customer',
-          customer_phone: a.contact_mobile || a.customer_phone || a.phone || '',
+          // Always tie the delivery contact to the real logged-in customer
+          // (never stale/seeded names). Fall back to any stored contact.
+          customer_name: user?.name || a.contact_name || a.customer_name || a.name || 'Customer',
+          customer_phone: user?.mobile || a.contact_mobile || a.customer_phone || a.phone || '',
           address: fullAddr,
           landmark: a.landmark || '',
           type: (a.type?.value || a.type || 'Home').toString(),
