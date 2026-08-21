@@ -13,6 +13,7 @@ export const CustomSelect = ({
   required = false,
   disabled = false,
   className = '',
+  buttonClassName = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -52,7 +53,7 @@ export const CustomSelect = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-11 sm:h-12 flex items-center justify-between text-left text-xs font-bold rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed ${
+        className={`w-full ${buttonClassName || 'h-10 sm:h-10.5'} flex items-center justify-between text-left text-xs font-bold rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-800 disabled:cursor-not-allowed ${
           error
             ? 'border-rose-500'
             : isOpen

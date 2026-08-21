@@ -291,6 +291,7 @@ Route::prefix('v1')->group(function () {
                 Route::delete('/items/{item}', [MenuPartnerController::class, 'destroyItem']);
                 Route::patch('/items/{item}/toggle-availability', [MenuPartnerController::class, 'toggleItemAvailability']);
                 Route::patch('/items/{item}/availability', [MenuPartnerController::class, 'toggleItemAvailability']);
+                Route::get('/search-food-images', [MenuPartnerController::class, 'searchFoodImages']);
                 Route::post('/upload-image', [MenuPartnerController::class, 'uploadImage']);
             });
 
@@ -337,6 +338,7 @@ Route::prefix('v1')->group(function () {
                 // Restaurant Onboarding & Status Moderation
                 Route::get('/restaurants', [RestaurantAdminController::class, 'index']);
                 Route::post('/restaurants', [RestaurantAdminController::class, 'store']);
+                Route::post('/restaurants/upload-image', [RestaurantAdminController::class, 'uploadImage']);
                 Route::get('/restaurants/{id}', [RestaurantAdminController::class, 'show']);
                 Route::put('/restaurants/{restaurant}', [RestaurantAdminController::class, 'update']);
                 Route::patch('/restaurants/{restaurant}/status', [RestaurantAdminController::class, 'updateStatus']);
@@ -349,6 +351,7 @@ Route::prefix('v1')->group(function () {
 
                 // Full menu management: categories, sub-categories, items, image upload
                 Route::get('/restaurants/{id}/menu', [MenuAdminController::class, 'menu']);
+                Route::get('/restaurants/{id}/menu/search-food-images', [MenuAdminController::class, 'searchFoodImages']);
                 Route::post('/restaurants/{id}/menu/upload-image', [MenuAdminController::class, 'uploadImage']);
                 Route::post('/restaurants/{id}/menu/categories', [MenuAdminController::class, 'storeCategory']);
                 Route::put('/restaurants/{id}/menu/categories/{categoryId}', [MenuAdminController::class, 'updateCategory']);

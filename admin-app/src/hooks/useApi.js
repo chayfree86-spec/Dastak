@@ -62,13 +62,17 @@ export const useApi = (apiFn, params = null, options = {}) => {
     }
   }, [])
 
+  const lastFetchRef = useRef(Date.now())
+
   const silentRefresh = useCallback(() => {
+    lastFetchRef.current = Date.now()
     return execute(undefined, { silent: true })
   }, [execute])
 
   useEffect(() => {
     isMounted.current = true
     if (immediate) {
+      lastFetchRef.current = Date.now()
       execute()
     }
 
@@ -76,15 +80,16 @@ export const useApi = (apiFn, params = null, options = {}) => {
     let handleFocus = () => {}
 
     if (autoSync) {
-      // 0ms Realtime bus auto-refresh
+      // 0ms Realtime bus auto-refresh on actual data mutations
       unsubscribe = realtimeBus.subscribe(() => {
         if (isMounted.current && !document.hidden) {
           silentRefresh()
         }
       })
 
+      // Refetch on window focus only if idle for at least 60s (prevents flooding during file picker dialogs)
       handleFocus = () => {
-        if (isMounted.current) {
+        if (isMounted.current && !document.hidden && Date.now() - lastFetchRef.current > 60000) {
           silentRefresh()
         }
       }

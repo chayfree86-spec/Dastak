@@ -283,6 +283,15 @@ export const RestaurantFormModal = ({
 
     setLoading(true)
     try {
+      // `image` is a File when a new logo was picked, or a string URL when
+      // unchanged/already-uploaded. The backend only accepts a string URL,
+      // so upload the file first and swap in the returned URL.
+      let imageUrl = typeof image === 'string' ? image : null
+      if (image && typeof image !== 'string') {
+        const res = await restaurantsApi.uploadRestaurantImage(image)
+        imageUrl = res?.data?.url || res?.url || null
+      }
+
       const payload = {
         name,
         owner_name: ownerName,
@@ -296,8 +305,8 @@ export const RestaurantFormModal = ({
         delivery_radius_km: Number(deliveryRadiusKm),
         status: isActive ? 'ACTIVE' : 'INACTIVE',
         is_veg_only: isVegOnly,
-        image: image || null,
-        logo: image || null,
+        image: imageUrl,
+        logo: imageUrl,
         latitude: Number(latitude),
         longitude: Number(longitude),
       }

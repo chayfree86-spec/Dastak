@@ -403,4 +403,14 @@ class RestaurantAdminController extends Controller
 
         return $map;
     }
+
+    /** Flexible logo/banner upload — accepts any image, up to 10 MB. Works for create (no id yet) and edit. */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate(['image' => ['required', 'image', 'max:10240']]);
+
+        $path = $request->file('image')->store('restaurants', 'public');
+
+        return ApiResponse::success(['url' => asset('storage/'.$path)], 'Image uploaded successfully.', 201);
+    }
 }

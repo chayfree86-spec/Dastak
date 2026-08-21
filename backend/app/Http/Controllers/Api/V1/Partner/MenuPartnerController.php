@@ -16,7 +16,8 @@ use Illuminate\Http\Request;
 class MenuPartnerController extends Controller
 {
     public function __construct(
-        protected MenuService $menuService
+        protected MenuService $menuService,
+        protected \App\Services\FoodImageSearchService $imageSearchService
     ) {}
 
     protected function getPartnerRestaurant(Request $request): Restaurant
@@ -227,19 +228,38 @@ class MenuPartnerController extends Controller
         );
     }
 
+    /** Search royalty-free high quality food images for dish naming. */
+    public function searchFoodImages(Request $request): JsonResponse
+    {
+        $query = $request->query('q', $request->query('query', 'delicious food'));
+        $results = $this->imageSearchService->search((string) $query, 16);
+
+        return ApiResponse::success($results, 'Food images retrieved.');
+    }
+
     public function uploadImage(Request $request): JsonResponse
     {
         $restaurant = $this->getPartnerRestaurant($request);
 
         $request->validate([
-            'image' => ['required', 'image', 'max:10240'],
+            'image' => ['nullable', 'image', 'max:10240'],
+            'image_url' => ['nullable', 'string', 'url'],
         ]);
 
-        $path = $request->file('image')->store('menu/'.$restaurant->id, 'public');
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('menu/'.$restaurant->id, 'public');
+        } elseif ($request->filled('image_url')) {
+            $path = $this->imageSearchService->downloadAndStore($request->input('image_url'), $restaurant->id);
+            if (! $path) {
+                return ApiResponse::error('Failed to download image from web source.', 422);
+            }
+        } else {
+            return ApiResponse::error('Please provide an image file or a valid image_url.', 422);
+        }
 
         return ApiResponse::success(
             ['url' => asset('storage/'.$path)],
-            'Image uploaded successfully.',
+            'Image uploaded and stored successfully.',
             201
         );
     }

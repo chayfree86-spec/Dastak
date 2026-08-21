@@ -19,15 +19,33 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  timeout: 15000,
+  timeout: 30000,
 })
 
-// Request Interceptor: Attach Auth Token
+/**
+ * Request config for FormData / file uploads (longer timeout).
+ */
+export const multipartConfig = {
+  timeout: 60000,
+}
+
+// Request Interceptor: Attach Auth Token & Handle FormData headers
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('dastak_admin_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    }
+    // When sending FormData, remove Content-Type so browser sets boundary automatically
+    if (config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers['Content-Type']
+        delete config.headers['content-type']
+        if (typeof config.headers.delete === 'function') {
+          config.headers.delete('Content-Type')
+          config.headers.delete('content-type')
+        }
+      }
     }
     return config
   },

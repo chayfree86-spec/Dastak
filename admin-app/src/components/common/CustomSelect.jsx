@@ -13,12 +13,13 @@ export const CustomSelect = ({
   required = false,
   disabled = false,
   className = '',
+  buttonClassName = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const dropdownRef = useRef(null)
 
-  const selectedOption = options.find((opt) => opt.value === value)
+  const selectedOption = options.find((opt) => String(opt.value) === String(value))
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -52,7 +53,7 @@ export const CustomSelect = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-11 sm:h-10 flex items-center justify-between text-left text-sm rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed ${
+        className={`w-full ${buttonClassName || 'h-10 sm:h-10.5'} flex items-center justify-between text-left text-xs font-bold rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#113BD0]/30 focus:border-[#113BD0] disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:cursor-not-allowed ${
           error
             ? 'border-rose-500'
             : isOpen
@@ -96,13 +97,13 @@ export const CustomSelect = ({
                   type="button"
                   onClick={() => handleSelect(opt.value)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-xs text-left transition-colors cursor-pointer ${
-                    opt.value === value
+                    String(opt.value) === String(value)
                       ? 'bg-[#113BD0]/10 text-[#113BD0] dark:bg-[#113BD0]/20 dark:text-blue-400 font-semibold'
                       : 'text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                   }`}
                 >
                   <span>{opt.label}</span>
-                  {opt.value === value && <Check className="w-3.5 h-3.5" />}
+                  {String(opt.value) === String(value) && <Check className="w-3.5 h-3.5" />}
                 </button>
               ))
             )}

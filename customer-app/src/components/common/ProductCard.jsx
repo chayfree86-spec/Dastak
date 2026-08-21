@@ -1,68 +1,13 @@
-import React from 'react'
-import { Plus, Minus, Star, Flame, Utensils } from 'lucide-react'
+import React, { useState } from 'react'
+import { Plus, Minus, Star, Flame, UtensilsCrossed } from 'lucide-react'
 import { formatCurrency } from '../../utils/formatters'
 import { useCart } from '../../context/CartContext'
 import { useLanguage } from '../../context/LanguageContext'
 
-// Fallback high quality mouth-watering food photography optimized for fast mobile load
-const getFoodImage = (product) => {
-  const rawImage = product?.image || ''
-  if (
-    rawImage &&
-    !rawImage.includes('placeholder') &&
-    !rawImage.includes('logo') &&
-    !rawImage.includes('default') &&
-    !rawImage.endsWith('.svg')
-  ) {
-    return rawImage
-  }
-
-  const name = (product?.name || '').toLowerCase()
-  if (name.includes('chai') || name.includes('tea') || name.includes('kulhad') || name.includes('coffee')) {
-    return 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('sandwich') || name.includes('toast') || name.includes('wrap')) {
-    return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('burger')) {
-    return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('pizza')) {
-    return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('biryani') || name.includes('rice') || name.includes('pulao')) {
-    return 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('samosa') || name.includes('snack') || name.includes('kachori') || name.includes('pakoda') || name.includes('chaat')) {
-    return 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('paneer') || name.includes('curry') || name.includes('dal') || name.includes('gravy') || name.includes('shahi')) {
-    return 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('thali') || name.includes('roti') || name.includes('naan') || name.includes('paratha')) {
-    return 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('dosa') || name.includes('idli') || name.includes('vada') || name.includes('south')) {
-    return 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('noodle') || name.includes('chowmein') || name.includes('manchurian') || name.includes('chinese') || name.includes('pasta') || name.includes('maggi')) {
-    return 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('sweet') || name.includes('jalebi') || name.includes('cake') || name.includes('dessert') || name.includes('gulab') || name.includes('ice cream')) {
-    return 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('roll') || name.includes('kathi') || name.includes('frankie') || name.includes('shawarma')) {
-    return 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=400&auto=format&fit=crop&q=75'
-  }
-  if (name.includes('shake') || name.includes('lassi') || name.includes('juice') || name.includes('drink')) {
-    return 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&auto=format&fit=crop&q=75'
-  }
-  return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&auto=format&fit=crop&q=75'
-}
-
 export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
   const { t } = useLanguage()
   const { getItemQuantity, addItem, updateQuantity } = useCart()
+  const [imageFailed, setImageFailed] = useState(false)
 
   if (!product) return null
 
@@ -72,7 +17,14 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
   const originalPrice = Number(product.base_price || 0)
   const isVeg = product.food_type === 'VEG' || product.food_type === 'pure_veg'
   const restaurantName = product.restaurant?.name || customRestaurant?.name
-  const imageUrl = getFoodImage(product)
+  const rawImage = product?.image && typeof product.image === 'string' ? product.image.trim() : ''
+  const hasImage = Boolean(
+    rawImage &&
+    !imageFailed &&
+    !rawImage.includes('placeholder') &&
+    !rawImage.includes('default') &&
+    !rawImage.endsWith('.svg')
+  )
 
   const handleAdd = (e) => {
     e?.stopPropagation()
@@ -99,30 +51,39 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
   return (
     <article
       onClick={onSelect}
-      className={`group relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl border border-slate-200/80 dark:border-slate-800 transition-all duration-300 h-56 sm:h-64 w-full select-none ${
+      className={`group relative rounded-3xl overflow-hidden shadow-md hover:shadow-2xl border border-slate-200/80 dark:border-slate-800 transition-all duration-300 h-56 sm:h-64 w-full select-none bg-gradient-to-br from-slate-900 via-slate-850 to-slate-950 ${
         onSelect ? 'cursor-pointer' : ''
       }`}
       aria-label={`${product.name} - ${formatCurrency(price)}`}
     >
-      {/* 1. Full-Width Full-Height Food Photography Background */}
-      <img
-        src={imageUrl}
-        alt={product.name}
-        width="360"
-        height="240"
-        loading="lazy"
-        decoding="async"
-        className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 pointer-events-none"
-        onError={(e) => {
-          e.target.onerror = null
-          e.target.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&auto=format&fit=crop&q=75'
-        }}
-      />
+      {/* 1. Real Item Image (Only if uploaded by Merchant) */}
+      {hasImage ? (
+        <>
+          <img
+            src={rawImage}
+            alt={product.name}
+            width="360"
+            height="240"
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 pointer-events-none"
+            onError={() => setImageFailed(true)}
+          />
+          {/* Multi-Stop Gradient Overlay for Crisp Text Readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-black/20 pointer-events-none" />
+        </>
+      ) : (
+        /* Minimalist & Modern Graphic Card Background when no image is uploaded */
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 flex items-center justify-center pointer-events-none overflow-hidden">
+          {/* Subtle Ambient Glow */}
+          <div className="absolute -top-12 -right-12 w-40 h-40 bg-orange-500/10 rounded-full blur-2xl" />
+          <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl" />
+          {/* Watermark Food Icon */}
+          <UtensilsCrossed className="w-24 h-24 text-white/[0.04] transform -rotate-12 group-hover:scale-110 transition-transform duration-500" />
+        </div>
+      )}
 
-      {/* 2. Multi-Stop Gradient Overlays for Superb Readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-black/20 pointer-events-none" />
-
-      {/* 3. Top Floating Badges (Veg/NonVeg, Bestseller, Rating) */}
+      {/* 2. Top Floating Badges (Veg/NonVeg, Bestseller, Rating, Restaurant) */}
       <div className="absolute top-3 inset-x-3 sm:top-4 sm:inset-x-4 flex items-center justify-between gap-2 z-10">
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Veg / Non-Veg Indicator */}
@@ -149,7 +110,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
           )}
 
           {restaurantName && !product.is_featured && (
-            <span className="px-2.5 py-0.5 rounded-lg bg-black/50 text-white text-[10px] font-bold backdrop-blur-md truncate max-w-[140px]">
+            <span className="px-2.5 py-0.5 rounded-lg bg-black/50 text-white text-[10px] font-bold backdrop-blur-md truncate max-w-[140px] border border-white/10">
               {restaurantName}
             </span>
           )}
@@ -172,7 +133,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
         </div>
       </div>
 
-      {/* 4. Bottom Content Directly Overlayed on Image (Name, Price & ADD Controller) */}
+      {/* 3. Bottom Content (Name, Description, Price & ADD Controller) */}
       <div className="absolute bottom-3 inset-x-3 sm:bottom-4 sm:inset-x-4 flex items-end justify-between gap-3 z-10">
         {/* Left: Dish Name, Description, and Price */}
         <div className="space-y-1 min-w-0 flex-1 text-white pr-2">
@@ -181,7 +142,7 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
           </h3>
 
           {product.description && (
-            <p className="text-[11px] text-white/90 line-clamp-1 font-medium drop-shadow-xs leading-tight">
+            <p className="text-[11px] text-white/80 line-clamp-1 font-medium drop-shadow-xs leading-tight">
               {product.description}
             </p>
           )}
@@ -226,7 +187,10 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
               >
                 <Minus className="w-3.5 h-3.5 stroke-[3]" />
               </button>
-              <span className="text-xs sm:text-sm font-black px-1 min-w-[18px] text-center drop-shadow-sm" aria-label={`Current quantity: ${currentQty}`}>
+              <span
+                className="text-xs sm:text-sm font-black px-1 min-w-[18px] text-center drop-shadow-sm"
+                aria-label={`Current quantity: ${currentQty}`}
+              >
                 {currentQty}
               </span>
               <button

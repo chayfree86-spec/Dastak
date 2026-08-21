@@ -16,6 +16,10 @@ use Illuminate\Http\Request;
  */
 class MenuAdminController extends Controller
 {
+    public function __construct(
+        protected \App\Services\FoodImageSearchService $imageSearchService
+    ) {}
+
     /** Hierarchical menu tree: top categories -> items + sub-categories -> items. */
     public function menu(int $restaurantId): JsonResponse
     {
@@ -155,18 +159,37 @@ class MenuAdminController extends Controller
         );
     }
 
-    /** Flexible image upload — accepts any common image, up to 10 MB. */
+    /** Search royalty-free high quality food images for dish naming. */
+    public function searchFoodImages(Request $request, int $restaurantId): JsonResponse
+    {
+        $query = $request->query('q', $request->query('query', 'delicious food'));
+        $results = $this->imageSearchService->search((string) $query, 16);
+
+        return ApiResponse::success($results, 'Food images retrieved.');
+    }
+
+    /** Flexible image upload — accepts file upload OR direct web image_url download. */
     public function uploadImage(Request $request, int $restaurantId): JsonResponse
     {
         $request->validate([
-            'image' => ['required', 'image', 'max:10240'],
+            'image' => ['nullable', 'image', 'max:10240'],
+            'image_url' => ['nullable', 'string', 'url'],
         ]);
 
-        $path = $request->file('image')->store('menu/'.$restaurantId, 'public');
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('menu/'.$restaurantId, 'public');
+        } elseif ($request->filled('image_url')) {
+            $path = $this->imageSearchService->downloadAndStore($request->input('image_url'), $restaurantId);
+            if (! $path) {
+                return ApiResponse::error('Failed to download image from web source.', 422);
+            }
+        } else {
+            return ApiResponse::error('Please provide an image file or a valid image_url.', 422);
+        }
 
         return ApiResponse::success(
             ['url' => asset('storage/'.$path)],
-            'Image uploaded successfully.',
+            'Image uploaded and stored successfully.',
             201
         );
     }

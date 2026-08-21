@@ -1,4 +1,4 @@
-import apiClient from './client'
+import apiClient, { multipartConfig } from './client'
 
 export const deliveryBoysApi = {
   getDeliveryBoys: (params) => apiClient.get('/admin/delivery-boys', { params }),
@@ -7,11 +7,8 @@ export const deliveryBoysApi = {
   updateDeliveryBoy: (id, data) => apiClient.put(`/admin/delivery-boys/${id}`, data),
   deleteDeliveryBoy: (id) => apiClient.delete(`/admin/delivery-boys/${id}`),
   downloadIdCard: (id) => apiClient.get(`/admin/delivery-boys/${id}/id-card`, { responseType: 'blob' }),
-  uploadDocument: (formData) => apiClient.post('/admin/delivery-boys/upload-document', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  }),
+  // multipartConfig strips the JSON content-type (see client.js).
+  uploadDocument: (formData) => apiClient.post('/admin/delivery-boys/upload-document', formData, multipartConfig),
   toggleStatus: (id, statusData) => apiClient.patch(`/admin/delivery-boys/${id}/status`, statusData),
   getActiveDeliveries: (id) => apiClient.get(`/admin/delivery-boys/${id}/active-deliveries`),
   getOrderHistory: (id, params) => apiClient.get(`/admin/delivery-boys/${id}/orders`, { params }),

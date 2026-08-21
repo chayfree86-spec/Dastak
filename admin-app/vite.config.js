@@ -31,9 +31,14 @@ export default defineConfig({
   server: {
     port: 5191,
     strictPort: true,
+    headers: {
+      // Dev server must never let the browser cache module responses —
+      // otherwise a normal refresh can keep showing pre-edit code.
+      'Cache-Control': 'no-store',
+    },
     watch: {
       usePolling: true,
-      interval: 1000,
+      interval: 300,
       ignored: [
         '**/customer-app/**',
         '**/partner-app/**',

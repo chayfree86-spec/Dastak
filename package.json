@@ -16,5 +16,8 @@
     "build:partner": "npm --prefix partner-app run build",
     "build:delivery": "npm --prefix deliveryboy-app run build",
     "simulate": "node simulation/runner.js"
+  },
+  "dependencies": {
+    "animejs": "^4.5.0"
   }
 }

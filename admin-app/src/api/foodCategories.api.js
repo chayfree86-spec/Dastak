@@ -1,4 +1,5 @@
-import apiClient from './client'
+import apiClient, { multipartConfig } from './client'
+import { compressImage } from '../utils/imageCompressor'
 
 const BASE = '/admin/marketing/food-categories'
 
@@ -10,12 +11,11 @@ export const foodCategoriesApi = {
   deleteCategory: (id) => apiClient.delete(`${BASE}/${id}`),
 
   // Flexible image upload (any image) -> returns { url }
-  uploadImage: (file) => {
+  uploadImage: async (file) => {
+    const optimized = await compressImage(file)
     const fd = new FormData()
-    fd.append('image', file)
-    return apiClient.post(`${BASE}/upload-image`, fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    fd.append('image', optimized)
+    return apiClient.post(`${BASE}/upload-image`, fd, multipartConfig)
   },
 }
 

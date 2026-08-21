@@ -50,7 +50,7 @@ export const ConfirmDialog = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-md" showClose={false}>
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-md" showClose={false} zIndex="z-[10010]">
       <div className="text-center p-2">
         {getIcon()}
         <h4 className="text-base font-black text-slate-900 dark:text-slate-100 mb-1.5">{title}</h4>

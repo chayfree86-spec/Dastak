@@ -148,24 +148,69 @@ export const searchPlacesAuto = async (query) => {
 }
 
 /**
- * High Accuracy Browser Geolocation with Timeout
+ * IP-based approximate location fallback
+ */
+export const fallbackIpLocation = async () => {
+  try {
+    const res = await fetch('https://ipapi.co/json/')
+    const data = await res.json()
+    if (data && data.latitude && data.longitude) {
+      const city = data.city || data.region || 'Kanpur'
+      return {
+        formatted_address: `${data.city || 'Current Area'}, ${data.region || ''} ${data.postal || ''}`.trim(),
+        short_address: `${data.city || 'My Location'}, ${data.region || 'India'}`,
+        locality: data.city || 'Current Location',
+        city: city,
+        pincode: data.postal || '',
+        latitude: parseFloat(data.latitude),
+        longitude: parseFloat(data.longitude),
+      }
+    }
+  } catch (e) {
+    console.warn('IP location fetch fallback error:', e)
+  }
+
+  // Sensible local default if completely offline
+  return {
+    formatted_address: 'Kalyanpur, Kanpur, Uttar Pradesh 208017',
+    short_address: 'Kalyanpur, Kanpur',
+    locality: 'Kalyanpur',
+    city: 'Kanpur',
+    pincode: '208017',
+    latitude: 26.4947,
+    longitude: 80.2798,
+  }
+}
+
+/**
+ * High Accuracy Browser Geolocation with Timeout and Smart Fallback
  */
 export const detectCurrentGPS = () => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by your browser.'))
+      fallbackIpLocation().then(resolve).catch(reject)
       return
     }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        const lat = position.coords.latitude
-        const lng = position.coords.longitude
-        const geocoded = await reverseGeocode(lat, lng)
-        resolve(geocoded)
+        try {
+          const lat = position.coords.latitude
+          const lng = position.coords.longitude
+          const geocoded = await reverseGeocode(lat, lng)
+          resolve(geocoded)
+        } catch (e) {
+          const ipLoc = await fallbackIpLocation()
+          resolve(ipLoc)
+        }
       },
-      (error) => {
-        reject(error)
+      async (error) => {
+        try {
+          const ipLoc = await fallbackIpLocation()
+          resolve(ipLoc)
+        } catch (err) {
+          reject(error)
+        }
       },
       {
         enableHighAccuracy: true,

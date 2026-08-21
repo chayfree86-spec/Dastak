@@ -1,4 +1,5 @@
-import apiClient from './client'
+import apiClient, { multipartConfig } from './client'
+import { compressImage } from '../utils/imageCompressor'
 
 export const menuApi = {
   getMenuTree: () => apiClient.get('/partner/menu/tree'),
@@ -14,12 +15,15 @@ export const menuApi = {
   deleteItem: (id) => apiClient.delete(`/partner/menu/items/${id}`),
   toggleAvailability: (id, isAvailable) =>
     apiClient.patch(`/partner/menu/items/${id}/availability`, { is_available: isAvailable }),
-  uploadImage: (file) => {
+  searchFoodImages: (query) => apiClient.get('/partner/menu/search-food-images', { params: { q: query } }),
+  uploadImage: async (fileOrUrl) => {
+    if (typeof fileOrUrl === 'string' && fileOrUrl.startsWith('http')) {
+      return apiClient.post('/partner/menu/upload-image', { image_url: fileOrUrl })
+    }
+    const optimized = await compressImage(fileOrUrl)
     const fd = new FormData()
-    fd.append('image', file)
-    return apiClient.post('/partner/menu/upload-image', fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    fd.append('image', optimized)
+    return apiClient.post('/partner/menu/upload-image', fd, multipartConfig)
   },
 }
 

@@ -10,6 +10,7 @@ export const Modal = ({
   maxWidth = 'max-w-md',
   showClose = true,
   isBottomSheetOnMobile = true,
+  zIndex = 'z-[9999]',
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -25,7 +26,7 @@ export const Modal = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className={`fixed inset-0 ${zIndex} flex items-end sm:items-center justify-center p-0 sm:p-4`}>
       {/* Backdrop */}
       <div
         onClick={onClose}

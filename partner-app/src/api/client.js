@@ -13,21 +13,36 @@ export const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl()
 
-const apiClient = axios.create({
+export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
-  timeout: 15000,
+  timeout: 30000,
 })
 
-// Request interceptor to attach Bearer token
+export const multipartConfig = {
+  timeout: 60000,
+}
+
+// Request interceptor to attach Bearer token & handle FormData
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('dastak_partner_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    }
+    // When sending FormData, remove Content-Type so browser sets multipart boundary automatically
+    if (config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers['Content-Type']
+        delete config.headers['content-type']
+        if (typeof config.headers.delete === 'function') {
+          config.headers.delete('Content-Type')
+          config.headers.delete('content-type')
+        }
+      }
     }
     return config
   },
