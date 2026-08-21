@@ -92,6 +92,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/start', [CustomerDeviceAuthController::class, 'start']);
         Route::post('/resend-otp', [CustomerDeviceAuthController::class, 'resendOtp']);
         Route::post('/verify', [CustomerDeviceAuthController::class, 'verify']);
+        Route::post('/verify-pin', [CustomerDeviceAuthController::class, 'verifyPin']);
         Route::post('/session', [CustomerDeviceAuthController::class, 'session']);
     });
 
@@ -183,6 +184,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('customer')->group(function () {
             Route::get('/profile', [CustomerProfileController::class, 'getProfile']);
             Route::put('/profile', [CustomerProfileController::class, 'updateProfile']);
+            Route::post('/profile/change-pin', [CustomerProfileController::class, 'changePin']);
             
             // Saved Addresses
             Route::get('/addresses', [CustomerProfileController::class, 'getAddresses']);
@@ -344,10 +346,15 @@ Route::prefix('v1')->group(function () {
                 Route::patch('/restaurants/{restaurant}/status', [RestaurantAdminController::class, 'updateStatus']);
                 Route::put('/restaurants/{id}/operating-hours', [RestaurantAdminController::class, 'updateOperatingHours']);
 
-                // Restaurant detail tabs: menu, orders, earnings, settlements
+                // Restaurant detail tabs: menu, orders, earnings, settlements, reviews & rating
                 Route::get('/restaurants/{id}/orders', [RestaurantAdminController::class, 'getOrders']);
                 Route::get('/restaurants/{id}/earnings', [RestaurantAdminController::class, 'getEarnings']);
                 Route::get('/restaurants/{id}/settlements', [RestaurantAdminController::class, 'getSettlements']);
+                Route::get('/restaurants/{id}/reviews', [RestaurantAdminController::class, 'getReviews']);
+                Route::put('/restaurants/{id}/rating', [RestaurantAdminController::class, 'updateRating']);
+                Route::post('/restaurants/{id}/recalculate-rating', [RestaurantAdminController::class, 'recalculateRating']);
+                Route::patch('/reviews/{id}/visibility', [ReviewAdminController::class, 'toggleVisibility']);
+                Route::post('/reviews/{id}/reply', [ReviewAdminController::class, 'reply']);
 
                 // Full menu management: categories, sub-categories, items, image upload
                 Route::get('/restaurants/{id}/menu', [MenuAdminController::class, 'menu']);

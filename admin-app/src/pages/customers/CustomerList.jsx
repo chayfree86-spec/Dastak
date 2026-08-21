@@ -63,8 +63,12 @@ export const CustomerList = () => {
       header: 'Customer',
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold text-xs flex items-center justify-center shrink-0">
-            {row.name ? row.name.charAt(0).toUpperCase() : 'C'}
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold text-xs flex items-center justify-center shrink-0">
+            {row.avatar ? (
+              <img src={row.avatar} alt={row.name} className="w-full h-full object-cover" />
+            ) : (
+              row.name ? row.name.charAt(0).toUpperCase() : 'C'
+            )}
           </div>
           <div>
             <div className="font-semibold text-slate-900 dark:text-slate-100">{row.name}</div>
@@ -76,7 +80,7 @@ export const CustomerList = () => {
     {
       key: 'mobile',
       header: 'Mobile',
-      render: (row) => <span className="font-mono text-slate-700 dark:text-slate-300 text-xs">{formatPhone(row.mobile)}</span>,
+      render: (row) => <span className="font-medium text-slate-700 dark:text-slate-300 text-xs">{formatPhone(row.mobile)}</span>,
     },
     {
       key: 'city',
@@ -103,6 +107,27 @@ export const CustomerList = () => {
           {formatCurrency(row.total_spent || row.ltv || 0)}
         </span>
       ),
+    },
+    {
+      key: 'profile_completion_percentage',
+      header: 'Profile',
+      render: (row) => {
+        const pct = row.profile_completion_percentage ?? 0
+        const isComplete = pct === 100
+        return (
+          <span
+            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+              isComplete
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60'
+                : pct >= 50
+                ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700'
+            }`}
+          >
+            {pct}%
+          </span>
+        )
+      },
     },
     {
       key: 'status',
@@ -228,8 +253,12 @@ export const CustomerList = () => {
               {/* Header: Avatar, Name & Status */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold text-xs flex items-center justify-center shrink-0">
-                    {cust.name ? cust.name.charAt(0).toUpperCase() : 'C'}
+                  <div className="w-9 h-9 rounded-xl overflow-hidden bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold text-xs flex items-center justify-center shrink-0">
+                    {cust.avatar ? (
+                      <img src={cust.avatar} alt={cust.name} className="w-full h-full object-cover" />
+                    ) : (
+                      cust.name ? cust.name.charAt(0).toUpperCase() : 'C'
+                    )}
                   </div>
                   <div className="min-w-0">
                     <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{cust.name}</h4>
@@ -247,7 +276,7 @@ export const CustomerList = () => {
                   <a
                     href={`tel:${cust.mobile}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="font-mono text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 group truncate"
+                    className="font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 group truncate"
                   >
                     <span>{formatPhone(cust.mobile)}</span>
                     <Phone className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />

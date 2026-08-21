@@ -246,8 +246,9 @@ class AuthService
         if (! $user) {
             // Register new Customer User
             $isNewUser = true;
+            $userName = $name && trim($name) ? trim($name) : 'Customer ' . substr($cleanMobile, -4);
             $user = User::create([
-                'name' => $name ? trim($name) : 'Customer ' . substr($cleanMobile, -4),
+                'name' => $userName,
                 'mobile' => $cleanMobile,
                 'email' => $cleanMobile . '@dastak.local',
                 'password' => Hash::make('password123'),
@@ -265,7 +266,11 @@ class AuthService
             ]);
         } else {
             $this->validateAccountStatus($user);
-            $user->update(['last_login_at' => now(), 'mobile_verified_at' => now()]);
+            $updates = ['last_login_at' => now(), 'mobile_verified_at' => now()];
+            if ($name && trim($name) && (str_starts_with($user->name, 'Customer ') || empty($user->name))) {
+                $updates['name'] = trim($name);
+            }
+            $user->update($updates);
         }
 
         $token = $user->createToken($deviceName ?? 'Customer App')->plainTextToken;

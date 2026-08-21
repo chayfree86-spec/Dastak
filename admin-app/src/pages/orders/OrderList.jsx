@@ -70,7 +70,7 @@ export const OrderList = () => {
       key: 'id',
       header: 'Order ID',
       render: (row) => (
-        <span className="font-mono font-bold text-[#113BD0] dark:text-blue-400 hover:underline">
+        <span className="font-bold text-[#113BD0] dark:text-blue-400 hover:underline">
           #{row.id}
         </span>
       ),
@@ -221,7 +221,7 @@ export const OrderList = () => {
               className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer space-y-2.5"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-sm text-[#113BD0] dark:text-blue-400">
+                <span className="font-bold text-sm text-[#113BD0] dark:text-blue-400">
                   #{order.id}
                 </span>
                 <div className="flex items-center gap-1.5">

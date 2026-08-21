@@ -32,6 +32,16 @@ export const authApi = {
     return res.data
   },
 
+  verifyPin: async (sessionId, pin) => {
+    const res = await apiClient.post('/customer/auth/verify-pin', {
+      session_id: sessionId,
+      pin,
+      device_id: getDeviceId(),
+      device_name: getDeviceName(),
+    })
+    return res.data
+  },
+
   validateSession: async (sessionToken) => {
     const res = await apiClient.post('/customer/auth/session', {
       session_token: sessionToken,

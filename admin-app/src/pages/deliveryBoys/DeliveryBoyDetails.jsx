@@ -208,14 +208,14 @@ export const DeliveryBoyDetails = () => {
               {rider?.mobile && (
                 <a
                   href={`tel:${rider?.mobile}`}
-                  className="font-mono text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-semibold inline-flex items-center gap-1"
+                  className="font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 inline-flex items-center gap-1"
                 >
                   <span>{formatPhone(rider?.mobile)}</span>
                   <Phone className="w-3 h-3 text-emerald-500 shrink-0" />
                 </a>
               )}
               <span>&bull;</span>
-              <span className="font-mono font-semibold">ID: {rider?.id}</span>
+              <span className="font-semibold">ID: {rider?.id}</span>
               <span>&bull;</span>
               <span className="flex items-center gap-1 font-bold text-amber-500">
                 <Star className="w-3.5 h-3.5 fill-amber-400" />
@@ -427,7 +427,7 @@ export const DeliveryBoyDetails = () => {
           <div className="hidden md:block">
             <DataTable
               columns={[
-                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#113BD0]">#{r.id}</span> },
+                { key: 'id', header: 'Order ID', render: (r) => <span className="font-bold text-[#113BD0]">#{r.id}</span> },
                 { key: 'restaurant', header: 'Restaurant' },
                 { key: 'customer', header: 'Customer' },
                 { key: 'amount', header: 'Order Value', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
@@ -458,7 +458,7 @@ export const DeliveryBoyDetails = () => {
                   className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#113BD0] dark:text-blue-400">
+                    <div className="flex items-center gap-1.5 font-bold text-[#113BD0] dark:text-blue-400">
                       <span>#{trip.id}</span>
                       <span className="text-[11px] font-normal text-slate-400">&bull; {formatDateTime(trip.time)}</span>
                     </div>
@@ -538,7 +538,7 @@ export const DeliveryBoyDetails = () => {
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div>
                 <span className="text-slate-400 block mb-0.5">Aadhaar Card Number</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {rider?.aadhar_number ? rider.aadhar_number.replace(/(\d{4})/g, '$1 ').trim() : 'Not Provided'}
                 </span>
                 {rider?.aadhar_url && (
@@ -554,7 +554,7 @@ export const DeliveryBoyDetails = () => {
               </div>
               <div>
                 <span className="text-slate-400 block mb-0.5">PAN Card Number</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {rider?.pan_number || 'Not Provided'}
                 </span>
                 {rider?.pan_url && (
@@ -570,7 +570,7 @@ export const DeliveryBoyDetails = () => {
               </div>
               <div className="col-span-2">
                 <span className="text-slate-400 block mb-0.5">Driving License Number</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {rider?.license_number || 'Not Provided'}
                 </span>
                 {rider?.license_url && (
@@ -602,19 +602,19 @@ export const DeliveryBoyDetails = () => {
               </div>
               <div>
                 <span className="text-slate-400 block mb-0.5">Bank Account Number</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {rider?.bank_account_number || 'Not Provided'}
                 </span>
               </div>
               <div>
                 <span className="text-slate-400 block mb-0.5">Bank IFSC Code</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {rider?.bank_ifsc || 'Not Provided'}
                 </span>
               </div>
               <div>
                 <span className="text-slate-400 block mb-0.5">UPI ID</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {rider?.bank_upi_id || 'Not Provided'}
                 </span>
               </div>
@@ -636,7 +636,7 @@ export const DeliveryBoyDetails = () => {
               </div>
               <div>
                 <span className="text-slate-400 block">Vehicle Number Plate</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {rider?.vehicle_number || 'Not Provided'}
                 </span>
               </div>
@@ -668,7 +668,7 @@ export const DeliveryBoyDetails = () => {
               </div>
               <div>
                 <span className="text-slate-400 block mb-0.5">Registered Mobile</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200 font-mono text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {formatPhone(rider?.mobile)}
                 </span>
               </div>

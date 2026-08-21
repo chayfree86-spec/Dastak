@@ -51,4 +51,19 @@ class ReviewAdminController extends Controller
             $review->is_visible ? 'Review is now visible.' : 'Review hidden by moderator.'
         );
     }
+
+    public function reply(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'reply' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $review = Review::findOrFail($id);
+        $updated = $this->reviewService->replyToReview($review, $validated['reply']);
+
+        return ApiResponse::success(
+            new ReviewResource($updated),
+            'Reply posted successfully.'
+        );
+    }
 }

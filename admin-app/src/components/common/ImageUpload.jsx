@@ -1,5 +1,5 @@
 import React, { useRef, useMemo, useEffect, useState } from 'react'
-import { UploadCloud, X, Image as ImageIcon, Loader2, Sparkles, FolderOpen } from 'lucide-react'
+import { UploadCloud, X, Image as ImageIcon, Loader2, Globe, FolderOpen } from 'lucide-react'
 import { compressImage } from '../../utils/imageCompressor'
 
 export const ImageUpload = ({
@@ -75,9 +75,9 @@ export const ImageUpload = ({
               e.stopPropagation()
               onOpenWebSearch()
             }}
-            className="h-7 px-2.5 rounded-lg bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-900/30 dark:to-indigo-900/30 text-[#113BD0] dark:text-blue-300 hover:from-blue-500/20 hover:to-indigo-500/20 border border-blue-200 dark:border-blue-800 text-[11px] font-black flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all cursor-pointer"
+            className="h-7 px-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 text-[11px] font-bold flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400" />
+            <Globe className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400" />
             <span>Search Web Images</span>
           </button>
         )}
@@ -100,7 +100,7 @@ export const ImageUpload = ({
                 onClick={onOpenWebSearch}
                 className="px-3 py-1.5 rounded-lg bg-[#113BD0] hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-colors flex items-center gap-1 cursor-pointer"
               >
-                <Sparkles className="w-3 h-3" />
+                <Globe className="w-3 h-3" />
                 <span>Search Web</span>
               </button>
             )}
@@ -138,9 +138,9 @@ export const ImageUpload = ({
               <button
                 type="button"
                 onClick={onOpenWebSearch}
-                className="h-9 px-3.5 rounded-xl bg-gradient-to-r from-[#113BD0] to-[#1E3A8A] hover:from-[#0E2FA8] hover:to-[#172554] text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+                className="h-9 px-3.5 rounded-xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
               >
-                <Sparkles className="w-4 h-4" />
+                <Globe className="w-4 h-4" />
                 <span>Search Web</span>
               </button>
             )}

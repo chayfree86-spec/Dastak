@@ -94,7 +94,7 @@ export const RestaurantList = () => {
     {
       key: 'mobile',
       header: 'Mobile',
-      render: (row) => <span className="font-mono text-slate-600 dark:text-slate-400">{formatPhone(row.mobile)}</span>,
+      render: (row) => <span className="font-medium text-slate-600 dark:text-slate-400">{formatPhone(row.mobile)}</span>,
     },
     {
       key: 'city',
@@ -316,7 +316,7 @@ export const RestaurantList = () => {
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Mobile</span>
-                  <span className="font-mono text-slate-700 dark:text-slate-300 truncate block">{formatPhone(rest.mobile)}</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-300 truncate block">{formatPhone(rest.mobile)}</span>
                 </div>
               </div>
 

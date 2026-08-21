@@ -18,6 +18,11 @@ export const customerApi = {
     return res.data
   },
 
+  changePin: async (payload) => {
+    const res = await apiClient.post('/customer/profile/change-pin', payload)
+    return res.data
+  },
+
   // Saved Addresses
   getAddresses: async () => {
     const res = await apiClient.get('/customer/addresses')

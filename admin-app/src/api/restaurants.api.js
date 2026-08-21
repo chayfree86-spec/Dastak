@@ -43,6 +43,11 @@ export const restaurantsApi = {
   },
   getRestaurantEarnings: (id, params) => apiClient.get(`/admin/restaurants/${id}/earnings`, { params }),
   getRestaurantSettlements: (id, params) => apiClient.get(`/admin/restaurants/${id}/settlements`, { params }),
+  getRestaurantReviews: (id) => apiClient.get(`/admin/restaurants/${id}/reviews`),
+  updateRestaurantRating: (id, data) => apiClient.put(`/admin/restaurants/${id}/rating`, data),
+  recalculateRestaurantRating: (id) => apiClient.post(`/admin/restaurants/${id}/recalculate-rating`),
+  toggleReviewVisibility: (reviewId) => apiClient.patch(`/admin/reviews/${reviewId}/visibility`),
+  replyToReview: (reviewId, reply) => apiClient.post(`/admin/reviews/${reviewId}/reply`, { reply }),
 }
 
 export default restaurantsApi

@@ -12,6 +12,14 @@ import {
   AlertCircle,
   Ban,
   CheckCircle2,
+  Cake,
+  Heart,
+  Flame,
+  Utensils,
+  Award,
+  ShieldCheck,
+  Check,
+  XCircle,
 } from 'lucide-react'
 import customersApi from '../../api/customers.api'
 import { useApi } from '../../hooks/useApi'
@@ -23,6 +31,32 @@ import DataTable from '../../components/common/DataTable'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
 import LiveMapTracker from '../../components/common/LiveMapTracker'
 import { useToast } from '../../context/ToastContext'
+
+const DIETARY_OPTIONS_MASTER = [
+  { id: 'ALL', label: 'All Foods', icon: '🍽️', desc: 'No restrictions' },
+  { id: 'VEG', label: 'Pure Veg', icon: '🌱', desc: '100% vegetarian' },
+  { id: 'NON_VEG', label: 'Non-Veg', icon: '🍗', desc: 'Chicken, meat, fish' },
+  { id: 'EGG', label: 'Eggitarian', icon: '🥚', desc: 'Veg + Egg items' },
+  { id: 'VEGAN', label: 'Vegan', icon: '🥑', desc: '100% plant-based' },
+  { id: 'JAIN', label: 'Jain Friendly', icon: '🌿', desc: 'No onion/garlic/root veg' },
+]
+
+const TASTE_TAGS_MASTER = [
+  { id: 'spicy', label: 'Spicy & Masala', icon: '🌶️' },
+  { id: 'sweet', label: 'Sweet Tooth', icon: '🍯' },
+  { id: 'tangy', label: 'Tangy & Chaat', icon: '🍋' },
+  { id: 'cheesy', label: 'Cheesy & Creamy', icon: '🧀' },
+  { id: 'crispy', label: 'Crispy & Crunchy', icon: '🥨' },
+  { id: 'healthy', label: 'Healthy & Low Oil', icon: '🥗' },
+  { id: 'desi', label: 'Desi North Indian', icon: '🍲' },
+  { id: 'south_indian', label: 'South Indian', icon: '🥥' },
+  { id: 'street_food', label: 'Street Food & Momos', icon: '🥟' },
+  { id: 'chai_coffee', label: 'Chai & Coffee', icon: '☕' },
+  { id: 'high_protein', label: 'High Protein', icon: '🥩' },
+  { id: 'pizza_fastfood', label: 'Pizza & Fast Food', icon: '🍕' },
+  { id: 'chinese', label: 'Chinese & Noodles', icon: '🍜' },
+  { id: 'biryani', label: 'Biryani Lover', icon: '🍚' },
+]
 
 export const CustomerDetails = () => {
   const { id } = useParams()
@@ -59,6 +93,7 @@ export const CustomerDetails = () => {
 
   const tabs = [
     { id: 'orders', label: 'Order History', icon: ShoppingBag },
+    { id: 'profile', label: 'Personal Details & Taste', icon: User },
     { id: 'location', label: 'Live Location', icon: MapPin },
     { id: 'addresses', label: 'Saved Addresses', icon: MapPin },
   ]
@@ -79,8 +114,12 @@ export const CustomerDetails = () => {
       {/* Customer Header Card */}
       <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-5">
         <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 w-full md:w-auto">
-          <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 text-xl sm:text-2xl font-black flex items-center justify-center shrink-0 shadow-2xs">
-            {customer?.name?.charAt(0) || 'C'}
+          <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-purple-50 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 text-xl sm:text-2xl font-black flex items-center justify-center shrink-0 shadow-2xs">
+            {customer?.avatar ? (
+              <img src={customer.avatar} alt={customer.name} className="w-full h-full object-cover" />
+            ) : (
+              customer?.name?.charAt(0) || 'C'
+            )}
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -92,7 +131,7 @@ export const CustomerDetails = () => {
               {customer?.mobile && (
                 <a
                   href={`tel:${customer?.mobile}`}
-                  className="font-mono text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 font-semibold inline-flex items-center gap-1"
+                  className="font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 inline-flex items-center gap-1"
                 >
                   <span>{formatPhone(customer?.mobile)}</span>
                   <Phone className="w-3 h-3 text-emerald-500 shrink-0" />
@@ -170,7 +209,7 @@ export const CustomerDetails = () => {
           <div className="hidden md:block">
             <DataTable
               columns={[
-                { key: 'id', header: 'Order ID', render: (r) => <span className="font-mono font-bold text-[#113BD0]">#{r.id}</span> },
+                { key: 'id', header: 'Order ID', render: (r) => <span className="font-bold text-[#113BD0]">#{r.id}</span> },
                 { key: 'restaurant', header: 'Restaurant' },
                 { key: 'amount', header: 'Amount', align: 'right', render: (r) => <span className="font-bold">{formatCurrency(r.amount)}</span> },
                 { key: 'payment', header: 'Payment', render: (r) => <StatusBadge status={r.payment} size="xs" /> },
@@ -200,7 +239,7 @@ export const CustomerDetails = () => {
                   className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2 text-xs"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-mono font-bold text-[#113BD0] dark:text-blue-400">
+                    <div className="flex items-center gap-1.5 font-bold text-[#113BD0] dark:text-blue-400">
                       <span>#{ord.id}</span>
                       <span className="text-[11px] font-normal text-slate-400">&bull; {formatDateTime(ord.time)}</span>
                     </div>
@@ -220,6 +259,366 @@ export const CustomerDetails = () => {
                 </div>
               ))
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Profile & Taste Preferences */}
+      {activeTab === 'profile' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* 1. Personal Information & Milestones */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400 flex items-center justify-center font-bold shadow-2xs">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-slate-100">
+                      Personal Information & Milestones
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Field completion status & verified customer records
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-black shrink-0 ${
+                    customer?.profile_completion_percentage === 100
+                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200'
+                      : 'bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 border border-blue-200'
+                  }`}
+                >
+                  {customer?.profile_completion_percentage || 0}% Complete
+                </span>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1">
+                <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#113BD0] dark:bg-blue-500 rounded-full transition-all duration-500"
+                    style={{ width: `${customer?.profile_completion_percentage || 0}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Bento Grid Fields (Theme Consistent) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {/* 1. Customer Name */}
+                <div
+                  className={`p-3.5 rounded-2xl border transition-all ${
+                    customer?.name
+                      ? 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 shadow-2xs'
+                      : 'bg-slate-50/50 dark:bg-slate-900/30 border-dashed border-slate-200 dark:border-slate-800 opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-[#113BD0]" /> Full Name
+                    </span>
+                    {customer?.name ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Updated
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+                        Not Provided
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-black text-slate-900 dark:text-slate-100 text-sm truncate">
+                    {customer?.name || '—'}
+                  </div>
+                </div>
+
+                {/* 2. Primary Mobile */}
+                <div
+                  className={`p-3.5 rounded-2xl border transition-all ${
+                    customer?.mobile
+                      ? 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 shadow-2xs'
+                      : 'bg-slate-50/50 dark:bg-slate-900/30 border-dashed border-slate-200 dark:border-slate-800 opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-emerald-500" /> Primary Phone
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center gap-1">
+                      <ShieldCheck className="w-2.5 h-2.5" /> Verified
+                    </span>
+                  </div>
+                  <div className="font-mono font-black text-slate-900 dark:text-slate-100 text-sm">
+                    {customer?.mobile ? `+91 ${formatPhone(customer.mobile)}` : '—'}
+                  </div>
+                </div>
+
+                {/* 3. Email Address */}
+                <div
+                  className={`p-3.5 rounded-2xl border transition-all ${
+                    customer?.email
+                      ? 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 shadow-2xs'
+                      : 'bg-slate-50/50 dark:bg-slate-900/30 border-dashed border-slate-200 dark:border-slate-800 opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5 text-[#113BD0]" /> Email Address
+                    </span>
+                    {customer?.email ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Updated
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+                        Not Provided
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-black text-slate-900 dark:text-slate-100 text-xs truncate">
+                    {customer?.email || '—'}
+                  </div>
+                </div>
+
+                {/* 4. Alternate Mobile */}
+                <div
+                  className={`p-3.5 rounded-2xl border transition-all ${
+                    customer?.alternate_mobile
+                      ? 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 shadow-2xs'
+                      : 'bg-slate-50/50 dark:bg-slate-900/30 border-dashed border-slate-200 dark:border-slate-800 opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-[#113BD0]" /> Alternate Phone
+                    </span>
+                    {customer?.alternate_mobile ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Updated
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+                        Not Provided
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-mono font-black text-slate-900 dark:text-slate-100 text-xs">
+                    {customer?.alternate_mobile ? `+91 ${formatPhone(customer.alternate_mobile)}` : '—'}
+                  </div>
+                </div>
+
+                {/* 5. Gender */}
+                <div
+                  className={`p-3.5 rounded-2xl border transition-all ${
+                    customer?.gender
+                      ? 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 shadow-2xs'
+                      : 'bg-slate-50/50 dark:bg-slate-900/30 border-dashed border-slate-200 dark:border-slate-800 opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-[#113BD0]" /> Gender
+                    </span>
+                    {customer?.gender ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Updated
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+                        Not Provided
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-black text-slate-900 dark:text-slate-100 text-xs capitalize">
+                    {customer?.gender ? customer.gender.replace('_', ' ').toLowerCase() : '—'}
+                  </div>
+                </div>
+
+                {/* 6. Date of Birth (DOB) */}
+                <div
+                  className={`p-3.5 rounded-2xl border transition-all ${
+                    customer?.date_of_birth
+                      ? 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 shadow-2xs'
+                      : 'bg-slate-50/50 dark:bg-slate-900/30 border-dashed border-slate-200 dark:border-slate-800 opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                      <Cake className="w-3.5 h-3.5 text-[#F97316]" /> Date of Birth (DOB)
+                    </span>
+                    {customer?.date_of_birth ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Updated
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+                        Not Provided
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-black text-slate-900 dark:text-slate-100 text-xs flex items-center gap-2">
+                    <span>{customer?.date_of_birth ? formatDate(customer.date_of_birth) : '—'}</span>
+                    {customer?.date_of_birth && (
+                      <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md">
+                        {Math.floor((new Date() - new Date(customer.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000))} Yrs
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* 7. Anniversary Date */}
+                <div
+                  className={`p-3.5 rounded-2xl border transition-all sm:col-span-2 ${
+                    customer?.anniversary_date
+                      ? 'bg-white dark:bg-slate-800/90 border-slate-200 dark:border-slate-700 shadow-2xs'
+                      : 'bg-slate-50/50 dark:bg-slate-900/30 border-dashed border-slate-200 dark:border-slate-800 opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                      <Heart className="w-3.5 h-3.5 text-rose-500" /> Anniversary Date
+                    </span>
+                    {customer?.anniversary_date ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40 flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Updated
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+                        Not Provided
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-black text-slate-900 dark:text-slate-100 text-xs">
+                    {customer?.anniversary_date ? formatDate(customer.anniversary_date) : '—'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Loyalty Reward Points */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 text-xs">
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-[#F97316]" />
+                  <span className="font-bold text-slate-800 dark:text-slate-200">Dastak Loyalty Rewards Balance</span>
+                </div>
+                <span className="font-black text-[#113BD0] dark:text-blue-400 font-mono text-sm">
+                  {customer?.loyalty_points || 0} Pts
+                </span>
+              </div>
+            </div>
+
+            {/* 2. Dietary Lifestyle & Food Taste Preferences */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shadow-2xs">
+                  <Utensils className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 dark:text-slate-100">
+                    Dietary & Palate Preferences
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Customer food lifestyle and dish taste tags
+                  </p>
+                </div>
+              </div>
+
+              {/* Dietary Preferences */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                    Dietary Lifestyle Preference
+                  </span>
+                  {customer?.dietary_preference ? (
+                    <span className="text-[10px] font-bold text-[#113BD0] dark:text-blue-400 flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Updated by customer
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-slate-400">Default (All Foods)</span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {DIETARY_OPTIONS_MASTER.map((diet) => {
+                    const isSelected =
+                      customer?.dietary_preference === diet.id ||
+                      (customer?.dietary_preference === diet.label) ||
+                      (!customer?.dietary_preference && diet.id === 'ALL')
+
+                    return (
+                      <div
+                        key={diet.id}
+                        className={`p-3 rounded-2xl border transition-all ${
+                          isSelected
+                            ? 'bg-blue-50/70 dark:bg-blue-950/50 border-2 border-[#113BD0] dark:border-blue-500 shadow-xs'
+                            : 'bg-slate-50/40 dark:bg-slate-900/20 border border-slate-200/70 dark:border-slate-700/60 opacity-45'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-lg">{diet.icon}</span>
+                          {isSelected && (
+                            <span className="w-4 h-4 rounded-full bg-[#113BD0] text-white flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5" />
+                            </span>
+                          )}
+                        </div>
+                        <div
+                          className={`text-xs font-black ${
+                            isSelected
+                              ? 'text-[#113BD0] dark:text-blue-300'
+                              : 'text-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          {diet.label}
+                        </div>
+                        <p className="text-[10px] text-slate-400 truncate mt-0.5">{diet.desc}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Food Taste & Flavor Tags */}
+              <div className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                    Taste & Flavor Preferences ({customer?.taste_preferences?.length || 0} Selected)
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-400">
+                    {customer?.taste_preferences?.length || 0} of {TASTE_TAGS_MASTER.length} selected
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {TASTE_TAGS_MASTER.map((tag) => {
+                    const isSelected =
+                      Array.isArray(customer?.taste_preferences) &&
+                      (customer.taste_preferences.includes(tag.id) ||
+                        customer.taste_preferences.includes(tag.label))
+
+                    return (
+                      <div
+                        key={tag.id}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                          isSelected
+                            ? 'bg-blue-50/90 dark:bg-blue-950/60 border border-blue-300 dark:border-blue-700 text-[#113BD0] dark:text-blue-300 shadow-2xs'
+                            : 'bg-slate-50 dark:bg-slate-900/30 border border-slate-200/70 dark:border-slate-800 text-slate-400 dark:text-slate-500 opacity-40'
+                        }`}
+                      >
+                        <span className="text-sm">{tag.icon}</span>
+                        <span>{tag.label}</span>
+                        {isSelected && (
+                          <span className="w-3.5 h-3.5 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
+                            <Check className="w-2.5 h-2.5" />
+                          </span>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

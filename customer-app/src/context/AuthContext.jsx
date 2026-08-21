@@ -92,6 +92,34 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const verifyDevicePin = async (sessionId, pin) => {
+    const res = await authApi.verifyPin(sessionId, pin)
+    const authToken = res.data?.token || res.data?.data?.token
+    const rawSessionToken = res.data?.session_token || res.data?.data?.session_token
+    const authUser = res.data?.user || res.data?.data?.user
+
+    if (!authToken || !authUser) {
+      throw new Error('Invalid response from server.')
+    }
+
+    setToken(authToken)
+    if (rawSessionToken) {
+      setSessionToken(rawSessionToken)
+      localStorage.setItem('dastak_customer_session_token', rawSessionToken)
+    }
+    setUser(authUser)
+    localStorage.setItem('dastak_customer_token', authToken)
+    localStorage.setItem('dastak_customer_user', JSON.stringify(authUser))
+
+    return {
+      token: authToken,
+      sessionToken: rawSessionToken,
+      user: authUser,
+      isNewUser: false,
+      response: res,
+    }
+  }
+
   const changeDevice = async () => {
     try {
       await authApi.changeDevice()
@@ -139,6 +167,7 @@ export const AuthProvider = ({ children }) => {
         startVerification,
         resendOtp,
         verifyDeviceOtp,
+        verifyDevicePin,
         changeDevice,
         updateSessionUser,
         logout,

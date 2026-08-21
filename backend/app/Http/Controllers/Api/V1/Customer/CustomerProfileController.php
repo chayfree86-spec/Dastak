@@ -40,6 +40,26 @@ class CustomerProfileController extends Controller
         );
     }
 
+    public function changePin(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'current_pin' => ['nullable', 'string', 'size:4'],
+            'new_pin' => ['required', 'string', 'size:4'],
+            'new_pin_confirmation' => ['required', 'string', 'same:new_pin'],
+        ]);
+
+        $this->customerService->changePin(
+            user: $request->user(),
+            newPin: $validated['new_pin'],
+            currentPin: $validated['current_pin'] ?? null
+        );
+
+        return ApiResponse::success(
+            new UserResource($request->user()->fresh()),
+            'Login PIN changed successfully.'
+        );
+    }
+
     public function getAddresses(Request $request): JsonResponse
     {
         $addresses = $this->customerService->getAddresses($request->user());

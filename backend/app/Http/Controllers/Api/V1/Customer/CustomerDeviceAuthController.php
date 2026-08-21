@@ -88,6 +88,30 @@ class CustomerDeviceAuthController extends Controller
         ], $result['message']);
     }
 
+    public function verifyPin(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'session_id' => ['required', 'string'],
+            'pin' => ['required', 'string', 'size:4'],
+            'device_id' => ['required', 'string'],
+            'device_name' => ['nullable', 'string', 'max:150'],
+        ]);
+
+        $result = $this->deviceAuthService->verifyPin(
+            sessionPublicId: $validated['session_id'],
+            pin: $validated['pin'],
+            deviceId: $validated['device_id'],
+            deviceName: $validated['device_name'] ?? 'Customer App'
+        );
+
+        return ApiResponse::success([
+            'token' => $result['token'],
+            'session_token' => $result['session_token'],
+            'user' => new UserResource($result['user']),
+            'is_new_user' => false,
+        ], $result['message']);
+    }
+
     public function session(Request $request): JsonResponse
     {
         $validated = $request->validate([

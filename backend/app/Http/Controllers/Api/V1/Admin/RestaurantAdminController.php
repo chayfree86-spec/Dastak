@@ -121,6 +121,8 @@ class RestaurantAdminController extends Controller
             'delivery_radius_km' => ['nullable', 'numeric', 'min:0'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'rating' => ['nullable', 'numeric', 'between:1,5'],
+            'total_ratings' => ['nullable', 'integer', 'min:0'],
             'status' => ['nullable', 'string'],
             'is_veg_only' => ['nullable', 'boolean'],
             'image' => ['nullable', 'string'],
@@ -390,6 +392,9 @@ class RestaurantAdminController extends Controller
         if (array_key_exists('latitude', $v) && $v['latitude'] !== null) $map['latitude'] = $v['latitude'];
         if (array_key_exists('longitude', $v) && $v['longitude'] !== null) $map['longitude'] = $v['longitude'];
 
+        if (array_key_exists('rating', $v) && $v['rating'] !== null) $map['rating'] = round((float) $v['rating'], 1);
+        if (array_key_exists('total_ratings', $v) && $v['total_ratings'] !== null) $map['total_ratings'] = (int) $v['total_ratings'];
+
         if ($isCreate) {
             // Backend requires these NOT NULL columns; the admin form may not collect them.
             $map['phone'] ??= $v['phone'] ?? $v['mobile'] ?? '9876543210';
@@ -399,6 +404,8 @@ class RestaurantAdminController extends Controller
             $map['is_open'] ??= true;
             $map['address_line1'] ??= 'N/A';
             $map['city'] ??= 'Kanpur';
+            $map['rating'] ??= round((float) ($v['rating'] ?? 4.5), 1);
+            $map['total_ratings'] ??= (int) ($v['total_ratings'] ?? 0);
         }
 
         return $map;
@@ -412,5 +419,72 @@ class RestaurantAdminController extends Controller
         $path = $request->file('image')->store('restaurants', 'public');
 
         return ApiResponse::success(['url' => asset('storage/'.$path)], 'Image uploaded successfully.', 201);
+    }
+
+    /** Get all customer reviews and rating breakdown for this restaurant */
+    public function getReviews(int $id): JsonResponse
+    {
+        $restaurant = Restaurant::findOrFail($id);
+        $reviews = \App\Models\Review::with(['customer', 'order'])
+            ->where('restaurant_id', $id)
+            ->latest('id')
+            ->get();
+
+        $visibleReviews = $reviews->where('is_visible', true);
+        $totalCount = $visibleReviews->count();
+        $avgFood = $totalCount > 0 ? round((float) $visibleReviews->avg('food_rating'), 1) : (float) $restaurant->rating;
+        $avgDelivery = $totalCount > 0 ? round((float) $visibleReviews->whereNotNull('delivery_rating')->avg('delivery_rating'), 1) : null;
+
+        $starCounts = [
+            5 => $visibleReviews->where('food_rating', 5)->count(),
+            4 => $visibleReviews->where('food_rating', 4)->count(),
+            3 => $visibleReviews->where('food_rating', 3)->count(),
+            2 => $visibleReviews->where('food_rating', 2)->count(),
+            1 => $visibleReviews->where('food_rating', 1)->count(),
+        ];
+
+        return ApiResponse::success([
+            'restaurant_id' => $restaurant->id,
+            'current_rating' => (float) $restaurant->rating,
+            'total_ratings' => (int) $restaurant->total_ratings,
+            'avg_food_rating' => $avgFood,
+            'avg_delivery_rating' => $avgDelivery,
+            'distribution' => $starCounts,
+            'reviews' => \App\Http\Resources\ReviewResource::collection($reviews),
+        ], 'Restaurant reviews and rating statistics retrieved.');
+    }
+
+    /** Calibrate base rating & review count manually (e.g. for new restaurants) */
+    public function updateRating(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'rating' => ['required', 'numeric', 'between:1,5'],
+            'total_ratings' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $restaurant = Restaurant::findOrFail($id);
+        $restaurant->update([
+            'rating' => round((float) $validated['rating'], 1),
+            'total_ratings' => isset($validated['total_ratings']) ? (int) $validated['total_ratings'] : $restaurant->total_ratings,
+        ]);
+
+        return ApiResponse::success(
+            new AdminRestaurantDetailResource($restaurant->fresh(['owner', 'operatingHours'])),
+            'Restaurant base rating calibrated successfully.'
+        );
+    }
+
+    /** Synchronize and recalculate live average rating from real customer orders */
+    public function recalculateRating(int $id, \App\Services\ReviewService $reviewService): JsonResponse
+    {
+        $restaurant = Restaurant::findOrFail($id);
+        $reviewService->recalculateRatings($restaurant->id);
+
+        $restaurant->refresh();
+
+        return ApiResponse::success(
+            new AdminRestaurantDetailResource($restaurant->fresh(['owner', 'operatingHours'])),
+            'Restaurant ratings synchronized with real customer orders.'
+        );
     }
 }

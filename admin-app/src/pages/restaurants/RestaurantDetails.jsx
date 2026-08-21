@@ -28,7 +28,15 @@ import {
   RotateCw,
   RotateCcw,
   Layers,
+  MessageSquare,
+  Eye,
+  EyeOff,
+  CornerDownRight,
+  RefreshCw,
+  Sliders,
+  ThumbsUp,
 } from 'lucide-react'
+import apiClient from '../../api/client'
 import restaurantsApi from '../../api/restaurants.api'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatPhone, formatDateTime } from '../../utils/formatters'
@@ -118,6 +126,125 @@ export const RestaurantDetails = () => {
   const markerRef = useRef(null)
   const circleRef = useRef(null)
   const mapContainerRef = useRef(null)
+
+  // Reviews & Rating Tab States
+  const [reviewsData, setReviewsData] = useState(null)
+  const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [ratingModalOpen, setRatingModalOpen] = useState(false)
+  const [editRatingVal, setEditRatingVal] = useState('4.5')
+  const [editReviewsCount, setEditReviewsCount] = useState('0')
+  const [ratingSaving, setRatingSaving] = useState(false)
+  const [recalculatingRating, setRecalculatingRating] = useState(false)
+  const [replyModalOpen, setReplyModalOpen] = useState(false)
+  const [selectedReview, setSelectedReview] = useState(null)
+  const [replyText, setReplyText] = useState('')
+  const [replySaving, setReplySaving] = useState(false)
+  const [starFilter, setStarFilter] = useState('ALL')
+
+  const loadReviews = async () => {
+    setReviewsLoading(true)
+    try {
+      const res = await apiClient.get(`/admin/restaurants/${id}/reviews`)
+      const data = res?.data?.data || res?.data || res
+      setReviewsData(data)
+    } catch (e) {
+      console.error('Failed to load reviews:', e)
+    } finally {
+      setReviewsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'reviews') {
+      loadReviews()
+    }
+  }, [activeTab, id])
+
+  const handleOpenRatingModal = () => {
+    setEditRatingVal(restaurant?.rating ? String(restaurant.rating) : '4.5')
+    setEditReviewsCount(restaurant?.total_reviews ? String(restaurant.total_reviews) : '0')
+    setRatingModalOpen(true)
+  }
+
+  const handleSaveBaseRating = async (e) => {
+    if (e) e.preventDefault()
+    const rVal = parseFloat(editRatingVal)
+    if (isNaN(rVal) || rVal < 1 || rVal > 5) {
+      toast.warning('Invalid Rating', 'Please enter a valid rating between 1.0 and 5.0 (e.g. 4.5).')
+      return
+    }
+    setRatingSaving(true)
+    try {
+      const res = await apiClient.put(`/admin/restaurants/${id}/rating`, {
+        rating: rVal,
+        total_ratings: parseInt(editReviewsCount) || 0,
+      })
+      const updated = res?.data?.data || res?.data || res
+      if (updated) setRestaurantData(updated)
+      toast.success('Rating Calibrated', 'Base rating updated successfully.')
+      setRatingModalOpen(false)
+      loadReviews()
+      retry()
+    } catch (err) {
+      toast.error('Update Failed', err.response?.data?.message || err.message || 'Unable to update base rating.')
+    } finally {
+      setRatingSaving(false)
+    }
+  }
+
+  const handleRecalculateLiveRating = async () => {
+    setRecalculatingRating(true)
+    try {
+      const res = await apiClient.post(`/admin/restaurants/${id}/recalculate-rating`)
+      const updated = res?.data?.data || res?.data || res
+      if (updated) setRestaurantData(updated)
+      toast.success('Rating Synchronized', 'Restaurant rating recalculated from real customer orders.')
+      loadReviews()
+      retry()
+    } catch (err) {
+      toast.error('Sync Failed', err.response?.data?.message || err.message || 'Unable to recalculate ratings.')
+    } finally {
+      setRecalculatingRating(false)
+    }
+  }
+
+  const handleToggleReviewVisibility = async (revId) => {
+    try {
+      const res = await apiClient.patch(`/admin/reviews/${revId}/visibility`)
+      toast.success('Visibility Updated', res?.data?.message || 'Review visibility updated.')
+      loadReviews()
+      retry()
+    } catch (err) {
+      toast.error('Failed', err.response?.data?.message || err.message || 'Unable to toggle review visibility.')
+    }
+  }
+
+  const handleOpenReplyModal = (rev) => {
+    setSelectedReview(rev)
+    setReplyText(rev.restaurant_reply || '')
+    setReplyModalOpen(true)
+  }
+
+  const handleSendReply = async (e) => {
+    if (e) e.preventDefault()
+    if (!replyText.trim()) {
+      toast.warning('Reply Required', 'Please enter a reply message.')
+      return
+    }
+    setReplySaving(true)
+    try {
+      await apiClient.post(`/admin/reviews/${selectedReview.id}/reply`, { reply: replyText.trim() })
+      toast.success('Reply Posted', 'Your official reply has been published.')
+      setReplyModalOpen(false)
+      setReplyText('')
+      setSelectedReview(null)
+      loadReviews()
+    } catch (err) {
+      toast.error('Failed', err.response?.data?.message || err.message || 'Unable to post reply.')
+    } finally {
+      setReplySaving(false)
+    }
+  }
 
   // Initialize coordinates from restaurant details
   useEffect(() => {
@@ -707,6 +834,7 @@ export const RestaurantDetails = () => {
     { id: 'overview', label: 'Overview', icon: Store },
     { id: 'menu', label: 'Menu & Items', icon: UtensilsCrossed },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'reviews', label: 'Reviews & Rating', icon: Star },
     { id: 'earnings', label: 'Earnings & Commission', icon: Wallet },
     { id: 'settlements', label: 'Settlements', icon: Clock },
     { id: 'reports', label: 'Performance', icon: BarChart3 },
@@ -755,10 +883,18 @@ export const RestaurantDetails = () => {
             </div>
 
             <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
-              <span className="flex items-center gap-1 font-bold text-amber-500">
-                <Star className="w-3.5 h-3.5 fill-amber-400" />
-                {restaurant?.rating || '4.5'} ({restaurant?.total_reviews || 0} reviews)
-              </span>
+              <button
+                type="button"
+                onClick={() => setActiveTab('reviews')}
+                className="flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 px-2.5 py-0.5 rounded-full border border-amber-200/80 dark:border-amber-800/60 cursor-pointer transition-colors"
+                title="Click to view & manage customer reviews"
+              >
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                <span>{restaurant?.rating ? Number(restaurant.rating).toFixed(1) : 'New'}</span>
+                <span className="text-slate-500 dark:text-slate-400 font-normal text-[11px]">
+                  ({restaurant?.total_reviews || 0} reviews)
+                </span>
+              </button>
               <span>&bull;</span>
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5" />
@@ -809,7 +945,7 @@ export const RestaurantDetails = () => {
                 </div>
                 <div>
                   <span className="text-slate-400 block">Mobile:</span>
-                  <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{formatPhone(restaurant?.mobile)}</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">{formatPhone(restaurant?.mobile)}</span>
                 </div>
                 <div>
                   <span className="text-slate-400 block">Email:</span>
@@ -1415,6 +1551,427 @@ export const RestaurantDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Tab 8: Reviews & Rating */}
+      {activeTab === 'reviews' && (
+        <div className="space-y-6">
+          {/* Top Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Overall Score Card */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between space-y-4">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                  Store Overall Rating
+                </span>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-4xl font-black text-slate-900 dark:text-slate-100">
+                    {restaurant?.rating ? Number(restaurant.rating).toFixed(1) : '0.0'}
+                  </span>
+                  <div className="flex items-center gap-1 text-amber-400">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-4 h-4 ${
+                          s <= Math.round(Number(restaurant?.rating || 0))
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-slate-300 dark:text-slate-600'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Based on <strong>{restaurant?.total_reviews || 0}</strong> verified ratings
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/60">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={Sliders}
+                  onClick={handleOpenRatingModal}
+                  className="flex-1 text-xs"
+                >
+                  Calibrate Base
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={RefreshCw}
+                  loading={recalculatingRating}
+                  onClick={handleRecalculateLiveRating}
+                  className="flex-1 text-xs"
+                  title="Recalculate average directly from customer reviews in database"
+                >
+                  Sync Live
+                </Button>
+              </div>
+            </div>
+
+            {/* Food & Delivery Breakdown */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex flex-col justify-between space-y-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+                Quality Breakdown
+              </span>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/50 text-[#F97316] flex items-center justify-center">
+                      <UtensilsCrossed className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Food Quality</span>
+                      <span className="text-[11px] text-slate-400">Taste, packaging & portion</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 font-black text-slate-900 dark:text-slate-100 text-sm">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                    <span>{reviewsData?.avg_food_rating ? Number(reviewsData.avg_food_rating).toFixed(1) : (restaurant?.rating ? Number(restaurant.rating).toFixed(1) : '0.0')}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/50 text-[#113BD0] flex items-center justify-center">
+                      <Bike className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Rider Experience</span>
+                      <span className="text-[11px] text-slate-400">Speed, handling & delivery</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 font-black text-slate-900 dark:text-slate-100 text-sm">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                    <span>{reviewsData?.avg_delivery_rating ? Number(reviewsData.avg_delivery_rating).toFixed(1) : '5.0'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-400 italic">
+                💡 Ratings automatically update as real customers rate delivered orders.
+              </p>
+            </div>
+
+            {/* 5-Star Distribution Bar */}
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
+                Star Distribution
+              </span>
+              <div className="space-y-2 pt-1">
+                {[5, 4, 3, 2, 1].map((star) => {
+                  const count = reviewsData?.distribution?.[star] || 0
+                  const total = reviewsData?.total_ratings || 1
+                  const pct = Math.min(100, Math.round((count / (total || 1)) * 100))
+                  return (
+                    <div key={star} className="flex items-center gap-2 text-xs">
+                      <span className="w-6 font-bold text-slate-600 dark:text-slate-400 flex items-center gap-0.5">
+                        {star}<Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                      </span>
+                      <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                        <div
+                          className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="w-8 text-right font-mono text-[11px] text-slate-400">{count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Customer Reviews Feed Header & Filters */}
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-[#113BD0]" />
+                  <span>Customer Reviews & Feedback</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Real feedback submitted by customers after order delivery.
+                </p>
+              </div>
+
+              {/* Star Rating Filter */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {['ALL', 5, 4, 3, 2, 1].map((filter) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setStarFilter(filter)}
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      starFilter === filter
+                        ? 'bg-[#113BD0] text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
+                  >
+                    {filter === 'ALL' ? 'All Reviews' : `${filter} ★`}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Reviews List */}
+            {reviewsLoading ? (
+              <div className="py-12 flex flex-col items-center justify-center space-y-2">
+                <div className="w-8 h-8 border-2 border-slate-200 border-t-[#113BD0] rounded-full animate-spin" />
+                <p className="text-xs text-slate-400">Loading customer reviews...</p>
+              </div>
+            ) : (
+              (() => {
+                const rawReviews = reviewsData?.reviews || []
+                const filtered = starFilter === 'ALL'
+                  ? rawReviews
+                  : rawReviews.filter((r) => r.food_rating === Number(starFilter))
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="py-12 text-center rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-dashed border-slate-200 dark:border-slate-800 space-y-2">
+                      <Star className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        {rawReviews.length === 0
+                          ? 'No customer reviews submitted yet.'
+                          : 'No reviews found for this star filter.'}
+                      </p>
+                      <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
+                        When customers complete orders and submit feedback in the Customer App, they will automatically appear here.
+                      </p>
+                    </div>
+                  )
+                }
+
+                return (
+                  <div className="space-y-4">
+                    {filtered.map((rev) => (
+                      <div
+                        key={rev.id}
+                        className={`p-4 rounded-xl border transition-all ${
+                          rev.is_visible
+                            ? 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700'
+                            : 'bg-slate-50/60 dark:bg-slate-900/60 border-rose-200 dark:border-rose-900/50 opacity-70'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-slate-700/60">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-black text-xs flex items-center justify-center">
+                              {rev.customer?.name?.charAt(0) || 'C'}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                                  {rev.customer?.name || 'Verified Customer'}
+                                </span>
+                                {!rev.is_visible && (
+                                  <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400">
+                                    Hidden by Moderator
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-slate-400 block font-mono">
+                                Order #{rev.order?.order_number || rev.order_id || 'N/A'} &bull; {formatDateTime(rev.created_at)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-md text-xs font-black border border-amber-200/60 dark:border-amber-800/50">
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                              <span>{rev.food_rating}.0 Food</span>
+                            </div>
+                            {rev.delivery_rating && (
+                              <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md text-xs font-black border border-blue-200/60 dark:border-blue-800/50">
+                                <Bike className="w-3 h-3" />
+                                <span>{rev.delivery_rating}.0 Rider</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Comment */}
+                        <div className="py-3">
+                          <p className="text-xs text-slate-700 dark:text-slate-300 italic">
+                            "{rev.comment || 'Customer rated this order without additional comments.'}"
+                          </p>
+                        </div>
+
+                        {/* Official Partner Reply if any */}
+                        {rev.restaurant_reply && (
+                          <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border-l-2 border-[#113BD0] space-y-1 mb-3">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#113BD0] dark:text-blue-400">
+                              <CornerDownRight className="w-3 h-3" />
+                              <span>Official Restaurant Response</span>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-300">
+                              {rev.restaurant_reply}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Action Bar */}
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleReviewVisibility(rev.id)}
+                            className="px-2.5 py-1 text-[11px] font-semibold rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+                          >
+                            {rev.is_visible ? (
+                              <>
+                                <EyeOff className="w-3 h-3 text-rose-500" />
+                                <span>Hide Review</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3 h-3 text-emerald-500" />
+                                <span>Unhide Review</span>
+                              </>
+                            )}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenReplyModal(rev)}
+                            className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[#113BD0]/10 text-[#113BD0] dark:bg-blue-900/30 dark:text-blue-400 hover:bg-[#113BD0]/20 transition-colors flex items-center gap-1 cursor-pointer"
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                            <span>{rev.restaurant_reply ? 'Edit Reply' : 'Reply'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Calibrate Base Rating Modal */}
+      <Modal
+        isOpen={ratingModalOpen}
+        onClose={() => setRatingModalOpen(false)}
+        title="Calibrate Restaurant Base Rating"
+        subtitle="Set or adjust initial base star rating (3.0 - 5.0) and review count for this restaurant."
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleSaveBaseRating} className="space-y-4">
+          <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/50 text-xs text-blue-700 dark:text-blue-300">
+            <p className="font-bold flex items-center gap-1.5">
+              <Star className="w-3.5 h-3.5 fill-blue-500 text-blue-500" />
+              <span>Dynamic Customer Rating Sync</span>
+            </p>
+            <p className="mt-1 text-[11px] opacity-90">
+              When real customers submit order reviews, the system will automatically re-calculate the live average. You can set the initial starting rating here.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex justify-between">
+              <span>Base Star Rating (3.0 to 5.0)</span>
+              <span className="text-amber-500 font-black text-sm flex items-center gap-1">
+                <Star className="w-4 h-4 fill-amber-400" />
+                {editRatingVal}
+              </span>
+            </label>
+            <input
+              type="range"
+              min="3.0"
+              max="5.0"
+              step="0.1"
+              value={editRatingVal}
+              onChange={(e) => setEditRatingVal(e.target.value)}
+              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-[#113BD0]"
+            />
+            <div className="flex justify-between text-[10px] text-slate-400 font-bold">
+              <span>3.0 ★</span>
+              <span>4.0 ★</span>
+              <span>5.0 ★</span>
+            </div>
+          </div>
+
+          <Input
+            label="Initial Review Count"
+            type="number"
+            min="0"
+            max="10000"
+            value={editReviewsCount}
+            onChange={(e) => setEditReviewsCount(e.target.value)}
+            placeholder="0"
+            help="Starting count of verified customer reviews."
+          />
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRatingModalOpen(false)}
+              disabled={ratingSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={ratingSaving}
+            >
+              Save Rating
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Official Reply Modal */}
+      <Modal
+        isOpen={replyModalOpen}
+        onClose={() => setReplyModalOpen(false)}
+        title="Reply to Customer Review"
+        subtitle={`Responding to ${selectedReview?.customer?.name || 'Customer'}'s feedback for Order #${selectedReview?.order?.order_number || selectedReview?.order_id || ''}`}
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleSendReply} className="space-y-4">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 space-y-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Customer's Review:</span>
+            <p className="text-xs text-slate-700 dark:text-slate-300 italic">
+              "{selectedReview?.comment || 'Customer rated without comment.'}"
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-200">
+              Official Response / Reply <span className="text-rose-500">*</span>
+            </label>
+            <textarea
+              rows={3}
+              required
+              placeholder="e.g. Thank you for your feedback! We are glad you enjoyed the meal..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setReplyModalOpen(false)}
+              disabled={replySaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              loading={replySaving}
+            >
+              Post Reply
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Edit Full Profile Modal */}
       <RestaurantFormModal

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Settings as SettingsIcon,
@@ -16,6 +16,11 @@ import {
   Phone,
   Smartphone,
   AlertTriangle,
+  Edit3,
+  Flame,
+  Cake,
+  KeyRound,
+  Lock,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -23,6 +28,8 @@ import { useTheme } from '../../context/ThemeContext'
 import { useLocationContext } from '../../context/LocationContext'
 import { useToast } from '../../context/ToastContext'
 import Button from '../../components/common/Button'
+import customerApi from '../../api/customer.api'
+import ChangePinModal from '../../components/auth/ChangePinModal'
 
 export const SettingsPage = () => {
   const navigate = useNavigate()
@@ -34,6 +41,35 @@ export const SettingsPage = () => {
 
   const [showChangeDeviceModal, setShowChangeDeviceModal] = useState(false)
   const [changeDeviceLoading, setChangeDeviceLoading] = useState(false)
+  const [showPinModal, setShowPinModal] = useState(false)
+  const [profileData, setProfileData] = useState(null)
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      customerApi.getProfile()
+        .then((res) => setProfileData(res?.data || res))
+        .catch(() => {})
+    }
+  }, [isAuthenticated])
+
+  const calculateCompletion = () => {
+    const u = profileData || user
+    if (!u) return 0
+    if (u.profile_completion_percentage != null) return u.profile_completion_percentage
+    
+    let score = 0
+    if (u.name) score += 15
+    if (u.email) score += 15
+    if (u.mobile) score += 15
+    const p = u.customer_profile || {}
+    if (p.gender) score += 10
+    if (p.date_of_birth) score += 15
+    if (p.anniversary_date) score += 10
+    if (p.dietary_preference || (Array.isArray(p.taste_preferences) && p.taste_preferences.length > 0)) score += 20
+    return Math.min(100, score)
+  }
+
+  const completionPercentage = calculateCompletion()
 
   const handleLogout = async () => {
     await logout()
@@ -56,7 +92,7 @@ export const SettingsPage = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 pb-12">
       {/* Header */}
       <div>
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight flex items-center gap-2.5">
@@ -70,16 +106,36 @@ export const SettingsPage = () => {
         </p>
       </div>
 
-      {/* 1. Account Profile Card */}
-      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3">
+      {/* 1. Account Profile Card (Clickable to /profile) */}
+      <div
+        onClick={() => isAuthenticated && navigate('/profile')}
+        className={`p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 transition-all ${
+          isAuthenticated ? 'hover:border-[#113BD0]/40 cursor-pointer group' : ''
+        }`}
+      >
         <div className="flex items-center gap-3.5 min-w-0">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0">
-            {user?.name ? user.name[0].toUpperCase() : 'C'}
+          <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-tr from-[#113BD0] to-[#F97316] text-white flex items-center justify-center font-black text-2xl shadow-md shrink-0 group-hover:scale-105 transition-transform">
+            {profileData?.avatar || user?.avatar ? (
+              <img
+                src={profileData?.avatar || user?.avatar}
+                alt={user?.name || 'Customer'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{user?.name ? user.name[0].toUpperCase() : 'C'}</span>
+            )}
           </div>
           <div className="min-w-0 space-y-0.5">
-            <h3 className="text-base font-black text-slate-900 dark:text-slate-100 truncate">
-              {user?.name || (isAuthenticated ? (lang === 'hi' ? 'प्रिय ग्राहक' : 'Valued Customer') : (lang === 'hi' ? 'अतिथि ग्राहक' : 'Guest Customer'))}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-black text-slate-900 dark:text-slate-100 truncate">
+                {user?.name || (isAuthenticated ? (lang === 'hi' ? 'प्रिय ग्राहक' : 'Valued Customer') : (lang === 'hi' ? 'अतिथि ग्राहक' : 'Guest Customer'))}
+              </h3>
+              {isAuthenticated && (
+                <span className="text-[10px] font-bold text-[#113BD0] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md flex items-center gap-1">
+                  <Edit3 className="w-2.5 h-2.5" /> Edit
+                </span>
+              )}
+            </div>
             <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
               {user?.mobile ? `+91 ${user.mobile}` : (lang === 'hi' ? 'सभी प्राथमिकताएं एक्सेस करने के लिए साइन इन करें' : 'Sign in to access all preferences')}
             </p>
@@ -91,20 +147,100 @@ export const SettingsPage = () => {
             variant="primary"
             size="sm"
             icon={LogIn}
-            onClick={() => navigate('/login?redirect=/settings')}
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate('/login?redirect=/settings')
+            }}
             className="font-bold text-xs shrink-0"
           >
             {t.login}
           </Button>
         ) : (
-          <span className="text-[11px] font-black bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-3 py-1 rounded-xl">
-            {lang === 'hi' ? 'सक्रिय डिवाइस' : 'Active Device'}
-          </span>
+          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#113BD0] group-hover:translate-x-0.5 transition-all shrink-0" />
         )}
       </div>
 
+      {/* Profile Completion Notification Banner (When < 100%) */}
+      {isAuthenticated && completionPercentage < 100 && (
+        <div
+          onClick={() => navigate('/profile')}
+          className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 border border-blue-200/80 dark:border-blue-800/60 shadow-xs flex items-stretch gap-3.5 cursor-pointer hover:border-blue-400 transition-all group"
+        >
+          {/* Full-Height Centered Percentage Box */}
+          <div className="w-16 sm:w-20 shrink-0 self-stretch rounded-2xl bg-[#113BD0] text-white flex flex-col items-center justify-center p-2 text-center shadow-sm group-hover:scale-105 transition-transform">
+            <span className="text-lg sm:text-xl font-black leading-none">
+              {completionPercentage}%
+            </span>
+            <span className="text-[9px] uppercase font-bold text-blue-200 mt-1">
+              Score
+            </span>
+          </div>
+
+          {/* Title, Subtitle & Progress Bar Column */}
+          <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 space-y-2">
+            <div className="space-y-0.5">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">
+                  Complete Your Profile
+                </h4>
+                <span className="text-[10px] font-bold text-[#113BD0] dark:text-blue-400 flex items-center gap-0.5 shrink-0">
+                  Finish <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium line-clamp-2">
+                Add your birthday, anniversary & food taste preferences for custom dish curation & discounts!
+              </p>
+            </div>
+
+            {/* Visual Progress Line */}
+            <div className="w-full h-2 bg-blue-200/70 dark:bg-blue-900/60 rounded-full overflow-hidden p-0.5">
+              <div
+                className="h-full bg-gradient-to-r from-amber-400 to-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${completionPercentage}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. Preferences List */}
       <div className="p-2 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+        {/* Personal Details & Taste Preferences */}
+        {isAuthenticated && (
+          <div
+            onClick={() => navigate('/profile')}
+            className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0]">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                    Personal Details & Food Taste
+                  </h5>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      completionPercentage === 100
+                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400'
+                        : 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400'
+                    }`}
+                  >
+                    {completionPercentage}%
+                  </span>
+                </div>
+                <p className="text-slate-400 text-[11px] font-medium">
+                  DOB, Anniversary, Gender & Food Preferences
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-black text-[#113BD0] dark:text-blue-400 bg-blue-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl flex items-center gap-1">
+              <span>Edit Profile</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </span>
+          </div>
+        )}
         {/* Language Switcher */}
         <div
           onClick={toggleLanguage}
@@ -197,6 +333,32 @@ export const SettingsPage = () => {
           </div>
         )}
 
+        {/* 4-Digit Security PIN */}
+        {isAuthenticated && (
+          <div
+            onClick={() => setShowPinModal(true)}
+            className="p-4 flex items-center justify-between gap-3 hover:bg-orange-50/50 dark:hover:bg-orange-950/20 rounded-2xl transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-orange-950/50 text-[#FF5200]">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                  4-Digit Security PIN
+                </h5>
+                <p className="text-slate-400 text-[11px] font-medium">
+                  {lang === 'hi' ? 'लॉगिन पिन बदलें या प्रबंधित करें' : 'Change or manage your fast login PIN'}
+                </p>
+              </div>
+            </div>
+            <span className="text-xs font-black text-[#FF5200] bg-orange-50 dark:bg-orange-950/50 px-3 py-1.5 rounded-xl flex items-center gap-1">
+              <span>Change PIN</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </span>
+          </div>
+        )}
+
         {/* Support & Helpline */}
         <div
           onClick={() => window.open('tel:1800123456', '_blank')}
@@ -271,6 +433,12 @@ export const SettingsPage = () => {
           </div>
         </div>
       )}
+
+      {/* Standalone Change PIN Popup */}
+      <ChangePinModal
+        isOpen={showPinModal}
+        onClose={() => setShowPinModal(false)}
+      />
     </div>
   )
 }

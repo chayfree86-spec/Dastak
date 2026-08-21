@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Sparkles, X, Check, Loader2, ImageOff } from 'lucide-react'
+import { Search, Globe, X, Check, Loader2, ImageOff } from 'lucide-react'
 import Modal from './Modal'
 import apiClient from '../../api/client'
 import restaurantsApi from '../../api/restaurants.api'
@@ -39,23 +39,15 @@ export const WebImageSearchModal = ({
   const handleSearch = async (searchKeyword = query) => {
     const q = (searchKeyword || '').trim()
     if (!q) return
+
     setLoading(true)
     try {
-      let res
-      if (typeof restaurantsApi?.searchFoodImages === 'function') {
-        res = await restaurantsApi.searchFoodImages(restaurantId, q)
-      } else {
-        const rid = restaurantId || 1
-        res = await apiClient.get(`/admin/restaurants/${rid}/menu/search-food-images`, { params: { q } })
-      }
-      const list = res?.data?.data || res?.data || []
+      let endpoint = `/admin/restaurants/${restaurantId || 1}/menu/search-food-images?q=${encodeURIComponent(q)}`
+      const res = await apiClient.get(endpoint)
+      const list = res.data?.data || res.data || []
       setResults(list)
-      if (list.length === 0) {
-        toast.info('No results', `No web images found for "${q}". Try another keyword.`)
-      }
     } catch (err) {
-      console.warn('Search error:', err)
-      toast.error('Search Failed', err.message || 'Unable to fetch web images.')
+      toast.error('Search Failed', err.message || 'Could not fetch web food images.')
     } finally {
       setLoading(false)
     }
@@ -63,24 +55,26 @@ export const WebImageSearchModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      const startQuery = (initialQuery || '').trim()
-      setQuery(startQuery)
-      if (startQuery) {
-        handleSearch(startQuery)
+      const q = (initialQuery || '').trim()
+      setQuery(q)
+      if (q) {
+        handleSearch(q)
       } else {
-        handleSearch('Indian fast food')
+        handleSearch('Food Dish')
       }
     }
   }, [isOpen, initialQuery, restaurantId])
 
   const handleSelect = async (item) => {
-    if (selectingUrl) return
+    if (!item?.full_url) return
     setSelectingUrl(item.full_url)
     try {
-      await onSelectImage(item.full_url)
+      onSelectImage(item.full_url)
+      toast.success('Food Image Selected', 'Image selected and updated in menu item.')
       onClose()
     } catch (err) {
       toast.error('Selection Failed', err.message || 'Unable to use this image.')
+    } finally {
       setSelectingUrl(null)
     }
   }
@@ -89,11 +83,11 @@ export const WebImageSearchModal = ({
 
   return (
     <Modal
-      isOpen
+      isOpen={isOpen}
       onClose={onClose}
       title="Search Web Food Images"
       subtitle="Pick a professional food image for this dish. It will be downloaded to your server."
-      maxWidth="max-w-2xl"
+      maxWidth="max-w-3xl"
       zIndex={zIndex}
     >
       <div className="space-y-4">
@@ -130,7 +124,7 @@ export const WebImageSearchModal = ({
             disabled={loading || !query.trim()}
             className="h-11 px-4 rounded-xl bg-[#113BD0] hover:bg-[#1E3A8A] text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
           >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Globe className="w-4 h-4" />}
             <span>Search</span>
           </button>
         </form>

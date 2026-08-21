@@ -71,7 +71,7 @@ export const DeliveryBoyList = () => {
             >
               {row.name}
             </span>
-            <span className="text-[11px] text-slate-400 font-mono">
+            <span className="text-[11px] text-slate-400">
               ID: {row.id} &bull; {row.vehicle_type}
             </span>
           </div>
@@ -81,7 +81,7 @@ export const DeliveryBoyList = () => {
     {
       key: 'mobile',
       header: 'Mobile',
-      render: (row) => <span className="font-mono text-slate-700 dark:text-slate-300">{formatPhone(row.mobile)}</span>,
+      render: (row) => <span className="font-medium text-slate-700 dark:text-slate-300">{formatPhone(row.mobile)}</span>,
     },
     {
       key: 'status',
@@ -98,7 +98,7 @@ export const DeliveryBoyList = () => {
       header: 'Current Order',
       render: (row) =>
         row.current_order ? (
-          <span className="font-mono font-bold text-[#113BD0] dark:text-blue-400">
+          <span className="font-bold text-[#113BD0] dark:text-blue-400">
             {row.current_order}
           </span>
         ) : (
@@ -278,7 +278,7 @@ export const DeliveryBoyList = () => {
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
                       <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 truncate">{rider.name}</h4>
-                      <span className="text-[10px] font-mono text-slate-400">ID: {rider.id}</span>
+                      <span className="text-[10px] text-slate-400">ID: {rider.id}</span>
                     </div>
                     {rider.vehicle_type && (
                       <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider block">
@@ -301,7 +301,7 @@ export const DeliveryBoyList = () => {
                   <a
                     href={`tel:${rider.mobile}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="font-mono text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 group truncate"
+                    className="font-medium text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1.5 group truncate"
                   >
                     <span>{formatPhone(rider.mobile)}</span>
                     <Phone className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />

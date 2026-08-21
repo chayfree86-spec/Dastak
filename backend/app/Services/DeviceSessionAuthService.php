@@ -114,6 +114,16 @@ class DeviceSessionAuthService
 
         $user = User::where('mobile', $cleanMobile)->first();
 
+        // Check if this device already has an active trusted session for this user
+        $trustedSession = null;
+        if ($user) {
+            $trustedSession = AppDeviceSession::where('mobile_number', $cleanMobile)
+                ->where('app_type', $appType)
+                ->where('device_identifier_hash', $deviceHash)
+                ->where('status', 'ACTIVE')
+                ->first();
+        }
+
         // System Logger Event
         SystemLogger::info(
             category: 'AUTH',
@@ -135,7 +145,11 @@ class DeviceSessionAuthService
             'otp' => $otp, // Pre-filled directly in the UI as requested
             'device_platform' => $platform,
             'is_existing_user' => (bool) $user,
-            'message' => 'Verification code ready for instant authentication.',
+            'user_name' => $user?->name,
+            'has_custom_pin' => ! is_null($user?->login_pin),
+            'requires_name' => ! $user,
+            'is_trusted_device' => (bool) $trustedSession,
+            'message' => $user ? "Welcome back, {$user->name}!" : 'Please enter your name to complete registration.',
         ];
     }
 
@@ -261,15 +275,23 @@ class DeviceSessionAuthService
 
             if (! $user) {
                 $isNewUser = true;
-                $defaultName = $name ? trim($name) : ($appType === 'delivery_boy' ? 'Rider ' . substr($mobile, -4) : ($appType === 'restaurant_partner' ? 'Partner ' . substr($mobile, -4) : 'Customer ' . substr($mobile, -4)));
+                $trimmedName = trim($name ?? '');
+                if ($appType === 'customer' && empty($trimmedName)) {
+                    throw ValidationException::withMessages([
+                        'name' => ['Please enter your full name to complete registration.'],
+                    ]);
+                }
+
+                $userName = ! empty($trimmedName) ? $trimmedName : ($appType === 'delivery_boy' ? 'Rider ' . substr($mobile, -4) : ($appType === 'restaurant_partner' ? 'Partner ' . substr($mobile, -4) : 'Customer ' . substr($mobile, -4)));
 
                 $user = User::create([
-                    'name' => $defaultName,
+                    'name' => $userName,
                     'mobile' => $mobile,
                     'email' => $mobile . '@dastak.local',
                     'password' => Hash::make(bin2hex(random_bytes(16))),
                     'status' => AccountStatus::ACTIVE,
                     'mobile_verified_at' => now(),
+                    'last_login_at' => now(),
                 ]);
 
                 // Assign matching role
@@ -288,6 +310,12 @@ class DeviceSessionAuthService
                         'rating' => 5.0,
                     ]);
                 }
+            } else {
+                $userUpdates = ['last_login_at' => now(), 'mobile_verified_at' => now()];
+                if (! empty(trim($name ?? '')) && (str_starts_with($user->name, 'Customer ') || empty($user->name))) {
+                    $userUpdates['name'] = trim($name);
+                }
+                $user->update($userUpdates);
             }
 
             // Session Revocation Strategy:
@@ -359,6 +387,172 @@ class DeviceSessionAuthService
                 'is_new_user' => $isNewUser,
                 'device_platform' => $platform,
                 'message' => 'Authenticated successfully.',
+            ];
+        });
+    }
+
+    /**
+     * Verify 4-Digit PIN for existing registered customer.
+     * Default PIN is the last 4 digits of mobile number if not customized.
+     */
+    public function verifyPin(
+        string $sessionPublicId,
+        string $pin,
+        string $deviceId,
+        ?string $deviceName = 'Customer App'
+    ): array {
+        $deviceHash = hash('sha256', trim($deviceId));
+        $cleanPin = trim($pin);
+
+        if (strlen($cleanPin) !== 4 || ! ctype_digit($cleanPin)) {
+            throw ValidationException::withMessages([
+                'pin' => ['Please enter a valid 4-digit numeric PIN.'],
+            ]);
+        }
+
+        $session = AppVerificationSession::where('session_public_id', $sessionPublicId)->first();
+
+        if (! $session) {
+            throw ValidationException::withMessages([
+                'session' => ['Verification session not found. Please enter your mobile number again.'],
+            ]);
+        }
+
+        if ($session->status === 'LOCKED') {
+            throw ValidationException::withMessages([
+                'pin' => ['Maximum PIN attempts exceeded. Please login with OTP.'],
+            ]);
+        }
+
+        if (! $session->isPending()) {
+            throw ValidationException::withMessages([
+                'session' => ['Verification session is no longer active. Please restart.'],
+            ]);
+        }
+
+        $mobile = $session->mobile_number;
+        $appType = $session->app_type;
+        $platform = $session->device_platform ?: 'mobile';
+
+        $user = User::where('mobile', $mobile)->first();
+
+        if (! $user) {
+            throw ValidationException::withMessages([
+                'pin' => ['Customer account not found. Please register as a new customer.'],
+            ]);
+        }
+
+        // Default PIN is the last 4 digits of mobile number
+        $defaultPin = substr($mobile, -4);
+
+        $isPinValid = false;
+        if (! empty($user->login_pin)) {
+            $isPinValid = Hash::check($cleanPin, $user->login_pin);
+        } else {
+            // Default PIN fallback: last 4 digits of mobile or password check
+            $isPinValid = ($cleanPin === $defaultPin) || Hash::check($cleanPin, $user->password);
+        }
+
+        if (! $isPinValid) {
+            $session->increment('attempts');
+
+            if ($session->attempts >= 5) {
+                $session->update(['status' => 'LOCKED', 'revoked_at' => now()]);
+            }
+
+            SystemLogger::warning(
+                category: 'AUTH',
+                event: strtoupper($appType) . '_PIN_FAILED',
+                description: "Incorrect PIN entered for {$mobile} (Attempt {$session->attempts}/5).",
+                params: ['session_ref' => $sessionPublicId, 'attempts' => $session->attempts]
+            );
+
+            throw ValidationException::withMessages([
+                'pin' => ["Incorrect 4-digit PIN. Default PIN is the last 4 digits ({$defaultPin}) of your mobile number."],
+            ]);
+        }
+
+        // Mark verification session as VERIFIED
+        $session->update([
+            'status' => 'VERIFIED',
+            'verified_at' => now(),
+            'otp_plain' => null,
+        ]);
+
+        return DB::transaction(function () use ($session, $user, $deviceHash, $deviceName, $platform, $mobile, $appType, $cleanPin) {
+            // If user's login_pin was null, save this verified PIN
+            if (empty($user->login_pin)) {
+                $user->update(['login_pin' => Hash::make($cleanPin)]);
+            }
+
+            $user->update(['last_login_at' => now(), 'mobile_verified_at' => now()]);
+
+            // Session Revocation Strategy:
+            if ($platform === 'mobile') {
+                AppDeviceSession::where('mobile_number', $mobile)
+                    ->where('app_type', $appType)
+                    ->where('device_platform', 'mobile')
+                    ->where('status', 'ACTIVE')
+                    ->update([
+                        'status' => 'REVOKED',
+                        'revoked_at' => now(),
+                        'revocation_reason' => 'NEW_MOBILE_PHONE_SESSION_ESTABLISHED',
+                    ]);
+            } else {
+                AppDeviceSession::where('mobile_number', $mobile)
+                    ->where('app_type', $appType)
+                    ->where('device_identifier_hash', $deviceHash)
+                    ->where('status', 'ACTIVE')
+                    ->update([
+                        'status' => 'REVOKED',
+                        'revoked_at' => now(),
+                        'revocation_reason' => 'PC_SESSION_RENEWED',
+                    ]);
+            }
+
+            // Generate cryptographically secure permanent session token
+            $rawToken = 'dsk_sess_' . bin2hex(random_bytes(32));
+            $tokenHash = hash('sha256', $rawToken);
+
+            $deviceSession = AppDeviceSession::create([
+                'user_id' => $user->id,
+                'app_type' => $appType,
+                'mobile_number' => $mobile,
+                'session_token_hash' => $tokenHash,
+                'device_identifier_hash' => $deviceHash,
+                'device_name' => $deviceName,
+                'device_platform' => $platform,
+                'status' => 'ACTIVE',
+                'last_seen_at' => now(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+
+            // Generate Sanctum access token matching device
+            $sanctumToken = $user->createToken($deviceName ?: ($appType . ' App'))->plainTextToken;
+
+            // System Log Event
+            SystemLogger::info(
+                category: 'AUTH',
+                event: strtoupper($appType) . '_PIN_LOGIN_SUCCESS',
+                description: "User {$user->name} (+91 {$mobile}) signed in with PIN on {$deviceName} ({$platform}).",
+                params: [
+                    'actor_type' => strtoupper($appType),
+                    'actor_id' => $user->id,
+                    'actor_name' => $user->name,
+                    'session_id' => $deviceSession->id,
+                    'device_name' => $deviceName,
+                    'platform' => $platform,
+                ]
+            );
+
+            return [
+                'token' => $sanctumToken,
+                'session_token' => $rawToken,
+                'user' => $user->load('roles.permissions'),
+                'is_new_user' => false,
+                'device_platform' => $platform,
+                'message' => 'Signed in successfully with PIN.',
             ];
         });
     }

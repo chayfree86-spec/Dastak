@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Phone,
+  User,
   ShieldCheck,
   ArrowRight,
   ArrowLeft,
@@ -35,13 +36,22 @@ export const LoginPage = () => {
   const [searchParams] = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
 
-  const { startVerification, resendOtp, verifyDeviceOtp, isAuthenticated } = useAuth()
+  const { startVerification, resendOtp, verifyDeviceOtp, verifyDevicePin, isAuthenticated } = useAuth()
   const { isDark, toggleTheme } = useTheme()
   const toast = useToast()
 
   // Steps: 'mobile' | 'otp' | 'active_elsewhere'
   const [step, setStep] = useState('mobile')
-  const [mobile, setMobile] = useState('')
+  const [authMode, setAuthMode] = useState('pin') // 'pin' | 'otp'
+  const [mobile, setMobile] = useState(() => {
+    return localStorage.getItem('dastak_last_customer_mobile') || ''
+  })
+  const [name, setName] = useState('')
+  const [isExistingUser, setIsExistingUser] = useState(false)
+  const [existingUserName, setExistingUserName] = useState('')
+  const [hasCustomPin, setHasCustomPin] = useState(false)
+  const [requiresName, setRequiresName] = useState(false)
+  const [pinDigits, setPinDigits] = useState(['', '', '', ''])
   const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
   const [generatedOtp, setGeneratedOtp] = useState('')
   const [sessionId, setSessionId] = useState('')
@@ -49,11 +59,14 @@ export const LoginPage = () => {
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [focusedPinIdx, setFocusedPinIdx] = useState(null)
   const [focusedOtpIdx, setFocusedOtpIdx] = useState(null)
 
   // Mouse Parallax Offset
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 })
 
+  const nameInputRef = useRef(null)
+  const pinInputsRef = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const otpInputsRef = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
 
   // Track Mouse Movement for 3D Dynamic Parallax
@@ -106,6 +119,7 @@ export const LoginPage = () => {
 
     setLoading(true)
     try {
+      localStorage.setItem('dastak_last_customer_mobile', cleanMobile)
       const res = await startVerification(cleanMobile)
       const data = res?.data?.data || res?.data || res
 
@@ -117,9 +131,23 @@ export const LoginPage = () => {
         setStep('active_elsewhere')
       } else {
         setSessionId(data.verification_session_id)
+        setIsExistingUser(Boolean(data.is_existing_user))
+        setExistingUserName(data.user_name || '')
+        setHasCustomPin(Boolean(data.has_custom_pin))
+        setRequiresName(Boolean(data.requires_name))
         applyOtp(data.otp)
         setStep('otp')
-        toast.success('Verification Code Ready', `Code ${data.otp || ''} generated.`)
+
+        if (data.is_existing_user) {
+          // Default to 4-digit PIN mode for existing customer
+          setAuthMode('pin')
+          setPinDigits(['', '', '', ''])
+          toast.success('Welcome Back!', `Welcome back, ${data.user_name || 'Customer'}!`)
+        } else {
+          // Registration OTP mode for new customer
+          setAuthMode('otp')
+          toast.info('New Registration', 'Please enter your full name and verify code.')
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Verification could not be initiated.')
@@ -145,7 +173,71 @@ export const LoginPage = () => {
     }
   }
 
-  // 3. Handle OTP Input Changes
+  // 3. Handle 4-Digit PIN Input Changes
+  const handlePinChange = (index, value) => {
+    const digit = value.replace(/\D/g, '').slice(-1)
+    const newPin = [...pinDigits]
+    newPin[index] = digit
+    setPinDigits(newPin)
+
+    if (digit && index < 3) {
+      pinInputsRef[index + 1].current?.focus()
+    }
+  }
+
+  const handlePinKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !pinDigits[index] && index > 0) {
+      pinInputsRef[index - 1].current?.focus()
+    } else if (e.key === 'Enter') {
+      handleVerifyPin(e)
+    }
+  }
+
+  const handlePinPaste = (e) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
+    if (pasted) {
+      const newPin = ['', '', '', '']
+      for (let i = 0; i < pasted.length; i++) {
+        newPin[i] = pasted[i]
+      }
+      setPinDigits(newPin)
+      const targetIdx = Math.min(pasted.length, 3)
+      pinInputsRef[targetIdx].current?.focus()
+    }
+  }
+
+  // 4. Verify 4-Digit PIN for Existing User
+  const handleVerifyPin = async (e) => {
+    e?.preventDefault()
+    setError('')
+    const pin = pinDigits.join('')
+
+    if (pin.length < 4) {
+      setError('Please enter your complete 4-digit PIN.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await verifyDevicePin(sessionId, pin)
+      toast.success('Welcome to Dastak!', `Welcome back, ${existingUserName || 'Customer'}!`)
+      navigate(redirect, { replace: true })
+    } catch (err) {
+      const defaultHint = mobile.replace(/\D/g, '').slice(-4)
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          (hasCustomPin
+            ? 'Incorrect PIN. Please enter your valid 4-digit PIN or login with OTP.'
+            : `Incorrect PIN. Default PIN is the last 4 digits (${defaultHint}) of your mobile number.`)
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 5. Handle OTP Input Changes
   const handleOtpChange = (index, value) => {
     const digit = value.replace(/\D/g, '').slice(-1)
     const newOtp = [...otpDigits]
@@ -179,7 +271,7 @@ export const LoginPage = () => {
     }
   }
 
-  // 4. Verify OTP & Establish Permanent Session
+  // 6. Verify OTP & Establish Permanent Session
   const handleVerifyOtp = async (e) => {
     e?.preventDefault()
     setError('')
@@ -190,10 +282,19 @@ export const LoginPage = () => {
       return
     }
 
+    if (!isExistingUser && !name.trim()) {
+      setError('Please enter your full name to complete registration.')
+      if (nameInputRef.current) nameInputRef.current.focus()
+      return
+    }
+
     setLoading(true)
     try {
-      await verifyDeviceOtp(sessionId, code)
-      toast.success('Welcome to Dastak!', 'Successfully authenticated.')
+      await verifyDeviceOtp(sessionId, code, name.trim() || null)
+      toast.success(
+        'Welcome to Dastak!',
+        isExistingUser ? `Welcome back, ${existingUserName || 'Customer'}!` : `Account created successfully for ${name.trim()}!`
+      )
       navigate(redirect, { replace: true })
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Verification failed. Please check the code.')
@@ -432,14 +533,22 @@ export const LoginPage = () => {
             {step === 'active_elsewhere'
               ? 'Active On Another Device'
               : step === 'otp'
-              ? 'Verify Mobile Number'
+              ? isExistingUser
+                ? authMode === 'pin'
+                  ? (existingUserName ? `Welcome Back, ${existingUserName}!` : 'Welcome Back!')
+                  : 'Sign In with OTP'
+                : 'New Customer Registration'
               : 'Customer Sign In'}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             {step === 'active_elsewhere'
               ? 'Single-phone security policy is active'
               : step === 'otp'
-              ? `Verification code for +91 ${mobile.replace(/\D/g, '')}`
+              ? isExistingUser
+                ? authMode === 'pin'
+                  ? `Enter your 4-digit security PIN for +91 ${mobile.replace(/\D/g, '')}`
+                  : `Enter verification code for +91 ${mobile.replace(/\D/g, '')}`
+                : `Enter your name & verification code for +91 ${mobile.replace(/\D/g, '')}`
               : 'Enter your 10-digit mobile number to continue'}
           </p>
         </div>
@@ -544,9 +653,212 @@ export const LoginPage = () => {
           </form>
         )}
 
-        {/* STEP 2: 6-DIGIT OTP VERIFICATION WITH CODE DISPLAY */}
-        {step === 'otp' && (
+        {/* STEP 2: EXISTING USER 4-DIGIT PIN AUTHENTICATION */}
+        {step === 'otp' && isExistingUser && authMode === 'pin' && (
+          <form onSubmit={handleVerifyPin} className="space-y-4 animate-in fade-in">
+            {/* Account Recognition Card */}
+            <div className="p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50 flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#FF5200] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                {(existingUserName || 'C')[0].toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-black text-slate-900 dark:text-white truncate">
+                    {existingUserName || 'Registered Customer'}
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md">
+                    Existing Account
+                  </span>
+                </div>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
+                  +91 {mobile.replace(/\D/g, '')}
+                </span>
+              </div>
+            </div>
+
+            {/* 4-Digit PIN Input */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-[#FF5200]" />
+                  <span>Enter 4-Digit Security PIN</span> <span className="text-rose-500">*</span>
+                </label>
+                {!hasCustomPin ? (
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                    Default: ••••{mobile.replace(/\D/g, '').slice(-4)}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
+                    Custom PIN Active
+                  </span>
+                )}
+              </div>
+
+              {/* 4 Digit Input Boxes */}
+              <div className="grid grid-cols-4 gap-3 max-w-[280px] mx-auto">
+                {pinDigits.map((digit, idx) => {
+                  const isFocused = focusedPinIdx === idx
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => pinInputsRef[idx].current?.focus()}
+                      className={`relative w-full h-14 rounded-2xl flex items-center justify-center transition-all cursor-text ${
+                        isFocused
+                          ? 'bg-white dark:bg-slate-900 border-2 border-[#FF5200] ring-4 ring-orange-500/20 shadow-xs'
+                          : digit
+                          ? 'bg-orange-50/60 dark:bg-slate-800 border-2 border-orange-200 dark:border-orange-900/60 shadow-xs'
+                          : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      <input
+                        ref={pinInputsRef[idx]}
+                        type="password"
+                        maxLength={1}
+                        inputMode="numeric"
+                        value={digit}
+                        onFocus={() => setFocusedPinIdx(idx)}
+                        onBlur={() => setFocusedPinIdx(null)}
+                        onChange={(e) => handlePinChange(idx, e.target.value)}
+                        onKeyDown={(e) => handlePinKeyDown(idx, e)}
+                        onPaste={idx === 0 ? handlePinPaste : undefined}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-text"
+                      />
+
+                      {digit ? (
+                        <span className="text-2xl font-black text-[#FF5200] pointer-events-none">
+                          ●
+                        </span>
+                      ) : isFocused ? (
+                        <span className="w-0.5 h-5 bg-[#FF5200] animate-pulse pointer-events-none rounded-full" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 pointer-events-none" />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              {!hasCustomPin ? (
+                <p className="text-[11px] text-center text-slate-400 font-medium pt-1">
+                  Default PIN is the last 4 digits (<strong>{mobile.replace(/\D/g, '').slice(-4)}</strong>) of your phone
+                </p>
+              ) : (
+                <p className="text-[11px] text-center text-slate-400 font-medium pt-1">
+                  Enter your 4-digit security PIN to sign in
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between text-xs pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setStep('mobile')
+                  setError('')
+                }}
+                className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-semibold cursor-pointer"
+              >
+                Change Number
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('otp')
+                  setError('')
+                }}
+                className="text-[#FF5200] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+              >
+                Forgot PIN? Login with OTP
+              </button>
+            </div>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              loading={loading}
+              className="w-full font-bold h-11 bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 cursor-pointer"
+              icon={CheckCircle2}
+            >
+              Sign In with PIN
+            </Button>
+          </form>
+        )}
+
+        {/* STEP 2: 6-DIGIT OTP VERIFICATION (REGISTRATION OR FORGOT PIN FALLBACK) */}
+        {step === 'otp' && (!isExistingUser || authMode === 'otp') && (
           <form onSubmit={handleVerifyOtp} className="space-y-4 animate-in fade-in">
+            {/* Account Recognition / Registration Card */}
+            {isExistingUser ? (
+              <div className="p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#FF5200] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                  {(existingUserName || 'C')[0].toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black text-slate-900 dark:text-white truncate">
+                      {existingUserName || 'Registered Customer'}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md">
+                      OTP Login
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
+                    +91 {mobile.replace(/\D/g, '')}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                  <User className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black text-blue-900 dark:text-blue-100">
+                      New Customer Registration
+                    </span>
+                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-100/80 dark:bg-blue-950/60 px-1.5 py-0.5 rounded-md">
+                      New Account
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
+                    +91 {mobile.replace(/\D/g, '')}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Mandatory Name Field For New Registration */}
+            {!isExistingUser && (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-[#FF5200]" />
+                    <span>Your Full Name</span>
+                    <span className="text-rose-500">*</span>
+                  </span>
+                  <span className="text-[10px] text-rose-500 font-bold bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-md">
+                    Required for Registration
+                  </span>
+                </label>
+                <input
+                  ref={nameInputRef}
+                  type="text"
+                  required
+                  autoFocus
+                  placeholder="Enter your full name (e.g. Rahul Sharma)"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value)
+                    setError('')
+                  }}
+                  className="w-full h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
+                />
+              </div>
+            )}
+
             {generatedOtp && (
               <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 flex items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -557,7 +869,7 @@ export const LoginPage = () => {
                     <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wider leading-none">
                       Your Verification Code
                     </span>
-                    <span className="text-sm font-black text-slate-900 dark:text-white tracking-widest font-mono">
+                    <span className="text-sm font-black text-slate-900 dark:text-white tracking-widest">
                       {generatedOtp}
                     </span>
                   </div>
@@ -642,15 +954,28 @@ export const LoginPage = () => {
                 Change Number
               </button>
 
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                disabled={loading}
-                className="text-[#FF5200] hover:underline font-bold flex items-center gap-1 cursor-pointer"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>New Code</span>
-              </button>
+              {isExistingUser ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('pin')
+                    setError('')
+                  }}
+                  className="text-[#FF5200] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  Use 4-Digit PIN Instead
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={loading}
+                  className="text-[#FF5200] hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>New Code</span>
+                </button>
+              )}
             </div>
 
             <Button
@@ -661,7 +986,7 @@ export const LoginPage = () => {
               className="w-full font-bold h-11 bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 cursor-pointer"
               icon={CheckCircle2}
             >
-              Verify & Sign In
+              {isExistingUser ? 'Verify OTP & Sign In' : 'Verify & Complete Registration'}
             </Button>
           </form>
         )}

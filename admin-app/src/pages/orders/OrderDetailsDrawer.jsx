@@ -119,7 +119,7 @@ export const OrderDetailsDrawer = ({
               </h5>
               <div className="text-xs space-y-1.5">
                 <p className="font-bold text-slate-900 dark:text-slate-100">{order?.customer?.name}</p>
-                <p className="font-mono text-slate-600 dark:text-slate-400">{formatPhone(order?.customer?.mobile)}</p>
+                <p className="font-medium text-slate-600 dark:text-slate-400">{formatPhone(order?.customer?.mobile)}</p>
                 <p className="text-slate-500 dark:text-slate-400 leading-snug">{order?.customer?.address}</p>
                 {order?.customer?.landmark && (
                   <p className="text-[11px] text-slate-400">Landmark: {order?.customer?.landmark}</p>
@@ -135,7 +135,7 @@ export const OrderDetailsDrawer = ({
               </h5>
               <div className="text-xs space-y-1.5">
                 <p className="font-bold text-slate-900 dark:text-slate-100">{order?.restaurant?.name}</p>
-                <p className="font-mono text-slate-600 dark:text-slate-400">{formatPhone(order?.restaurant?.mobile)}</p>
+                <p className="font-medium text-slate-600 dark:text-slate-400">{formatPhone(order?.restaurant?.mobile)}</p>
                 <p className="text-slate-500 dark:text-slate-400 leading-snug">{order?.restaurant?.address}</p>
                 <p className="text-[11px] text-[#113BD0] dark:text-blue-400 font-semibold">
                   Commission: {order?.restaurant?.commission_rate}%
@@ -159,7 +159,7 @@ export const OrderDetailsDrawer = ({
               </div>
               <div>
                 <span className="text-slate-400 block text-[11px]">Rider Mobile:</span>
-                <span className="font-mono text-slate-700 dark:text-slate-300">
+                <span className="font-medium text-slate-700 dark:text-slate-300">
                   {formatPhone(order?.delivery?.mobile) || '-'}
                 </span>
               </div>

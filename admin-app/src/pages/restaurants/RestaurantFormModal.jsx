@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Box } from 'lucide-react'
+import { Box, Star } from 'lucide-react'
 import { Modal } from '../../components/common/Modal'
 import Input from '../../components/common/Input'
 import AmountInput from '../../components/common/AmountInput'
@@ -33,6 +33,8 @@ export const RestaurantFormModal = ({
   const [isActive, setIsActive] = useState(true)
   const [isVegOnly, setIsVegOnly] = useState(false)
   const [image, setImage] = useState(null)
+  const [baseRating, setBaseRating] = useState('4.5')
+  const [baseReviews, setBaseReviews] = useState('0')
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   const [latitude, setLatitude] = useState(26.8467)
@@ -77,6 +79,8 @@ export const RestaurantFormModal = ({
     setIsActive(r.status ? r.status === 'ACTIVE' : true)
     setIsVegOnly(!!r.is_veg_only)
     setImage(r.logo || r.image || r.banner || null)
+    setBaseRating(r.rating != null ? String(r.rating) : '4.5')
+    setBaseReviews(r.total_reviews != null ? String(r.total_reviews) : '0')
     if (r.latitude != null && r.longitude != null) {
       setLatitude(Number(r.latitude))
       setLongitude(Number(r.longitude))
@@ -107,6 +111,8 @@ export const RestaurantFormModal = ({
       setIsActive(true)
       setIsVegOnly(false)
       setImage(null)
+      setBaseRating('4.5')
+      setBaseReviews('0')
       setLatitude(26.8467)
       setLongitude(80.9462)
     }
@@ -309,6 +315,8 @@ export const RestaurantFormModal = ({
         logo: imageUrl,
         latitude: Number(latitude),
         longitude: Number(longitude),
+        rating: parseFloat(baseRating) || 4.5,
+        total_ratings: parseInt(baseReviews) || 0,
       }
 
       if (restaurant?.id) {
@@ -490,6 +498,52 @@ export const RestaurantFormModal = ({
               onChange={setImage}
               onRemove={() => setImage(null)}
             />
+          </div>
+
+          {/* Initial Base Star Rating (3.0 - 5.0) */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                  Initial Base Star Rating (3.0 - 5.0)
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  Starting display rating for new restaurants. Auto-manages as customers review.
+                </span>
+              </div>
+              <div className="flex items-center gap-1 font-black text-amber-500 bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 rounded-xl border border-amber-200/60 dark:border-amber-800/60 text-sm shrink-0">
+                <Star className="w-4 h-4 fill-amber-400" />
+                <span>{baseRating}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+              <div>
+                <input
+                  type="range"
+                  min="3.0"
+                  max="5.0"
+                  step="0.1"
+                  value={baseRating}
+                  onChange={(e) => setBaseRating(e.target.value)}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-[#113BD0]"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400 font-bold mt-1">
+                  <span>3.0 ★</span>
+                  <span>4.0 ★</span>
+                  <span>5.0 ★</span>
+                </div>
+              </div>
+              <Input
+                label="Starting Review Count"
+                type="number"
+                min="0"
+                max="10000"
+                value={baseReviews}
+                onChange={(e) => setBaseReviews(e.target.value)}
+                placeholder="0"
+              />
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-6 pt-2 pb-1 border-t border-slate-100 dark:border-slate-700/60">

@@ -159,4 +159,24 @@ class User extends Authenticatable
         $primaryRole = $this->roles()->first();
         return $primaryRole ? $primaryRole->slug : 'customer';
     }
+
+    public function getProfileCompletionPercentageAttribute(): int
+    {
+        $score = 0;
+        if (!empty($this->name)) $score += 15;
+        if (!empty($this->email)) $score += 15;
+        if (!empty($this->mobile)) $score += 15;
+
+        $profile = $this->customerProfile;
+        if ($profile) {
+            if (!empty($profile->gender)) $score += 10;
+            if (!empty($profile->date_of_birth)) $score += 15;
+            if (!empty($profile->anniversary_date)) $score += 10;
+            if (!empty($profile->dietary_preference) || (!empty($profile->taste_preferences) && count($profile->taste_preferences) > 0)) {
+                $score += 20;
+            }
+        }
+
+        return min(100, $score);
+    }
 }

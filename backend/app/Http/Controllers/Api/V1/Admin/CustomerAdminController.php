@@ -59,21 +59,31 @@ class CustomerAdminController extends Controller
 
     public function show(int $id): JsonResponse
     {
-        $user = User::with(['addresses'])->findOrFail($id);
+        $user = User::with(['addresses', 'customerProfile'])->findOrFail($id);
 
         $delivered = $user->customerOrders()->where('status', OrderStatus::DELIVERED->value);
         $totalSpend = (float) $delivered->sum('total_amount');
         $totalOrders = (int) $user->customerOrders()->count();
         $deliveredCount = (int) (clone $delivered)->count();
         $default = $user->addresses->firstWhere('is_default', true) ?? $user->addresses->first();
+        $profile = $user->customerProfile;
 
         return ApiResponse::success([
             'id' => $user->id,
             'name' => $user->name,
             'mobile' => $user->mobile,
             'email' => $user->email,
+            'avatar' => $user->avatar ? (str_starts_with($user->avatar, 'http') || str_starts_with($user->avatar, 'data:') ? $user->avatar : asset('storage/' . $user->avatar)) : null,
             'joined_date' => $user->created_at?->toIso8601String(),
             'status' => $this->statusLabel($user),
+            'profile_completion_percentage' => $user->profile_completion_percentage,
+            'gender' => $profile?->gender,
+            'date_of_birth' => $profile?->date_of_birth?->format('Y-m-d'),
+            'anniversary_date' => $profile?->anniversary_date?->format('Y-m-d'),
+            'dietary_preference' => $profile?->dietary_preference,
+            'taste_preferences' => $profile?->taste_preferences ?? [],
+            'alternate_mobile' => $profile?->alternate_mobile,
+            'loyalty_points' => (int) ($profile?->loyalty_points ?? 0),
             'total_orders' => $totalOrders,
             'total_spend' => $totalSpend,
             'average_order_value' => $deliveredCount > 0 ? round($totalSpend / $deliveredCount, 2) : 0.0,
@@ -146,10 +156,12 @@ class CustomerAdminController extends Controller
             'name' => $u->name,
             'mobile' => $u->mobile,
             'email' => $u->email,
+            'avatar' => $u->avatar ? (str_starts_with($u->avatar, 'http') || str_starts_with($u->avatar, 'data:') ? $u->avatar : asset('storage/' . $u->avatar)) : null,
             'total_orders' => (int) ($u->customer_orders_count ?? $u->customerOrders()->count()),
             'total_spend' => (float) $delivered->sum('total_amount'),
             'last_order_date' => $u->customerOrders()->max('placed_at'),
             'status' => $this->statusLabel($u),
+            'profile_completion_percentage' => $u->profile_completion_percentage,
             'city' => $u->addresses->first()?->city,
         ];
     }

@@ -23,6 +23,7 @@ const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'))
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'))
 const MorePage = lazy(() => import('./pages/more/MorePage'))
 const AccountPage = lazy(() => import('./pages/account/AccountPage'))
+const ProfilePage = lazy(() => import('./pages/account/ProfilePage'))
 const SavedAddressesPage = lazy(() => import('./pages/addresses/SavedAddressesPage'))
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 
@@ -82,6 +83,7 @@ export function App() {
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/more" element={<MorePage />} />
                         <Route path="/account" element={<AccountPage />} />
+                        <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/addresses" element={<SavedAddressesPage />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                       </Route>
