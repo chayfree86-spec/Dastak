@@ -530,15 +530,22 @@ export const LoginPage = () => {
             />
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            {step === 'active_elsewhere'
-              ? 'Active On Another Device'
-              : step === 'otp'
-              ? isExistingUser
-                ? authMode === 'pin'
-                  ? (existingUserName ? `Welcome Back, ${existingUserName}!` : 'Welcome Back!')
-                  : 'Sign In with OTP'
-                : 'New Customer Registration'
-              : 'Customer Sign In'}
+            {step === 'active_elsewhere' ? (
+              'Active On Another Device'
+            ) : step === 'otp' ? (
+              isExistingUser ? (
+                <>
+                  <span>Welcome Back, </span>
+                  <span className="text-[#113BD0] dark:text-blue-400">
+                    {existingUserName || 'Customer'}!
+                  </span>
+                </>
+              ) : (
+                'New Customer Registration'
+              )
+            ) : (
+              'Customer Sign In'
+            )}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             {step === 'active_elsewhere'
@@ -656,26 +663,6 @@ export const LoginPage = () => {
         {/* STEP 2: EXISTING USER 4-DIGIT PIN AUTHENTICATION */}
         {step === 'otp' && isExistingUser && authMode === 'pin' && (
           <form onSubmit={handleVerifyPin} className="space-y-4 animate-in fade-in">
-            {/* Account Recognition Card */}
-            <div className="p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FF5200] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-                {(existingUserName || 'C')[0].toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-black text-slate-900 dark:text-white truncate">
-                    {existingUserName || 'Registered Customer'}
-                  </span>
-                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md">
-                    Existing Account
-                  </span>
-                </div>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                  +91 {mobile.replace(/\D/g, '')}
-                </span>
-              </div>
-            </div>
-
             {/* 4-Digit PIN Input */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -789,27 +776,8 @@ export const LoginPage = () => {
         {/* STEP 2: 6-DIGIT OTP VERIFICATION (REGISTRATION OR FORGOT PIN FALLBACK) */}
         {step === 'otp' && (!isExistingUser || authMode === 'otp') && (
           <form onSubmit={handleVerifyOtp} className="space-y-4 animate-in fade-in">
-            {/* Account Recognition / Registration Card */}
-            {isExistingUser ? (
-              <div className="p-3 rounded-2xl bg-orange-50/70 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-900/50 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#FF5200] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-                  {(existingUserName || 'C')[0].toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black text-slate-900 dark:text-white truncate">
-                      {existingUserName || 'Registered Customer'}
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded-md">
-                      OTP Login
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium block">
-                    +91 {mobile.replace(/\D/g, '')}
-                  </span>
-                </div>
-              </div>
-            ) : (
+            {/* New Customer Registration Card */}
+            {!isExistingUser && (
               <div className="p-3 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
                   <User className="w-4 h-4" />
