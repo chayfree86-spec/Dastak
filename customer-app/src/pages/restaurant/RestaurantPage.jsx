@@ -25,6 +25,7 @@ import VoiceSearchModal from '../../components/common/VoiceSearchModal'
 import { formatCurrency } from '../../utils/formatters'
 import { makePhoneCall } from '../../utils/geo'
 import { realtimeBus } from '../../utils/realtimeSync'
+import dataCache from '../../utils/dataCache'
 
 const getRestaurantBanner = (restaurant) => {
   if (restaurant?.banner && !restaurant.banner.includes('placeholder')) {
@@ -49,29 +50,41 @@ export const RestaurantPage = () => {
   const { t, lang } = useLanguage()
   const { itemCount, grandTotal } = useCart()
 
-  const [restaurant, setRestaurant] = useState(null)
-  const [categories, setCategories] = useState([])
+  const [restaurant, setRestaurant] = useState(() => dataCache.get(`restaurant_${slug}`) || null)
+  const [categories, setCategories] = useState(() => dataCache.get(`restaurant_menu_${slug}`) || [])
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [vegOnly, setVegOnly] = useState(false)
   const [menuSearch, setMenuSearch] = useState('')
   const [voiceModalOpen, setVoiceModalOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !dataCache.has(`restaurant_${slug}`))
 
   const loadRestaurant = async (isSilent = false) => {
-    if (!isSilent) setLoading(true)
+    if (!isSilent && !dataCache.has(`restaurant_${slug}`)) {
+      setLoading(true)
+    }
     try {
       const res = await restaurantApi.getRestaurant(slug)
       const restData = res?.data?.data || res?.data || res || {}
       setRestaurant(restData)
+      dataCache.set(`restaurant_${slug}`, restData)
 
       const menuRes = await restaurantApi.getMenu(slug)
       const rawMenu = menuRes?.data?.data || menuRes?.data || menuRes?.categories || menuRes || []
       const categoriesList = Array.isArray(rawMenu) ? rawMenu : (rawMenu.categories || [])
       setCategories(categoriesList)
+      dataCache.set(`restaurant_menu_${slug}`, categoriesList)
+
+      // Preload banner and all dish images in the background
+      const allImages = [
+        restData.banner,
+        restData.logo,
+        ...categoriesList.flatMap(c => (c.items || c.menu_items || []).map(i => i.image)),
+      ].filter(Boolean)
+      dataCache.preloadImages(allImages)
     } catch (e) {
       console.warn('Failed to load restaurant:', e)
     } finally {
-      if (!isSilent) setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -154,11 +167,15 @@ export const RestaurantPage = () => {
       {/* 1. Restaurant Hero Header Banner (Mobile-Optimized) */}
       <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900">
         <div className="relative h-44 sm:h-60 w-full overflow-hidden">
-          <img
-            src={bannerUrl}
-            alt={restaurant.name}
-            className="w-full h-full object-cover"
-          />
+          {bannerUrl ? (
+            <img
+              src={bannerUrl}
+              alt={restaurant.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-[#113BD0] via-indigo-700 to-slate-900" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
           {/* Floating Top Controls: Frosted Glass Back Button & Badges */}
@@ -214,7 +231,9 @@ export const RestaurantPage = () => {
               </div>
               <div>
                 <span className="block font-black text-xs sm:text-sm text-slate-900 dark:text-slate-100 leading-tight">
-                  {(Number(restaurant.rating) || 4.8).toFixed(1)}
+                  {Number(restaurant.rating) > 0
+                    ? Number(restaurant.rating).toFixed(1)
+                    : lang === 'hi' ? 'नया' : 'New'}
                 </span>
                 <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase leading-tight block">
                   {lang === 'hi' ? 'रेटिंग' : 'Rating'}
@@ -229,7 +248,9 @@ export const RestaurantPage = () => {
               </div>
               <div>
                 <span className="block font-black text-xs sm:text-sm text-slate-900 dark:text-slate-100 leading-tight">
-                  {restaurant.preparation_time_minutes || 25} {lang === 'hi' ? 'मिनट' : 'Mins'}
+                  {Number(restaurant.preparation_time_minutes) > 0
+                    ? `${restaurant.preparation_time_minutes} ${lang === 'hi' ? 'मिनट' : 'Mins'}`
+                    : '—'}
                 </span>
                 <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase leading-tight block">
                   {lang === 'hi' ? 'डिलीवरी' : 'Delivery'}

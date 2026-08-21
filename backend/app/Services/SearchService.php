@@ -215,9 +215,21 @@ class SearchService
     public function getSuggestions(string $partial): Collection
     {
         if (empty(trim($partial))) {
-            return collect([
-                'Chai', 'Samosa', 'Burger', 'Biryani', 'Pizza', 'Jalebi', 'Paneer Butter Masala',
-            ]);
+            $categoryNames = \App\Models\FoodCategory::where('is_active', true)
+                ->orderBy('sort_order')
+                ->pluck('name')
+                ->toArray();
+
+            if (!empty($categoryNames)) {
+                return collect($categoryNames);
+            }
+
+            return MenuItem::query()
+                ->where('is_available', true)
+                ->limit(10)
+                ->pluck('name')
+                ->unique()
+                ->values();
         }
 
         $intent = $this->extractIntent($partial);

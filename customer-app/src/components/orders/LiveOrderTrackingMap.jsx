@@ -1,6 +1,4 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 import {
   Bike,
   Store,
@@ -20,8 +18,68 @@ import {
   fetchOsrmRoute,
   makePhoneCall,
 } from '../../utils/geo'
+import { loadGoogleMaps } from '../../utils/googleMapsLoader'
 import { useTheme } from '../../context/ThemeContext'
 import { useLanguage } from '../../context/LanguageContext'
+
+// Minimal dark style so the Google base map matches the app's dark theme.
+const DARK_MAP_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#1d2733' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#1d2733' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#94a3b8' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2b3644' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#cbd5e1' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0f1a2b' }] },
+  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+]
+
+/**
+ * Factory for an OverlayView-based HTML marker so we can keep the existing
+ * rich, animated marker HTML (ping rings, bike bounce, info pills) that Leaflet
+ * divIcons rendered. The inner HTML self-centers via -translate-x/y-1/2.
+ */
+const makeHtmlMarker = (maps, map, position, html, zIndex = 0) => {
+  class HtmlMarker extends maps.OverlayView {
+    constructor() {
+      super()
+      this.position = position
+      this.html = html
+      this.div = null
+      this.zIndex = zIndex
+      this.setMap(map)
+    }
+    onAdd() {
+      this.div = document.createElement('div')
+      this.div.style.position = 'absolute'
+      this.div.style.zIndex = String(this.zIndex)
+      this.div.innerHTML = this.html
+      this.getPanes().overlayMouseTarget.appendChild(this.div)
+    }
+    draw() {
+      const proj = this.getProjection()
+      if (!proj || !this.div) return
+      const point = proj.fromLatLngToDivPixel(
+        new maps.LatLng(this.position.lat, this.position.lng)
+      )
+      if (point) {
+        this.div.style.left = `${point.x}px`
+        this.div.style.top = `${point.y}px`
+      }
+    }
+    setPosition(pos) {
+      this.position = pos
+      this.draw()
+    }
+    onRemove() {
+      if (this.div) {
+        this.div.remove()
+        this.div = null
+      }
+    }
+  }
+  return new HtmlMarker()
+}
 
 export const LiveOrderTrackingMap = ({
   order,
@@ -30,8 +88,10 @@ export const LiveOrderTrackingMap = ({
 }) => {
   const mapContainerRef = useRef(null)
   const mapInstanceRef = useRef(null)
-  const layerGroupRef = useRef(null)
+  const mapsApiRef = useRef(null)
+  const overlaysRef = useRef([])
   const riderMarkerRef = useRef(null)
+  const [mapReady, setMapReady] = useState(false)
 
   const { isDark } = useTheme()
   const { t } = useLanguage()
@@ -41,18 +101,20 @@ export const LiveOrderTrackingMap = ({
   const deliveryBoy = order?.delivery_boy || {}
   const customerAddress = order?.delivery_address || order?.delivery_address_json || {}
 
-  // Fallback / Standard Kanpur Local Coordinates
-  const restLat = Number(restaurant.latitude) || 26.4520
-  const restLng = Number(restaurant.longitude) || 80.3340
+  // Real coordinates from the order (no fake fallback — see hasCoords guard below)
+  const restLat = Number(restaurant.latitude) || null
+  const restLng = Number(restaurant.longitude) || null
 
-  const custLat = Number(customerAddress.latitude) || 26.4590
-  const custLng = Number(customerAddress.longitude) || 80.3440
+  const custLat = Number(customerAddress.latitude) || null
+  const custLng = Number(customerAddress.longitude) || null
+
+  const hasCoords = Boolean(restLat && restLng && custLat && custLng)
 
   // OSRM Road Geometry Coordinates State
   const [roadPath, setRoadPath] = useState([])
   const [osrmLoading, setOsrmLoading] = useState(true)
-  const [roadDistanceKm, setRoadDistanceKm] = useState(1.4)
-  const [roadDurationMins, setRoadDurationMins] = useState(6)
+  const [roadDistanceKm, setRoadDistanceKm] = useState(null)
+  const [roadDurationMins, setRoadDurationMins] = useState(null)
 
   // Simulation progress along the road points (index fraction)
   const [routePointIndex, setRoutePointIndex] = useState(0)
@@ -62,6 +124,7 @@ export const LiveOrderTrackingMap = ({
 
   // Fetch real road route from OSRM
   useEffect(() => {
+    if (!hasCoords) return
     let isMounted = true
 
     const loadRoadRoute = async () => {
@@ -137,61 +200,84 @@ export const LiveOrderTrackingMap = ({
     return () => clearInterval(interval)
   }, [isOutForDelivery, roadPath])
 
-  // Initialize and update Leaflet Map
+  // Initialize the Google Map once
   useEffect(() => {
-    if (!mapContainerRef.current) return
+    let cancelled = false
+    if (!hasCoords || !mapContainerRef.current || mapInstanceRef.current) return
 
-    if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        center: [(restLat + custLat) / 2, (restLng + custLng) / 2],
-        zoom: 15,
-        minZoom: 12,
-        maxZoom: 18,
-        zoomControl: false,
-        attributionControl: false,
+    loadGoogleMaps()
+      .then((maps) => {
+        if (cancelled || !mapContainerRef.current) return
+        mapsApiRef.current = maps
+        const map = new maps.Map(mapContainerRef.current, {
+          center: { lat: (restLat + custLat) / 2, lng: (restLng + custLng) / 2 },
+          zoom: 15,
+          minZoom: 11,
+          maxZoom: 19,
+          disableDefaultUI: true,
+          zoomControl: true,
+          zoomControlOptions: { position: maps.ControlPosition.RIGHT_TOP },
+          gestureHandling: 'greedy',
+          clickableIcons: false,
+          styles: isDark ? DARK_MAP_STYLE : undefined,
+        })
+        mapInstanceRef.current = map
+        setMapReady(true)
       })
+      .catch((err) => console.warn('Failed to load Google Maps:', err))
 
-      L.control.zoom({ position: 'topright' }).addTo(map)
-
-      // High quality CartoDB Voyager tiles
-      const tileUrl = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-
-      L.tileLayer(tileUrl, {
-        maxZoom: 19,
-        subdomains: 'abcd',
-      }).addTo(map)
-
-      layerGroupRef.current = L.featureGroup().addTo(map)
-      mapInstanceRef.current = map
+    return () => {
+      cancelled = true
     }
+  }, [hasCoords])
 
+  // Keep base-map styling in sync with light/dark theme
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setOptions({ styles: isDark ? DARK_MAP_STYLE : undefined })
+    }
+  }, [isDark])
+
+  // Draw / redraw route + markers whenever data changes
+  useEffect(() => {
+    const maps = mapsApiRef.current
     const map = mapInstanceRef.current
-    const group = layerGroupRef.current
-    group.clearLayers()
+    if (!maps || !map) return
+
+    // Clear previous overlays (polylines + HTML markers)
+    overlaysRef.current.forEach((o) => o.setMap && o.setMap(null))
+    overlaysRef.current = []
 
     // 1. Draw Real OSRM Road Polyline Path
-    const activeRouteCoordinates = roadPath.length > 0 ? roadPath : [
-      [restLat, restLng],
-      [custLat, custLng],
-    ]
+    const activeRouteCoordinates = (roadPath.length > 0
+      ? roadPath
+      : [
+          [restLat, restLng],
+          [custLat, custLng],
+        ]
+    ).map(([lat, lng]) => ({ lat, lng }))
 
     // Background thick road route line
-    L.polyline(activeRouteCoordinates, {
-      color: '#113BD0',
-      weight: 6,
-      opacity: 0.9,
-      lineCap: 'round',
-      lineJoin: 'round',
-    }).addTo(group)
+    overlaysRef.current.push(
+      new maps.Polyline({
+        path: activeRouteCoordinates,
+        strokeColor: '#113BD0',
+        strokeOpacity: 0.9,
+        strokeWeight: 6,
+        map,
+      })
+    )
 
-    // Animated dashed pulse route line
-    L.polyline(activeRouteCoordinates, {
-      color: '#60A5FA',
-      weight: 2.5,
-      dashArray: '8, 12',
-      opacity: 0.95,
-      lineCap: 'round',
-    }).addTo(group)
+    // Lighter overlay line on top for depth
+    overlaysRef.current.push(
+      new maps.Polyline({
+        path: activeRouteCoordinates,
+        strokeColor: '#60A5FA',
+        strokeOpacity: 0.95,
+        strokeWeight: 2.5,
+        map,
+      })
+    )
 
     // 2. Restaurant Marker
     const restIconHtml = `
@@ -207,13 +293,9 @@ export const LiveOrderTrackingMap = ({
       </div>
     `
 
-    L.marker([restLat, restLng], {
-      icon: L.divIcon({
-        html: restIconHtml,
-        className: 'custom-rest-marker',
-        iconSize: [40, 40],
-      }),
-    }).addTo(group)
+    overlaysRef.current.push(
+      makeHtmlMarker(maps, map, { lat: restLat, lng: restLng }, restIconHtml, 400)
+    )
 
     // 3. Customer Home Marker
     const custIconHtml = `
@@ -229,13 +311,9 @@ export const LiveOrderTrackingMap = ({
       </div>
     `
 
-    L.marker([custLat, custLng], {
-      icon: L.divIcon({
-        html: custIconHtml,
-        className: 'custom-cust-marker',
-        iconSize: [40, 40],
-      }),
-    }).addTo(group)
+    overlaysRef.current.push(
+      makeHtmlMarker(maps, map, { lat: custLat, lng: custLng }, custIconHtml, 400)
+    )
 
     // 4. Live Rider On Bike Marker (Animated 3D Glowing Badge)
     const riderIconHtml = `
@@ -247,7 +325,7 @@ export const LiveOrderTrackingMap = ({
         <!-- Floating Info Pill on Rider -->
         <div class="mb-1 px-2 py-0.5 rounded-full bg-slate-900 text-white text-[9px] font-black shadow-xl flex items-center gap-1 border border-white/20 whitespace-nowrap">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>${deliveryBoy.name || 'Rahul (Rider)'}</span>
+          <span>${deliveryBoy.name || 'Delivery Partner'}</span>
         </div>
 
         <!-- 3D Bike Badge with Elevation & Glow -->
@@ -261,69 +339,94 @@ export const LiveOrderTrackingMap = ({
       </div>
     `
 
-    const riderMarker = L.marker(riderCoords, {
-      icon: L.divIcon({
-        html: riderIconHtml,
-        className: 'custom-rider-marker',
-        iconSize: [48, 48],
-      }),
-      zIndexOffset: 1000,
-    }).addTo(group)
-
+    const riderMarker = makeHtmlMarker(
+      maps,
+      map,
+      { lat: riderCoords[0], lng: riderCoords[1] },
+      riderIconHtml,
+      1000
+    )
+    overlaysRef.current.push(riderMarker)
     riderMarkerRef.current = riderMarker
 
-    // Auto-fit bounds smoothly
-    map.fitBounds(group.getBounds(), {
-      padding: [45, 45],
-      maxZoom: 16,
+    // Auto-fit bounds smoothly around the whole route + all markers
+    const bounds = new maps.LatLngBounds()
+    activeRouteCoordinates.forEach((c) => bounds.extend(c))
+    bounds.extend({ lat: restLat, lng: restLng })
+    bounds.extend({ lat: custLat, lng: custLng })
+    map.fitBounds(bounds, 45)
+    // Never zoom in past street level when the two points are very close
+    const cap = maps.event.addListenerOnce(map, 'idle', () => {
+      if (map.getZoom() > 16) map.setZoom(16)
     })
-  }, [restLat, restLng, custLat, custLng, isDark, restaurant.name, deliveryBoy.name, roadPath])
+    overlaysRef.current.push({ setMap: () => maps.event.removeListener(cap) })
+  }, [mapReady, restLat, restLng, custLat, custLng, restaurant.name, deliveryBoy.name, roadPath])
 
-  // Smoothly pan & update rider position on map
+  // Smoothly update rider position on map
   useEffect(() => {
     if (riderMarkerRef.current) {
-      riderMarkerRef.current.setLatLng(riderCoords)
+      riderMarkerRef.current.setPosition({ lat: riderCoords[0], lng: riderCoords[1] })
     }
   }, [riderCoords])
 
   const handleCenterOnRider = () => {
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.flyTo(riderCoords, 16, { duration: 1.2 })
+      mapInstanceRef.current.panTo({ lat: riderCoords[0], lng: riderCoords[1] })
+      mapInstanceRef.current.setZoom(16)
     }
   }
 
   return (
     <div className={`relative overflow-hidden rounded-3xl border-2 border-slate-200/90 dark:border-slate-800 shadow-xl bg-slate-100 dark:bg-slate-900 ${className}`}>
-      {/* 1. Leaflet Live Map Canvas */}
-      <div ref={mapContainerRef} className="w-full h-72 sm:h-80 z-0" />
+      {/* 1. Google Maps Live Map Canvas (real order coordinates only) */}
+      {hasCoords ? (
+        <div ref={mapContainerRef} className="w-full h-72 sm:h-80 z-0" />
+      ) : (
+        <div className="w-full h-72 sm:h-80 flex flex-col items-center justify-center text-center px-8 gap-2 text-slate-400 dark:text-slate-500">
+          <MapPin className="w-8 h-8" />
+          <p className="text-xs font-bold">
+            Live map appears once the restaurant &amp; delivery location are available.
+          </p>
+        </div>
+      )}
 
       {/* 2. Top-Left Live Status Badge */}
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-2 pointer-events-none">
-        <div className="px-3 py-1.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg border border-slate-200/80 dark:border-slate-800 flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
-          <div>
-            <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block leading-none flex items-center gap-1">
-              <Navigation className="w-2.5 h-2.5 text-[#113BD0]" />
-              <span>{isOutForDelivery ? 'OSRM LIVE ROUTE' : isDelivered ? 'DELIVERED' : 'KITCHEN READY'}</span>
-            </span>
-            <span className="text-xs font-black text-slate-900 dark:text-slate-100 leading-tight">
-              {isOutForDelivery ? `${roadDistanceKm} km road • ~${roadDurationMins} mins` : isDelivered ? 'Delivered to Home' : 'Food Being Prepared'}
-            </span>
+      {hasCoords && (
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-2 pointer-events-none">
+          <div className="px-3 py-1.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-lg border border-slate-200/80 dark:border-slate-800 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block leading-none flex items-center gap-1">
+                <Navigation className="w-2.5 h-2.5 text-[#113BD0]" />
+                <span>{isOutForDelivery ? 'LIVE ROUTE' : isDelivered ? 'DELIVERED' : 'KITCHEN READY'}</span>
+              </span>
+              <span className="text-xs font-black text-slate-900 dark:text-slate-100 leading-tight">
+                {isOutForDelivery
+                  ? roadDistanceKm != null
+                    ? `${roadDistanceKm} km road • ~${roadDurationMins} mins`
+                    : 'Calculating route…'
+                  : isDelivered
+                  ? 'Delivered to Home'
+                  : 'Food Being Prepared'}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 3. Top-Right Center Focus Button */}
-      <div className="absolute top-3 right-3 z-10">
-        <button
-          type="button"
-          onClick={handleCenterOnRider}
-          className="p-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-700 dark:text-slate-200 hover:text-[#113BD0] shadow-lg border border-slate-200/80 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-          title="Center on Rider"
-        >
-          <Crosshair className="w-4 h-4" />
-        </button>
-      </div>
+      {hasCoords && (
+        <div className="absolute top-3 right-3 z-10">
+          <button
+            type="button"
+            onClick={handleCenterOnRider}
+            className="p-2 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-700 dark:text-slate-200 hover:text-[#113BD0] shadow-lg border border-slate-200/80 dark:border-slate-800 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            title="Center on Rider"
+          >
+            <Crosshair className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* 4. Bottom Interactive Delivery Partner Strip */}
       <div className="absolute bottom-3 inset-x-3 z-10">
@@ -337,7 +440,7 @@ export const LiveOrderTrackingMap = ({
                 DELIVERY PARTNER
               </span>
               <h4 className="text-xs font-black text-slate-900 dark:text-slate-100 truncate">
-                {deliveryBoy.name || 'Rahul Verma'}
+                {deliveryBoy.name || 'Delivery Partner'}
               </h4>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                 {isOutForDelivery ? 'Riding towards your location' : 'Assigned & ready for pickup'}

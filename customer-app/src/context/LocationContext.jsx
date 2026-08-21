@@ -27,7 +27,8 @@ export const LocationProvider = ({ children }) => {
     }
   }, [isAuthenticated])
 
-  // Auto-detect real location on initial mount if not set or if dummy address is present
+  // Auto-detect real location on initial mount only when no usable address is
+  // stored (no hardcoded dummy-address matching — a real saved address stays).
   useEffect(() => {
     const saved = localStorage.getItem('dastak_active_address')
     let parsed = null
@@ -35,12 +36,9 @@ export const LocationProvider = ({ children }) => {
       parsed = saved ? JSON.parse(saved) : null
     } catch (e) {}
 
-    const isDummy =
-      !parsed ||
-      parsed.address?.includes('Ganga Heights') ||
-      parsed.address?.includes('Flat 402')
+    const hasUsableAddress = Boolean(parsed?.address && parsed?.latitude && parsed?.longitude)
 
-    if (isDummy) {
+    if (!hasUsableAddress) {
       detectCurrentLocation().catch((err) => {
         console.warn('Auto location detection:', err)
       })
@@ -74,15 +72,21 @@ export const LocationProvider = ({ children }) => {
       })
       setAddresses(list)
 
-      // Only auto-select default address if user hasn't already got a live GPS detected address
+      // Only auto-select the default saved address if the user doesn't already
+      // have a usable active address (e.g. a live GPS-detected one).
       const savedActive = localStorage.getItem('dastak_active_address')
-      const currentActive = savedActive ? JSON.parse(savedActive) : null
-      const isCurrentDummy = !currentActive || currentActive.address?.includes('Ganga Heights') || currentActive.address?.includes('Flat 402')
+      let currentActive = null
+      try {
+        currentActive = savedActive ? JSON.parse(savedActive) : null
+      } catch (e) {}
+      const hasUsableActive = Boolean(
+        currentActive?.address && currentActive?.latitude && currentActive?.longitude
+      )
 
       const def = list.find((a) => a.is_default) || list[0]
-      if (def && !isCurrentDummy && !def.address?.includes('Ganga Heights')) {
+      if (def && !hasUsableActive) {
         selectAddress(def)
-      } else if (isCurrentDummy) {
+      } else if (!hasUsableActive) {
         detectCurrentLocation().catch(() => {})
       }
     } catch (e) {

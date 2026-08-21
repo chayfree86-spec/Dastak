@@ -21,6 +21,7 @@ import EmptyState from '../../components/common/EmptyState'
 import Button from '../../components/common/Button'
 import RatingModal from '../../components/common/RatingModal'
 import { realtimeBus } from '../../utils/realtimeSync'
+import dataCache from '../../utils/dataCache'
 
 export const OrdersPage = () => {
   const navigate = useNavigate()
@@ -29,22 +30,23 @@ export const OrdersPage = () => {
   const { isAuthenticated } = useAuth()
   const { addItem } = useCart()
 
-  const [orders, setOrders] = useState([])
+  const [orders, setOrders] = useState(() => dataCache.get('customer_orders') || [])
   const [activeTab, setActiveTab] = useState('all') // 'all' | 'active' | 'completed'
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !dataCache.has('customer_orders'))
   const [selectedOrderForRating, setSelectedOrderForRating] = useState(null)
 
   const loadOrders = async (isSilent = false) => {
     if (!isAuthenticated) return
-    if (!isSilent) setLoading(true)
+    if (!isSilent && !dataCache.has('customer_orders')) setLoading(true)
     try {
       const res = await customerApi.getOrders({ per_page: 30 })
       const list = res.data?.data || res.data || []
       setOrders(list)
+      dataCache.set('customer_orders', list)
     } catch (e) {
       console.warn('Orders load error:', e)
     } finally {
-      if (!isSilent) setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -54,7 +56,7 @@ export const OrdersPage = () => {
       return
     }
 
-    loadOrders(false)
+    loadOrders(dataCache.has('customer_orders'))
 
     // Realtime sync on order status changes (assigned, preparing, dispatched, delivered)
     const unsubscribe = realtimeBus.subscribe(() => {

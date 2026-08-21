@@ -45,12 +45,12 @@ export const reverseGeocode = async (lat, lng) => {
         addr.town ||
         addr.city_district ||
         'Location'
-      const city = addr.city || addr.state_district || addr.state || 'Kanpur'
+      const city = addr.city || addr.state_district || addr.state || ''
       const pincode = addr.postcode || ''
 
       return {
         formatted_address: data.display_name,
-        short_address: `${locality}, ${city}${pincode ? ' ' + pincode : ''}`,
+        short_address: [locality, city].filter(Boolean).join(', ') + (pincode ? ' ' + pincode : ''),
         locality,
         city,
         pincode,
@@ -108,7 +108,7 @@ export const searchPlacesAuto = async (query) => {
           formatted_address: it.display_name,
           latitude: parseFloat(it.lat),
           longitude: parseFloat(it.lon),
-          city: addr.city || addr.state_district || 'Kanpur',
+          city: addr.city || addr.state_district || '',
         }
       })
     }
@@ -126,7 +126,7 @@ export const searchPlacesAuto = async (query) => {
       return data2.features.map((f) => {
         const p = f.properties || {}
         const name = p.name || query
-        const city = p.city || p.district || p.state || 'Kanpur'
+        const city = p.city || p.district || p.state || ''
         const full = [p.name, p.street, p.city, p.state, p.postcode]
           .filter(Boolean)
           .join(', ')
@@ -136,11 +136,11 @@ export const searchPlacesAuto = async (query) => {
           main_text: name,
           sub_text: full || name,
           formatted_address: full || name,
-          latitude: f.geometry?.coordinates?.[1] || 26.456,
-          longitude: f.geometry?.coordinates?.[0] || 80.339,
+          latitude: f.geometry?.coordinates?.[1] ?? null,
+          longitude: f.geometry?.coordinates?.[0] ?? null,
           city,
         }
-      })
+      }).filter((r) => r.latitude != null && r.longitude != null)
     }
   } catch (e) {}
 
@@ -155,11 +155,11 @@ export const fallbackIpLocation = async () => {
     const res = await fetch('https://ipapi.co/json/')
     const data = await res.json()
     if (data && data.latitude && data.longitude) {
-      const city = data.city || data.region || 'Kanpur'
+      const city = data.city || data.region || ''
       return {
-        formatted_address: `${data.city || 'Current Area'}, ${data.region || ''} ${data.postal || ''}`.trim(),
-        short_address: `${data.city || 'My Location'}, ${data.region || 'India'}`,
-        locality: data.city || 'Current Location',
+        formatted_address: [data.city, data.region, data.postal].filter(Boolean).join(', '),
+        short_address: [data.city, data.region].filter(Boolean).join(', '),
+        locality: data.city || '',
         city: city,
         pincode: data.postal || '',
         latitude: parseFloat(data.latitude),
@@ -170,16 +170,9 @@ export const fallbackIpLocation = async () => {
     console.warn('IP location fetch fallback error:', e)
   }
 
-  // Sensible local default if completely offline
-  return {
-    formatted_address: 'Kalyanpur, Kanpur, Uttar Pradesh 208017',
-    short_address: 'Kalyanpur, Kanpur',
-    locality: 'Kalyanpur',
-    city: 'Kanpur',
-    pincode: '208017',
-    latitude: 26.4947,
-    longitude: 80.2798,
-  }
+  // No fake fallback — if IP location is unavailable, fail so the caller can
+  // ask the user to pick/detect a real location instead of showing a stub.
+  throw new Error('Unable to determine location.')
 }
 
 /**
@@ -225,7 +218,7 @@ export const detectCurrentGPS = () => {
  * Calculate distance in KM using Haversine formula
  */
 export const calculateDistanceKm = (lat1, lon1, lat2, lon2) => {
-  if (!lat1 || !lon1 || !lat2 || !lon2) return 1.5
+  if (!lat1 || !lon1 || !lat2 || !lon2) return 0
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
   const dLon = ((lon2 - lon1) * Math.PI) / 180

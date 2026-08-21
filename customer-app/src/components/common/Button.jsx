@@ -6,6 +6,7 @@ export const Button = ({
   variant = 'primary', // 'primary' | 'secondary' | 'accent' | 'outline' | 'danger' | 'ghost' | 'success'
   size = 'md', // 'sm' | 'md' | 'lg' | 'xl'
   icon: Icon,
+  iconPosition = 'left', // 'left' | 'right'
   loading = false,
   disabled = false,
   className = '',
@@ -53,9 +54,10 @@ export const Button = ({
       {loading ? (
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : (
-        Icon && <Icon className="w-4 h-4 shrink-0" />
+        Icon && iconPosition === 'left' && <Icon className="w-4 h-4 shrink-0" />
       )}
       <span>{children}</span>
+      {!loading && Icon && iconPosition === 'right' && <Icon className="w-4 h-4 shrink-0" />}
     </button>
   )
 }

@@ -30,6 +30,7 @@ import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import EmptyState from '../../components/common/EmptyState'
 import Button from '../../components/common/Button'
 import RatingModal from '../../components/common/RatingModal'
+import dataCache from '../../utils/dataCache'
 
 export const ReportsPage = () => {
   const navigate = useNavigate()
@@ -38,8 +39,8 @@ export const ReportsPage = () => {
   const { isAuthenticated, user } = useAuth()
   const { addItem } = useCart()
 
-  const [orders, setOrders] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [orders, setOrders] = useState(() => dataCache.get('customer_orders') || [])
+  const [loading, setLoading] = useState(() => !dataCache.has('customer_orders'))
   const [filterTab, setFilterTab] = useState('all') // 'all' | 'delivered' | 'cancelled'
   const [selectedOrderForRating, setSelectedOrderForRating] = useState(null)
 
@@ -49,11 +50,15 @@ export const ReportsPage = () => {
       return
     }
 
-    const loadData = async () => {
-      setLoading(true)
+    const loadData = async (isSilent = false) => {
+      if (!isSilent && !dataCache.has('customer_orders')) {
+        setLoading(true)
+      }
       try {
         const res = await customerApi.getOrders({ per_page: 50 })
-        setOrders(res.data?.data || res.data || [])
+        const list = res.data?.data || res.data || []
+        setOrders(list)
+        dataCache.set('customer_orders', list)
       } catch (e) {
         console.warn('Reports load error:', e)
       } finally {
@@ -61,7 +66,7 @@ export const ReportsPage = () => {
       }
     }
 
-    loadData()
+    loadData(dataCache.has('customer_orders'))
   }, [isAuthenticated])
 
   const handleReorder = (order) => {

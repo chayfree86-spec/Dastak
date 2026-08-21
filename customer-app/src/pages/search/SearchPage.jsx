@@ -37,7 +37,7 @@ export const SearchPage = () => {
     suggestions: [],
   })
 
-  const quickSuggestions = [
+  const [quickSuggestions, setQuickSuggestions] = useState([
     'Chai',
     'Samosa',
     'Burger',
@@ -45,7 +45,22 @@ export const SearchPage = () => {
     'Pizza',
     'Jalebi',
     'Paneer Butter Masala',
-  ]
+  ])
+
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const res = await searchApi.getSuggestions('')
+        const list = res?.data || res || []
+        if (Array.isArray(list) && list.length > 0) {
+          setQuickSuggestions(list)
+        }
+      } catch (e) {
+        console.warn('Suggestions load error:', e)
+      }
+    }
+    loadSuggestions()
+  }, [])
 
   const performSearch = useCallback(
     async (searchTerm) => {

@@ -18,7 +18,7 @@ export const RestaurantCard = ({ restaurant }) => {
 
   const isOpen = restaurant.is_open !== false
   const rating = Number(restaurant.rating) || 0
-  const timeMin = restaurant.preparation_time_minutes || 25
+  const timeMin = Number(restaurant.preparation_time_minutes) || null
   const isPureVeg = Boolean(restaurant.is_pure_veg)
   const bannerUrl = getRestaurantBanner(restaurant)
 
@@ -33,7 +33,7 @@ export const RestaurantCard = ({ restaurant }) => {
           navigate(`/restaurant/${restaurant.slug || restaurant.id}`)
         }
       }}
-      aria-label={`View restaurant: ${restaurant.name}, Rating: ${rating.toFixed(1)}, Delivery in ${timeMin} to ${timeMin + 10} minutes`}
+      aria-label={`View restaurant: ${restaurant.name}${rating > 0 ? `, Rating: ${rating.toFixed(1)}` : ''}${timeMin ? `, Delivery in ${timeMin} to ${timeMin + 10} minutes` : ''}`}
     >
       {/* Banner Hero with Aspect Ratio */}
       <div className="relative aspect-[16/9] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -44,7 +44,6 @@ export const RestaurantCard = ({ restaurant }) => {
             width="360"
             height="202"
             className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500"
-            loading="lazy"
             decoding="async"
           />
         ) : (
@@ -109,10 +108,12 @@ export const RestaurantCard = ({ restaurant }) => {
 
         {/* Meta Footer: Delivery Time & Location */}
         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-bold gap-2">
-          <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-            <Clock className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400 shrink-0" />
-            <span>{timeMin}-{timeMin + 10} min</span>
-          </div>
+          {timeMin ? (
+            <div className="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+              <Clock className="w-3.5 h-3.5 text-[#113BD0] dark:text-blue-400 shrink-0" />
+              <span>{timeMin}-{timeMin + 10} min</span>
+            </div>
+          ) : <span />}
           <div className="flex items-center gap-1.5 min-w-0 truncate justify-end">
             <MapPin className="w-3.5 h-3.5 text-[#F97316] shrink-0" />
             <span className="truncate">{restaurant.city || ''}</span>

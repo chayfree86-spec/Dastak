@@ -47,10 +47,18 @@
   </head>
   <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white min-h-screen">
     <div id="root">
-      <!-- Lightweight Initial App Shell for 0.1s First Contentful Paint -->
-      <header style="height: 56px; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; align-items: center; padding: 0 16px; justify-content: space-between;">
-        <img src="/logo-horizontal.svg" alt="Dastak" width="130" height="32" style="height: 32px; width: 130px;" />
-        <div style="width: 80px; height: 28px; border-radius: 12px;" class="critical-skeleton"></div>
+      <!-- Centered Lightweight Initial App Shell for 0.1s First Contentful Paint & Zero CLS -->
+      <header style="height: 56px; border-bottom: 1px solid #e2e8f0; background: #ffffff; display: flex; align-items: center;">
+        <div style="max-width: 80rem; width: 100%; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <img src="/logo-horizontal.svg" alt="Dastak" width="130" height="32" style="height: 32px; width: auto; max-height: 36px; object-fit: contain;" />
+            <div style="width: 130px; height: 32px; border-radius: 16px;" class="critical-skeleton"></div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 60px; height: 32px; border-radius: 12px;" class="critical-skeleton"></div>
+            <div style="width: 32px; height: 32px; border-radius: 12px;" class="critical-skeleton"></div>
+          </div>
+        </div>
       </header>
     </div>
     <script type="module" src="/src/main.jsx"></script>

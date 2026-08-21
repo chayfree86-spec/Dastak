@@ -64,9 +64,8 @@ export const ProductCard = ({ product, customRestaurant = null, onSelect }) => {
             alt={product.name}
             width="360"
             height="240"
-            loading="lazy"
             decoding="async"
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 pointer-events-none"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-all duration-500 pointer-events-none"
             onError={() => setImageFailed(true)}
           />
           {/* Multi-Stop Gradient Overlay for Crisp Text Readability */}

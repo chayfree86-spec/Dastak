@@ -17,20 +17,24 @@ import restaurantApi from '../../api/restaurant.api'
 import RestaurantCard from '../../components/common/RestaurantCard'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import EmptyState from '../../components/common/EmptyState'
+import dataCache from '../../utils/dataCache'
 
 export const RestaurantsPage = () => {
   const { t, lang } = useLanguage()
-  const [restaurants, setRestaurants] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [restaurants, setRestaurants] = useState(() => dataCache.get('restaurants_all') || [])
+  const [loading, setLoading] = useState(() => !dataCache.has('restaurants_all'))
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState('all') // 'all' | 'veg' | 'rating' | 'fast'
 
   useEffect(() => {
     const loadRestaurants = async () => {
-      setLoading(true)
+      if (!dataCache.has('restaurants_all')) setLoading(true)
       try {
         const res = await restaurantApi.getRestaurants({ per_page: 20 })
-        setRestaurants(res.data?.data || res.data || [])
+        const list = res.data?.data || res.data || []
+        setRestaurants(list)
+        dataCache.set('restaurants_all', list)
+        dataCache.preloadImages(list.map(r => r.banner || r.logo))
       } catch (e) {
         console.warn('Failed to load restaurants:', e)
       } finally {
@@ -51,8 +55,11 @@ export const RestaurantsPage = () => {
     if (!matchesSearch) return false
 
     if (filter === 'veg') return Boolean(rest.is_pure_veg)
-    if (filter === 'rating') return (Number(rest.rating) || 4.8) >= 4.5
-    if (filter === 'fast') return (rest.preparation_time_minutes || 30) <= 25
+    if (filter === 'rating') return Number(rest.rating) >= 4.5
+    if (filter === 'fast') {
+      const prep = Number(rest.preparation_time_minutes)
+      return prep > 0 && prep <= 25
+    }
 
     return true
   })

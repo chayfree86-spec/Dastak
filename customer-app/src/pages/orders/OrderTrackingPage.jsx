@@ -539,7 +539,9 @@ export const OrderTrackingPage = () => {
                   ? liveTelemetry.etaMins <= 1
                     ? lang === 'hi' ? 'बस पहुँचने वाला है!' : 'Arriving Now!'
                     : `~${liveTelemetry.etaMins} ${lang === 'hi' ? 'मिनट' : 'Mins'}`
-                  : `~${order.estimated_delivery_minutes || 25} ${lang === 'hi' ? 'मिनट' : 'Mins'}`}
+                  : Number(order.estimated_delivery_minutes) > 0
+                  ? `~${order.estimated_delivery_minutes} ${lang === 'hi' ? 'मिनट' : 'Mins'}`
+                  : '—'}
               </div>
               {order.status === 'OUT_FOR_DELIVERY' && (
                 <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 block mt-0.5">
