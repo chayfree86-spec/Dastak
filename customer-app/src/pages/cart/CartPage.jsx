@@ -38,26 +38,6 @@ export const CartPage = () => {
     clearCart,
   } = useCart()
 
-  const [activeOrder, setActiveOrder] = useState(null)
-
-  useEffect(() => {
-    if (!isAuthenticated) return
-    const loadActiveOrder = async () => {
-      try {
-        const res = await customerApi.getOrders({ status: 'active' })
-        const list = res.data?.data || res.data || []
-        const active = list.find(
-          (o) =>
-            o.status !== 'DELIVERED' &&
-            o.status !== 'CANCELLED' &&
-            o.status !== 'REJECTED'
-        )
-        setActiveOrder(active || null)
-      } catch (e) {}
-    }
-    loadActiveOrder()
-  }, [isAuthenticated])
-
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto space-y-6 py-6 pb-28">
@@ -68,13 +48,6 @@ export const CartPage = () => {
           actionLabel={t.browseRestaurants}
           onAction={() => navigate('/')}
         />
-
-        {/* Floating Live Active Order Card - Positioned above footer for 1-hand reach */}
-        {activeOrder && (
-          <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-40 drop-shadow-2xl">
-            <ActiveOrderBanner order={activeOrder} />
-          </div>
-        )}
       </div>
     )
   }
@@ -275,13 +248,6 @@ export const CartPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Floating Live Active Order Card (if exists) */}
-      {activeOrder && (
-        <div className="fixed bottom-20 inset-x-4 max-w-md mx-auto z-40 drop-shadow-2xl">
-          <ActiveOrderBanner order={activeOrder} />
-        </div>
-      )}
     </div>
   )
 }

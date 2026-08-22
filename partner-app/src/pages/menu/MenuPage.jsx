@@ -36,7 +36,14 @@ const Thumb = ({ src, size = 'w-16 h-16 sm:w-20 sm:h-20', veg }) => (
     className={`${size} rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-2xs`}
   >
     {src ? (
-      <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+      <img
+        src={src}
+        alt=""
+        className="w-full h-full object-cover"
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
+      />
     ) : (
       <div className="flex flex-col items-center justify-center p-2 text-center">
         <UtensilsCrossed

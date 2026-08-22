@@ -25,6 +25,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useSound } from '../../context/SoundContext'
 import { useToast } from '../../context/ToastContext'
+import { useRiderLocation } from '../../context/LocationContext'
 import { BottomNav } from './BottomNav'
 import NewAssignmentSheet from '../delivery/NewAssignmentSheet'
 import DutyToggleModal from '../delivery/DutyToggleModal'
@@ -41,6 +42,7 @@ export const DeliveryLayout = () => {
     setNewAssignmentModal,
     logout,
   } = useAuth()
+  const { location: riderLocation, openLocationModal } = useRiderLocation()
   const { isDark, toggleTheme } = useTheme()
   const { soundEnabled, toggleSound } = useSound()
   const toast = useToast()
@@ -160,6 +162,28 @@ export const DeliveryLayout = () => {
             </div>
           </div>
 
+          {/* Active Operating Zone / Live GPS Button in Sidebar */}
+          <button
+            type="button"
+            onClick={openLocationModal}
+            className="w-full p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 hover:bg-blue-50 dark:hover:bg-slate-750 border border-slate-200/80 dark:border-slate-700/70 text-left transition-colors cursor-pointer flex items-center justify-between gap-2 group"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <MapPin className={`w-3.5 h-3.5 shrink-0 ${riderLocation.isGpsLive ? 'text-emerald-500 animate-pulse' : 'text-[#F97316]'}`} />
+              <div className="min-w-0">
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block truncate group-hover:text-[#113BD0]">
+                  {riderLocation.zoneName || 'Set Location'}
+                </span>
+                <span className="text-[9px] font-medium text-slate-400 block truncate">
+                  {riderLocation.isGpsLive ? 'Live GPS Active' : 'Click to switch zone'}
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 shrink-0">
+              Change
+            </span>
+          </button>
+
           {/* Prominent Sidebar Duty Toggle Button */}
           <button
             type="button"
@@ -228,33 +252,8 @@ export const DeliveryLayout = () => {
           })}
         </nav>
 
-        {/* Sidebar Footer Controls: Theme, Sound & Logout */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-700/60 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={toggleSound}
-              className={`flex-1 p-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
-                soundEnabled
-                  ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800 text-[#113BD0] dark:text-blue-400'
-                  : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'
-              }`}
-              title="Toggle Audio Tone"
-            >
-              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-              <span>{soundEnabled ? 'Audio On' : 'Muted'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-              title="Toggle Dark/Light Mode"
-            >
-              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-            </button>
-          </div>
-
+        {/* User Info / Logout in Desktop Sidebar */}
+        <div className="p-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => setLogoutModalOpen(true)}
@@ -280,9 +279,16 @@ export const DeliveryLayout = () => {
               <span className="text-sm sm:text-base font-black text-slate-900 dark:text-slate-100 block truncate leading-tight">
                 {user?.name || 'Rahul Verma'}
               </span>
-              <span className="text-[11px] font-bold text-slate-400 dark:text-slate-400 block truncate mt-0.5">
-                Kanpur Central Zone
-              </span>
+              <button
+                type="button"
+                onClick={openLocationModal}
+                className="text-[11px] font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 flex items-center gap-1 truncate mt-0.5 group cursor-pointer text-left"
+              >
+                <MapPin className={`w-3 h-3 shrink-0 ${riderLocation.isGpsLive ? 'text-emerald-500 animate-pulse' : 'text-[#F97316]'}`} />
+                <span className="truncate max-w-[130px] group-hover:underline">
+                  {riderLocation.zoneName || riderLocation.address || 'Set Location'}
+                </span>
+              </button>
             </div>
           </div>
 

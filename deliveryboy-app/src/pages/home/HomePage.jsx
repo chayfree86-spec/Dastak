@@ -14,9 +14,11 @@ import {
   Shield,
   PhoneCall,
   ChevronRight,
+  MapPin,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useRiderLocation } from '../../context/LocationContext'
 import { formatCurrency } from '../../utils/formatters'
 import deliveryApi from '../../api/delivery.api'
 import ActiveDeliveryCard from '../../components/delivery/ActiveDeliveryCard'
@@ -26,6 +28,7 @@ import { realtimeBus } from '../../utils/realtimeSync'
 
 export const HomePage = () => {
   const { riderProfile, activeOrder, refreshActiveOrder } = useAuth()
+  const { location, openLocationModal } = useRiderLocation()
   const navigate = useNavigate()
 
   const [summary, setSummary] = useState(null)
@@ -197,6 +200,7 @@ export const HomePage = () => {
         {/* ========================================================================= */}
         <div className="lg:col-span-4 space-y-4">
           {/* Duty Status Banner */}
+          {/* 1. Online / Offline Duty Status Card */}
           <div
             className={`p-5 rounded-3xl border transition-all flex items-center justify-between gap-3 shadow-xs ${
               isOnline
@@ -229,6 +233,60 @@ export const HomePage = () => {
                 isOnline ? 'bg-emerald-500 animate-ping' : 'bg-slate-400'
               }`}
             />
+          </div>
+
+          {/* 2. Active Operating Location & Zone Card */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-[#F97316]" />
+                <span>OPERATING LOCATION</span>
+              </h3>
+              <button
+                type="button"
+                onClick={openLocationModal}
+                className="text-[11px] font-black text-[#113BD0] dark:text-blue-400 hover:underline cursor-pointer"
+              >
+                Change Zone
+              </button>
+            </div>
+
+            <div
+              onClick={openLocationModal}
+              className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-700/60 hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-pointer flex items-center justify-between gap-3 group"
+            >
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                  location.isGpsLive
+                    ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400'
+                    : 'bg-orange-100 dark:bg-orange-950/50 text-[#F97316]'
+                }`}>
+                  {location.isGpsLive ? (
+                    <Navigation className="w-4 h-4 animate-pulse" />
+                  ) : (
+                    <MapPin className="w-4 h-4" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-black text-slate-900 dark:text-slate-100 truncate group-hover:text-[#113BD0]">
+                      {location.zoneName || 'Set Location'}
+                    </span>
+                    <span className={`text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md ${
+                      location.isGpsLive
+                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                        : 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
+                    }`}>
+                      {location.isGpsLive ? 'Live GPS' : 'Zone'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    {location.address || 'Kanpur, Uttar Pradesh'}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 shrink-0" />
+            </div>
           </div>
 
           {/* Today's Shift Overview */}

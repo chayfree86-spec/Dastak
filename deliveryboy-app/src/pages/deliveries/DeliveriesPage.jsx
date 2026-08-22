@@ -13,7 +13,7 @@ import {
   Filter,
 } from 'lucide-react'
 import deliveryApi from '../../api/delivery.api'
-import { formatCurrency, formatDateTime } from '../../utils/formatters'
+import { formatCurrency, formatDateTime, formatAddress } from '../../utils/formatters'
 import StatusBadge from '../../components/common/StatusBadge'
 import LoadingSkeleton from '../../components/common/LoadingSkeleton'
 import EmptyState from '../../components/common/EmptyState'
@@ -248,10 +248,10 @@ export const DeliveriesPage = () => {
                 Customer & Delivery Address
               </span>
               <h5 className="font-black text-slate-900 dark:text-slate-100">
-                {selectedOrder.customer?.name || selectedOrder.delivery_address?.customer_name}
+                {selectedOrder.customer?.name || selectedOrder.delivery_address?.customer_name || 'Customer'}
               </h5>
               <p className="text-slate-500">
-                {selectedOrder.delivery_address?.address}
+                {formatAddress(selectedOrder.delivery_address || selectedOrder.delivery_address_json) || selectedOrder.delivery_address?.address || 'Kanpur, Uttar Pradesh'}
               </p>
             </div>
 

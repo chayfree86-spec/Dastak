@@ -1,13 +1,23 @@
-import React from 'react';
-import { Download, UtensilsCrossed, BellRing, Printer, Share2, PlusSquare, X, CheckCircle2, ExternalLink } from 'lucide-react';
-import { usePwaInstall } from '../../hooks/usePwaInstall';
+import React from 'react'
+import {
+  Download,
+  UtensilsCrossed,
+  BellRing,
+  TrendingUp,
+  Share2,
+  PlusSquare,
+  X,
+  CheckCircle2,
+  ExternalLink,
+} from 'lucide-react'
+import { usePwaInstall } from '../../hooks/usePwaInstall'
 
 export function PwaInstallModal({
   appName = 'Dastak Restaurant Partner',
-  appRole = 'Live Order Management & Kitchen Display System',
+  appRole = 'Live Kitchen Orders, Menu & Sales Management',
   iconSrc = '/pwa-512x512.png',
-  accentColor = 'bg-[#113BD0] hover:bg-[#1E3A8A] text-white shadow-blue-600/30',
-  accentBadge = 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20'
+  accentColor = 'bg-gradient-to-r from-[#113BD0] via-[#7C3AED] to-[#FF5200] hover:opacity-95 text-white shadow-lg shadow-indigo-600/35',
+  accentBadge = 'bg-gradient-to-r from-blue-50 to-orange-50 dark:from-blue-950/40 dark:to-orange-950/40 text-slate-900 dark:text-slate-100 border-indigo-200 dark:border-indigo-500/20',
 }) {
   const {
     showModal,
@@ -15,123 +25,124 @@ export function PwaInstallModal({
     isIOS,
     isInstalled,
     promptInstall,
-    dismissModal
-  } = usePwaInstall();
+    dismissModal,
+  } = usePwaInstall()
 
   if (!showModal || isStandalone) {
-    return null;
+    return null
   }
 
   const handleActionClick = async () => {
     if (isInstalled) {
-      window.location.href = '/';
-      dismissModal(14);
-      return;
+      window.location.href = '/'
+      dismissModal(14)
+      return
     }
-    await promptInstall();
-  };
+    await promptInstall()
+  }
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div 
-        className="relative w-full max-w-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-slate-900/15 dark:shadow-black/80 transform transition-all duration-300 scale-100 overflow-hidden"
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+      <div
+        className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-slate-950/20 dark:shadow-black/80 transform transition-all duration-200 overflow-hidden text-left"
         role="dialog"
         aria-modal="true"
       >
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 dark:bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 dark:bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Ambient dual subtle glow (Blue + Orange) */}
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-blue-500/10 dark:bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-orange-500/10 dark:bg-orange-500/15 rounded-full blur-3xl pointer-events-none" />
 
+        {/* Close Button */}
         <button
+          type="button"
           onClick={() => dismissModal(3)}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-white bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors cursor-pointer"
           aria-label="Close dialog"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-6 text-center sm:text-left">
+        {/* Header Section */}
+        <div className="flex items-center gap-3.5 pr-8 mb-4">
           <div className="relative shrink-0">
             <img
               src={iconSrc}
               alt={appName}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover shadow-xl border border-slate-200 dark:border-white/10 ring-4 ring-slate-100 dark:ring-white/5"
+              className="w-14 h-14 rounded-2xl object-cover shadow-md border border-slate-200 dark:border-slate-700 ring-2 ring-indigo-500/20"
               onError={(e) => {
-                e.target.src = '/favicon.png';
+                e.target.src = '/favicon.png'
               }}
             />
-            <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-900 shadow-md">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-0.5 rounded-full border-2 border-white dark:border-slate-900 shadow-xs">
+              <CheckCircle2 className="w-3 h-3" />
             </div>
           </div>
 
-          <div className="flex-1 min-w-0">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide mb-2 border ${accentBadge}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-              {isInstalled ? 'App Ready' : 'Merchant Portal'}
+          <div className="min-w-0 flex-1">
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide border mb-1 ${accentBadge}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5200] animate-pulse" />
+              {isInstalled ? 'App Installed' : 'Merchant Partner'}
             </span>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-slate-100 tracking-tight truncate leading-tight">
               {appName}
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
               {appRole}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/50 rounded-2xl p-3.5 flex flex-col items-center text-center">
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
-              <BellRing className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-slate-900 dark:text-white">Loud Sound Alarm</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Never miss any incoming order</span>
+        {/* Compact 3-Pill Feature Strip */}
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/60 flex flex-col items-center text-center">
+            <BellRing className="w-4 h-4 text-[#113BD0] dark:text-blue-400 mb-1" />
+            <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight">Live Bell</span>
+            <span className="text-[9px] text-slate-400">Audio Alert</span>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/50 rounded-2xl p-3.5 flex flex-col items-center text-center">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2">
-              <UtensilsCrossed className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-slate-900 dark:text-white">Kitchen Display</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">1-Click accept & food prep</span>
+          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/60 flex flex-col items-center text-center">
+            <UtensilsCrossed className="w-4 h-4 text-[#FF5200] dark:text-orange-400 mb-1" />
+            <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight">KOT Orders</span>
+            <span className="text-[9px] text-slate-400">1-Tap Ready</span>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/50 rounded-2xl p-3.5 flex flex-col items-center text-center">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2">
-              <Printer className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-slate-900 dark:text-white">Thermal Print</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Auto KOT receipt printing</span>
+          <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/70 dark:border-slate-700/60 flex flex-col items-center text-center">
+            <TrendingUp className="w-4 h-4 text-emerald-500 mb-1" />
+            <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 leading-tight">Live Sales</span>
+            <span className="text-[9px] text-slate-400">Analytics</span>
           </div>
         </div>
 
+        {/* iOS Guided Install Instructions */}
         {isIOS ? (
-          <div className="bg-slate-50 dark:bg-slate-800/80 border border-blue-500/30 rounded-2xl p-4 mb-6">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
-              <Share2 className="w-4 h-4" />
-              <span>How to Install on iPhone / iPad:</span>
+          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 mb-4 text-xs">
+            <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 font-bold mb-1.5">
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Install on iPhone:</span>
             </div>
-            <ol className="text-xs text-slate-700 dark:text-slate-300 space-y-2 list-decimal list-inside font-medium">
-              <li>Tap the <strong className="text-slate-900 dark:text-white">Share button</strong> <Share2 className="inline w-3.5 h-3.5 text-blue-600 dark:text-blue-400 mx-0.5" /> in Safari.</li>
-              <li>Select <strong className="text-slate-900 dark:text-white">Add to Home Screen</strong> <PlusSquare className="inline w-3.5 h-3.5 text-blue-600 dark:text-blue-400 mx-0.5" />.</li>
-              <li>Tap <strong className="text-slate-900 dark:text-white">Add</strong> on the top right.</li>
+            <ol className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1 list-decimal list-inside">
+              <li>Tap <strong>Share</strong> in Safari.</li>
+              <li>Select <strong>Add to Home Screen</strong>.</li>
             </ol>
           </div>
         ) : null}
 
-        <div className="flex flex-col sm:flex-row items-center gap-3">
+        {/* Large Prominent Partner Dual Gradient (Blue + Orange) Button */}
+        <div className="space-y-2">
           {!isIOS && (
             <button
+              type="button"
               onClick={handleActionClick}
-              className={`w-full sm:flex-1 py-3.5 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer ${accentColor}`}
+              className={`w-full py-3.5 sm:py-4 px-6 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all cursor-pointer ${accentColor}`}
             >
               {isInstalled ? (
                 <>
-                  <ExternalLink className="w-4 h-4" />
-                  <span>Open in App</span>
+                  <ExternalLink className="w-5 h-5" />
+                  <span>Open Partner Portal</span>
                 </>
               ) : (
                 <>
-                  <Download className="w-4 h-4" />
+                  <Download className="w-5 h-5 animate-bounce" />
                   <span>Install Partner App</span>
                 </>
               )}
@@ -139,17 +150,21 @@ export function PwaInstallModal({
           )}
 
           <button
+            type="button"
             onClick={() => dismissModal(isIOS ? 7 : 3)}
-            className="w-full sm:w-auto py-3.5 px-6 rounded-xl font-bold text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+            className="w-full py-2.5 rounded-xl font-bold text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             {isIOS ? 'Got It' : 'Maybe Later'}
           </button>
         </div>
 
-        <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-4 font-medium">
-          Free install • Keep screen awake enabled • Always instant sync
+        {/* Bottom Trust Micro-Label */}
+        <p className="text-center text-[10px] text-slate-400 dark:text-slate-500 mt-2.5 font-medium">
+          Free merchant app • Works on tablet & phone • Realtime KOT
         </p>
       </div>
     </div>
-  );
+  )
 }
+
+export default PwaInstallModal

@@ -6,11 +6,18 @@ export const deliveryApi = {
   updateProfile: (data) => apiClient.put('/delivery/profile', data),
   toggleDutyStatus: (isOnline) =>
     apiClient.patch('/delivery/duty-status', { is_online: isOnline }),
+  // Location & Geocoding
   updateLocation: (coords) =>
     apiClient.post('/delivery/location', {
       latitude: coords.latitude,
       longitude: coords.longitude,
     }),
+  streamLocation: (data) =>
+    apiClient.post('/delivery/location/stream', data),
+  reverseGeocode: (lat, lng) =>
+    apiClient.get('/geocode/reverse', { params: { lat, lng } }),
+  forwardGeocode: (query) =>
+    apiClient.get('/geocode/forward', { params: { query } }),
 
   // Orders
   getAssignedOrder: () => apiClient.get('/delivery/orders/assigned'),

@@ -14,6 +14,7 @@ import LoadingSkeleton from './components/common/LoadingSkeleton'
 
 import { PwaInstallModal } from './components/pwa/PwaInstallModal'
 import { usePwaUpdate } from './hooks/usePwaUpdate'
+import LocationPickerModal from './components/location/LocationPickerModal'
 
 // Protected Route Guard
 const ProtectedRoute = ({ children }) => {
@@ -62,6 +63,7 @@ export const App = () => {
   return (
     <>
       <PwaController />
+      <LocationPickerModal />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 

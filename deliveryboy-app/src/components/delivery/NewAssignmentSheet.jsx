@@ -10,7 +10,7 @@ import {
   ArrowRight,
   Zap,
 } from 'lucide-react'
-import { formatCurrency } from '../../utils/formatters'
+import { formatCurrency, formatAddress } from '../../utils/formatters'
 import Modal from '../common/Modal'
 import Button from '../common/Button'
 
@@ -21,6 +21,8 @@ export const NewAssignmentSheet = ({ order, onClose, onAcknowledge }) => {
   const totalAmount = order.bill?.total_amount || order.total_amount || 0
   const restaurant = order.restaurant || {}
   const customer = order.customer || order.delivery_address || {}
+  const deliveryAddress = formatAddress(order.delivery_address || order.delivery_address_json) || 'Kanpur, Uttar Pradesh'
+  const restaurantAddress = formatAddress(restaurant.address_line1 || restaurant.address || restaurant) || 'Kanpur'
 
   return (
     <Modal
@@ -67,8 +69,8 @@ export const NewAssignmentSheet = ({ order, onClose, onAcknowledge }) => {
               <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">
                 {restaurant.name || 'Kitchen Partner'}
               </h5>
-              <p className="text-[11px] text-slate-500 truncate">
-                {restaurant.address_line1 || restaurant.address || 'Kanpur'}
+              <p className="text-[11px] text-slate-500 line-clamp-1">
+                {restaurantAddress}
               </p>
             </div>
           </div>
@@ -87,8 +89,8 @@ export const NewAssignmentSheet = ({ order, onClose, onAcknowledge }) => {
               <h5 className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">
                 {customer.name || customer.customer_name || 'Customer'}
               </h5>
-              <p className="text-[11px] text-slate-500 truncate">
-                {order.delivery_address?.address || 'Customer Location'}
+              <p className="text-[11px] text-slate-500 font-medium line-clamp-2">
+                {deliveryAddress}
               </p>
             </div>
           </div>

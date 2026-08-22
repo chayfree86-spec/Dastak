@@ -10,15 +10,19 @@ import {
   Shield,
   Wifi,
   WifiOff,
+  ChevronDown,
+  Navigation,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useSound } from '../../context/SoundContext'
 import { useToast } from '../../context/ToastContext'
+import { useRiderLocation } from '../../context/LocationContext'
 import DutyToggleModal from '../delivery/DutyToggleModal'
 
 export const Header = () => {
   const { riderProfile, toggleDutyStatus, user } = useAuth()
+  const { location, openLocationModal } = useRiderLocation()
   const { isDark, toggleTheme } = useTheme()
   const { soundEnabled, toggleSound } = useSound()
   const toast = useToast()
@@ -45,8 +49,8 @@ export const Header = () => {
       toast.success(
         targetState ? 'You are Now Online!' : 'You are Now Offline',
         targetState
-          ? 'Available to receive new delivery assignments.'
-          : 'Trip assignments paused.'
+          ? 'You are active to receive instant pickup & delivery requests.'
+          : 'You will not receive any new order assignments.'
       )
       setDutyModalOpen(false)
     } catch (err) {
@@ -74,10 +78,22 @@ export const Header = () => {
                   {riderProfile?.vehicle_number || 'FLEET'}
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-[11px] text-slate-400">
-                <MapPin className="w-3 h-3 text-[#F97316]" />
-                <span className="truncate">Kanpur Central Zone</span>
-              </div>
+              <button
+                type="button"
+                onClick={openLocationModal}
+                className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors cursor-pointer group text-left mt-0.5"
+                title="Click to set delivery zone or detect GPS"
+              >
+                {location.isGpsLive ? (
+                  <Navigation className="w-3 h-3 text-emerald-500 animate-pulse shrink-0" />
+                ) : (
+                  <MapPin className="w-3 h-3 text-[#F97316] shrink-0" />
+                )}
+                <span className="truncate max-w-[130px] font-bold group-hover:underline">
+                  {location.zoneName || location.address || 'Set Location'}
+                </span>
+                <ChevronDown className="w-2.5 h-2.5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 shrink-0" />
+              </button>
             </div>
           </div>
 

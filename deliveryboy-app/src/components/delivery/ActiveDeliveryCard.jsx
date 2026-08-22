@@ -16,7 +16,7 @@ import {
   MessageCircle,
   ExternalLink,
 } from 'lucide-react'
-import { formatCurrency, formatTime, formatElapsedTime } from '../../utils/formatters'
+import { formatCurrency, formatTime, formatElapsedTime, formatAddress } from '../../utils/formatters'
 import { openGoogleMapsNavigation, makePhoneCall } from '../../utils/geo'
 import Button from '../common/Button'
 import StatusBadge from '../common/StatusBadge'
@@ -56,8 +56,8 @@ export const ActiveDeliveryCard = ({ order, onRefresh }) => {
 
   const restaurant = order.restaurant || {}
   const customer = order.customer || order.delivery_address || {}
-  const deliveryAddress = order.delivery_address?.address || order.delivery_address_json?.address || ''
-  const restaurantAddress = restaurant.address_line1 || restaurant.address || ''
+  const deliveryAddress = formatAddress(order.delivery_address || order.delivery_address_json) || order.delivery_address?.address || 'Kanpur, Uttar Pradesh'
+  const restaurantAddress = formatAddress(restaurant.address_line1 || restaurant.address || restaurant) || 'Kanpur'
   const landmark = order.delivery_address?.landmark || order.delivery_address_json?.landmark || ''
 
   const isCod = order.payment_mode === 'COD' || order.payment_mode === 'CASH_ON_DELIVERY'

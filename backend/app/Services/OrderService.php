@@ -337,13 +337,23 @@ class OrderService
         $order->estimated_delivery_minutes = $prepTimeMinutes;
         $order->save();
 
-        return $this->transitionStatus(
+        $updated = $this->transitionStatus(
             order: $order,
             targetStatus: OrderStatus::CONFIRMED,
             actor: $actor,
             actorType: ActorType::RESTAURANT,
             comment: "Order accepted by restaurant. Estimated cooking time: {$prepTimeMinutes} mins."
         );
+
+        if (! $updated->delivery_boy_id) {
+            try {
+                $this->dispatchService->autoDispatch($updated);
+            } catch (\Exception $e) {
+                // Continue
+            }
+        }
+
+        return $updated->fresh(['items.addons', 'restaurant.owner', 'deliveryBoy', 'statusHistories', 'customer']);
     }
 
     public function updateStatus(Order $order, OrderStatus $newStatus, ?User $actor, ?string $notes = null): Order
@@ -359,13 +369,23 @@ class OrderService
 
     public function markReadyForPickup(Order $order, ?User $actor): Order
     {
-        return $this->transitionStatus(
+        $updated = $this->transitionStatus(
             order: $order,
             targetStatus: OrderStatus::READY_FOR_PICKUP,
             actor: $actor,
             actorType: ActorType::RESTAURANT,
             comment: 'Food is packed and ready for delivery rider pickup.'
         );
+
+        if (! $updated->delivery_boy_id) {
+            try {
+                $this->dispatchService->autoDispatch($updated);
+            } catch (\Exception $e) {
+                // Continue
+            }
+        }
+
+        return $updated->fresh(['items.addons', 'restaurant.owner', 'deliveryBoy', 'statusHistories', 'customer']);
     }
 
     public function cancelOrder(Order $order, User $actor, string $reason, string $cancelledBy): Order
@@ -404,8 +424,10 @@ class OrderService
             ]);
         }
 
-        // Enforce OTP verification whenever delivery_otp is configured
-        if ($order->delivery_otp !== null) {
+        $isCod = $order->payment_mode === PaymentMode::COD;
+
+        // Enforce OTP verification ONLY for Prepaid/Online orders (COD requires zero OTP)
+        if (! $isCod && $order->delivery_otp !== null) {
             if (empty($otp) || trim((string) $order->delivery_otp) !== trim((string) $otp)) {
                 throw ValidationException::withMessages([
                     'delivery_otp' => ['Invalid 4-digit verification OTP provided.'],
@@ -413,9 +435,9 @@ class OrderService
             }
         }
 
-        $comment = $order->payment_mode === PaymentMode::COD
+        $comment = $isCod
             ? 'COD cash collection verified and order marked delivered.'
-            : 'Online order verified with 4-digit customer OTP and marked delivered.';
+            : 'Online prepaid order verified with 4-digit customer OTP and marked delivered.';
 
         return $this->transitionStatus(
             order: $order,

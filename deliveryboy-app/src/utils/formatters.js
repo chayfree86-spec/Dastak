@@ -61,11 +61,10 @@ export const formatAddress = (addr) => {
   if (typeof addr === 'object') {
     if (addr.formatted_address) return addr.formatted_address
     if (addr.complete_address) return addr.complete_address
-    if (addr.address && typeof addr.address === 'string') return addr.address
 
     const parts = [
       addr.house_number || addr.flat_no || addr.door_no || '',
-      addr.address_line1 || addr.street || addr.area || '',
+      addr.address_line1 || addr.address || addr.street || addr.area || '',
       addr.address_line2 || '',
       addr.landmark ? `Near ${addr.landmark}` : '',
       addr.city || '',
@@ -75,6 +74,8 @@ export const formatAddress = (addr) => {
     if (parts.length > 0) {
       return parts.join(', ')
     }
+
+    if (addr.address && typeof addr.address === 'string') return addr.address
   }
   return ''
 }

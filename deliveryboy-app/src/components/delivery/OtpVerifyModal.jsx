@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { CheckCircle2, ShieldCheck, Banknote, AlertCircle, KeyRound } from 'lucide-react'
+import { CheckCircle2, ShieldCheck, Banknote, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '../../utils/formatters'
 import Modal from '../common/Modal'
 import Button from '../common/Button'
@@ -10,7 +10,6 @@ import { useToast } from '../../context/ToastContext'
 export const OtpVerifyModal = ({ isOpen, onClose, order, onSuccess }) => {
   const toast = useToast()
   const [otp, setOtp] = useState('')
-  const [cashCollected, setCashCollected] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -23,14 +22,8 @@ export const OtpVerifyModal = ({ isOpen, onClose, order, onSuccess }) => {
     e?.preventDefault()
     setError('')
 
-    // 1. Validation for COD: Cash collection must be confirmed (No OTP needed)
-    if (isCod) {
-      if (!cashCollected) {
-        setError('Please check the box confirming you have collected the cash from customer.')
-        return
-      }
-    } else {
-      // 2. Validation for Online Paid: 4-digit OTP is mandatory
+    // 1. Validation for Online Paid: 4-digit OTP is mandatory (COD needs direct confirmation click only)
+    if (!isCod) {
       if (!otp || otp.trim().length < 4) {
         setError('Please enter the 4-digit delivery verification OTP provided by the customer.')
         return
@@ -48,7 +41,6 @@ export const OtpVerifyModal = ({ isOpen, onClose, order, onSuccess }) => {
         `Order #${order.order_number} marked delivered. ${isCod ? 'Cash added to COD ledger.' : ''}`
       )
       setOtp('')
-      setCashCollected(false)
       if (onSuccess) onSuccess()
     } catch (err) {
       setError(err.message || 'Delivery completion failed.')
@@ -67,39 +59,27 @@ export const OtpVerifyModal = ({ isOpen, onClose, order, onSuccess }) => {
     >
       <form onSubmit={handleVerify} className="space-y-4">
         {/* ========================================================================= */}
-        {/* Case A: COD Order (NO OTP, Cash collection confirmation only)             */}
+        {/* Case A: COD Order (NO OTP, Direct 1-Click Confirmation)                    */}
         {/* ========================================================================= */}
         {isCod ? (
           <div className="space-y-3">
-            <div className="p-5 rounded-3xl bg-amber-500/15 border-2 border-amber-500/30 text-amber-950 dark:text-amber-100 space-y-3">
-              <div className="flex items-center gap-3">
+            <div className="p-5 rounded-3xl bg-amber-500/15 border-2 border-amber-500/30 text-amber-950 dark:text-amber-100 space-y-2.5">
+              <div className="flex items-center gap-3.5">
                 <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shrink-0">
                   <Banknote className="w-6 h-6" />
                 </div>
                 <div>
                   <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300 block">
-                    CASH ON DELIVERY (NO OTP REQUIRED)
+                    CASH ON DELIVERY (COD)
                   </span>
-                  <div className="text-2xl font-black text-amber-950 dark:text-amber-100">
+                  <div className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-amber-100">
                     Collect {formatCurrency(totalAmount)}
                   </div>
                 </div>
               </div>
-
-              <label className="flex items-center gap-3 pt-3 border-t border-amber-300/50 dark:border-amber-700/50 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={cashCollected}
-                  onChange={(e) => {
-                    setCashCollected(e.target.checked)
-                    setError('')
-                  }}
-                  className="w-5 h-5 rounded-lg border-amber-400 text-amber-600 focus:ring-amber-500 cursor-pointer"
-                />
-                <span className="text-xs font-black text-amber-950 dark:text-amber-100 leading-snug">
-                  I have collected {formatCurrency(totalAmount)} cash in hand from customer
-                </span>
-              </label>
+              <p className="text-xs text-amber-800 dark:text-amber-200 font-medium pt-2 border-t border-amber-300/50 dark:border-amber-700/50">
+                Please collect the exact cash amount in hand from the customer before tapping confirm below.
+              </p>
             </div>
           </div>
         ) : (
@@ -135,17 +115,24 @@ export const OtpVerifyModal = ({ isOpen, onClose, order, onSuccess }) => {
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
-          <Button variant="outline" size="md" onClick={onClose} disabled={loading}>
+        {/* Large Mobile-Friendly Buttons */}
+        <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={loading}
+            className="h-14 px-5 rounded-2xl font-bold text-sm shrink-0"
+          >
             Cancel
           </Button>
+
           <Button
             type="submit"
             variant="success"
-            size="md"
             icon={CheckCircle2}
             loading={loading}
-            className="flex-1 shadow-md font-bold"
+            className="flex-1 h-14 rounded-2xl font-black text-sm sm:text-base shadow-lg shadow-emerald-500/20"
           >
             {isCod ? 'YES, CASH COLLECTED — DELIVER' : 'VERIFY OTP & COMPLETE'}
           </Button>

@@ -4,6 +4,7 @@
  */
 
 const memoryStore = new Map()
+const preloadedImages = new Set()
 
 export const dataCache = {
   get: (key) => {
@@ -53,14 +54,18 @@ export const dataCache = {
   },
 
   /**
-   * Preloads an array of image URLs into browser cache so they render with 0ms pop-in.
+   * Preloads & pre-decodes an array of image URLs directly into browser memory so tab switches render with 0ms delay.
    */
   preloadImages: (urls) => {
     if (!Array.isArray(urls) || typeof window === 'undefined') return
     urls.filter(Boolean).forEach((url) => {
-      if (typeof url === 'string' && url.startsWith('http')) {
+      if (typeof url === 'string' && url.length > 5 && !preloadedImages.has(url)) {
+        preloadedImages.add(url)
         const img = new Image()
         img.src = url
+        if (img.decode) {
+          img.decode().catch(() => {})
+        }
       }
     })
   },

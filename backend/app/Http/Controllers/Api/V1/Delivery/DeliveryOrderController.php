@@ -22,11 +22,42 @@ class DeliveryOrderController extends Controller
 
     public function assignedOrder(Request $request): JsonResponse
     {
-        $order = Order::where('delivery_boy_id', $request->user()->id)
+        $user = $request->user();
+
+        $order = Order::where('delivery_boy_id', $user->id)
             ->whereNotIn('status', [OrderStatus::DELIVERED, OrderStatus::CANCELLED, OrderStatus::REJECTED, OrderStatus::FAILED])
             ->with(['items.addons', 'restaurant', 'customer', 'statusHistories'])
             ->latest('id')
             ->first();
+
+        // If no direct assignment exists, auto-match unassigned active order if rider is online
+        if (! $order) {
+            $profile = $user->deliveryProfile;
+            if ($profile && $profile->is_online) {
+                $unassignedOrder = Order::whereNull('delivery_boy_id')
+                    ->whereIn('status', [
+                        OrderStatus::PENDING,
+                        OrderStatus::CONFIRMED,
+                        OrderStatus::PREPARING,
+                        OrderStatus::READY_FOR_PICKUP,
+                    ])
+                    ->with(['items.addons', 'restaurant', 'customer', 'statusHistories'])
+                    ->latest('id')
+                    ->first();
+
+                if ($unassignedOrder) {
+                    $unassignedOrder->delivery_boy_id = $user->id;
+                    $unassignedOrder->save();
+                    
+                    if (! $profile->is_busy) {
+                        $profile->is_busy = true;
+                        $profile->save();
+                    }
+
+                    $order = $unassignedOrder;
+                }
+            }
+        }
 
         if (! $order) {
             return ApiResponse::success(null, 'No active order currently assigned.');

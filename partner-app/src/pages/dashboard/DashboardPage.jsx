@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   TrendingUp,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { useApi } from '../../hooks/useApi'
 import { useAuth } from '../../context/AuthContext'
+import { realtimeBus } from '../../utils/realtimeSync'
 import reportsApi from '../../api/reports.api'
 import { formatCurrency } from '../../utils/formatters'
 import StatCard from '../../components/common/StatCard'
@@ -30,10 +31,38 @@ export const DashboardPage = () => {
   const { restaurant } = useAuth()
   const navigate = useNavigate()
 
-  const { data: dashboardData, loading, error, retry } = useApi(
+  const { data: dashboardData, loading, error, retry, revalidate } = useApi(
     () => reportsApi.getDashboard(),
     []
   )
+
+  // Silent Background Real-time synchronization for dashboard metrics & live counters
+  useEffect(() => {
+    const unsubscribe = realtimeBus.subscribe(() => {
+      revalidate()
+    })
+
+    const pollInterval = setInterval(() => {
+      if (!document.hidden) {
+        revalidate()
+      }
+    }, 6000)
+
+    const onVisibilityChange = () => {
+      if (!document.hidden) {
+        revalidate()
+      }
+    }
+    window.addEventListener('focus', onVisibilityChange)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      unsubscribe()
+      clearInterval(pollInterval)
+      window.removeEventListener('focus', onVisibilityChange)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
+  }, [revalidate])
 
   const summary = dashboardData || {}
   const kpis = summary.kpis || {}

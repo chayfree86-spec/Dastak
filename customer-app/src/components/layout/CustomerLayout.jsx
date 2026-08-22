@@ -23,6 +23,7 @@ import { useLocationContext } from '../../context/LocationContext'
 import { useCart } from '../../context/CartContext'
 import { useTheme } from '../../context/ThemeContext'
 import { useAuth } from '../../context/AuthContext'
+import { realtimeBus } from '../../utils/realtimeSync'
 import LocationPickerModal from '../common/LocationPickerModal'
 import GpsEnableModal from '../common/GpsEnableModal'
 import ActiveOrderBanner from '../common/ActiveOrderBanner'
@@ -40,9 +41,12 @@ export const CustomerLayout = () => {
   const [locationModalOpen, setLocationModalOpen] = useState(false)
   const [activeOrder, setActiveOrder] = useState(null)
 
-  // Poll for active order if user is logged in
+  // Real-time listener & fast background polling for active order tracking
   useEffect(() => {
-    if (!isAuthenticated) return
+    if (!isAuthenticated) {
+      setActiveOrder(null)
+      return
+    }
 
     const checkActiveOrder = async () => {
       try {
@@ -59,8 +63,34 @@ export const CustomerLayout = () => {
     }
 
     checkActiveOrder()
-    const interval = setInterval(checkActiveOrder, 15000)
-    return () => clearInterval(interval)
+
+    // 1. Instant update via Realtime Event Bus
+    const unsubscribe = realtimeBus.subscribe(() => {
+      checkActiveOrder()
+    })
+
+    // 2. 4-second background heartbeat poll
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        checkActiveOrder()
+      }
+    }, 4000)
+
+    // 3. Tab focus / visibility revalidation
+    const handleFocus = () => {
+      if (!document.hidden) {
+        checkActiveOrder()
+      }
+    }
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleFocus)
+
+    return () => {
+      unsubscribe()
+      clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleFocus)
+    }
   }, [isAuthenticated, location.pathname])
 
   // 5 Footer Navigation Tabs:
@@ -168,6 +198,13 @@ export const CustomerLayout = () => {
       <main className={`flex-1 max-w-7xl w-full mx-auto px-3 py-4 sm:p-6 ${isAuthPage ? 'pb-8 flex flex-col justify-center' : 'pb-28 sm:pb-32'}`}>
         <Outlet />
       </main>
+
+      {/* 2.5 Global Floating Live Active Order Banner (Real-time synced across all pages) */}
+      {!isAuthPage && !location.pathname.startsWith('/orders/') && activeOrder && (
+        <div className="fixed bottom-20 inset-x-3 max-w-md mx-auto z-40 drop-shadow-2xl animate-in slide-in-from-bottom duration-300">
+          <ActiveOrderBanner order={activeOrder} />
+        </div>
+      )}
 
       {/* 3. Universal Bottom Footer Navigation Bar */}
       {!isAuthPage && (

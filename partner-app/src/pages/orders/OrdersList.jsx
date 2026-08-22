@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Clock,
   Search,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useApi } from '../../hooks/useApi'
 import { useToast } from '../../context/ToastContext'
+import { realtimeBus } from '../../utils/realtimeSync'
 import ordersApi from '../../api/orders.api'
 import OrderCard from '../../components/orders/OrderCard'
 import OrderDetailModal from './OrderDetailModal'
@@ -34,7 +35,7 @@ export const OrdersList = () => {
   const [selectedOrderForReject, setSelectedOrderForReject] = useState(null)
   const [actionLoading, setActionLoading] = useState(false)
 
-  const { data: ordersData, loading, error, retry } = useApi(
+  const { data: ordersData, loading, error, retry, revalidate } = useApi(
     () =>
       ordersApi.getOrders({
         status: activeStatus === 'ALL' ? undefined : activeStatus,
@@ -43,6 +44,37 @@ export const OrdersList = () => {
       }),
     [activeStatus, searchQuery]
   )
+
+  // Silent Background Real-time sync (No page reload, zero flicker, smooth in-place update)
+  useEffect(() => {
+    // 1. Instant update when Rider picks up / delivers or Customer places order
+    const unsubscribe = realtimeBus.subscribe(() => {
+      revalidate()
+    })
+
+    // 2. 5-second background silent sync
+    const pollInterval = setInterval(() => {
+      if (!document.hidden) {
+        revalidate()
+      }
+    }, 5000)
+
+    // 3. Silent revalidate on window focus
+    const onVisibilityChange = () => {
+      if (!document.hidden) {
+        revalidate()
+      }
+    }
+    window.addEventListener('focus', onVisibilityChange)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    return () => {
+      unsubscribe()
+      clearInterval(pollInterval)
+      window.removeEventListener('focus', onVisibilityChange)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
+  }, [revalidate])
 
   const orders = Array.isArray(ordersData?.data)
     ? ordersData.data
