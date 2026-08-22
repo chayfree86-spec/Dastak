@@ -15,6 +15,9 @@ import {
   Edit,
   Trash2,
   Compass,
+  Clock,
+  Power,
+  Timer,
 } from 'lucide-react'
 import settingsApi from '../../api/settings.api'
 import { useApi } from '../../hooks/useApi'
@@ -22,6 +25,7 @@ import Tabs from '../../components/common/Tabs'
 import Input from '../../components/common/Input'
 import AmountInput from '../../components/common/AmountInput'
 import CustomSelect from '../../components/common/CustomSelect'
+import TimeSelect from '../../components/common/TimeSelect'
 import Switch from '../../components/common/Switch'
 import Button from '../../components/common/Button'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
@@ -55,6 +59,14 @@ export const SettingsPage = () => {
 
   // Commission Settings
   const [defaultCommission, setDefaultCommission] = useState('')
+
+  // Store / Service Hours
+  const [storeMode, setStoreMode] = useState('24x7') // '24x7' | 'scheduled' | 'closed'
+  const [storeOpenTime, setStoreOpenTime] = useState('09:00')
+  const [storeCloseTime, setStoreCloseTime] = useState('22:00')
+  const [storeClosedMessage, setStoreClosedMessage] = useState('')
+  const [storeStatus, setStoreStatus] = useState(null)
+  const [savingHours, setSavingHours] = useState(false)
 
   // Service Areas Management State
   const [serviceAreas, setServiceAreas] = useState([])
@@ -104,9 +116,45 @@ export const SettingsPage = () => {
     }
   }
 
+  const fetchStoreHours = async () => {
+    try {
+      const res = await settingsApi.getStoreHours()
+      const data = res?.data || res || {}
+      if (data.service_mode !== undefined) setStoreMode(data.service_mode)
+      if (data.service_open_time) setStoreOpenTime(data.service_open_time)
+      if (data.service_close_time) setStoreCloseTime(data.service_close_time)
+      if (data.service_closed_message !== undefined) setStoreClosedMessage(data.service_closed_message || '')
+      if (data.status) setStoreStatus(data.status)
+    } catch (err) {
+      console.error('Failed to load store hours:', err)
+    }
+  }
+
+  const handleSaveStoreHours = async (e) => {
+    if (e) e.preventDefault()
+    setSavingHours(true)
+    try {
+      const payload = {
+        service_mode: storeMode,
+        service_open_time: storeOpenTime,
+        service_close_time: storeCloseTime,
+        service_closed_message: storeClosedMessage || '',
+      }
+      const res = await settingsApi.updateStoreHours(payload)
+      const data = res?.data || res || {}
+      if (data.status) setStoreStatus(data.status)
+      toast.success('Store Hours Saved', 'Customer ordering availability updated.')
+    } catch (err) {
+      toast.error('Failed', err.message || 'Unable to update store hours.')
+    } finally {
+      setSavingHours(false)
+    }
+  }
+
   useEffect(() => {
     fetchSettings()
     fetchServiceAreas()
+    fetchStoreHours()
   }, [])
 
   const handleToggleZoneStatus = async (zone) => {
@@ -188,6 +236,7 @@ export const SettingsPage = () => {
 
   const tabs = [
     { id: 'general', label: 'General & Brand', icon: Settings },
+    { id: 'store_hours', label: 'Store Hours', icon: Clock },
     { id: 'orders', label: 'Order Rules', icon: Store },
     { id: 'delivery', label: 'Delivery & Fleet', icon: Bike },
     { id: 'payments', label: 'Payments & COD', icon: CreditCard },
@@ -207,7 +256,7 @@ export const SettingsPage = () => {
           </p>
         </div>
 
-        {activeTab !== 'service_areas' && (
+        {!['service_areas', 'store_hours'].includes(activeTab) && (
           <Button
             type="button"
             variant="primary"
@@ -271,6 +320,107 @@ export const SettingsPage = () => {
                 value={supportEmail}
                 onChange={(e) => setSupportEmail(e.target.value)}
               />
+            </div>
+          </div>
+        )}
+
+        {/* Tab: Store Hours */}
+        {activeTab === 'store_hours' && (
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-5">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Customer Ordering Availability</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Control when customers can place orders. Useful for rural areas that can't offer 24×7 service yet.
+                Customers can still browse when closed — only ordering is paused.
+              </p>
+            </div>
+
+            {/* Live status banner */}
+            {storeStatus && (
+              <div
+                className={`p-4 rounded-2xl border flex items-center gap-3 ${
+                  storeStatus.is_open
+                    ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900/60'
+                    : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60'
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                    storeStatus.is_open
+                      ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-400'
+                  }`}
+                >
+                  <Power className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className={`text-sm font-black ${storeStatus.is_open ? 'text-emerald-800 dark:text-emerald-300' : 'text-rose-800 dark:text-rose-300'}`}>
+                    {storeStatus.is_open ? 'Ordering is OPEN right now' : 'Ordering is CLOSED right now'}
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    {storeStatus.is_open
+                      ? storeStatus.closes_at
+                        ? `Closes at ${new Date(storeStatus.closes_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`
+                        : 'Always accepting orders (24×7)'
+                      : storeStatus.opens_at
+                        ? `Opens at ${new Date(storeStatus.opens_at).toLocaleString('en-IN', { weekday: 'short', hour: '2-digit', minute: '2-digit' })}`
+                        : 'Temporarily closed'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Mode */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <CustomSelect
+                label="Service Mode"
+                value={storeMode}
+                onChange={setStoreMode}
+                options={[
+                  { value: '24x7', label: 'Always Open (24×7)' },
+                  { value: 'scheduled', label: 'Daily Schedule (Set Open/Close Time)' },
+                  { value: 'closed', label: 'Temporarily Closed' },
+                ]}
+              />
+            </div>
+
+            {/* Schedule times — only for scheduled mode */}
+            {storeMode === 'scheduled' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <TimeSelect
+                  label="Opening Time"
+                  value={storeOpenTime}
+                  onChange={setStoreOpenTime}
+                />
+                <TimeSelect
+                  label="Closing Time"
+                  value={storeCloseTime}
+                  onChange={setStoreCloseTime}
+                />
+                <p className="sm:col-span-2 text-[11px] text-slate-400 flex items-center gap-1.5">
+                  <Timer className="w-3.5 h-3.5" />
+                  <span>Times are in IST. For overnight service set a closing time earlier than opening (e.g. 18:00 → 02:00).</span>
+                </p>
+              </div>
+            )}
+
+            {/* Custom closed message — for closed / scheduled */}
+            {storeMode !== '24x7' && (
+              <div>
+                <Input
+                  label="Custom Closed Message (optional)"
+                  value={storeClosedMessage}
+                  placeholder="e.g. We deliver 9 AM–10 PM. Order now for the next slot!"
+                  onChange={(e) => setStoreClosedMessage(e.target.value)}
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Shown to customers when ordering is closed.</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end pt-1">
+              <Button type="button" variant="primary" size="lg" icon={Save} loading={savingHours} onClick={handleSaveStoreHours} className="w-full sm:w-auto">
+                Save Store Hours
+              </Button>
             </div>
           </div>
         )}
@@ -480,7 +630,7 @@ export const SettingsPage = () => {
           </div>
         )}
 
-        {activeTab !== 'service_areas' && (
+        {!['service_areas', 'store_hours'].includes(activeTab) && (
           <div className="flex items-center justify-end">
             <Button type="submit" variant="primary" size="lg" icon={Save} loading={saving} className="w-full sm:w-auto">
               Save All Settings

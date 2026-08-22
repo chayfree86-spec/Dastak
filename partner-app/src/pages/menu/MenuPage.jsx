@@ -41,7 +41,7 @@ const Thumb = ({ src, size = 'w-16 h-16 sm:w-20 sm:h-20', veg }) => (
         alt=""
         className="w-full h-full object-cover"
         loading="eager"
-        fetchPriority="high"
+        fetchpriority="high"
         decoding="async"
       />
     ) : (

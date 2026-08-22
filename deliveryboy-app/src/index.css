@@ -100,6 +100,17 @@
   padding-top: env(safe-area-inset-top, 12px);
 }
 
+/* Hide scrollbar for clean mobile swipe strips */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
 /* Rider Ambient Motion Keyframes */
 @keyframes float-slow {
   0%, 100% {

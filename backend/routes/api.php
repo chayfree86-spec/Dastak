@@ -134,6 +134,7 @@ Route::prefix('v1')->group(function () {
     // Landing-page public marketing data (real numbers + real reviews)
     Route::get('/stats', [PublicStatsController::class, 'stats']);
     Route::get('/testimonials', [PublicStatsController::class, 'testimonials']);
+    Route::get('/service-status', [PublicStatsController::class, 'serviceStatus']);
     Route::get('/config', [PublicStatsController::class, 'config']);
 
     // Customer home food-category chips (DB driven)
@@ -510,6 +511,8 @@ Route::prefix('v1')->group(function () {
                     Route::put('/payments', [SettingsController::class, 'updatePaymentSettings']);
                     Route::get('/notifications', [SettingsController::class, 'getNotificationSettings']);
                     Route::put('/notifications', [SettingsController::class, 'updateNotificationSettings']);
+                    Route::get('/store-hours', [SettingsController::class, 'getStoreHours']);
+                    Route::put('/store-hours', [SettingsController::class, 'updateStoreHours']);
                     Route::get('/service-areas', [SettingsController::class, 'getServiceAreas']);
                     Route::post('/service-areas', [SettingsController::class, 'createServiceArea']);
                     Route::put('/service-areas/{id}', [SettingsController::class, 'updateServiceArea']);

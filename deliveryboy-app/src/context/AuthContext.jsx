@@ -117,7 +117,6 @@ export const AuthProvider = ({ children }) => {
       setActiveOrder((prevOrder) => {
         if (order && (!prevOrder || prevOrder.id !== order.id)) {
           setNewAssignmentModal(order)
-          soundAlert.playOrderTone()
         }
         return order
       })

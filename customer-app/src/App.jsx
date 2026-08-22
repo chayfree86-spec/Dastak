@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
 import { LocationProvider } from './context/LocationContext'
+import { ServiceStatusProvider } from './context/ServiceStatusContext'
 import { CartProvider } from './context/CartContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { ToastProvider } from './context/ToastContext'
@@ -44,8 +45,8 @@ const PwaController = () => {
       appName="Dastak Food & Grocery"
       appRole="Food, Grocery & Essentials in 10-20 Mins"
       iconSrc="/pwa-512x512.png"
-      accentColor="bg-[#113BD0] hover:bg-blue-700 text-white shadow-blue-600/30"
-      accentBadge="bg-blue-500/10 text-blue-500 border-blue-500/20"
+      accentColor="bg-gradient-to-r from-[#FF5200] to-[#EA580C] hover:from-[#EA580C] hover:to-[#C2410C] text-white shadow-lg shadow-orange-500/35"
+      accentBadge="bg-orange-50 dark:bg-orange-950/40 text-[#FF5200] dark:text-orange-400 border-orange-200 dark:border-orange-500/20"
     />
   )
 }
@@ -67,8 +68,9 @@ export function App() {
       <LanguageProvider>
         <AuthProvider>
           <LocationProvider>
-            <CartProvider>
-              <ToastProvider>
+            <ServiceStatusProvider>
+              <CartProvider>
+                <ToastProvider>
                 <BrowserRouter>
                   <PwaController />
                   <Suspense fallback={<PageLoadingFallback />}>
@@ -101,8 +103,9 @@ export function App() {
                     </Routes>
                   </Suspense>
                 </BrowserRouter>
-              </ToastProvider>
-            </CartProvider>
+                </ToastProvider>
+              </CartProvider>
+            </ServiceStatusProvider>
           </LocationProvider>
         </AuthProvider>
       </LanguageProvider>

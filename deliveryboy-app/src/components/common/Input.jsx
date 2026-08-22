@@ -34,7 +34,7 @@ export const Input = ({
           placeholder={placeholder}
           disabled={disabled}
           required={required}
-          className={`w-full bg-white dark:bg-slate-900/90 border rounded-2xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/20 focus:border-[#113BD0] dark:focus:border-blue-500 disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed ${
+          className={`w-full bg-white dark:bg-slate-900/90 border rounded-2xl px-4 py-3 sm:py-2.5 min-h-[48px] sm:min-h-[42px] text-sm font-semibold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#113BD0]/20 focus:border-[#113BD0] dark:focus:border-blue-500 disabled:bg-slate-50 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:cursor-not-allowed ${
             Icon ? 'pl-11' : ''
           } ${error ? 'border-rose-300 dark:border-rose-500 ring-1 ring-rose-300 dark:ring-rose-500' : 'border-slate-200 dark:border-slate-700'} ${className}`}
           {...props}

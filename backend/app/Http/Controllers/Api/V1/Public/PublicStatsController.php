@@ -11,6 +11,7 @@ use App\Models\Restaurant;
 use App\Models\Review;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Services\StoreHoursService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 
@@ -20,6 +21,12 @@ use Illuminate\Http\JsonResponse;
  */
 class PublicStatsController extends Controller
 {
+    /** Current ordering availability (open/closed + next opening time). */
+    public function serviceStatus(StoreHoursService $store): JsonResponse
+    {
+        return ApiResponse::success($store->status(), 'Service status retrieved.');
+    }
+
     public function config(): JsonResponse
     {
         $all = SystemSetting::getAllSettings();

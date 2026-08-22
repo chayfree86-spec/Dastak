@@ -21,6 +21,7 @@ import {
   ChevronRight,
   TrendingUp,
   X,
+  ChevronDown,
 } from 'lucide-react'
 import deliveryApi from '../../api/delivery.api'
 import { formatCurrency, formatDateTime, formatTime } from '../../utils/formatters'
@@ -50,6 +51,32 @@ export const CodCollectionPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [customDateModalOpen, setCustomDateModalOpen] = useState(false)
   const [dateRange, setDateRange] = useState({ from: '', to: '' })
+
+  // Custom Theme Dropdowns State
+  const [dateDropdownOpen, setDateDropdownOpen] = useState(false)
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
+
+  const dateOptions = [
+    { id: 'all', label: 'All Time' },
+    { id: 'today', label: 'Today' },
+    { id: 'yesterday', label: 'Yesterday' },
+    { id: 'week', label: 'This Week' },
+    { id: 'month', label: 'This Month' },
+  ]
+
+  const statusOptions = [
+    { id: 'ALL', label: 'All Status', color: 'bg-slate-400' },
+    { id: 'COLLECTED', label: 'Cash in Hand', color: 'bg-amber-500' },
+    { id: 'DEPOSITED_TO_OFFICE', label: 'Submitted to Hub', color: 'bg-emerald-500' },
+  ]
+
+  const currentDateLabel =
+    datePreset === 'custom' && dateRange.from
+      ? `${dateRange.from}${dateRange.to ? ` - ${dateRange.to}` : ''}`
+      : dateOptions.find((d) => d.id === datePreset)?.label || 'All Time'
+
+  const currentStatusLabel =
+    statusOptions.find((s) => s.id === statusFilter)?.label || 'All Status'
 
   // Inspection Modal State
   const [selectedItem, setSelectedItem] = useState(null)
@@ -166,15 +193,15 @@ export const CodCollectionPage = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-28 sm:pb-32">
       {/* 1. Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+          <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
             COD Cash Ledger & Settlements
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Audit cash collected on deliveries, customer order receipts, and office deposit status
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+            Audit cash collected on deliveries and office deposit status
           </p>
         </div>
 
@@ -185,171 +212,223 @@ export const CodCollectionPage = () => {
             icon={Building}
             loading={depositLoading}
             onClick={handleDepositAll}
-            className="shadow-lg shadow-blue-600/25 text-xs font-black shrink-0"
+            className="w-full sm:w-auto shadow-lg shadow-blue-600/25 text-xs font-black shrink-0 py-3 sm:py-2.5 rounded-2xl"
           >
             Deposit Cash to Office ({formatCurrency(meta.pending_cash_in_hand)})
           </Button>
         )}
       </div>
 
-      {/* 2. Top Summary Bento Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        {/* Card 1: Cash in Hand (To Deposit) */}
-        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent border-2 border-amber-400/40 dark:border-amber-500/30 text-amber-950 dark:text-amber-100 flex items-center justify-between gap-3 shadow-xs">
-          <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300 block">
+      {/* 2. Top Summary Bento Cards (Compact & Ergonomic on Mobile) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3.5">
+        {/* Card 1: Cash in Hand (To Deposit) - Full Width on Mobile */}
+        <div className="col-span-2 sm:col-span-1 p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent border-2 border-amber-400/50 dark:border-amber-500/30 text-amber-950 dark:text-amber-100 flex items-center justify-between gap-3 shadow-xs">
+          <div className="space-y-0.5 sm:space-y-1 min-w-0">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300 block truncate">
               CASH IN HAND (TO DEPOSIT)
             </span>
-            <div className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-amber-100">
+            <div className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-amber-100 tracking-tight">
               {formatCurrency(meta.pending_cash_in_hand)}
             </div>
-            <p className="text-[11px] text-amber-800 dark:text-amber-300/80 font-medium">
+            <p className="text-[10px] sm:text-[11px] text-amber-800 dark:text-amber-300/80 font-medium truncate">
               Physical cash with rider
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shrink-0">
-            <Banknote className="w-6 h-6" />
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shrink-0">
+            <Banknote className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
         </div>
 
         {/* Card 2: Today's COD Collected */}
-        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border border-blue-200 dark:border-blue-800/50 text-slate-900 dark:text-slate-100 flex items-center justify-between gap-3 shadow-xs">
-          <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 block">
-              TODAY'S COD COLLECTED
+        <div className="col-span-1 p-3.5 sm:p-5 rounded-3xl bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent border border-blue-200 dark:border-blue-800/50 text-slate-900 dark:text-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 shadow-xs">
+          <div className="space-y-0.5 sm:space-y-1 min-w-0">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 block truncate">
+              TODAY'S COD
             </span>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
+            <div className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               {formatCurrency(meta.today_collected)}
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              Collected from today's orders
+            <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate hidden sm:block">
+              Collected from today
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-[#113BD0] text-white flex items-center justify-center shadow-md shrink-0">
-            <TrendingUp className="w-6 h-6" />
+          <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-[#113BD0] text-white flex items-center justify-center shadow-md shrink-0 self-end sm:self-center">
+            <TrendingUp className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
           </div>
         </div>
 
         {/* Card 3: Total Deposited to Hub */}
-        <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent border border-emerald-200 dark:border-emerald-800/50 text-slate-900 dark:text-slate-100 flex items-center justify-between gap-3 shadow-xs">
-          <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
-              SUBMITTED TO HUB / OFFICE
+        <div className="col-span-1 p-3.5 sm:p-5 rounded-3xl bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent border border-emerald-200 dark:border-emerald-800/50 text-slate-900 dark:text-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 shadow-xs">
+          <div className="space-y-0.5 sm:space-y-1 min-w-0">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block truncate">
+              SUBMITTED
             </span>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100">
+            <div className="text-xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
               {formatCurrency(meta.total_deposited)}
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              Handed over to central office
+            <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate hidden sm:block">
+              Handed over to hub
             </p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shrink-0">
-            <Shield className="w-6 h-6" />
+          <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shrink-0 self-end sm:self-center">
+            <Shield className="w-4.5 h-4.5 sm:w-6 sm:h-6" />
           </div>
         </div>
       </div>
 
-      {/* 3. Filters & Search Bar Suite */}
-      <div className="p-4 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3.5">
-        {/* Row 1: Search Bar & Custom Date Trigger */}
-        <div className="flex flex-col sm:flex-row items-center gap-2.5">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by Order #, Customer Name, Phone or Dish..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X className="w-4 h-4" />
-              </button>
+      {/* 3. Filters & Search Bar Suite with Custom Theme Dropdowns */}
+      <div className="p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+        {/* Row 1: Search Bar */}
+        <div className="relative w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by Order #, Customer Name..."
+            className="w-full pl-10 pr-4 py-3 sm:py-2.5 min-h-[46px] sm:min-h-[40px] rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Row 2: Custom Theme Dropdowns (2-Column Mobile Grid) */}
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2.5">
+          {/* Dropdown 1: Date Filter */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setDateDropdownOpen(!dateDropdownOpen)
+                setStatusDropdownOpen(false)
+              }}
+              className={`w-full px-3 py-2.5 min-h-[42px] rounded-2xl border text-xs font-black flex items-center justify-between gap-1.5 transition-all cursor-pointer touch-manipulation active:scale-[0.98] ${
+                datePreset !== 'all'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 border-blue-200 dark:border-blue-800 shadow-2xs'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Calendar className="w-3.5 h-3.5 shrink-0 text-[#113BD0] dark:text-blue-400" />
+                <span className="truncate">{currentDateLabel}</span>
+              </div>
+              <ChevronDown
+                className={`w-3.5 h-3.5 shrink-0 transition-transform ${
+                  dateDropdownOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {/* Date Dropdown Popover */}
+            {dateDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setDateDropdownOpen(false)}
+                />
+                <div className="absolute top-full mt-1.5 left-0 w-48 sm:w-56 z-50 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
+                  {dateOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        setDatePreset(opt.id)
+                        setDateRange({ from: '', to: '' })
+                        setDateDropdownOpen(false)
+                      }}
+                      className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
+                        datePreset === opt.id
+                          ? 'bg-[#113BD0] text-white'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <span>{opt.label}</span>
+                      {datePreset === opt.id && <Check className="w-3.5 h-3.5" />}
+                    </button>
+                  ))}
+
+                  <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDateDropdownOpen(false)
+                        setCustomDateModalOpen(true)
+                      }}
+                      className="w-full px-3 py-2 rounded-xl text-xs font-bold text-[#113BD0] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 flex items-center justify-between transition-colors"
+                    >
+                      <span>Custom Range...</span>
+                      <Calendar className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setCustomDateModalOpen(true)}
-            className={`w-full sm:w-auto px-4 py-2.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              datePreset === 'custom'
-                ? 'bg-[#113BD0] text-white border-[#113BD0] shadow-md shadow-blue-600/20'
-                : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
-            }`}
-          >
-            <Calendar className="w-4 h-4" />
-            <span>
-              {datePreset === 'custom' && dateRange.from
-                ? `${dateRange.from} ${dateRange.to ? `to ${dateRange.to}` : ''}`
-                : 'Custom Date Range'}
-            </span>
-          </button>
-        </div>
-
-        {/* Row 2: Filter Pills (Date Presets & Status) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-slate-750 text-xs">
-          {/* Date Preset Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1">
-              <Calendar className="w-3 h-3" /> Date:
-            </span>
-            {[
-              { id: 'all', label: 'All Time' },
-              { id: 'today', label: 'Today' },
-              { id: 'yesterday', label: 'Yesterday' },
-              { id: 'week', label: 'This Week' },
-              { id: 'month', label: 'This Month' },
-            ].map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => {
-                  setDatePreset(p.id)
-                  setDateRange({ from: '', to: '' })
-                }}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  datePreset === p.id
-                    ? 'bg-[#113BD0] text-white shadow-xs'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+          {/* Dropdown 2: Status Filter */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setStatusDropdownOpen(!statusDropdownOpen)
+                setDateDropdownOpen(false)
+              }}
+              className={`w-full px-3 py-2.5 min-h-[42px] rounded-2xl border text-xs font-black flex items-center justify-between gap-1.5 transition-all cursor-pointer touch-manipulation active:scale-[0.98] ${
+                statusFilter !== 'ALL'
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 border-blue-200 dark:border-blue-800 shadow-2xs'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Filter className="w-3.5 h-3.5 shrink-0 text-[#113BD0] dark:text-blue-400" />
+                <span className="truncate">{currentStatusLabel}</span>
+              </div>
+              <ChevronDown
+                className={`w-3.5 h-3.5 shrink-0 transition-transform ${
+                  statusDropdownOpen ? 'rotate-180' : ''
                 }`}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
+              />
+            </button>
 
-          {/* Status Filter Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-bold text-slate-400 mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3" /> Status:
-            </span>
-            {[
-              { id: 'ALL', label: 'All Status' },
-              { id: 'COLLECTED', label: 'Cash in Hand' },
-              { id: 'DEPOSITED_TO_OFFICE', label: 'Submitted to Hub' },
-            ].map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setStatusFilter(s.id)}
-                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  statusFilter === s.id
-                    ? s.id === 'COLLECTED'
-                      ? 'bg-amber-500 text-white'
-                      : s.id === 'DEPOSITED_TO_OFFICE'
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
+            {/* Status Dropdown Popover */}
+            {statusDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setStatusDropdownOpen(false)}
+                />
+                <div className="absolute top-full mt-1.5 right-0 w-48 sm:w-56 z-50 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 duration-150">
+                  {statusOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        setStatusFilter(opt.id)
+                        setStatusDropdownOpen(false)
+                      }}
+                      className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-colors ${
+                        statusFilter === opt.id
+                          ? 'bg-[#113BD0] text-white'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${opt.color}`} />
+                        <span>{opt.label}</span>
+                      </div>
+                      {statusFilter === opt.id && <Check className="w-3.5 h-3.5" />}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -389,42 +468,46 @@ export const CodCollectionPage = () => {
                   key={item.id}
                   className="rounded-3xl bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all overflow-hidden"
                 >
-                  {/* Top Bar: Order # & Status Badge & Timestamp */}
-                  <div className="p-4 bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-750 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
+                  {/* Top Bar: Order # & Status Badge & Timestamp (Balanced Mobile Layout) */}
+                  <div className="p-3.5 sm:p-4 bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-750 flex items-center justify-between gap-2.5">
+                    {/* Left: Order Number & Date Time */}
+                    <div className="min-w-0 space-y-1">
                       <button
                         type="button"
                         onClick={() => handleCopyOrderNumber(item.order_number, item.id)}
-                        className="font-black text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5 hover:text-[#113BD0] dark:hover:text-blue-400"
+                        className="font-black text-xs sm:text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5 hover:text-[#113BD0] dark:hover:text-blue-400 font-mono tracking-tight truncate cursor-pointer active:scale-95 transition-transform"
                         title="Click to copy Order #"
                       >
-                        <span>#{item.order_number}</span>
+                        <span className="truncate">#{item.order_number}</span>
                         {copiedId === item.id ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                         ) : (
-                          <Copy className="w-3.5 h-3.5 text-slate-400" />
+                          <Copy className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                         )}
                       </button>
 
+                      <div className="flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                        <Clock className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{formatDateTime(item.created_at)}</span>
+                      </div>
+                    </div>
+
+                    {/* Right: Clean Status Badge Pill */}
+                    <div className="shrink-0">
                       <span
-                        className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-lg border flex items-center gap-1 ${
+                        className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-xl border flex items-center gap-1.5 shadow-2xs whitespace-nowrap ${
                           isDeposited
-                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
-                            : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/40'
+                            ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50'
+                            : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/50'
                         }`}
                       >
                         <span
-                          className={`w-1.5 h-1.5 rounded-full ${
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                             isDeposited ? 'bg-emerald-500' : 'bg-amber-500 animate-ping'
                           }`}
                         />
-                        {item.status_label || item.status}
+                        <span>{isDeposited ? 'Deposited' : 'Cash in Hand'}</span>
                       </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{formatDateTime(item.created_at)}</span>
                     </div>
                   </div>
 

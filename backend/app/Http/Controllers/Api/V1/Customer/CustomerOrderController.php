@@ -10,6 +10,7 @@ use App\Http\Resources\ApiResponse;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Services\OrderService;
+use App\Services\StoreHoursService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -20,8 +21,18 @@ class CustomerOrderController extends Controller
         protected OrderService $orderService
     ) {}
 
-    public function checkout(CheckoutRequest $request): JsonResponse
+    public function checkout(CheckoutRequest $request, StoreHoursService $store): JsonResponse
     {
+        // Enforce service hours — no orders while ordering is closed.
+        $status = $store->status();
+        if (! $status['is_open']) {
+            return ApiResponse::error(
+                $status['message'] ?: 'Ordering is currently closed. Please try again during open hours.',
+                ['service_status' => $status],
+                422
+            );
+        }
+
         $order = $this->orderService->checkout(
             user: $request->user(),
             checkoutData: $request->validated()

@@ -18,6 +18,7 @@ import { useCart } from '../../context/CartContext'
 import { useLocationContext } from '../../context/LocationContext'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useServiceStatus } from '../../context/ServiceStatusContext'
 import customerApi from '../../api/customer.api'
 import { formatCurrency } from '../../utils/formatters'
 import Button from '../../components/common/Button'
@@ -31,6 +32,7 @@ export const CheckoutPage = () => {
     useCart()
   const { activeAddress } = useLocationContext()
   const { isAuthenticated, user } = useAuth()
+  const { isOpen: serviceOpen, status: serviceStatus, openClosedAlert } = useServiceStatus()
 
   const [paymentMode, setPaymentMode] = useState('COD') // 'COD' | 'ONLINE'
   const [specialInstructions, setSpecialInstructions] = useState('')
@@ -51,6 +53,12 @@ export const CheckoutPage = () => {
   const handlePlaceOrder = async (e) => {
     e?.preventDefault()
     setError('')
+
+    // Ordering hours gate — show the opening-countdown alert if closed.
+    if (!serviceOpen) {
+      openClosedAlert()
+      return
+    }
 
     // If not authenticated, prompt login
     if (!isAuthenticated) {
@@ -243,6 +251,25 @@ export const CheckoutPage = () => {
           </div>
         )}
 
+        {/* Service-closed banner */}
+        {!serviceOpen && (
+          <button
+            type="button"
+            onClick={openClosedAlert}
+            className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-left cursor-pointer"
+          >
+            <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs font-black text-rose-700 dark:text-rose-300">Ordering is currently closed</p>
+              <p className="text-[11px] text-rose-600/90 dark:text-rose-400/90 font-medium">
+                {serviceStatus?.opens_at
+                  ? `Opens ${new Date(serviceStatus.opens_at).toLocaleString('en-IN', { weekday: 'short', hour: '2-digit', minute: '2-digit' })} — tap to see countdown`
+                  : (serviceStatus?.message || 'Please check back soon — tap for details')}
+              </p>
+            </div>
+          </button>
+        )}
+
         {/* 5. Place Order Button */}
         <Button
           type="submit"
@@ -250,9 +277,14 @@ export const CheckoutPage = () => {
           size="xl"
           icon={CheckCircle2}
           loading={loading}
+          disabled={!serviceOpen}
           className="w-full shadow-xl shadow-orange-500/35 text-base sm:text-lg font-black py-4 rounded-2xl cursor-pointer"
         >
-          {loading ? t.placingOrder : `${t.placeOrder} • ${formatCurrency(grandTotal)}`}
+          {!serviceOpen
+            ? 'Ordering Closed'
+            : loading
+            ? t.placingOrder
+            : `${t.placeOrder} • ${formatCurrency(grandTotal)}`}
         </Button>
       </form>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Lock,
@@ -12,10 +12,20 @@ import {
   CheckCircle2,
   AlertCircle,
   LogOut,
+  Music,
+  Upload,
+  Play,
+  Trash2,
+  FileAudio,
+  Sparkles,
+  Check,
+  RotateCcw,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
-import { useSound } from '../../context/SoundContext'
+import { useSound, SOUND_PRESETS } from '../../context/SoundContext'
 import { useToast } from '../../context/ToastContext'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
@@ -25,8 +35,30 @@ export const SettingsPage = () => {
   const navigate = useNavigate()
   const { user, logout, changeDevice } = useAuth()
   const { isDark, toggleTheme } = useTheme()
-  const { soundEnabled, toggleSound, playAlert } = useSound()
+  const {
+    soundEnabled,
+    soundPreset,
+    customAudioData,
+    customAudioName,
+    setSoundPreset,
+    setCustomAudio,
+    removeCustomAudio,
+    toggleSound,
+    playAlert,
+    playPreview,
+  } = useSound()
   const toast = useToast()
+
+  const fileInputRef = useRef(null)
+  const [soundStudioExpanded, setSoundStudioExpanded] = useState(false)
+
+  const activeSoundTitle = customAudioData
+    ? customAudioName || 'Custom Ringtone'
+    : SOUND_PRESETS.find((p) => p.id === soundPreset)?.name || 'Royal Chime'
+
+  const activeSoundDesc = customAudioData
+    ? 'Custom audio file active for order assignments'
+    : SOUND_PRESETS.find((p) => p.id === soundPreset)?.desc || 'Harmonic chime'
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -36,6 +68,32 @@ export const SettingsPage = () => {
 
   const [showChangeDeviceModal, setShowChangeDeviceModal] = useState(false)
   const [changeDeviceLoading, setChangeDeviceLoading] = useState(false)
+
+  // Custom Audio File Upload Handler
+  const handleAudioFileUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // 10MB size limit
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File Too Large', 'Please choose an audio file under 10MB.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result
+      if (dataUrl) {
+        setCustomAudio(dataUrl, file.name)
+        toast.success('Custom Alert Set', `"${file.name}" is now your active assignment ringtone.`)
+      }
+    }
+    reader.onerror = () => {
+      toast.error('Upload Error', 'Could not process audio file. Please try another audio format.')
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
 
   const handlePasswordChange = async (e) => {
     e.preventDefault()
@@ -89,179 +147,389 @@ export const SettingsPage = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="w-full max-w-full space-y-4 sm:space-y-6 pb-28 md:pb-12">
       <div>
-        <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+        <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
           App Settings & Preferences
         </h2>
-        <p className="text-xs text-slate-400">
-          Configure security, alerts, and user interface preferences
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Configure security, alert sounds, and user interface preferences
         </p>
       </div>
 
-      {/* 1. App Interface & Audio Preferences Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
-        <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700/60 pb-3">
-          App Preferences
-        </h3>
-
-        <div className="space-y-3">
-          {/* Theme Option */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-              </div>
+      {/* 2-Column Responsive Layout: Left (Audio Studio) / Right (Display & Security) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+        {/* ========================================================================= */}
+        {/* Left Primary Column: Audio Alert & Ringtone Studio                        */}
+        {/* ========================================================================= */}
+        <div className="lg:col-span-7 space-y-5">
+          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
+            {/* Studio Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3.5">
               <div>
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                  Dark Mode Theme
-                </span>
-                <span className="text-[11px] text-slate-400">
-                  {isDark ? 'Dark theme is currently active' : 'Light theme is currently active'}
-                </span>
+                <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Music className="w-4 h-4 text-[#113BD0] dark:text-blue-400" />
+                  <span>Assignment Audio Alert</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Customize ringtones and sound alerts for incoming delivery trips
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => playAlert()}
+                  disabled={!soundEnabled}
+                  className="text-xs font-bold"
+                  icon={Play}
+                >
+                  Test Sound
+                </Button>
+                <Button
+                  variant={soundEnabled ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={toggleSound}
+                  className="text-xs font-black"
+                  icon={soundEnabled ? Volume2 : VolumeX}
+                >
+                  {soundEnabled ? 'Audio Enabled' : 'Muted'}
+                </Button>
               </div>
             </div>
-            <Button variant="outline" size="xs" onClick={toggleTheme}>
-              {isDark ? 'Switch Light' : 'Switch Dark'}
-            </Button>
+
+            {/* Current Active Sound Compact Row */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shrink-0 shadow-2xs">
+                  {customAudioData ? <FileAudio className="w-5 h-5" /> : <Music className="w-5 h-5" />}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 truncate">
+                      {activeSoundTitle}
+                    </span>
+                    <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 shrink-0">
+                      Active
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate block">
+                    {activeSoundDesc}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto pt-1 sm:pt-0">
+                {/* Mobile-Only Accordion Button */}
+                <button
+                  type="button"
+                  onClick={() => setSoundStudioExpanded(!soundStudioExpanded)}
+                  className={`lg:hidden flex-1 sm:flex-initial px-3.5 py-2 min-h-[38px] rounded-xl border text-xs font-black flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer ${
+                    soundStudioExpanded
+                      ? 'bg-[#113BD0] text-white border-[#113BD0]'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-[#113BD0] dark:text-blue-400'
+                  }`}
+                >
+                  <span>{soundStudioExpanded ? 'Close' : 'Change Tone'}</span>
+                  {soundStudioExpanded ? (
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  ) : (
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Sound Studio Body (Always visible on Desktop lg:block, Collapsible on Mobile) */}
+            <div
+              className={`space-y-4 pt-1 ${
+                soundStudioExpanded ? 'block' : 'hidden lg:block'
+              }`}
+            >
+              {/* Built-in Tone Presets */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between text-xs font-black text-slate-700 dark:text-slate-200">
+                  <span>Built-in Alert Tones</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold">Fast & Offline Ready</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {SOUND_PRESETS.map((preset) => {
+                    const isSelected = soundPreset === preset.id && !customAudioData
+                    return (
+                      <div
+                        key={preset.id}
+                        onClick={() => setSoundPreset(preset.id)}
+                        className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 touch-manipulation active:scale-[0.98] ${
+                          isSelected
+                            ? 'bg-blue-50/80 dark:bg-blue-950/40 border-[#113BD0] dark:border-blue-500 shadow-2xs'
+                            : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div
+                            className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                              isSelected
+                                ? 'border-[#113BD0] bg-[#113BD0] text-white'
+                                : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-xs font-black text-slate-900 dark:text-slate-100 block truncate">
+                              {preset.name}
+                            </span>
+                            <span className="text-[10px] text-slate-400 truncate block">
+                              {preset.desc}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            playPreview(preset.id)
+                          }}
+                          className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-[#113BD0] dark:hover:text-blue-400 hover:scale-105 transition-all shadow-2xs shrink-0 cursor-pointer"
+                          title="Play Preview"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Custom Audio Upload Studio */}
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between text-xs font-black text-slate-700 dark:text-slate-200">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#F97316]" />
+                    <span>Custom Sound / Ringtone</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">MP3, WAV, M4A, AAC, OGG, FLAC</span>
+                </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAudioFileUpload}
+                  accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac,.flac,.webm"
+                  className="hidden"
+                />
+
+                {customAudioData ? (
+                  /* Uploaded Sound Active State Card */
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-50/80 to-indigo-50/60 dark:from-blue-950/40 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-10 h-10 rounded-2xl bg-[#113BD0] text-white flex items-center justify-center shrink-0 shadow-xs">
+                        <FileAudio className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h5 className="font-black text-slate-900 dark:text-slate-100 text-xs sm:text-sm truncate">
+                          {customAudioName || 'Custom Audio Alert'}
+                        </h5>
+                        <p className="text-slate-500 dark:text-slate-400 text-[11px]">
+                          Playing for all delivery trip alerts
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1 sm:pt-0">
+                      <button
+                        type="button"
+                        onClick={() => playPreview('custom')}
+                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 text-xs font-bold text-[#113BD0] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/40 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>Preview</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-750 flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Replace</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={removeCustomAudio}
+                        className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 shadow-2xs transition-all shrink-0 cursor-pointer"
+                        title="Remove Custom Sound & Reset"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Upload Trigger Dropzone */
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-5 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-[#113BD0] dark:hover:border-blue-500 bg-slate-50/60 dark:bg-slate-900/40 hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-all cursor-pointer text-center space-y-1.5 group"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60 text-slate-400 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 flex items-center justify-center mx-auto transition-colors">
+                      <Upload className="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-black text-slate-800 dark:text-slate-200 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 block transition-colors">
+                        Upload Custom Sound / Ringtone
+                      </span>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Tap to browse audio file (.mp3, .wav, .m4a, .aac, .ogg, .flac)
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Sound Alert Option */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400">
-                {soundEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+        {/* ========================================================================= */}
+        {/* Right Column: Display Appearance & Device / Account Security               */}
+        {/* ========================================================================= */}
+        <div className="lg:col-span-5 space-y-5">
+          {/* 1. Display Appearance (Dark / Light Theme) */}
+          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3.5">
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+              Display Appearance
+            </h3>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 shadow-2xs">
+                  {isDark ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-500" />}
+                </div>
+                <div className="min-w-0">
+                  <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 block">
+                    Dark Mode Theme
+                  </span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    {isDark ? 'Dark theme is active' : 'Light theme is active'}
+                  </span>
+                </div>
               </div>
-              <div>
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                  New Assignment Audio Alert
-                </span>
-                <span className="text-[11px] text-slate-400">
-                  High-priority sound chime when a trip is assigned
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                size="xs"
-                onClick={playAlert}
-                className="text-[11px]"
+                size="sm"
+                onClick={toggleTheme}
+                className="w-full sm:w-auto shrink-0 font-black text-xs"
               >
-                Test Sound
+                {isDark ? 'Switch Light' : 'Switch Dark'}
               </Button>
+            </div>
+          </div>
+
+          {/* 2. Device Management */}
+          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3.5">
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+              Device & Session Security
+            </h3>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-2xs">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h5 className="font-black text-slate-900 dark:text-slate-100 text-xs sm:text-sm">
+                    Change Device
+                  </h5>
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">
+                    Switch session to another device
+                  </p>
+                </div>
+              </div>
               <Button
-                variant={soundEnabled ? 'primary' : 'outline'}
-                size="xs"
-                onClick={toggleSound}
+                variant="outline"
+                size="sm"
+                onClick={() => setShowChangeDeviceModal(true)}
+                className="w-full sm:w-auto shrink-0 font-black text-xs text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/50"
               >
-                {soundEnabled ? 'Mute' : 'Enable'}
+                Change Device
               </Button>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* 2. Device Management & Change Device */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
-        <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700/60 pb-3">
-          Device & Session Security
-        </h3>
+          {/* 3. Change Password / Security PIN */}
+          <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3.5">
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2.5">
+              Change Password / PIN
+            </h3>
 
-        <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400">
-              <Smartphone className="w-5 h-5" />
-            </div>
-            <div>
-              <h5 className="font-black text-slate-900 dark:text-slate-100 text-xs">
-                Change Device
-              </h5>
-              <p className="text-slate-500 dark:text-slate-400 text-[11px]">
-                Switch your active rider session to another phone or tablet
-              </p>
-            </div>
+            <form onSubmit={handlePasswordChange} className="space-y-3 text-xs">
+              <Input
+                label="Current Password / PIN"
+                type="password"
+                icon={Lock}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+              <Input
+                label="New Password"
+                type="password"
+                icon={Lock}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+              <Input
+                label="Confirm New Password"
+                type="password"
+                icon={Lock}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+
+              {passwordError && (
+                <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{passwordError}</span>
+                </div>
+              )}
+
+              <div className="pt-1">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  loading={passwordLoading}
+                  icon={CheckCircle2}
+                  className="w-full py-3 font-black text-xs rounded-2xl"
+                >
+                  Update Password
+                </Button>
+              </div>
+            </form>
           </div>
-          <Button
-            variant="outline"
-            size="xs"
-            onClick={() => setShowChangeDeviceModal(true)}
-            className="font-bold text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/50"
+
+          {/* 4. Logout Button */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full p-3.5 min-h-[46px] rounded-2xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 border border-rose-200/90 dark:border-rose-800/70 text-rose-600 dark:text-rose-400 text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation active:scale-[0.98] shadow-2xs"
           >
-            Change Device
-          </Button>
-        </div>
-      </div>
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out of Rider Account</span>
+          </button>
 
-      {/* 3. Change Password / Security PIN Card */}
-      <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-4">
-        <h3 className="text-sm font-black text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700/60 pb-3">
-          Change Password / Security PIN
-        </h3>
-
-        <form onSubmit={handlePasswordChange} className="space-y-3 max-w-md text-xs">
-          <Input
-            label="Current Password / PIN"
-            type="password"
-            icon={Lock}
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-          />
-          <Input
-            label="New Password"
-            type="password"
-            icon={Lock}
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-          <Input
-            label="Confirm New Password"
-            type="password"
-            icon={Lock}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-
-          {passwordError && (
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{passwordError}</span>
-            </div>
-          )}
-
-          <div className="pt-2">
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              loading={passwordLoading}
-              icon={CheckCircle2}
-            >
-              Update Password
-            </Button>
+          {/* App Version Info */}
+          <div className="text-center text-xs text-slate-400 pt-1 space-y-1">
+            <p className="font-bold text-slate-500 dark:text-slate-400 text-xs">
+              Dastak Rider PWA v1.0.0 (Production Fleet Build)
+            </p>
+            <p className="text-[11px]">Designed for high-speed multi-drop deliveries</p>
           </div>
-        </form>
-      </div>
-
-      {/* Logout Button */}
-      <button
-        type="button"
-        onClick={handleLogout}
-        className="w-full p-4 rounded-3xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 text-xs font-black flex items-center justify-center gap-2 hover:bg-rose-100 transition-colors cursor-pointer"
-      >
-        <LogOut className="w-4 h-4" />
-        <span>Sign Out of Rider Account</span>
-      </button>
-
-      {/* App Version Info */}
-      <div className="text-center text-xs text-slate-400 pt-2 space-y-1">
-        <p className="font-bold text-slate-500 dark:text-slate-400">
-          Dastak Rider PWA v1.0.0 (Production Fleet Build)
-        </p>
-        <p className="text-[11px]">Designed for high-speed multi-drop deliveries</p>
+        </div>
       </div>
 
       {/* Change Device Confirmation Modal */}

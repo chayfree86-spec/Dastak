@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   Bell,
   Store,
@@ -11,10 +11,22 @@ import {
   Zap,
 } from 'lucide-react'
 import { formatCurrency, formatAddress } from '../../utils/formatters'
+import { useSound } from '../../context/SoundContext'
 import Modal from '../common/Modal'
 import Button from '../common/Button'
 
 export const NewAssignmentSheet = ({ order, onClose, onAcknowledge }) => {
+  const { startAlert, stopAlert } = useSound()
+
+  useEffect(() => {
+    if (order) {
+      startAlert()
+    }
+    return () => {
+      stopAlert()
+    }
+  }, [order, startAlert, stopAlert])
+
   if (!order) return null
 
   const isCod = order.payment_mode === 'COD' || order.payment_mode === 'CASH_ON_DELIVERY'

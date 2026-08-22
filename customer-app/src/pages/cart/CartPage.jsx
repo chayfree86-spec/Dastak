@@ -38,6 +38,8 @@ export const CartPage = () => {
     clearCart,
   } = useCart()
 
+  const [showClearConfirm, setShowClearConfirm] = useState(false)
+
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto space-y-6 py-6 pb-28">
@@ -53,33 +55,83 @@ export const CartPage = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-32">
-      {/* 1. Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            {t.yourCart}
-          </h2>
+    <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6 pb-36 sm:pb-40">
+      {/* 1. Premium & Designful Cart Header (Fixed directly below Top App Header) */}
+      <div className="sticky top-14 sm:top-16 z-30 p-3.5 sm:p-4 rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-sm flex items-center justify-between gap-3 transition-all -mt-1 sm:mt-0">
+        <div className="min-w-0 space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-base sm:text-xl lg:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+              {t.yourCart}
+            </h2>
+            <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-950/70 text-[#FF5200] dark:text-orange-400 text-[11px] font-black uppercase tracking-wide">
+              {itemCount} {itemCount === 1 ? 'Dish' : 'Dishes'}
+            </span>
+          </div>
+
           {restaurant && (
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
-              <Store className="w-4 h-4 text-[#113BD0]" />
-              <span>Ordering from <strong>{restaurant.name}</strong></span>
-            </p>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[11px] sm:text-xs font-bold max-w-full truncate">
+              <Store className="w-3.5 h-3.5 text-[#FF5200] shrink-0" />
+              <span className="truncate">
+                From <strong className="text-slate-900 dark:text-white font-black">{restaurant.name}</strong>
+              </span>
+            </div>
           )}
         </div>
 
+        {/* Designful Clear Cart Button */}
         <button
           type="button"
-          onClick={clearCart}
-          className="text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1 cursor-pointer"
+          onClick={() => setShowClearConfirm(true)}
+          className="shrink-0 px-3 sm:px-3.5 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200/90 dark:border-rose-800/60 text-xs font-black flex items-center gap-1.5 transition-all shadow-2xs active:scale-95 cursor-pointer group"
+          title="Clear all cart items"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
           <span>Clear Cart</span>
         </button>
       </div>
 
+      {/* Clear Cart Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto shadow-xs border border-rose-200/60 dark:border-rose-900/40">
+              <Trash2 className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1">
+              <h4 className="text-base font-black text-slate-900 dark:text-white">
+                Clear all cart items?
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                This will remove all dishes from your current order.
+              </p>
+            </div>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Keep Items
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearCart()
+                  setShowClearConfirm(false)
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-md shadow-rose-600/30 transition-colors"
+              >
+                Yes, Clear Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 2. Main 2-Column Grid (Items Left, Bill Right on Desktop) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start">
         {/* Left Column: Items List Card */}
         <div className="lg:col-span-2 space-y-4">
           <div className="p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
@@ -166,33 +218,45 @@ export const CartPage = () => {
                 )
               })}
             </div>
+          </div>
 
-            {/* Add More Items Button */}
-            <button
-              type="button"
-              onClick={() =>
-                restaurant?.slug
-                  ? navigate(`/restaurant/${restaurant.slug}`)
-                  : navigate('/restaurants')
-              }
-              className="w-full py-3 px-4 rounded-2xl bg-blue-50/80 hover:bg-blue-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-[#113BD0] dark:text-blue-400 text-xs sm:text-sm font-black border border-dashed border-[#113BD0]/30 dark:border-blue-500/40 flex items-center justify-between transition-all cursor-pointer group"
-            >
-              <span className="flex items-center gap-2">
-                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
-                <span>Add More Items</span>
-              </span>
-              <span className="text-xs font-bold text-slate-400 group-hover:text-[#113BD0] dark:group-hover:text-blue-400 transition-colors">
-                {restaurant?.name ? `From ${restaurant.name} →` : 'Browse Menu →'}
-              </span>
-            </button>
+          {/* Standalone '+ Add More Items' Card - Outside Items Card */}
+          <div
+            onClick={() =>
+              restaurant?.slug
+                ? navigate(`/restaurant/${restaurant.slug}`)
+                : navigate('/restaurants')
+            }
+            className="p-4 rounded-3xl bg-white dark:bg-slate-900 border-2 border-dashed border-[#FF5200]/50 dark:border-orange-500/50 hover:border-[#FF5200] flex items-center justify-between gap-3 transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-[0.99] group select-none"
+            role="button"
+            tabIndex={0}
+          >
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-10 h-10 rounded-2xl bg-orange-50 dark:bg-orange-950/60 text-[#FF5200] flex items-center justify-center font-black shadow-xs group-hover:scale-110 group-hover:bg-[#FF5200] group-hover:text-white transition-all shrink-0">
+                <Plus className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-sm font-black text-slate-900 dark:text-slate-100 leading-tight truncate">
+                  + Add More Items
+                </span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                  {restaurant?.name ? `From ${restaurant.name}` : 'Explore full menu'}
+                </span>
+              </div>
+            </div>
+
+            <span className="shrink-0 text-xs font-black text-[#FF5200] dark:text-orange-400 bg-orange-50 dark:bg-orange-950/60 px-3 py-1.5 rounded-xl border border-orange-200/80 dark:border-orange-900/60 shadow-2xs group-hover:bg-[#FF5200] group-hover:text-white transition-all flex items-center gap-1">
+              <span>Menu</span>
+              <span>→</span>
+            </span>
           </div>
         </div>
 
-        {/* Right Column: Bill Details & Checkout Button */}
-        <div className="lg:col-span-1 space-y-4 sticky top-20">
+        {/* Right Column: Bill Details Card */}
+        <div className="lg:col-span-1 space-y-4">
           <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-slate-700 dark:text-slate-200 font-black uppercase tracking-wider text-xs sm:text-sm">
-              <Receipt className="w-4 h-4 text-[#113BD0] dark:text-blue-400" />
+              <Receipt className="w-4 h-4 text-[#FF5200] dark:text-orange-400" />
               <span>BILL DETAILS</span>
             </div>
 
@@ -235,16 +299,33 @@ export const CartPage = () => {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <Button
-              variant="primary"
-              size="lg"
-              icon={ArrowRight}
-              onClick={() => navigate('/checkout')}
-              className="w-full py-3.5 shadow-xl shadow-orange-500/30 text-sm sm:text-base font-black mt-2"
-            >
-              {t.proceedToCheckout}
-            </Button>
+      {/* 3. Sticky Bottom Checkout Bar in Footer (Safe Gap above Home Navigation Button) */}
+      <div className="fixed bottom-20 sm:bottom-24 inset-x-3 sm:inset-x-6 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom-3 duration-300">
+        <div
+          onClick={() => navigate('/checkout')}
+          className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#FF5200] via-[#F97316] to-[#EA580C] text-white shadow-2xl shadow-orange-500/40 flex items-center justify-between gap-3 cursor-pointer hover:opacity-95 active:scale-[0.99] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-black shrink-0 shadow-xs">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] font-black uppercase text-white/90 block leading-tight">
+                {itemCount} {itemCount === 1 ? 'ITEM' : 'ITEMS'} • TOTAL
+              </span>
+              <div className="text-sm sm:text-base font-black leading-tight tracking-tight">
+                {formatCurrency(grandTotal)}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 font-black text-xs sm:text-sm bg-white text-slate-900 px-4 sm:px-5 py-2.5 rounded-2xl shadow-md shrink-0 active:scale-95 transition-transform">
+            <span>{t.proceedToCheckout || 'Proceed to Checkout'}</span>
+            <ArrowRight className="w-4 h-4 text-[#FF5200]" />
           </div>
         </div>
       </div>

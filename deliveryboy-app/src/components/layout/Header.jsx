@@ -128,7 +128,7 @@ export const Header = () => {
               type="button"
               onClick={handleDutyToggleClick}
               disabled={loading}
-              className={`relative px-3.5 py-1.5 rounded-2xl border font-black text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer ${
+              className={`relative px-3.5 py-2 sm:py-1.5 min-h-[38px] sm:min-h-[34px] rounded-2xl border font-black text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer touch-manipulation active:scale-95 ${
                 isOnline
                   ? 'bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-400 shadow-emerald-500/20'
                   : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'

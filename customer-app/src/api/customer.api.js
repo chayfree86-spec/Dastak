@@ -13,6 +13,12 @@ export const customerApi = {
     return res.data
   },
 
+  // Public: current ordering availability (open/closed + next opening time)
+  getServiceStatus: async () => {
+    const res = await apiClient.get('/service-status')
+    return res.data
+  },
+
   // Profile
   getProfile: async () => {
     const res = await apiClient.get('/customer/profile')

@@ -155,6 +155,29 @@ class OrderService
                 $totalAmount = round($subtotal - $discountAmount + $deliveryFee + $taxAmount, 2);
             }
 
+            // Enforce Strict Single-Partner Constraint: All items must belong to the same restaurant
+            $itemIds = collect($itemsToCreate)->pluck('menu_item_id')->filter()->unique();
+            if ($itemIds->isNotEmpty()) {
+                $dbItemRestaurants = \App\Models\MenuItem::whereIn('id', $itemIds)
+                    ->whereNotNull('restaurant_id')
+                    ->distinct()
+                    ->pluck('restaurant_id');
+
+                if ($dbItemRestaurants->count() > 1) {
+                    throw ValidationException::withMessages([
+                        'restaurant' => ['An order can only contain items from a single restaurant/partner.'],
+                    ]);
+                }
+
+                // If restaurant is set, make sure it matches the items' restaurant
+                if ($restaurant && $dbItemRestaurants->isNotEmpty() && !$dbItemRestaurants->contains($restaurant->id)) {
+                    $matchedRestaurant = \App\Models\Restaurant::find($dbItemRestaurants->first());
+                    if ($matchedRestaurant) {
+                        $restaurant = $matchedRestaurant;
+                    }
+                }
+            }
+
             // Unique Order Number & OTP
             $orderNumber = 'DSTK-' . date('Ymd') . '-' . strtoupper(Str::random(5));
             $deliveryOtp = (string) random_int(1000, 9999);

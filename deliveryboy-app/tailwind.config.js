@@ -18,7 +18,7 @@ export default {
         },
         slate: {
           750: '#1e293b',
-          850: '#113BD0',
+          850: '#131e2f',
         },
         success: '#16A34A',
         warning: '#F59E0B',

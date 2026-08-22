@@ -65,7 +65,7 @@ export const EarningsPage = () => {
           <button
             type="button"
             onClick={() => setPeriod('today')}
-            className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 sm:py-1.5 min-h-[44px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-xs font-black transition-all touch-manipulation active:scale-[0.98] ${
               period === 'today'
                 ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
@@ -76,7 +76,7 @@ export const EarningsPage = () => {
           <button
             type="button"
             onClick={() => setPeriod('week')}
-            className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 sm:py-1.5 min-h-[44px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-xs font-black transition-all touch-manipulation active:scale-[0.98] ${
               period === 'week'
                 ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
@@ -87,7 +87,7 @@ export const EarningsPage = () => {
           <button
             type="button"
             onClick={() => setPeriod('month')}
-            className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 sm:py-1.5 min-h-[44px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-xs font-black transition-all touch-manipulation active:scale-[0.98] ${
               period === 'month'
                 ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'

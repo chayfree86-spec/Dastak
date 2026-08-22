@@ -370,7 +370,7 @@ export const RestaurantPage = () => {
 
       {/* 5. Sticky Floating Bottom Cart Bar */}
       {itemCount > 0 && (
-        <div className="fixed bottom-16 sm:bottom-20 inset-x-3 sm:inset-x-6 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom-3 duration-300">
+        <div className="fixed bottom-20 sm:bottom-24 inset-x-3 sm:inset-x-6 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom-3 duration-300">
           <div
             onClick={() => navigate('/cart')}
             className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-[#FF5200] to-[#EA580C] text-white shadow-2xl shadow-orange-500/40 flex items-center justify-between gap-3 cursor-pointer hover:opacity-95 transition-all"

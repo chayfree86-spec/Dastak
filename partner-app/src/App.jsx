@@ -54,8 +54,8 @@ const PwaController = () => {
       appName="Dastak Restaurant Partner"
       appRole="Live Order Management & Kitchen Display System"
       iconSrc="/pwa-512x512.png"
-      accentColor="bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30"
-      accentBadge="bg-blue-500/10 text-blue-400 border-blue-500/20"
+      accentColor="bg-gradient-to-r from-[#113BD0] via-[#7C3AED] to-[#FF5200] hover:opacity-95 text-white shadow-lg shadow-indigo-600/35"
+      accentBadge="bg-gradient-to-r from-blue-50 to-orange-50 dark:from-blue-950/40 dark:to-orange-950/40 text-slate-900 dark:text-slate-100 border-indigo-200 dark:border-indigo-500/20"
     />
   )
 }

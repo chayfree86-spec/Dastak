@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiResponse;
 use App\Models\SystemSetting;
 use App\Models\Zone;
+use App\Services\StoreHoursService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -67,6 +68,33 @@ class SettingsController extends Controller
     public function updateNotificationSettings(Request $request): JsonResponse
     {
         return $this->patchStore($request, 'Notification settings updated.');
+    }
+
+    // --- Store / service hours ---
+
+    public function getStoreHours(StoreHoursService $store): JsonResponse
+    {
+        $data = $this->only(['service_mode', 'service_open_time', 'service_close_time', 'service_closed_message']);
+        $data['status'] = $store->status();
+
+        return ApiResponse::success($data, 'Store hours retrieved.');
+    }
+
+    public function updateStoreHours(Request $request, StoreHoursService $store): JsonResponse
+    {
+        $data = $request->validate([
+            'service_mode' => ['required', 'in:24x7,scheduled,closed'],
+            'service_open_time' => ['nullable', 'date_format:H:i'],
+            'service_close_time' => ['nullable', 'date_format:H:i'],
+            'service_closed_message' => ['nullable', 'string', 'max:200'],
+        ]);
+
+        SystemSetting::setMany($data);
+
+        $out = $this->only(['service_mode', 'service_open_time', 'service_close_time', 'service_closed_message']);
+        $out['status'] = $store->status();
+
+        return ApiResponse::success($out, 'Store hours updated successfully.');
     }
 
     // --- Service areas (backed by Zone) ---
@@ -199,6 +227,10 @@ class SettingsController extends Controller
             'notify_sms' => true,
             'notify_push' => true,
             'notify_email' => false,
+            'service_mode' => '24x7',
+            'service_open_time' => '09:00',
+            'service_close_time' => '22:00',
+            'service_closed_message' => '',
         ];
     }
 

@@ -44,8 +44,8 @@ const PwaController = () => {
       appName="Dastak Delivery Partner"
       appRole="Live Delivery & Rider Order Fulfilment App"
       iconSrc="/pwa-512x512.png"
-      accentColor="bg-orange-600 hover:bg-orange-500 text-white shadow-orange-600/30"
-      accentBadge="bg-orange-500/10 text-orange-400 border-orange-500/20"
+      accentColor="bg-gradient-to-r from-[#113BD0] to-[#1E3A8A] hover:from-[#0F32B5] hover:to-[#172554] text-white shadow-lg shadow-blue-600/35"
+      accentBadge="bg-blue-50 dark:bg-blue-950/40 text-[#113BD0] dark:text-blue-400 border-blue-200 dark:border-blue-500/20"
     />
   )
 }

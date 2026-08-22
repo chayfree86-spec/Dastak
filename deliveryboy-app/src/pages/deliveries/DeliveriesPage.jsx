@@ -79,7 +79,7 @@ export const DeliveriesPage = () => {
           <button
             type="button"
             onClick={() => setTab('active')}
-            className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 sm:py-1.5 min-h-[44px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-xs sm:text-xs font-black transition-all touch-manipulation active:scale-[0.98] ${
               tab === 'active'
                 ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
@@ -90,7 +90,7 @@ export const DeliveriesPage = () => {
           <button
             type="button"
             onClick={() => setTab('completed')}
-            className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 sm:py-1.5 min-h-[44px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-xs sm:text-xs font-black transition-all touch-manipulation active:scale-[0.98] ${
               tab === 'completed'
                 ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
@@ -101,7 +101,7 @@ export const DeliveriesPage = () => {
           <button
             type="button"
             onClick={() => setTab('all')}
-            className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-xl text-xs font-black transition-all ${
+            className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2.5 sm:py-1.5 min-h-[44px] sm:min-h-[36px] flex items-center justify-center rounded-xl text-xs sm:text-xs font-black transition-all touch-manipulation active:scale-[0.98] ${
               tab === 'all'
                 ? 'bg-[#113BD0] text-white shadow-xs'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
@@ -271,13 +271,24 @@ export const DeliveriesPage = () => {
             )}
 
             {/* Payment Summary */}
-            <div className="p-3.5 rounded-2xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 flex justify-between items-center">
+            <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 flex justify-between items-center shadow-2xs">
               <span className="font-black text-slate-900 dark:text-slate-100">
                 Total Bill Amount:
               </span>
-              <span className="text-base font-black text-[#113BD0] dark:text-blue-400">
+              <span className="text-lg font-black text-[#113BD0] dark:text-blue-400">
                 {formatCurrency(selectedOrder.bill?.total_amount || selectedOrder.total_amount)}
               </span>
+            </div>
+
+            {/* Modal Bottom Close Action in Transparent Red with Solid Red Text */}
+            <div className="pt-2 pb-6 sm:pb-2">
+              <button
+                type="button"
+                onClick={() => setSelectedOrder(null)}
+                className="w-full py-3.5 min-h-[48px] rounded-2xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 border border-rose-200/90 dark:border-rose-800/70 text-rose-600 dark:text-rose-400 font-black text-sm flex items-center justify-center gap-2 transition-all cursor-pointer touch-manipulation active:scale-[0.98] shadow-2xs"
+              >
+                <span>Close Details</span>
+              </button>
             </div>
           </div>
         </Modal>

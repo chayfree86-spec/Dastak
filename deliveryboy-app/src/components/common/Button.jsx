@@ -19,41 +19,41 @@ export const Button = ({
 
   const variants = {
     primary:
-      'bg-[#113BD0] hover:bg-[#F97316] text-white shadow-md shadow-blue-600/20 hover:shadow-orange-500/20',
+      'bg-[#113BD0] hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:shadow-blue-600/30',
     secondary:
-      'bg-slate-100 dark:bg-slate-800 hover:bg-[#F97316] dark:hover:bg-[#F97316] text-slate-800 dark:text-slate-200 hover:text-white',
+      'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200',
     outline:
-      'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:text-white hover:border-[#F97316] dark:hover:border-[#F97316] shadow-xs',
+      'bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white shadow-2xs',
     success:
       'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20',
     danger:
       'bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20',
     dangerOutline:
-      'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50 hover:text-white hover:border-rose-600',
+      'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50 hover:bg-rose-100 dark:hover:bg-rose-900/60',
     ghost:
-      'bg-transparent hover:bg-[#F97316] text-slate-600 dark:text-slate-300 hover:text-white',
+      'bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300',
     accent:
-      'bg-[#F97316] hover:bg-[#113BD0] text-white shadow-md shadow-orange-500/20 hover:shadow-blue-500/20',
+      'bg-[#F97316] hover:bg-orange-600 text-white shadow-md shadow-orange-500/20',
   }
 
-  // Slide fill colors per variant
+  // Slide fill colors per variant (subtle and theme-aligned)
   const slideColors = {
-    primary: 'bg-gradient-to-r from-[#F97316] to-[#EA580C]',
-    secondary: 'bg-gradient-to-r from-[#F97316] to-[#EA580C]',
-    outline: 'bg-gradient-to-r from-[#F97316] to-[#EA580C]',
+    primary: 'bg-gradient-to-r from-blue-700 to-blue-800',
+    secondary: 'bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-650',
+    outline: 'bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-750',
     success: 'bg-gradient-to-r from-emerald-700 to-emerald-800',
     danger: 'bg-gradient-to-r from-rose-700 to-rose-800',
-    dangerOutline: 'bg-gradient-to-r from-rose-600 to-rose-700',
-    ghost: 'bg-gradient-to-r from-[#F97316] to-[#EA580C]',
-    accent: 'bg-gradient-to-r from-[#113BD0] to-[#1E35B0]',
+    dangerOutline: 'bg-gradient-to-r from-rose-100 to-rose-200 dark:from-rose-900 dark:to-rose-850',
+    ghost: 'bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-750',
+    accent: 'bg-gradient-to-r from-orange-600 to-orange-700',
   }
 
   const sizes = {
-    xs: 'px-3 py-1.5 text-xs gap-1.5',
-    sm: 'px-3.5 py-2 text-xs gap-1.5',
-    md: 'px-4 py-2.5 text-sm gap-2',
-    lg: 'px-6 py-3.5 text-base gap-2.5',
-    xl: 'px-6 py-4 text-base sm:text-lg font-black gap-3 w-full',
+    xs: 'px-3.5 py-2 sm:py-1.5 min-h-[36px] sm:min-h-[32px] text-xs gap-1.5',
+    sm: 'px-4 py-2.5 sm:py-2 min-h-[42px] sm:min-h-[36px] text-xs font-bold gap-1.5',
+    md: 'px-4 py-3 sm:py-2.5 min-h-[48px] sm:min-h-[42px] text-sm font-bold gap-2',
+    lg: 'px-6 py-3.5 min-h-[52px] sm:min-h-[48px] text-base font-black gap-2.5',
+    xl: 'px-6 py-4 min-h-[56px] text-base sm:text-lg font-black gap-3 w-full',
   }
 
   return (

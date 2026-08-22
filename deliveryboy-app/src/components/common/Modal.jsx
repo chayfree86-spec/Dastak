@@ -67,7 +67,7 @@ export const Modal = ({
         )}
 
         {/* Content Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1 text-slate-800 dark:text-slate-200 pb-safe">
+        <div className="p-4 sm:p-5 pb-10 sm:pb-6 overflow-y-auto flex-1 text-slate-800 dark:text-slate-200 pb-safe">
           {children}
         </div>
       </div>
