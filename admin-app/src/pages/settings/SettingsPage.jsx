@@ -52,6 +52,13 @@ export const SettingsPage = () => {
   const [dispatchMode, setDispatchMode] = useState('AUTO')
   const [maxRadiusKm, setMaxRadiusKm] = useState('')
   const [baseDeliveryFee, setBaseDeliveryFee] = useState('')
+  // Delivery charge customization
+  const [allFreeDelivery, setAllFreeDelivery] = useState(false)
+  const [freeDeliveryRadiusKm, setFreeDeliveryRadiusKm] = useState('')
+  const [freeDeliveryMinOrder, setFreeDeliveryMinOrder] = useState('')
+  const [baseDeliveryDistanceKm, setBaseDeliveryDistanceKm] = useState('')
+  const [perKmCharge, setPerKmCharge] = useState('')
+  const [maxDeliveryFee, setMaxDeliveryFee] = useState('')
 
   // Payment Settings
   const [codEnabled, setCodEnabled] = useState(true)
@@ -92,6 +99,12 @@ export const SettingsPage = () => {
         if (data.dispatch_mode !== undefined) setDispatchMode(data.dispatch_mode)
         if (data.max_radius_km !== undefined) setMaxRadiusKm(String(data.max_radius_km))
         if (data.base_delivery_fee !== undefined) setBaseDeliveryFee(String(data.base_delivery_fee))
+        if (data.all_free_delivery !== undefined) setAllFreeDelivery(Boolean(data.all_free_delivery))
+        if (data.free_delivery_radius_km !== undefined) setFreeDeliveryRadiusKm(String(data.free_delivery_radius_km))
+        if (data.free_delivery_min_order !== undefined) setFreeDeliveryMinOrder(String(data.free_delivery_min_order))
+        if (data.base_delivery_distance_km !== undefined) setBaseDeliveryDistanceKm(String(data.base_delivery_distance_km))
+        if (data.per_km_charge !== undefined) setPerKmCharge(String(data.per_km_charge))
+        if (data.max_delivery_fee !== undefined) setMaxDeliveryFee(String(data.max_delivery_fee))
         if (data.cod_enabled !== undefined) setCodEnabled(Boolean(data.cod_enabled))
         if (data.online_gateway !== undefined) setOnlineGateway(data.online_gateway)
         if (data.default_commission !== undefined) setDefaultCommission(String(data.default_commission))
@@ -206,6 +219,12 @@ export const SettingsPage = () => {
         dispatch_mode: dispatchMode,
         max_radius_km: Number(maxRadiusKm),
         base_delivery_fee: Number(baseDeliveryFee),
+        all_free_delivery: allFreeDelivery,
+        free_delivery_radius_km: Number(freeDeliveryRadiusKm) || 0,
+        free_delivery_min_order: Number(freeDeliveryMinOrder) || 0,
+        base_delivery_distance_km: Number(baseDeliveryDistanceKm) || 0,
+        per_km_charge: Number(perKmCharge) || 0,
+        max_delivery_fee: Number(maxDeliveryFee) || 0,
         cod_enabled: codEnabled,
         online_gateway: onlineGateway,
         default_commission: Number(defaultCommission),
@@ -222,6 +241,12 @@ export const SettingsPage = () => {
         if (data.dispatch_mode !== undefined) setDispatchMode(data.dispatch_mode)
         if (data.max_radius_km !== undefined) setMaxRadiusKm(String(data.max_radius_km))
         if (data.base_delivery_fee !== undefined) setBaseDeliveryFee(String(data.base_delivery_fee))
+        if (data.all_free_delivery !== undefined) setAllFreeDelivery(Boolean(data.all_free_delivery))
+        if (data.free_delivery_radius_km !== undefined) setFreeDeliveryRadiusKm(String(data.free_delivery_radius_km))
+        if (data.free_delivery_min_order !== undefined) setFreeDeliveryMinOrder(String(data.free_delivery_min_order))
+        if (data.base_delivery_distance_km !== undefined) setBaseDeliveryDistanceKm(String(data.base_delivery_distance_km))
+        if (data.per_km_charge !== undefined) setPerKmCharge(String(data.per_km_charge))
+        if (data.max_delivery_fee !== undefined) setMaxDeliveryFee(String(data.max_delivery_fee))
         if (data.cod_enabled !== undefined) setCodEnabled(Boolean(data.cod_enabled))
         if (data.online_gateway !== undefined) setOnlineGateway(data.online_gateway)
         if (data.default_commission !== undefined) setDefaultCommission(String(data.default_commission))
@@ -452,6 +477,7 @@ export const SettingsPage = () => {
 
         {/* Tab 3: Delivery & Fleet */}
         {activeTab === 'delivery' && (
+          <>
           <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Fleet & Dispatch Rules</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -472,12 +498,93 @@ export const SettingsPage = () => {
                 onChange={(e) => setMaxRadiusKm(e.target.value)}
               />
               <AmountInput
-                label="Base Minimum Delivery Fee"
+                label="Base Delivery Fee"
                 value={baseDeliveryFee}
                 onChange={(e) => setBaseDeliveryFee(e.target.value)}
               />
             </div>
           </div>
+
+          {/* Fully-customizable delivery charges */}
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Delivery Charge Customization</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Control when delivery is free and how much to charge by order amount &amp; distance.
+              </p>
+            </div>
+
+            {/* Festival / promo master toggle */}
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50">
+              <Switch
+                checked={allFreeDelivery}
+                onChange={setAllFreeDelivery}
+                label="Free Delivery for Everyone (Festival Mode)"
+                description="Turn ON to make delivery ₹0 for ALL orders — any order value, any distance. Overrides everything below."
+              />
+            </div>
+
+            {/* Free-radius (distance-based free) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Input
+                  label="Free Delivery Within (KM)"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={freeDeliveryRadiusKm}
+                  onChange={(e) => setFreeDeliveryRadiusKm(e.target.value)}
+                  disabled={allFreeDelivery}
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Orders within this distance get free delivery, any order value. 0 = off. (e.g. 3 = free up to 3 km)</p>
+              </div>
+              <div>
+                <AmountInput
+                  label="Free Delivery Above (Order Amount)"
+                  value={freeDeliveryMinOrder}
+                  onChange={(e) => setFreeDeliveryMinOrder(e.target.value)}
+                  disabled={allFreeDelivery}
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Orders at/above this amount get free delivery. 0 = never free.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Input
+                  label="Base Fee Covers Distance (KM)"
+                  type="number"
+                  min="0"
+                  value={baseDeliveryDistanceKm}
+                  onChange={(e) => setBaseDeliveryDistanceKm(e.target.value)}
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Base fee applies up to this distance; beyond it, per-km charge is added.</p>
+              </div>
+              <div>
+                <AmountInput
+                  label="Per KM Charge (Beyond Base Distance)"
+                  value={perKmCharge}
+                  onChange={(e) => setPerKmCharge(e.target.value)}
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Extra charge for each km beyond the base distance. 0 = flat fee only.</p>
+              </div>
+              <div>
+                <AmountInput
+                  label="Maximum Delivery Fee (Cap)"
+                  value={maxDeliveryFee}
+                  onChange={(e) => setMaxDeliveryFee(e.target.value)}
+                />
+                <p className="text-[11px] text-slate-400 mt-1">Delivery fee never exceeds this. 0 = no cap.</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/50 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              <span className="font-black text-[#113BD0] dark:text-blue-400">How it's calculated: </span>
+              If order ≥ Free-Delivery amount → <strong>₹0</strong>. Otherwise <strong>Base Fee</strong> +
+              (distance − Base KM) × <strong>Per-KM Charge</strong>, capped at the Maximum Fee.
+            </div>
+          </div>
+          </>
         )}
 
         {/* Tab 4: Payments & COD */}

@@ -39,6 +39,7 @@ export const ServiceStatusProvider = ({ children }) => {
 
   // Unknown status → treat as open (don't block prematurely).
   const isOpen = status ? Boolean(status.is_open) : true
+  const deliveryConfig = status?.delivery || null
 
   const openClosedAlert = useCallback(() => setClosedAlertOpen(true), [])
 
@@ -51,7 +52,7 @@ export const ServiceStatusProvider = ({ children }) => {
 
   return (
     <ServiceStatusContext.Provider
-      value={{ status, isOpen, refresh: fetchStatus, requireOpen, openClosedAlert }}
+      value={{ status, isOpen, deliveryConfig, refresh: fetchStatus, requireOpen, openClosedAlert }}
     >
       {children}
 

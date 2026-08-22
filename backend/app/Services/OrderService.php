@@ -23,7 +23,8 @@ class OrderService
     public function __construct(
         protected CartService $cartService,
         protected CouponService $couponService,
-        protected DispatchService $dispatchService
+        protected DispatchService $dispatchService,
+        protected DeliveryFeeService $deliveryFeeService
     ) {}
 
     public function checkout(User $user, array $checkoutData): Order
@@ -177,6 +178,19 @@ class OrderService
                     }
                 }
             }
+
+            // Distance-aware, admin-configured delivery fee (overrides any
+            // precomputed/hardcoded value so pricing always matches Settings).
+            $distanceKm = null;
+            if ($restaurant && $restaurant->latitude && $restaurant->longitude
+                && $address && $address->latitude && $address->longitude) {
+                $distanceKm = $this->deliveryFeeService->haversineKm(
+                    (float) $restaurant->latitude, (float) $restaurant->longitude,
+                    (float) $address->latitude, (float) $address->longitude
+                );
+            }
+            $deliveryFee = $this->deliveryFeeService->compute($subtotal, $distanceKm)['fee'];
+            $totalAmount = round($subtotal - $discountAmount + $deliveryFee + $taxAmount, 2);
 
             // Unique Order Number & OTP
             $orderNumber = 'DSTK-' . date('Ymd') . '-' . strtoupper(Str::random(5));

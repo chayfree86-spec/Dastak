@@ -5,6 +5,7 @@ import { useTheme } from '../../context/ThemeContext'
 import { ROLE_LABELS, normalizeRole } from '../../utils/permissions'
 import NotificationsPopover from './NotificationsPopover'
 import GlobalSearchModal from './GlobalSearchModal'
+import StoreStatusBadge from './StoreStatusBadge'
 
 export const Header = ({ onOpenMobileSidebar, title, breadcrumbs = [] }) => {
   const { user, logout, role } = useAuth()
@@ -46,8 +47,11 @@ export const Header = ({ onOpenMobileSidebar, title, breadcrumbs = [] }) => {
           </div>
         </div>
 
-        {/* Right Side: Global Search + Theme Toggle + Notifications + Profile */}
+        {/* Right Side: Store Status + Global Search + Theme Toggle + Notifications + Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Live ordering-availability status */}
+          <StoreStatusBadge />
+
           {/* Search Trigger */}
           <button
             type="button"

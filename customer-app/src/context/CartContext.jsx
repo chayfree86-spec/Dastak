@@ -5,7 +5,7 @@ import { useServiceStatus } from './ServiceStatusContext'
 const CartContext = createContext(null)
 
 export const CartProvider = ({ children }) => {
-  const { requireOpen } = useServiceStatus()
+  const { requireOpen, deliveryConfig } = useServiceStatus()
   const [items, setItems] = useState(() => {
     const saved = localStorage.getItem('dastak_customer_cart_items')
     return saved ? JSON.parse(saved) : []
@@ -165,10 +165,18 @@ export const CartProvider = ({ children }) => {
     return items.reduce((sum, it) => sum + it.price * it.quantity, 0)
   }, [items])
 
+  // Delivery fee estimate from admin-configured settings (free threshold +
+  // base fee). Distance-based surcharge is applied by the backend at checkout.
   const deliveryFee = useMemo(() => {
     if (items.length === 0) return 0
-    return subtotal > 499 ? 0 : 35.0
-  }, [items, subtotal])
+    const cfg = deliveryConfig
+    if (!cfg) return subtotal >= 499 ? 0 : 35 // fallback until config loads
+    if (cfg.all_free_delivery) return 0 // festival mode — free for everyone
+    const freeMin = Number(cfg.free_delivery_min_order) || 0
+    if (freeMin > 0 && subtotal >= freeMin) return 0
+    // Note: free-within-radius applies at checkout (needs delivery distance).
+    return Number(cfg.base_delivery_fee) || 0
+  }, [items, subtotal, deliveryConfig])
 
   const taxAmount = useMemo(() => {
     return Math.round(subtotal * 0.05 * 100) / 100

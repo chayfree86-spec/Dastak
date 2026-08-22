@@ -42,7 +42,11 @@ class SettingsController extends Controller
 
     public function getDeliverySettings(): JsonResponse
     {
-        return ApiResponse::success($this->only(['dispatch_mode', 'max_radius_km', 'base_delivery_fee']), 'Delivery settings retrieved.');
+        return ApiResponse::success($this->only([
+            'dispatch_mode', 'max_radius_km', 'base_delivery_fee',
+            'all_free_delivery', 'free_delivery_radius_km',
+            'free_delivery_min_order', 'base_delivery_distance_km', 'per_km_charge', 'max_delivery_fee',
+        ]), 'Delivery settings retrieved.');
     }
 
     public function updateDeliverySettings(Request $request): JsonResponse
@@ -221,6 +225,12 @@ class SettingsController extends Controller
             'dispatch_mode' => 'AUTO',
             'max_radius_km' => 12,
             'base_delivery_fee' => 35,
+            'all_free_delivery' => false,
+            'free_delivery_radius_km' => 0,
+            'free_delivery_min_order' => 0,
+            'base_delivery_distance_km' => 3,
+            'per_km_charge' => 0,
+            'max_delivery_fee' => 0,
             'cod_enabled' => true,
             'online_gateway' => 'RAZORPAY',
             'default_commission' => 15,

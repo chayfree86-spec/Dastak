@@ -13,6 +13,8 @@ export const settingsApi = {
   updateNotificationSettings: (data) => apiClient.put('/admin/settings/notifications', data),
   getStoreHours: () => apiClient.get('/admin/settings/store-hours'),
   updateStoreHours: (data) => apiClient.put('/admin/settings/store-hours', data),
+  // Public ordering-availability status (no special permission needed) — used by the header badge
+  getServiceStatus: () => apiClient.get('/service-status'),
   getServiceAreas: () => apiClient.get('/admin/settings/service-areas'),
   createServiceArea: (data) => apiClient.post('/admin/settings/service-areas', data),
   updateServiceArea: (id, data) => apiClient.put(`/admin/settings/service-areas/${id}`, data),
