@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   User,
@@ -17,12 +17,21 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { formatCurrency } from '../../utils/formatters'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
+import deliveryApi from '../../api/delivery.api'
 
 export const MoreMenuPage = () => {
   const navigate = useNavigate()
   const { user, riderProfile, logout } = useAuth()
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
   const [logoutLoading, setLogoutLoading] = useState(false)
+  const [riderSupportPhone, setRiderSupportPhone] = useState('9005271986')
+
+  useEffect(() => {
+    deliveryApi.getConfig?.().then((res) => {
+      const p = res?.data?.data?.rider_support_phone || res?.data?.data?.support_phone || res?.data?.rider_support_phone || res?.data?.support_phone
+      if (p) setRiderSupportPhone(p)
+    }).catch(() => {})
+  }, [])
 
   const pendingCod = riderProfile?.pending_cod_amount || 0
   const rating = Number(riderProfile?.rating || 4.9).toFixed(1)
@@ -40,11 +49,9 @@ export const MoreMenuPage = () => {
           onClick: () => navigate('/cod'),
         },
         {
-          label: 'Rider Profile & Vehicle',
-          desc: 'Vehicle number, license & account status',
-          icon: User,
-          badge: 'Verified',
-          badgeColor: 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400',
+          label: 'Vehicle & Driving Profile',
+          desc: 'Vehicle number, driving license & ID proof',
+          icon: Bike,
           onClick: () => navigate('/profile'),
         },
       ],
@@ -60,9 +67,9 @@ export const MoreMenuPage = () => {
         },
         {
           label: 'Fleet Manager Helpline',
-          desc: 'Emergency contact & dispatch support',
+          desc: `Call ${riderSupportPhone} for dispatch assistance`,
           icon: PhoneCall,
-          onClick: () => (window.location.href = 'tel:+919876543210'),
+          onClick: () => (window.location.href = `tel:${riderSupportPhone.replace(/[^0-9+]/g, '')}`),
         },
       ],
     },

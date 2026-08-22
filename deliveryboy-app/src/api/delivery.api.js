@@ -38,6 +38,7 @@ export const deliveryApi = {
 
   // Support / Issue Report
   reportIssue: (data) => apiClient.post('/customer/tickets', data),
+  getConfig: () => apiClient.get('/config'),
 }
 
 export default deliveryApi

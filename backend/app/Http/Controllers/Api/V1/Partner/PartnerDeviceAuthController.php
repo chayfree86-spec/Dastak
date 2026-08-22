@@ -34,13 +34,13 @@ class PartnerDeviceAuthController extends Controller
 
         if (! empty($result['session_active_elsewhere'])) {
             return ApiResponse::error(
-                $result['message'],
-                409,
-                [
+                message: $result['message'],
+                errors: [
                     'session_active_elsewhere' => true,
                     'active_device_name' => $result['active_device_name'],
                     'instructions' => $result['instructions'],
-                ]
+                ],
+                statusCode: 409
             );
         }
 

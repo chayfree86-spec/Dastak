@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Users, RefreshCw, Eye, Ban, CheckCircle2, ShoppingBag, IndianRupee, Mail, Phone, MapPin } from 'lucide-react'
+import {
+  Search,
+  Users,
+  RefreshCw,
+  Eye,
+  Ban,
+  CheckCircle2,
+  ShoppingBag,
+  IndianRupee,
+  Mail,
+  Phone,
+  MapPin,
+  RotateCcw,
+  Smartphone,
+  ShieldAlert,
+  X,
+} from 'lucide-react'
 import customersApi from '../../api/customers.api'
+import apiClient from '../../api/client'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatPhone, formatDate } from '../../utils/formatters'
 import DataTable from '../../components/common/DataTable'
@@ -19,7 +36,12 @@ export const CustomerList = () => {
   const [currentPage, setCurrentPage] = useState(1)
 
   const [blockConfirmCustomer, setBlockConfirmCustomer] = useState(null)
+  const [revokeConfirmCustomer, setRevokeConfirmCustomer] = useState(null)
+  const [showQuickResetModal, setShowQuickResetModal] = useState(false)
+  const [quickResetMobile, setQuickResetMobile] = useState('')
+  const [quickResetReason, setQuickResetReason] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
+  const [revokeLoading, setRevokeLoading] = useState(false)
 
   const { data, loading, error, meta, retry, silentRefresh } = useApi(
     () =>
@@ -46,7 +68,9 @@ export const CustomerList = () => {
 
     setActionLoading(true)
     try {
-      await customersApi.toggleBlockStatus(blockConfirmCustomer.id, { status: newStatus })
+      await (customersApi?.toggleBlock
+        ? customersApi.toggleBlock(blockConfirmCustomer.id, { status: newStatus })
+        : apiClient.patch(`/admin/customers/${blockConfirmCustomer.id}/block-status`, { status: newStatus }))
       toast.success(`Customer ${blockConfirmCustomer.name} has been ${newStatus.toLowerCase()}.`)
       setBlockConfirmCustomer(null)
       retry()
@@ -54,6 +78,54 @@ export const CustomerList = () => {
       toast.error(err.message || 'Failed to update customer status.')
     } finally {
       setActionLoading(false)
+    }
+  }
+
+  const handleRevokeDevice = async () => {
+    if (!revokeConfirmCustomer) return
+    setRevokeLoading(true)
+    try {
+      const res = await (customersApi?.revokeDevice
+        ? customersApi.revokeDevice(revokeConfirmCustomer.id, { reason: 'ADMIN_MANUAL_REVOKE' })
+        : apiClient.post(`/admin/customers/${revokeConfirmCustomer.id}/revoke-device`, { reason: 'ADMIN_MANUAL_REVOKE' }))
+      toast.success('Device Revoked', res?.message || `${revokeConfirmCustomer.name} can now sign in on a new device.`)
+      setRevokeConfirmCustomer(null)
+      retry()
+    } catch (err) {
+      toast.error('Revoke Failed', err.message || 'Failed to revoke device session.')
+    } finally {
+      setRevokeLoading(false)
+    }
+  }
+
+  const handleQuickResetSubmit = async (e) => {
+    e?.preventDefault()
+    const clean = quickResetMobile.replace(/\D/g, '')
+    if (clean.length < 10) {
+      toast.warning('Invalid Mobile', 'Please enter a valid 10-digit mobile number.')
+      return
+    }
+
+    setRevokeLoading(true)
+    try {
+      const res = await (customersApi?.revokeDeviceByMobile
+        ? customersApi.revokeDeviceByMobile({
+            mobile: clean,
+            reason: quickResetReason || 'ADMIN_QUICK_MOBILE_RESET',
+          })
+        : apiClient.post('/admin/customers/revoke-device-by-mobile', {
+            mobile: clean,
+            reason: quickResetReason || 'ADMIN_QUICK_MOBILE_RESET',
+          }))
+      toast.success('Device Reset Successful', res?.message || `Device session revoked for +91 ${clean}. Customer can now log in on a new device.`)
+      setShowQuickResetModal(false)
+      setQuickResetMobile('')
+      setQuickResetReason('')
+      retry()
+    } catch (err) {
+      toast.error('Reset Failed', err.message || 'Unable to reset device binding.')
+    } finally {
+      setRevokeLoading(false)
     }
   }
 
@@ -155,6 +227,14 @@ export const CustomerList = () => {
           </button>
           <button
             type="button"
+            onClick={() => setRevokeConfirmCustomer(row)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors"
+            title="Revoke Device (Allow Login on New Phone)"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
             onClick={() => setBlockConfirmCustomer(row)}
             className={`p-1.5 rounded-lg transition-colors ${
               row.status === 'ACTIVE'
@@ -172,13 +252,27 @@ export const CustomerList = () => {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-          Customer Directory
-        </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          View registered customer profiles, LTV & order history.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            Customer Directory
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            View registered customer profiles, LTV, active device sessions & order history.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="md"
+            icon={Smartphone}
+            onClick={() => setShowQuickResetModal(true)}
+            className="text-xs"
+          >
+            Reset Phone Binding
+          </Button>
+        </div>
       </div>
 
       <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex flex-col md:flex-row items-center gap-3">
@@ -319,6 +413,14 @@ export const CustomerList = () => {
                   </button>
                   <button
                     type="button"
+                    onClick={() => setRevokeConfirmCustomer(cust)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40"
+                    title="Revoke Device (Allow Login on New Phone)"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setBlockConfirmCustomer(cust)}
                     className={`p-1.5 rounded-lg ${
                       cust.status === 'ACTIVE'
@@ -350,6 +452,113 @@ export const CustomerList = () => {
         }
         confirmText={blockConfirmCustomer?.status === 'ACTIVE' ? 'Yes, Block' : 'Yes, Unblock'}
       />
+
+      <ConfirmDialog
+        isOpen={!!revokeConfirmCustomer}
+        onClose={() => setRevokeConfirmCustomer(null)}
+        onConfirm={handleRevokeDevice}
+        loading={revokeLoading}
+        type="danger"
+        title={`Revoke Device Binding for ${revokeConfirmCustomer?.name}?`}
+        message={`This will immediately release the phone lock on ${revokeConfirmCustomer?.name}'s account (+91 ${revokeConfirmCustomer?.mobile}). They can immediately log in on another phone.`}
+        confirmText="Revoke Device"
+      />
+
+      {/* Quick Reset Phone Binding Modal */}
+      {showQuickResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xl p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
+                    Reset Device Binding
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Unlock customer login for new phone
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQuickResetModal(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleQuickResetSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Customer 10-Digit Mobile Number *
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    required
+                    maxLength={10}
+                    placeholder="9876543210"
+                    value={quickResetMobile}
+                    onChange={(e) => setQuickResetMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="w-full h-11 pl-12 pr-4 text-sm font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                    autoFocus
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Enter the registered phone number receiving the "Already active on another phone" error.
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Reason for Reset (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Customer bought a new phone, phone lost, formatted device"
+                  value={quickResetReason}
+                  onChange={(e) => setQuickResetReason(e.target.value)}
+                  className="w-full h-11 px-4 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-900/60 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">
+                  Revoking this session will immediately release the old device token. The customer can open the app on their new phone and log in seamlessly.
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  onClick={() => setShowQuickResetModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="danger"
+                  size="md"
+                  icon={RotateCcw}
+                  loading={revokeLoading}
+                >
+                  Revoke Device Binding
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

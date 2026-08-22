@@ -7,6 +7,7 @@ export const foodCategoriesApi = {
   getCategories: () => apiClient.get(BASE),
   createCategory: (data) => apiClient.post(BASE, data),
   updateCategory: (id, data) => apiClient.put(`${BASE}/${id}`, data),
+  reorderCategories: (orders) => apiClient.post(`${BASE}/reorder`, { orders }),
   toggleStatus: (id, isActive) => apiClient.patch(`${BASE}/${id}/status`, { is_active: isActive }),
   deleteCategory: (id) => apiClient.delete(`${BASE}/${id}`),
 

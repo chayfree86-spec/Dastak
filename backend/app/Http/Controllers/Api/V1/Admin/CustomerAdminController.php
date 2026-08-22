@@ -10,6 +10,7 @@ use App\Http\Resources\Admin\AdminOrderListResource;
 use App\Http\Resources\ApiResponse;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Services\DeviceSessionAuthService;
 use App\Services\OrderService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,10 @@ use Illuminate\Http\Request;
  */
 class CustomerAdminController extends Controller
 {
-    public function __construct(protected OrderService $orderService) {}
+    public function __construct(
+        protected OrderService $orderService,
+        protected DeviceSessionAuthService $deviceAuthService
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -145,6 +149,56 @@ class CustomerAdminController extends Controller
         ])->values();
 
         return ApiResponse::success($rows, 'Customer complaints retrieved.');
+    }
+
+    public function deviceSession(int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+        $deviceInfo = $this->deviceAuthService->getUserActiveDeviceSession($user, 'customer');
+
+        return ApiResponse::success([
+            'user_id' => $user->id,
+            'customer_name' => $user->name,
+            'mobile' => $user->mobile,
+            'has_active_device' => ! empty($deviceInfo),
+            'active_session' => $deviceInfo,
+        ], 'Customer active device session retrieved.');
+    }
+
+    public function revokeDevice(Request $request, int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+        $reason = $request->input('reason', 'ADMIN_MANUAL_REVOKE');
+
+        $revokedCount = $this->deviceAuthService->adminRevokeUserSessions($user, 'customer', $reason);
+
+        return ApiResponse::success([
+            'user_id' => $user->id,
+            'customer_name' => $user->name,
+            'mobile' => $user->mobile,
+            'revoked_count' => $revokedCount,
+        ], "Active device binding revoked successfully. {$user->name} can now sign in on a new device.");
+    }
+
+    public function revokeDeviceByMobile(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'mobile' => ['required', 'string', 'min:10', 'max:15'],
+            'reason' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $digits = preg_replace('/\D/', '', $validated['mobile']);
+        if (strlen($digits) > 10) {
+            $digits = substr($digits, -10);
+        }
+
+        $reason = $validated['reason'] ?? 'ADMIN_MANUAL_REVOKE_BY_MOBILE';
+        $revokedCount = $this->deviceAuthService->adminRevokeUserSessions($digits, 'customer', $reason);
+
+        return ApiResponse::success([
+            'mobile' => $digits,
+            'revoked_count' => $revokedCount,
+        ], "Device session revoked for +91 {$digits}. Customer can now sign in on any phone.");
     }
 
     protected function listRow(User $u): array

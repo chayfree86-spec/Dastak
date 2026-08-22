@@ -39,10 +39,13 @@ export const AccountPage = () => {
   }, [])
 
   useEffect(() => {
-    if (isAuthenticated) {
+    const token = localStorage.getItem('dastak_customer_token')
+    if (isAuthenticated && token) {
       customerApi.getProfile()
         .then((res) => setProfileData(res?.data || res))
         .catch(() => {})
+    } else {
+      setProfileData(null)
     }
   }, [isAuthenticated])
 
@@ -278,7 +281,7 @@ export const AccountPage = () => {
 
         {/* Support Helpline */}
         {(() => {
-          const supportPhone = platformConfig?.support_phone || '9005271986'
+          const supportPhone = platformConfig?.customer_support_phone || platformConfig?.support_phone || '9005271986'
           const dialPhone = supportPhone.replace(/[^0-9+]/g, '')
           return (
             <div

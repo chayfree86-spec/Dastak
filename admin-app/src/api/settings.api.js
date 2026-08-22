@@ -3,6 +3,10 @@ import apiClient from './client'
 export const settingsApi = {
   getSettings: () => apiClient.get('/admin/settings/general'),
   updateSettings: (data) => apiClient.put('/admin/settings/general', data),
+  uploadLogo: (formData) =>
+    apiClient.post('/admin/settings/upload-logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   getOrderSettings: () => apiClient.get('/admin/settings/orders'),
   updateOrderSettings: (data) => apiClient.put('/admin/settings/orders', data),
   getDeliverySettings: () => apiClient.get('/admin/settings/delivery'),

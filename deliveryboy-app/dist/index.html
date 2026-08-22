@@ -2,30 +2,344 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Dastak Delivery Partner — Live GPS navigation, rapid order fulfillment and daily earnings tracking for delivery fleet." />
-    <meta name="theme-color" content="#ea580c" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="Dastak Delivery Partner — Live Delivery & Rider Order Fulfilment App" />
+    <meta name="theme-color" content="#ffffff" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Dastak Rider" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>Dastak Delivery Partner | Rider Fleet App</title>
+    <title>Dastak Rider — Delivery Partner App</title>
 
+    <!-- Instant Preload Splash Image -->
+    <link rel="preload" as="image" href="/splash.png" />
+
+    <!-- Local Fast Fonts -->
+    <link rel="stylesheet" href="/fonts/plus-jakarta-sans/plus-jakarta-sans.css" />
+
+    <!-- Google Fonts Backup -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'" />
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" />
-    </noscript>
-    <script type="module" crossorigin src="/assets/index-BYY1JlP-.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-router-D3Ad4nBH.js">
-    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-Dpqy3X4E.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-Dt_4pvz8.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" />
+
+    <style>
+      :root {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #F8FAFC;
+        color: #0F172A;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        overscroll-behavior-y: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Single Unified Rider Splash Screen */
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(180deg, #FFF7ED 0%, #F8FAFC 50%, #FFFFFF 100%);
+        color: #0F172A;
+        box-sizing: border-box;
+        padding-top: max(1.2rem, env(safe-area-inset-top, 0px));
+        padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+        overflow: hidden;
+        z-index: 999999;
+        transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        -moz-user-select: none;
+             user-select: none;
+        -webkit-user-select: none;
+      }
+
+      #app-splash.fade-out {
+        opacity: 0;
+        transform: scale(0.98);
+        pointer-events: none;
+      }
+
+      /* STRICT MOBILE ONLY: Never show splash on desktop web (width > 768px) */
+      @media (min-width: 769px) {
+        #app-splash {
+          display: none !important;
+        }
+      }
+
+      /* Ambient Glow */
+      .splash-ambient-1 {
+        position: absolute;
+        top: 20%;
+        left: -80px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: rgba(255, 82, 0, 0.08);
+        filter: blur(60px);
+        pointer-events: none;
+      }
+      .splash-ambient-2 {
+        position: absolute;
+        bottom: 25%;
+        right: -80px;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: rgba(245, 158, 11, 0.08);
+        filter: blur(60px);
+        pointer-events: none;
+      }
+
+      .splash-container {
+        width: 100%;
+        max-width: 420px;
+        box-sizing: border-box;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Top Header */
+      .splash-header {
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .splash-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        background: rgba(255, 82, 0, 0.08);
+        border: 1px solid rgba(255, 82, 0, 0.16);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #FF5200;
+      }
+      .splash-icon-anim {
+        animation: splash-bike-move 1.6s ease-in-out infinite;
+        display: inline-flex;
+      }
+      @keyframes splash-bike-move {
+        0%, 100% { transform: translateX(0px) rotate(0deg); }
+        50% { transform: translateX(3px) rotate(-3deg); }
+      }
+
+      .splash-skip-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        font-size: 12px;
+        font-weight: 700;
+        color: #334155;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: transform 0.1s, background-color 0.2s;
+      }
+      .splash-skip-btn:active {
+        transform: scale(0.95);
+        background: #ffffff;
+      }
+
+      /* Center Canvas */
+      .splash-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 24px;
+      }
+      .splash-img-halo {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+      .splash-halo-glow {
+        position: absolute;
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 82, 0, 0.15) 0%, rgba(245, 158, 11, 0.1) 70%, transparent 100%);
+        filter: blur(24px);
+      }
+      .splash-img {
+        position: relative;
+        width: 100%;
+        max-width: 290px;
+        max-height: 44vh;
+        -o-object-fit: contain;
+           object-fit: contain;
+        filter: drop-shadow(0 14px 22px rgba(255, 82, 0, 0.12));
+      }
+
+      /* Role Pill */
+      .splash-role-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        padding: 5px 14px;
+        border-radius: 9999px;
+        background: rgba(255, 82, 0, 0.06);
+        border: 1px solid rgba(255, 82, 0, 0.12);
+        font-size: 11px;
+        font-weight: 700;
+        color: #C2410C;
+      }
+
+      /* Bottom Progress & Trust */
+      .splash-footer {
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .splash-progress-track {
+        width: 100%;
+        height: 5px;
+        background: rgba(255, 82, 0, 0.08);
+        border-radius: 9999px;
+        overflow: hidden;
+        position: relative;
+      }
+      .splash-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #FF5200, #F59E0B, #10B981);
+        border-radius: 9999px;
+        transition: width 0.08s ease-out;
+      }
+      .splash-trust {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748B;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-C7jiPMB0.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-router-C7w7XFq3.js">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-icons-Del4WGL9.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CDEJCxrp.css">
   </head>
-  <body class="bg-[#F8FAFC] dark:bg-slate-900 text-[#102A43] dark:text-slate-100 min-h-screen select-none antialiased">
+  <body class="bg-[#F8FAFC] text-[#102A43] font-sans antialiased select-none selection:bg-[#FF5200]/20 min-h-screen">
+    <!-- Single Unified Delivery Rider Splash Screen -->
+    <div id="app-splash" onclick="window.dismissSplash && window.dismissSplash()">
+      <div class="splash-ambient-1"></div>
+      <div class="splash-ambient-2"></div>
+
+      <!-- Top Header: Badge + Skip -->
+      <div class="splash-container splash-header">
+        <div class="splash-badge">
+          <!-- Animated Bike / Scooter Icon -->
+          <span class="splash-icon-anim">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF5200" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18.5" cy="17.5" r="3.5"></circle>
+              <circle cx="5.5" cy="17.5" r="3.5"></circle>
+              <circle cx="15" cy="5" r="1"></circle>
+              <path d="M12 17.5V14l-3-3 4-3 2 3h2"></path>
+            </svg>
+          </span>
+          DELIVERY RIDER APP
+        </div>
+        <button type="button" class="splash-skip-btn" onclick="event.stopPropagation(); window.dismissSplash && window.dismissSplash();" aria-label="Skip splash screen">
+          <span>Skip</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </div>
+
+      <!-- Center Artwork Canvas -->
+      <div class="splash-container splash-body">
+        <div class="splash-img-halo">
+          <div class="splash-halo-glow"></div>
+          <img src="/splash.png" alt="Dastak Rider" class="splash-img" />
+        </div>
+        <div class="splash-role-pill">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="#FF5200" stroke="#FF5200" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Live Pickups, Optimized Routes & Real-time Earnings</span>
+        </div>
+      </div>
+
+      <!-- Bottom Progress & Trust -->
+      <div class="splash-container splash-footer">
+        <div class="splash-progress-track">
+          <div id="splash-progress" class="splash-progress-fill"></div>
+        </div>
+        <div class="splash-trust">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF5200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+          <span>Rider Portal & Live GPS Navigation System</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        var splash = document.getElementById('app-splash');
+        if (window.innerWidth > 768) {
+          if (splash && splash.parentNode) {
+            splash.parentNode.removeChild(splash);
+          }
+          window.dismissSplash = function() {};
+          return;
+        }
+        var progressEl = document.getElementById('splash-progress');
+        var progress = 0;
+        var dismissed = false;
+
+        var progressTimer = setInterval(function() {
+          if (progress < 100) {
+            progress += 6;
+            if (progressEl) progressEl.style.width = Math.min(progress, 100) + '%';
+          } else {
+            clearInterval(progressTimer);
+          }
+        }, 55);
+
+        window.dismissSplash = function() {
+          if (dismissed) return;
+          dismissed = true;
+          clearInterval(progressTimer);
+          if (progressEl) progressEl.style.width = '100%';
+          if (splash) {
+            splash.classList.add('fade-out');
+            setTimeout(function() {
+              if (splash && splash.parentNode) {
+                splash.parentNode.removeChild(splash);
+              }
+            }, 420);
+          }
+        };
+
+        // Safety fallback auto dismiss
+        setTimeout(window.dismissSplash, 3000);
+      })();
+    </script>
+
+    <!-- React App Root Container -->
     <div id="root"></div>
   </body>
 </html>

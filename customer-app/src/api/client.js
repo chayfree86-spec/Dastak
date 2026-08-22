@@ -58,7 +58,11 @@ apiClient.interceptors.response.use(
 
     if (status === 401) {
       localStorage.removeItem('dastak_customer_token')
+      localStorage.removeItem('dastak_customer_session_token')
       localStorage.removeItem('dastak_customer_user')
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('dastak:unauthorized'))
+      }
     }
 
     return Promise.reject(new Error(message))

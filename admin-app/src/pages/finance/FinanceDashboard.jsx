@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Wallet,
   IndianRupee,
@@ -14,8 +15,14 @@ import {
   Filter,
   RefreshCw,
   PlusCircle,
+  Edit2,
+  Trash2,
+  Layers,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react'
 import financeApi from '../../api/finance.api'
+import settingsApi from '../../api/settings.api'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/formatters'
 import Tabs from '../../components/common/Tabs'
@@ -27,6 +34,7 @@ import CustomSelect from '../../components/common/CustomSelect'
 import Input from '../../components/common/Input'
 import AmountInput from '../../components/common/AmountInput'
 import Modal from '../../components/common/Modal'
+import ConfirmDialog from '../../components/common/ConfirmDialog'
 import { useToast } from '../../context/ToastContext'
 
 export const FinanceDashboard = () => {
@@ -41,27 +49,44 @@ export const FinanceDashboard = () => {
   const [editingCommissionRest, setEditingCommissionRest] = useState(null)
   const [newCommissionRate, setNewCommissionRate] = useState('')
 
-  // Delivery Rule State
-  const [deliveryRules, setDeliveryRules] = useState([])
+  // Delivery Rules & Tiers State
+  const [deliverySettings, setDeliverySettings] = useState(null)
+  const [loadingDeliverySettings, setLoadingDeliverySettings] = useState(false)
+  const [tierModal, setTierModal] = useState(null) // null | { index?: number, up_to_km: string, free_above: string, fee: string }
+  const [deleteTierIndex, setDeleteTierIndex] = useState(null)
+  const [savingTier, setSavingTier] = useState(false)
 
-  const { data: summary, loading: summaryLoading, retry: retrySummary, silentRefresh: silentRefreshSummary } = useApi(
+  const { data: summary, loading: summaryLoading, retry: retrySummary } = useApi(
     () => financeApi.getFinanceSummary()
   )
 
-  useEffect(() => {
-    if (summary?.delivery_rules && Array.isArray(summary.delivery_rules)) {
-      setDeliveryRules(summary.delivery_rules)
-    }
-  }, [summary])
-
-  const { data: settlements, loading: settleLoading, retry: retrySettlements, silentRefresh: silentRefreshSettlements } = useApi(
+  const { data: settlements, loading: settleLoading, retry: retrySettlements } = useApi(
     () => financeApi.getSettlements({ cycle: cycleFilter !== 'ALL' ? cycleFilter : undefined }),
     [cycleFilter]
   )
 
-  const { data: commissions, loading: commLoading, retry: retryCommissions, silentRefresh: silentRefreshCommissions } = useApi(
+  const { data: commissions, loading: commLoading, retry: retryCommissions } = useApi(
     () => financeApi.getRestaurantCommissions()
   )
+
+  const fetchDeliverySettings = useCallback(async () => {
+    setLoadingDeliverySettings(true)
+    try {
+      const res = await settingsApi.getDeliverySettings()
+      const data = res?.data || res || {}
+      setDeliverySettings(data)
+    } catch (err) {
+      console.error('Failed to load delivery settings:', err)
+    } finally {
+      setLoadingDeliverySettings(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (activeTab === 'delivery_rules') {
+      fetchDeliverySettings()
+    }
+  }, [activeTab, fetchDeliverySettings])
 
   const handleProcessSettlement = async () => {
     if (!payoutRef.trim()) {
@@ -103,6 +128,71 @@ export const FinanceDashboard = () => {
     }
   }
 
+  const handleSaveTier = async (tierData) => {
+    setSavingTier(true)
+    try {
+      const currentTiers = Array.isArray(deliverySettings?.delivery_tiers)
+        ? [...deliverySettings.delivery_tiers]
+        : []
+
+      const newTierObj = {
+        up_to_km: Number(tierData.up_to_km) || 0,
+        free_above: Number(tierData.free_above) || 0,
+        fee: Number(tierData.fee) || 0,
+      }
+
+      if (tierData.index !== undefined && tierData.index >= 0) {
+        currentTiers[tierData.index] = newTierObj
+      } else {
+        currentTiers.push(newTierObj)
+      }
+
+      // Sort tiers ascending by up_to_km
+      const sortedTiers = currentTiers
+        .filter((t) => t.up_to_km > 0)
+        .sort((a, b) => a.up_to_km - b.up_to_km)
+
+      await settingsApi.updateDeliverySettings({
+        delivery_tiers: sortedTiers,
+      })
+
+      toast.success(
+        tierData.index !== undefined ? 'Tier Updated' : 'Tier Created',
+        'Distance-based pricing tier saved to platform engine.'
+      )
+      setTierModal(null)
+      fetchDeliverySettings()
+    } catch (err) {
+      toast.error('Failed to save tier', err.message || 'Unable to update delivery tiers.')
+    } finally {
+      setSavingTier(false)
+    }
+  }
+
+  const handleDeleteTier = async () => {
+    if (deleteTierIndex === null) return
+    setSavingTier(true)
+    try {
+      const currentTiers = Array.isArray(deliverySettings?.delivery_tiers)
+        ? [...deliverySettings.delivery_tiers]
+        : []
+
+      const filtered = currentTiers.filter((_, idx) => idx !== deleteTierIndex)
+
+      await settingsApi.updateDeliverySettings({
+        delivery_tiers: filtered,
+      })
+
+      toast.success('Tier Removed', 'Pricing tier deleted from system.')
+      setDeleteTierIndex(null)
+      fetchDeliverySettings()
+    } catch (err) {
+      toast.error('Failed', err.message || 'Unable to delete tier.')
+    } finally {
+      setSavingTier(false)
+    }
+  }
+
   const tabs = [
     { id: 'settlements', label: 'Restaurant Settlements', icon: Store },
     { id: 'commissions', label: 'Commission Rates', icon: Percent },
@@ -118,29 +208,21 @@ export const FinanceDashboard = () => {
     {
       key: 'restaurant_name',
       header: 'Restaurant',
-      render: (row) => <span className="font-bold text-slate-900 dark:text-slate-100">{row.restaurant_name}</span>,
+      render: (row) => <span className="font-bold text-slate-800 dark:text-slate-200">{row.restaurant_name}</span>,
     },
     {
       key: 'period',
-      header: 'Period',
-      render: (row) => <span className="text-slate-600 dark:text-slate-400 text-xs">{row.period}</span>,
-    },
-    {
-      key: 'orders_count',
-      header: 'Orders',
-      align: 'center',
-      render: (row) => <span className="font-semibold">{row.orders_count}</span>,
+      header: 'Cycle / Period',
+      render: (row) => <span className="text-xs text-slate-500 dark:text-slate-400">{row.period}</span>,
     },
     {
       key: 'gross_sales',
       header: 'Gross Sales',
-      align: 'right',
-      render: (row) => <span className="font-bold">{formatCurrency(row.gross_sales)}</span>,
+      render: (row) => <span className="font-semibold text-slate-900 dark:text-slate-100">{formatCurrency(row.gross_sales)}</span>,
     },
     {
       key: 'commission_deducted',
-      header: 'Commission (-)',
-      align: 'right',
+      header: 'Commission',
       render: (row) => (
         <span className="font-semibold text-[#113BD0] dark:text-blue-400">
           -{formatCurrency(row.commission_deducted)}
@@ -150,34 +232,32 @@ export const FinanceDashboard = () => {
     {
       key: 'payable_amount',
       header: 'Net Payable',
-      align: 'right',
       render: (row) => (
-        <span className="font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(row.payable_amount)}</span>
+        <span className="font-black text-emerald-600 dark:text-emerald-400">
+          {formatCurrency(row.payable_amount)}
+        </span>
       ),
     },
     {
       key: 'status',
       header: 'Status',
-      render: (row) => <StatusBadge status={row.status} size="xs" />,
+      render: (row) => <StatusBadge status={row.status} />,
     },
     {
       key: 'actions',
-      header: 'Action',
-      align: 'right',
+      header: 'Actions',
       render: (row) =>
         row.status === 'PENDING' ? (
           <Button
             variant="primary"
-            size="sm"
+            size="xs"
             onClick={() => setSettleModalItem(row)}
+            className="font-bold"
           >
-            Process Pay
+            Settle Payout
           </Button>
         ) : (
-          <span className="text-emerald-600 text-xs font-bold flex items-center justify-end gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            Paid
-          </span>
+          <span className="text-xs text-slate-400 font-mono">Paid: {row.payout_reference || 'N/A'}</span>
         ),
     },
   ]
@@ -185,232 +265,204 @@ export const FinanceDashboard = () => {
   const commissionColumns = [
     {
       key: 'restaurant_name',
-      header: 'Restaurant',
-      render: (row) => <span className="font-bold text-slate-900 dark:text-slate-100">{row.restaurant_name}</span>,
+      header: 'Restaurant Partner',
+      render: (row) => (
+        <div>
+          <span className="font-bold text-slate-800 dark:text-slate-200 block">{row.restaurant_name}</span>
+          <span className="text-[10px] text-slate-400">ID: #{row.id}</span>
+        </div>
+      ),
     },
     {
       key: 'commission',
       header: 'Commission %',
       render: (row) => (
-        <span className="text-sm font-black text-[#113BD0] dark:text-blue-400">{row.commission}%</span>
+        <span className="font-black text-sm text-[#113BD0] dark:text-blue-400">
+          {row.commission}%
+        </span>
       ),
     },
     {
       key: 'effective_from',
       header: 'Effective Date',
-      render: (row) => <span className="text-slate-400 text-xs">{formatDate(row.effective_from)}</span>,
+      render: (row) => <span className="text-xs text-slate-500">{formatDate(row.effective_from)}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Agreement Status',
       render: (row) => <StatusBadge status={row.status} size="xs" />,
     },
     {
       key: 'actions',
-      header: 'Action',
-      align: 'right',
+      header: 'Edit',
       render: (row) => (
         <Button
           variant="outline"
-          size="sm"
+          size="xs"
           onClick={() => {
             setEditingCommissionRest(row)
             setNewCommissionRate(String(row.commission))
           }}
         >
-          Change %
+          Modify %
         </Button>
       ),
     },
   ]
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      silentRefreshSummary()
-      silentRefreshSettlements()
-      silentRefreshCommissions()
-    }, 15000)
-    return () => clearInterval(interval)
-  }, [silentRefreshSummary, silentRefreshSettlements, silentRefreshCommissions])
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-          Financial Health & Settlements
-        </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-          Track sales, commission, settlements & payouts.
-        </p>
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+            Financial Operations & Settlements
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Real-time ledger, partner revenue payouts, commission matrix, and delivery pricing rules.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            icon={RefreshCw}
+            onClick={() => {
+              retrySummary()
+              retrySettlements()
+              retryCommissions()
+              if (activeTab === 'delivery_rules') fetchDeliverySettings()
+            }}
+          >
+            Refresh
+          </Button>
+        </div>
       </div>
 
-      {/* 4 Core Financial KPI Cards (2-col on mobile, 4-col on desktop) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      {/* KPI Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
-          title="Gross Sales"
-          value={formatCurrency(summary?.gross_sales)}
+          title="Total Gross Volume"
+          value={formatCurrency(summary?.gross_sales || 0)}
+          subtitle="All platform orders to date"
+          icon={Wallet}
+          loading={summaryLoading}
+        />
+        <KPICard
+          title="Net Platform Revenue"
+          value={formatCurrency(summary?.net_revenue || 0)}
+          subtitle="Commissions & platform fees"
+          icon={TrendingUp}
+          loading={summaryLoading}
+        />
+        <KPICard
+          title="Pending Merchant Payouts"
+          value={formatCurrency(summary?.pending_payouts || 0)}
+          subtitle="Awaiting bank transfer"
+          icon={Store}
+          loading={summaryLoading}
+        />
+        <KPICard
+          title="Cash Collected (COD)"
+          value={formatCurrency(summary?.cod_collected || 0)}
+          subtitle="In rider hands / settled"
           icon={IndianRupee}
-          color="emerald"
-          loading={summaryLoading}
-        />
-        <KPICard
-          title="Dastak Commission"
-          value={formatCurrency(summary?.dastak_commission)}
-          icon={Percent}
-          color="blue"
-          loading={summaryLoading}
-        />
-        <KPICard
-          title="Delivery Charges"
-          value={formatCurrency(summary?.delivery_charges_collected)}
-          icon={Bike}
-          color="orange"
-          loading={summaryLoading}
-        />
-        <KPICard
-          title="Pending Settlements"
-          value={formatCurrency(summary?.pending_settlements_amount)}
-          icon={Clock}
-          color="rose"
           loading={summaryLoading}
         />
       </div>
 
-      {/* Secondary Finance Metrics Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs text-xs">
-        <div>
-          <span className="text-slate-400 block text-[11px]">Restaurant Payable:</span>
-          <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-            {formatCurrency(summary?.restaurant_payable)}
-          </span>
-        </div>
-        <div>
-          <span className="text-slate-400 block text-[11px]">Delivery Boy Payouts:</span>
-          <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
-            {formatCurrency(summary?.delivery_boy_payouts)}
-          </span>
-        </div>
-        <div>
-          <span className="text-slate-400 block text-[11px]">COD Cash Collected:</span>
-          <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">
-            {formatCurrency(summary?.cod_collected)}
-          </span>
-        </div>
-        <div>
-          <span className="text-slate-400 block text-[11px]">Online UPI / Card:</span>
-          <span className="font-bold text-[#113BD0] dark:text-blue-400 text-sm">
-            {formatCurrency(summary?.online_payments)}
-          </span>
-        </div>
-      </div>
-
-      {/* Tabs */}
       <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Tab 1: Restaurant Settlements */}
       {activeTab === 'settlements' && (
         <div className="space-y-4">
-          <div className="w-full sm:w-56">
-            <CustomSelect
-              value={cycleFilter}
-              onChange={setCycleFilter}
-              options={[
-                { value: 'ALL', label: 'All Settlement Cycles' },
-                { value: 'DAILY', label: 'Daily Settlements' },
-                { value: 'WEEKLY', label: 'Weekly Settlements' },
-                { value: 'MONTHLY', label: 'Monthly Settlements' },
-              ]}
-            />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Partner Settlement Ledger
+            </h3>
+            <div className="flex items-center gap-2">
+              <CustomSelect
+                value={cycleFilter}
+                onChange={setCycleFilter}
+                options={[
+                  { value: 'ALL', label: 'All Billing Cycles' },
+                  { value: 'WEEKLY', label: 'Weekly Settlement' },
+                  { value: 'BIWEEKLY', label: 'Bi-Weekly' },
+                  { value: 'MONTHLY', label: 'Monthly' },
+                ]}
+                className="w-44 text-xs"
+              />
+            </div>
           </div>
 
-          {/* Desktop Table View */}
           <div className="hidden md:block">
             <DataTable
               columns={settlementColumns}
               data={settlements || []}
               loading={settleLoading}
-              emptyTitle="No settlements pending"
+              emptyMessage="No partner settlements found for this cycle."
             />
           </div>
 
-          {/* Mobile Settlement Cards */}
-          <div className="md:hidden space-y-2.5">
+          <div className="md:hidden space-y-3">
             {settleLoading ? (
               <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
                 <p className="text-xs text-slate-400 font-medium">Loading settlements...</p>
               </div>
             ) : !settlements || settlements.length === 0 ? (
               <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs text-slate-400 font-medium">
-                No settlements pending.
+                No partner settlements found.
               </div>
             ) : (
               settlements.map((settle) => (
                 <div
                   key={settle.id}
-                  className="p-3.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-2.5 text-xs"
+                  className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs space-y-3 text-xs"
                 >
-                  {/* Header: ID, Restaurant & Status */}
                   <div className="flex items-center justify-between">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 font-mono font-bold text-[#113BD0] dark:text-blue-400">
-                        <span>#{settle.id}</span>
-                        <span className="font-semibold text-slate-900 dark:text-slate-100 font-sans truncate">
-                          &bull; {settle.restaurant_name}
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-slate-400 block mt-0.5">
-                        {settle.period} &bull; {settle.orders_count} Orders
+                    <div>
+                      <span className="font-mono font-bold text-[#113BD0] dark:text-blue-400 block text-xs">
+                        #{settle.id}
                       </span>
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100 mt-0.5">
+                        {settle.restaurant_name}
+                      </h4>
                     </div>
                     <StatusBadge status={settle.status} size="xs" />
                   </div>
 
-                  {/* Financial Breakdown Strip */}
-                  <div className="grid grid-cols-3 gap-1.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-700/60 text-center">
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Gross</span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
-                        {formatCurrency(settle.gross_sales)}
-                      </span>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Gross Sales</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{formatCurrency(settle.gross_sales)}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Comm (-)</span>
-                      <span className="font-semibold text-[#113BD0] dark:text-blue-400 text-xs">
-                        -{formatCurrency(settle.commission_deducted)}
-                      </span>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Commission</span>
+                      <span className="font-bold text-[#113BD0]">-{formatCurrency(settle.commission_deducted)}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 block">Net Pay</span>
-                      <span className="font-black text-emerald-600 dark:text-emerald-400 text-xs">
-                        {formatCurrency(settle.payable_amount)}
-                      </span>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Cycle</span>
+                      <span className="text-slate-600 dark:text-slate-400 font-medium">{settle.period}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Payable</span>
+                      <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">{formatCurrency(settle.payable_amount)}</span>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-700/60">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      Cycle: {settle.settlement_cycle}
-                    </span>
-
-                    {settle.status === 'PENDING' ? (
+                  {settle.status === 'PENDING' && (
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60">
                       <Button
                         variant="primary"
                         size="md"
                         onClick={() => setSettleModalItem(settle)}
-                        className="h-10 sm:h-8 px-4 text-xs font-bold"
+                        className="w-full h-10 text-xs font-black"
                       >
-                        Process Pay
+                        Process Payout
                       </Button>
-                    ) : (
-                      <span className="text-emerald-600 text-xs font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Paid
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -418,35 +470,27 @@ export const FinanceDashboard = () => {
         </div>
       )}
 
-      {/* Tab 2: Commissions */}
+      {/* Tab 2: Commission Rates */}
       {activeTab === 'commissions' && (
         <div className="space-y-4">
-          {/* Important Rule Banner */}
-          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3 text-xs text-amber-800 dark:text-amber-300">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <h5 className="font-bold text-sm">Historical Data Protection Rule</h5>
-              <p className="mt-0.5 leading-relaxed">
-                Changing a restaurant's commission percentage will apply strictly to <strong>future orders only</strong>. Past orders and existing settlement records will remain unchanged to preserve financial ledger integrity.
-              </p>
-            </div>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Merchant Commission Agreements
+            </h3>
           </div>
 
-          {/* Desktop Table View */}
           <div className="hidden md:block">
             <DataTable
               columns={commissionColumns}
               data={commissions || []}
               loading={commLoading}
-              emptyTitle="No commission rules configured"
+              emptyMessage="No commission rules configured."
             />
           </div>
 
-          {/* Mobile Commission Cards */}
-          <div className="md:hidden space-y-2.5">
+          <div className="md:hidden space-y-3">
             {commLoading ? (
               <div className="p-8 text-center bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-                <div className="w-8 h-8 border-3 border-slate-200 border-t-[#113BD0] rounded-full animate-spin mx-auto mb-2" />
                 <p className="text-xs text-slate-400 font-medium">Loading commissions...</p>
               </div>
             ) : !commissions || commissions.length === 0 ? (
@@ -476,12 +520,11 @@ export const FinanceDashboard = () => {
                     <div>
                       <Button
                         variant="outline"
-                        size="md"
+                        size="sm"
                         onClick={() => {
                           setEditingCommissionRest(comm)
                           setNewCommissionRate(String(comm.commission))
                         }}
-                        className="h-10 sm:h-8 text-xs"
                       >
                         Change %
                       </Button>
@@ -494,40 +537,205 @@ export const FinanceDashboard = () => {
         </div>
       )}
 
-      {/* Tab 3: Delivery Charge Rules */}
+      {/* Tab 3: Delivery Charge Rules & Interactive Tiers */}
       {activeTab === 'delivery_rules' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              Visual Delivery Pricing Rules
-            </h3>
-            <Button variant="primary" size="sm" icon={PlusCircle}>
-              Add Rule Tier
-            </Button>
+        <div className="space-y-5">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                Delivery Pricing & Distance Tiers
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Live delivery pricing rules applied to customer orders across distances.
+              </p>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <Link
+                to="/settings?tab=delivery"
+                className="inline-flex items-center justify-center gap-2 min-h-[42px] px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-[#113BD0] dark:hover:text-blue-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl transition-all shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-750"
+              >
+                <span>Fleet Settings</span>
+                <ExternalLink className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/settings?tab=delivery&action=add_tier"
+                className="inline-flex items-center justify-center gap-2 min-h-[42px] px-5 py-2.5 text-xs sm:text-sm font-black text-white bg-[#113BD0] hover:bg-[#0e30a8] rounded-2xl transition-all shadow-sm shadow-blue-500/20 active:scale-[0.98]"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Add Rule Tier</span>
+              </Link>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {deliveryRules.map((rule) => (
-              <div
-                key={rule.id}
-                className="p-5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs flex items-center justify-between"
-              >
+          {/* Top Info Highlights */}
+          {deliverySettings && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                  Festival Free Delivery
+                </span>
+                <span className={`text-sm font-black block ${deliverySettings.all_free_delivery ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300'}`}>
+                  {deliverySettings.all_free_delivery ? '⚡ Active (₹0 For Everyone)' : 'Inactive'}
+                </span>
+                <p className="text-[11px] text-slate-400">Overrides all rules when enabled.</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                  Standard Base Fee
+                </span>
+                <span className="text-sm font-black text-slate-900 dark:text-slate-100 block">
+                  {formatCurrency(deliverySettings.base_delivery_fee || 35)} (up to {deliverySettings.base_delivery_distance_km || 3} km)
+                </span>
+                <p className="text-[11px] text-slate-400">
+                  {deliverySettings.per_km_charge > 0 ? `+${formatCurrency(deliverySettings.per_km_charge)}/km beyond` : 'Flat rate only'}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                  Free Threshold
+                </span>
+                <span className="text-sm font-black text-emerald-600 dark:text-emerald-400 block">
+                  {Number(deliverySettings.free_delivery_min_order) > 0
+                    ? `Free on Orders ≥ ${formatCurrency(deliverySettings.free_delivery_min_order)}`
+                    : 'No global free threshold'}
+                </span>
+                <p className="text-[11px] text-slate-400">Simple free delivery threshold</p>
+              </div>
+            </div>
+          )}
+
+          {/* Distance Tiers Grid */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-[#113BD0]" />
+                <span>Configured Distance Tiers</span>
+              </h4>
+              <span className="text-[11px] text-slate-400">
+                {Array.isArray(deliverySettings?.delivery_tiers) ? deliverySettings.delivery_tiers.length : 0} Active Tiers
+              </span>
+            </div>
+
+            {loadingDeliverySettings ? (
+              <div className="p-10 text-center bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700">
+                <p className="text-xs text-slate-400 font-medium">Loading pricing tiers...</p>
+              </div>
+            ) : !deliverySettings?.delivery_tiers || deliverySettings.delivery_tiers.length === 0 ? (
+              <div className="p-10 text-center bg-white dark:bg-slate-800 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700 space-y-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400 flex items-center justify-center mx-auto">
+                  <Bike className="w-5 h-5" />
+                </div>
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">{rule.type}</h4>
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">
-                    {rule.min_km !== undefined ? `${rule.min_km} KM - ${rule.max_km} KM` : `Orders above ${formatCurrency(rule.min_order)}`}
+                  <p className="text-sm font-black text-slate-800 dark:text-slate-200">
+                    No distance-based tiers configured
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Orders currently use Standard Base Charges above. Add distance tiers to customize pricing by kilometer bands.
                   </p>
                 </div>
-                <div className="text-right">
-                  <span className="text-lg font-black text-[#113BD0] dark:text-blue-400">
-                    {rule.fee === 0 ? 'FREE' : formatCurrency(rule.fee)}
-                  </span>
-                </div>
+                <Link
+                  to="/settings?tab=delivery&action=add_tier"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-black text-white bg-[#113BD0] hover:bg-[#0e30a8] rounded-xl transition-all shadow-xs"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Add Your First Tier in Settings</span>
+                </Link>
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {deliverySettings.delivery_tiers.map((tier, idx) => {
+                  const fromKm = idx === 0 ? 0 : (Number(deliverySettings.delivery_tiers[idx - 1].up_to_km) || 0)
+                  const isFree = Number(tier.fee) === 0
+                  const freeAbove = Number(tier.free_above) || 0
+
+                  return (
+                    <div
+                      key={idx}
+                      className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 shadow-2xs flex flex-col justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-xs font-black text-[#113BD0] dark:text-blue-400 mb-1.5">
+                            {fromKm} km – {tier.up_to_km} km
+                          </div>
+                          <h5 className="text-xs font-black text-slate-800 dark:text-slate-200">
+                            Distance Band #{idx + 1}
+                          </h5>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                            {freeAbove > 0
+                              ? `Free for orders above ${formatCurrency(freeAbove)}`
+                              : 'Standard tier pricing applies'}
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <span className={`text-base font-black ${isFree ? 'text-emerald-600 dark:text-emerald-400' : 'text-[#113BD0] dark:text-blue-400'}`}>
+                            {isFree ? 'FREE' : formatCurrency(tier.fee)}
+                          </span>
+                          <span className="block text-[10px] text-slate-400 font-bold uppercase">
+                            Fee
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setTierModal({
+                              index: idx,
+                              up_to_km: String(tier.up_to_km),
+                              free_above: String(tier.free_above || ''),
+                              fee: String(tier.fee),
+                            })
+                          }
+                          className="p-1.5 rounded-lg text-slate-500 hover:text-[#113BD0] hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                          title="Edit Tier"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteTierIndex(idx)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                          title="Delete Tier"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* Rule Tier Add / Edit Modal */}
+      {tierModal && (
+        <TierModal
+          tier={tierModal}
+          onClose={() => setTierModal(null)}
+          onSave={handleSaveTier}
+          loading={savingTier}
+        />
+      )}
+
+      {/* Delete Tier Confirmation Modal */}
+      <ConfirmDialog
+        isOpen={deleteTierIndex !== null}
+        onClose={() => setDeleteTierIndex(null)}
+        onConfirm={handleDeleteTier}
+        loading={savingTier}
+        type="danger"
+        title="Delete Pricing Tier?"
+        message={`Remove Distance Tier #${(deleteTierIndex ?? 0) + 1}? Deliveries in this distance band will fall back to standard pricing.`}
+        confirmText="Yes, Delete Tier"
+      />
 
       {/* Process Settlement Modal */}
       {settleModalItem && (
@@ -618,6 +826,82 @@ export const FinanceDashboard = () => {
         </Modal>
       )}
     </div>
+  )
+}
+
+const TierModal = ({ tier, onClose, onSave, loading }) => {
+  const isEdit = tier?.index !== undefined
+  const [upToKm, setUpToKm] = useState(tier?.up_to_km || '')
+  const [freeAbove, setFreeAbove] = useState(tier?.free_above || '')
+  const [fee, setFee] = useState(tier?.fee || '')
+
+  const handleSubmit = (e) => {
+    e?.preventDefault()
+    if (!upToKm || Number(upToKm) <= 0) {
+      return
+    }
+    onSave({
+      index: tier?.index,
+      up_to_km: upToKm,
+      free_above: freeAbove,
+      fee: fee === '' ? '0' : fee,
+    })
+  }
+
+  return (
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={isEdit ? `Edit Distance Tier #${tier.index + 1}` : 'Add Distance Pricing Tier'}
+      subtitle="Define delivery fee and free order value threshold for this kilometer band."
+      maxWidth="max-w-md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Input
+            label="Up to Distance (KM)"
+            type="number"
+            min="0.5"
+            step="0.5"
+            required
+            placeholder="e.g. 2, 5, 10"
+            value={upToKm}
+            onChange={(e) => setUpToKm(e.target.value)}
+            helperText="Maximum distance for this pricing band (e.g. 3 = up to 3 KM)."
+          />
+        </div>
+
+        <div>
+          <AmountInput
+            label="Free Delivery Above Subtotal (₹)"
+            placeholder="e.g. 199 or 499 (0 = never free in this band)"
+            value={freeAbove}
+            onChange={(e) => setFreeAbove(e.target.value)}
+            helperText="Customer pays ₹0 delivery if order subtotal is at or above this amount."
+          />
+        </div>
+
+        <div>
+          <AmountInput
+            label="Delivery Fee (₹)"
+            required
+            placeholder="e.g. 20 or 35 (0 = free delivery)"
+            value={fee}
+            onChange={(e) => setFee(e.target.value)}
+            helperText="Standard delivery fee charged when order is below free threshold."
+          />
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" loading={loading}>
+            {isEdit ? 'Update Tier' : 'Save Rule Tier'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   )
 }
 

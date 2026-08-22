@@ -52,6 +52,39 @@ class FoodCategoryAdminController extends Controller
         return ApiResponse::success(['id' => $category->id, 'is_active' => (bool) $category->is_active], 'Status updated.');
     }
 
+    /**
+     * Bulk reorder category positions / custom sequence.
+     * Supports either:
+     *   - orders: [{ id: 1, sort_order: 0 }, { id: 2, sort_order: 1 }]
+     *   - category_ids: [1, 2, 3, 4] (array index becomes sort_order)
+     */
+    public function reorder(Request $request): JsonResponse
+    {
+        $request->validate([
+            'orders' => ['nullable', 'array'],
+            'orders.*.id' => ['required_with:orders', 'integer', 'exists:food_categories,id'],
+            'orders.*.sort_order' => ['required_with:orders', 'integer'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:food_categories,id'],
+        ]);
+
+        \DB::transaction(function () use ($request) {
+            if ($request->filled('orders')) {
+                foreach ($request->input('orders') as $item) {
+                    FoodCategory::where('id', $item['id'])->update(['sort_order' => (int) $item['sort_order']]);
+                }
+            } elseif ($request->filled('category_ids')) {
+                foreach ($request->input('category_ids') as $index => $id) {
+                    FoodCategory::where('id', $id)->update(['sort_order' => $index]);
+                }
+            }
+        });
+
+        $categories = FoodCategory::orderBy('sort_order')->orderBy('id')->get()->map(fn ($c) => $this->row($c));
+
+        return ApiResponse::success($categories, 'Food categories reordered successfully.');
+    }
+
     /** Flexible image upload for a category icon (any image, up to 5 MB). */
     public function uploadImage(Request $request): JsonResponse
     {

@@ -55,11 +55,11 @@ export const ConfirmDialog = ({
         {getIcon()}
         <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">{title}</h4>
         <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">{message}</p>
-        <div className="grid grid-cols-2 gap-3 pt-2">
-          <Button variant="outline" size="md" onClick={onClose} disabled={loading} className="w-full">
+        <div className="flex flex-col-reverse sm:flex-row items-center gap-2.5 pt-2">
+          <Button variant="outline" size="md" onClick={onClose} disabled={loading} className="w-full sm:flex-1 min-h-[44px]">
             {cancelText}
           </Button>
-          <Button variant={getButtonVariant()} size="md" onClick={onConfirm} loading={loading} className="w-full">
+          <Button variant={getButtonVariant()} size="md" onClick={onConfirm} loading={loading} className="w-full sm:flex-1 min-h-[44px] whitespace-nowrap px-4">
             {confirmText}
           </Button>
         </div>

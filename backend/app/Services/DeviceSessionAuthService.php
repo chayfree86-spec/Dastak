@@ -663,4 +663,120 @@ class DeviceSessionAuthService
             ]
         );
     }
+
+    /**
+     * Get active device session details for a user.
+     */
+    public function getUserActiveDeviceSession(User|int|string $userOrMobile, string $appType = 'customer'): ?array
+    {
+        $query = AppDeviceSession::where('app_type', $appType)
+            ->where('status', 'ACTIVE');
+
+        if ($userOrMobile instanceof User) {
+            $query->where('user_id', $userOrMobile->id);
+        } elseif (is_numeric($userOrMobile) && strlen((string) $userOrMobile) < 9) {
+            $query->where('user_id', (int) $userOrMobile);
+        } else {
+            $digits = preg_replace('/\D/', '', (string) $userOrMobile);
+            if (strlen($digits) > 10) {
+                $digits = substr($digits, -10);
+            }
+            $query->where('mobile_number', $digits);
+        }
+
+        $session = $query->latest('id')->first();
+
+        if (! $session) {
+            return null;
+        }
+
+        return [
+            'id' => $session->id,
+            'user_id' => $session->user_id,
+            'mobile_number' => $session->mobile_number,
+            'device_name' => $session->device_name,
+            'device_platform' => $session->device_platform,
+            'status' => $session->status,
+            'created_at' => $session->created_at?->toIso8601String(),
+            'last_seen_at' => $session->last_seen_at?->toIso8601String(),
+        ];
+    }
+
+    /**
+     * Admin force-revoke all active device sessions for a user or mobile number.
+     */
+    public function adminRevokeUserSessions(User|int|string $userOrMobile, ?string $appType = null, string $reason = 'ADMIN_MANUAL_REVOKE'): int
+    {
+        $query = AppDeviceSession::where('status', 'ACTIVE');
+        $userId = null;
+        $mobile = null;
+        $userName = 'User';
+
+        if ($userOrMobile instanceof User) {
+            $query->where('user_id', $userOrMobile->id);
+            $userId = $userOrMobile->id;
+            $mobile = $userOrMobile->mobile;
+            $userName = $userOrMobile->name;
+        } elseif (is_numeric($userOrMobile) && strlen((string) $userOrMobile) < 9) {
+            $userId = (int) $userOrMobile;
+            $query->where('user_id', $userId);
+            $user = User::find($userId);
+            if ($user) {
+                $mobile = $user->mobile;
+                $userName = $user->name;
+            }
+        } else {
+            $digits = preg_replace('/\D/', '', (string) $userOrMobile);
+            if (strlen($digits) > 10) {
+                $digits = substr($digits, -10);
+            }
+            $mobile = $digits;
+            $query->where('mobile_number', $digits);
+            $user = User::where('mobile', $digits)->first();
+            if ($user) {
+                $userId = $user->id;
+                $userName = $user->name;
+            }
+        }
+
+        if ($appType) {
+            $query->where('app_type', $appType);
+        }
+
+        $revokedCount = $query->update([
+            'status' => 'REVOKED',
+            'revoked_at' => now(),
+            'revocation_reason' => $reason,
+        ]);
+
+        // Revoke Sanctum tokens if user ID is known
+        if ($userId) {
+            DB::table('personal_access_tokens')
+                ->where('tokenable_id', $userId)
+                ->where('tokenable_type', User::class)
+                ->delete();
+        }
+
+        // Also clean up any lingering pending verification sessions
+        if ($mobile) {
+            AppVerificationSession::where('mobile_number', $mobile)
+                ->where('status', 'PENDING')
+                ->update(['status' => 'REVOKED', 'revoked_at' => now()]);
+        }
+
+        SystemLogger::info(
+            category: 'AUTH',
+            event: 'ADMIN_DEVICE_SESSION_REVOKED',
+            description: "Admin revoked {$revokedCount} active device session(s) for {$userName} (+91 {$mobile}).",
+            params: [
+                'user_id' => $userId,
+                'mobile' => $mobile,
+                'app_type' => $appType,
+                'revoked_count' => $revokedCount,
+                'reason' => $reason,
+            ]
+        );
+
+        return $revokedCount;
+    }
 }

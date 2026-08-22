@@ -9,6 +9,7 @@ export const restaurantApi = {
   toggleOpenStatus: (isOpen) => apiClient.patch('/partner/restaurant/toggle-open', { is_open: isOpen }),
   updateOperatingHours: (hours) => apiClient.put('/partner/restaurant/operating-hours', { hours }),
   updateBankAccount: (data) => apiClient.put('/partner/restaurant/bank-account', data),
+  getConfig: () => apiClient.get('/config'),
 }
 
 export default restaurantApi

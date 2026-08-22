@@ -22,6 +22,10 @@ import {
   Square,
   Check,
   FileAudio,
+  HelpCircle,
+  MessageSquare,
+  Globe,
+  Headphones,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useSound } from '../../context/SoundContext'
@@ -56,6 +60,13 @@ export const SettingsPage = () => {
 
   const [activeTab, setActiveTab] = useState('general')
   const [uploadingAudio, setUploadingAudio] = useState(false)
+  const [platformConfig, setPlatformConfig] = useState(null)
+
+  useEffect(() => {
+    restaurantApi.getConfig?.().then((res) => {
+      setPlatformConfig(res?.data?.data || res?.data || null)
+    }).catch(() => {})
+  }, [])
 
   // Fetch real restaurant profile from backend
   const {
@@ -322,6 +333,7 @@ export const SettingsPage = () => {
     { id: 'bank', label: 'Bank Payouts', icon: Wallet },
     { id: 'security', label: 'Security & PIN', icon: Lock },
     { id: 'sound', label: 'Sound Alert', icon: Volume2 },
+    { id: 'support', label: 'Help & Support', icon: HelpCircle },
   ]
 
   return (
@@ -481,6 +493,31 @@ export const SettingsPage = () => {
                     </Button>
                   </div>
                 </form>
+              </div>
+
+              {/* Quick Help & Support Footer in Profile Tab */}
+              <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-slate-900/50 border border-blue-200/50 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#113BD0] text-white flex items-center justify-center shrink-0">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-black text-xs text-slate-900 dark:text-slate-100 block">
+                      Need help with orders, menu updates or bank settlements?
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      Our partner operations team is available 24x7 via Call, WhatsApp & Email.
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveTab('support')}
+                  className="font-bold text-xs shrink-0"
+                >
+                  Open Support Hub ↗
+                </Button>
               </div>
             </div>
           )}
@@ -1113,6 +1150,162 @@ export const SettingsPage = () => {
               </div>
             </div>
           )}
+
+          {/* 6. HELP & SUPPORT TAB */}
+          {activeTab === 'support' && (() => {
+            const partnerPhone = platformConfig?.partner_support_phone || platformConfig?.support_phone || '9005271986'
+            const commonPhone = platformConfig?.support_phone || '9005271986'
+            const whatsappPhone = platformConfig?.support_whatsapp || partnerPhone
+            const supportEmail = platformConfig?.support_email || 'support@dastakdelivery.com'
+
+            const cleanCall = partnerPhone.replace(/[^0-9+]/g, '')
+            const cleanWhatsapp = whatsappPhone.replace(/[^0-9]/g, '')
+
+            return (
+              <div className="space-y-6">
+                {/* Main Support Header Card */}
+                <div className="p-6 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#113BD0] to-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <Headphones className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">
+                          Partner Helpdesk & Merchant Support
+                        </h3>
+                        <p className="text-xs text-slate-400 font-medium mt-0.5">
+                          24x7 Dedicated assistance for kitchen operations, rider dispatch & bank settlements.
+                        </p>
+                      </div>
+                    </div>
+                    <span className="self-start sm:self-auto text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/40 px-3 py-1 rounded-xl flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      Support Team Online
+                    </span>
+                  </div>
+
+                  {/* 3 Channels Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* 1. Partner Call Helpline */}
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-3 group hover:border-[#113BD0]/40 transition-all">
+                      <div className="flex items-center justify-between">
+                        <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
+                          <Phone className="w-4 h-4" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
+                          Direct Line
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
+                          Partner Helpline
+                        </span>
+                        <span className="font-black text-base text-slate-900 dark:text-slate-100 block mt-0.5">
+                          {partnerPhone}
+                        </span>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Call directly for live order queries and delivery fleet dispatch.
+                        </p>
+                      </div>
+                      <a
+                        href={`tel:${cleanCall}`}
+                        className="w-full py-2 px-3 rounded-xl bg-[#113BD0] hover:bg-blue-700 text-white font-bold text-xs text-center transition-colors shadow-xs flex items-center justify-center gap-1.5"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        <span>Call Partner Support</span>
+                      </a>
+                    </div>
+
+                    {/* 2. WhatsApp Merchant Support */}
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-3 group hover:border-emerald-500/40 transition-all">
+                      <div className="flex items-center justify-between">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                          <MessageSquare className="w-4 h-4" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+                          Instant Chat
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
+                          Merchant WhatsApp
+                        </span>
+                        <span className="font-black text-base text-slate-900 dark:text-slate-100 block mt-0.5">
+                          +91 {whatsappPhone}
+                        </span>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Share screenshots of bills, payout receipts, or menu updates.
+                        </p>
+                      </div>
+                      <a
+                        href={`https://wa.me/${cleanWhatsapp.startsWith('91') ? cleanWhatsapp : '91' + cleanWhatsapp}?text=Hello%20Dastak%20Partner%20Support,%20I%20am%20a%20registered%20restaurant%20partner%20and%20need%20assistance.`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs text-center transition-colors shadow-xs flex items-center justify-center gap-1.5"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5" />
+                        <span>Chat on WhatsApp</span>
+                      </a>
+                    </div>
+
+                    {/* 3. Official Email Support */}
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800 flex flex-col justify-between gap-3 group hover:border-purple-500/40 transition-all">
+                      <div className="flex items-center justify-between">
+                        <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-2 py-0.5 rounded-md">
+                          Official Desk
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
+                          Official Email
+                        </span>
+                        <span className="font-black text-base text-slate-900 dark:text-slate-100 block mt-0.5 truncate">
+                          {supportEmail}
+                        </span>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          For GST invoices, contractual inquiries, and onboarding support.
+                        </p>
+                      </div>
+                      <a
+                        href={`mailto:${supportEmail}?subject=Merchant%20Support%20Request%20-%20${encodeURIComponent(name || 'Partner')}`}
+                        className="w-full py-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs text-center transition-colors shadow-xs flex items-center justify-center gap-1.5"
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        <span>Send Email</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Global Common Toll-Free Helpline Banner */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-transparent border border-blue-200/60 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#113BD0] text-white flex items-center justify-center shrink-0">
+                        <Globe className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-xs sm:text-sm text-slate-900 dark:text-slate-100">
+                          Global Common Helpline: {commonPhone}
+                        </h4>
+                        <p className="text-[11px] text-slate-400">
+                          Central toll-free emergency operations line accessible across all Dastak partner hubs.
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={`tel:${commonPhone.replace(/[^0-9+]/g, '')}`}
+                      className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs shrink-0 hover:opacity-90 transition-opacity"
+                    >
+                      Call Global Hub
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
         </>
       )}
     </div>

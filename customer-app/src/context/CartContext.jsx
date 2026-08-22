@@ -172,6 +172,15 @@ export const CartProvider = ({ children }) => {
     const cfg = deliveryConfig
     if (!cfg) return subtotal >= 499 ? 0 : 35 // fallback until config loads
     if (cfg.all_free_delivery) return 0 // festival mode — free for everyone
+    // Distance tiers → estimate with the nearest band (exact fee resolved at
+    // checkout once the delivery distance is known).
+    const tiers = Array.isArray(cfg.delivery_tiers) ? cfg.delivery_tiers : []
+    if (tiers.length > 0) {
+      const first = [...tiers].sort((a, b) => (Number(a.up_to_km) || 0) - (Number(b.up_to_km) || 0))[0]
+      const fa = Number(first?.free_above) || 0
+      if (fa > 0 && subtotal >= fa) return 0
+      return Number(first?.fee) || 0
+    }
     const freeMin = Number(cfg.free_delivery_min_order) || 0
     if (freeMin > 0 && subtotal >= freeMin) return 0
     // Note: free-within-radius applies at checkout (needs delivery distance).

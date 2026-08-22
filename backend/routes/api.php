@@ -391,6 +391,9 @@ Route::prefix('v1')->group(function () {
                 Route::get('/customers/{id}/orders', [CustomerAdminController::class, 'orders']);
                 Route::get('/customers/{id}/addresses', [CustomerAdminController::class, 'addresses']);
                 Route::get('/customers/{id}/complaints', [CustomerAdminController::class, 'complaints']);
+                Route::get('/customers/{id}/device-session', [CustomerAdminController::class, 'deviceSession']);
+                Route::post('/customers/{id}/revoke-device', [CustomerAdminController::class, 'revokeDevice']);
+                Route::post('/customers/revoke-device-by-mobile', [CustomerAdminController::class, 'revokeDeviceByMobile']);
                 Route::patch('/customers/{id}/block-status', [CustomerAdminController::class, 'toggleBlock']);
 
                 // Service Zones Management
@@ -417,6 +420,7 @@ Route::prefix('v1')->group(function () {
                     // Food-category chips (customer home) — DB managed
                     Route::get('/food-categories', [FoodCategoryAdminController::class, 'index']);
                     Route::post('/food-categories/upload-image', [FoodCategoryAdminController::class, 'uploadImage']);
+                    Route::post('/food-categories/reorder', [FoodCategoryAdminController::class, 'reorder']);
                     Route::post('/food-categories', [FoodCategoryAdminController::class, 'store']);
                     Route::put('/food-categories/{id}', [FoodCategoryAdminController::class, 'update']);
                     Route::patch('/food-categories/{id}/status', [FoodCategoryAdminController::class, 'toggleStatus']);
@@ -503,6 +507,7 @@ Route::prefix('v1')->group(function () {
                 Route::prefix('settings')->group(function () {
                     Route::get('/general', [SettingsController::class, 'getSettings']);
                     Route::put('/general', [SettingsController::class, 'updateSettings']);
+                    Route::post('/upload-logo', [SettingsController::class, 'uploadBrandLogo']);
                     Route::get('/orders', [SettingsController::class, 'getOrderSettings']);
                     Route::put('/orders', [SettingsController::class, 'updateOrderSettings']);
                     Route::get('/delivery', [SettingsController::class, 'getDeliverySettings']);

@@ -34,8 +34,16 @@ export const HomePage = () => {
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [riderSupportPhone, setRiderSupportPhone] = useState('9005271986')
 
   const isOnline = !!riderProfile?.is_online
+
+  useEffect(() => {
+    deliveryApi.getConfig?.().then((res) => {
+      const p = res?.data?.data?.rider_support_phone || res?.data?.data?.support_phone || res?.data?.rider_support_phone || res?.data?.support_phone
+      if (p) setRiderSupportPhone(p)
+    }).catch(() => {})
+  }, [])
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -366,10 +374,10 @@ export const HomePage = () => {
               </div>
             </div>
             <a
-              href="tel:+919876543210"
+              href={`tel:${riderSupportPhone.replace(/[^0-9+]/g, '')}`}
               className="px-3 py-1.5 rounded-xl bg-[#113BD0] hover:bg-[#F97316] text-white font-bold text-[11px] transition-colors"
             >
-              Call Hub
+              Call Hub ({riderSupportPhone})
             </a>
           </div>
         </div>

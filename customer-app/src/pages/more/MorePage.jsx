@@ -206,7 +206,7 @@ export const MorePage = () => {
 
         {/* 6. Support Helpline */}
         {(() => {
-          const supportPhone = platformConfig?.support_phone || '9005271986'
+          const supportPhone = platformConfig?.customer_support_phone || platformConfig?.support_phone || '9005271986'
           const dialPhone = supportPhone.replace(/[^0-9+]/g, '')
           return (
             <div

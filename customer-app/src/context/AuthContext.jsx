@@ -53,6 +53,16 @@ export const AuthProvider = ({ children }) => {
     }
 
     initAuth()
+
+    const handleUnauthorized = () => {
+      setUser(null)
+      setToken(null)
+      setSessionToken(null)
+      setLoading(false)
+    }
+
+    window.addEventListener('dastak:unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('dastak:unauthorized', handleUnauthorized)
   }, [])
 
   const startVerification = async (mobile) => {

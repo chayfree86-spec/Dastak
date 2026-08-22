@@ -22,8 +22,11 @@ export const LocationProvider = ({ children }) => {
 
   // Fetch addresses if authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    const token = localStorage.getItem('dastak_customer_token')
+    if (isAuthenticated && token) {
       loadAddresses()
+    } else {
+      setAddresses([])
     }
   }, [isAuthenticated])
 
@@ -64,6 +67,8 @@ export const LocationProvider = ({ children }) => {
   }, [user, activeAddress?.id])
 
   const loadAddresses = async () => {
+    const token = localStorage.getItem('dastak_customer_token')
+    if (!token) return
     setLoading(true)
     try {
       const res = await customerApi.getAddresses()

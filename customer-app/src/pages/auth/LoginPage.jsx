@@ -178,7 +178,16 @@ export const LoginPage = () => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Verification could not be initiated.')
+      const errData = err.response?.data || {}
+      if (errData.errors?.session_active_elsewhere || err.response?.status === 409) {
+        setActiveDeviceInfo({
+          deviceName: errData.errors?.active_device_name || 'Another Mobile Phone',
+          instructions: errData.errors?.instructions || 'Open Dastak on your existing phone and go to Settings → Change Device.',
+        })
+        setStep('active_elsewhere')
+      } else {
+        setError(errData.message || err.message || 'Verification could not be initiated.')
+      }
     } finally {
       setLoading(false)
     }

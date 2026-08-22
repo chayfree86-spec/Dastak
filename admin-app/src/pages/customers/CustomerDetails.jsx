@@ -20,8 +20,15 @@ import {
   ShieldCheck,
   Check,
   XCircle,
+  Smartphone,
+  RotateCcw,
+  ShieldAlert,
+  Laptop,
+  KeyRound,
+  Sparkles,
 } from 'lucide-react'
 import customersApi from '../../api/customers.api'
+import apiClient from '../../api/client'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatPhone, formatDateTime, formatDate } from '../../utils/formatters'
 import Tabs from '../../components/common/Tabs'
@@ -64,7 +71,9 @@ export const CustomerDetails = () => {
   const toast = useToast()
   const [activeTab, setActiveTab] = useState('orders')
   const [blockConfirmOpen, setBlockConfirmOpen] = useState(false)
+  const [revokeConfirmOpen, setRevokeConfirmOpen] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [revokeLoading, setRevokeLoading] = useState(false)
 
   const { data: customer, loading, error, retry } = useApi(
     () => customersApi.getCustomerDetails(id),
@@ -73,6 +82,11 @@ export const CustomerDetails = () => {
 
   const { data: orders, loading: ordersLoading } = useApi(
     () => customersApi.getCustomerOrders(id, { limit: 10 }),
+    [id]
+  )
+
+  const { data: deviceData, loading: deviceLoading, retry: retryDevice } = useApi(
+    () => customersApi.getDeviceSession(id),
     [id]
   )
 
@@ -91,9 +105,28 @@ export const CustomerDetails = () => {
     }
   }
 
+  const handleRevokeDevice = async () => {
+    setRevokeLoading(true)
+    try {
+      const res = await (customersApi?.revokeDevice
+        ? customersApi.revokeDevice(id, { reason: 'ADMIN_MANUAL_REVOKE' })
+        : apiClient.post(`/admin/customers/${id}/revoke-device`, { reason: 'ADMIN_MANUAL_REVOKE' }))
+      
+      toast.success('Device Revoked Successfully', res?.message || `${customer?.name || 'Customer'} can now log in on a new device.`)
+      setRevokeConfirmOpen(false)
+      if (typeof retryDevice === 'function') retryDevice()
+      retry()
+    } catch (err) {
+      toast.error('Revoke Failed', err.message || 'Unable to revoke device session.')
+    } finally {
+      setRevokeLoading(false)
+    }
+  }
+
   const tabs = [
     { id: 'orders', label: 'Order History', icon: ShoppingBag },
     { id: 'profile', label: 'Personal Details & Taste', icon: User },
+    { id: 'device', label: 'Device & Session', icon: Smartphone },
     { id: 'location', label: 'Live Location', icon: MapPin },
     { id: 'addresses', label: 'Saved Addresses', icon: MapPin },
   ]
@@ -153,25 +186,38 @@ export const CustomerDetails = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
+        {/* Action Buttons: Mobile PWA 2-Tier Stack, Desktop Inline Row */}
+        <div className="w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row md:flex-row items-stretch md:items-center gap-2">
           {customer?.mobile && (
             <a
               href={`tel:${customer?.mobile}`}
-              className="flex-1 sm:flex-none h-11 sm:h-9 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+              className="w-full sm:w-auto min-h-[42px] px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs shrink-0"
             >
               <Phone className="w-4 h-4" />
               <span>Call Customer</span>
             </a>
           )}
-          <Button
-            variant={customer?.status === 'ACTIVE' ? 'danger' : 'primary'}
-            size="md"
-            icon={customer?.status === 'ACTIVE' ? Ban : CheckCircle2}
-            onClick={() => setBlockConfirmOpen(true)}
-            className="flex-1 sm:flex-none h-11 sm:h-9 text-xs"
-          >
-            {customer?.status === 'ACTIVE' ? 'Block Account' : 'Unblock Account'}
-          </Button>
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+            <Button
+              variant="secondary"
+              size="md"
+              icon={RotateCcw}
+              onClick={() => setRevokeConfirmOpen(true)}
+              className="w-full sm:w-auto min-h-[42px] text-xs justify-center whitespace-nowrap"
+              title="Revoke active phone session so customer can log in on a new device"
+            >
+              Revoke Device
+            </Button>
+            <Button
+              variant={customer?.status === 'ACTIVE' ? 'danger' : 'primary'}
+              size="md"
+              icon={customer?.status === 'ACTIVE' ? Ban : CheckCircle2}
+              onClick={() => setBlockConfirmOpen(true)}
+              className="w-full sm:w-auto min-h-[42px] text-xs justify-center whitespace-nowrap"
+            >
+              {customer?.status === 'ACTIVE' ? 'Block Account' : 'Unblock Account'}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -661,6 +707,106 @@ export const CustomerDetails = () => {
         </div>
       )}
 
+      {/* Tab: Device & Session */}
+      {activeTab === 'device' && (
+        <div className="space-y-6">
+          {/* Active Device Card */}
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-5 border-b border-slate-100 dark:border-slate-700/60">
+              <div className="flex items-center gap-3.5">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                  deviceData?.has_active_device
+                    ? 'bg-blue-50 text-[#113BD0] dark:bg-blue-950/60 dark:text-blue-400 shadow-2xs'
+                    : 'bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-400'
+                }`}>
+                  {deviceData?.active_session?.device_platform === 'desktop' ? (
+                    <Laptop className="w-6 h-6" />
+                  ) : (
+                    <Smartphone className="w-6 h-6" />
+                  )}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-slate-900 dark:text-slate-100">
+                      {deviceData?.has_active_device ? (deviceData?.active_session?.device_name || 'Active Mobile Device') : 'No Active Device Bound'}
+                    </h3>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      deviceData?.has_active_device
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800/60'
+                        : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
+                    }`}>
+                      {deviceData?.has_active_device ? 'Active Binding' : 'Unbound / Available'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {deviceData?.has_active_device
+                      ? `Bound to customer mobile +91 ${customer?.mobile}. 1-Mobile policy active.`
+                      : 'Customer is currently not locked to any specific phone device.'}
+                  </p>
+                </div>
+              </div>
+
+              {deviceData?.has_active_device && (
+                <Button
+                  variant="danger"
+                  size="md"
+                  icon={RotateCcw}
+                  onClick={() => setRevokeConfirmOpen(true)}
+                  loading={revokeLoading}
+                  className="w-full md:w-auto"
+                >
+                  Revoke Device Binding
+                </Button>
+              )}
+            </div>
+
+            {/* Session Attributes Bento Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Hardware Platform</span>
+                <span className="text-sm font-black text-slate-900 dark:text-slate-100 mt-1 flex items-center gap-1.5 capitalize">
+                  {deviceData?.active_session?.device_platform || 'Mobile Phone (Standard)'}
+                </span>
+                <span className="text-[11px] text-slate-400 mt-0.5 block">Dastak Customer App Client</span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Last Active / Heartbeat</span>
+                <span className="text-sm font-black text-slate-900 dark:text-slate-100 mt-1 block">
+                  {deviceData?.active_session?.last_seen_at ? formatDateTime(deviceData?.active_session?.last_seen_at) : 'Active Session'}
+                </span>
+                <span className="text-[11px] text-slate-400 mt-0.5 block">Session ID: #{deviceData?.active_session?.id || '—'}</span>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bound Since</span>
+                <span className="text-sm font-black text-slate-900 dark:text-slate-100 mt-1 block">
+                  {deviceData?.active_session?.created_at ? formatDate(deviceData?.active_session?.created_at) : '—'}
+                </span>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">
+                  {deviceData?.has_active_device ? '✓ 256-bit SHA Token Bound' : 'Ready for New Sign-in'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Device Security & Policy Info Box */}
+          <div className="p-5 rounded-3xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/60 text-[#113BD0] dark:text-blue-400 flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <div className="space-y-1 text-xs">
+              <h4 className="font-bold text-slate-900 dark:text-slate-100">
+                Why use "Revoke Device"?
+              </h4>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                For security, Dastak allows only 1 active mobile phone per customer account. If a customer changed their phone, lost their old device, or formatted their phone and gets the error <em>"This mobile number is already active on another mobile phone"</em>, click <strong>Revoke Device Binding</strong> above. The customer can then verify OTP and log in on their new device immediately.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ConfirmDialog
         isOpen={blockConfirmOpen}
         onClose={() => setBlockConfirmOpen(false)}
@@ -674,6 +820,17 @@ export const CustomerDetails = () => {
             : `Are you sure you want to unblock ${customer?.name}?`
         }
         confirmText={customer?.status === 'ACTIVE' ? 'Yes, Block' : 'Yes, Unblock'}
+      />
+
+      <ConfirmDialog
+        isOpen={revokeConfirmOpen}
+        onClose={() => setRevokeConfirmOpen(false)}
+        onConfirm={handleRevokeDevice}
+        loading={revokeLoading}
+        type="danger"
+        title={`Revoke Device Binding for ${customer?.name}?`}
+        message={`This will immediately revoke the active device session on ${deviceData?.active_session?.device_name || 'their phone'} for mobile +91 ${customer?.mobile}. The customer will be able to log in on their new device immediately.`}
+        confirmText="Revoke Device"
       />
     </div>
   )

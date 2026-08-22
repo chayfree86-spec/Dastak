@@ -50,6 +50,11 @@ export const CustomerLayout = () => {
 
     const checkActiveOrder = async () => {
       try {
+        const token = localStorage.getItem('dastak_customer_token')
+        if (!token) {
+          setActiveOrder(null)
+          return
+        }
         const res = await customerApi.getOrders({ status: 'active' })
         const orders = res.data?.data || res.data || []
         const active = orders.find(
@@ -59,7 +64,9 @@ export const CustomerLayout = () => {
             o.status !== 'REJECTED'
         )
         setActiveOrder(active || null)
-      } catch (e) {}
+      } catch (e) {
+        setActiveOrder(null)
+      }
     }
 
     checkActiveOrder()

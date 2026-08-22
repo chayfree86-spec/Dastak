@@ -44,7 +44,7 @@ class SettingsController extends Controller
     {
         return ApiResponse::success($this->only([
             'dispatch_mode', 'max_radius_km', 'base_delivery_fee',
-            'all_free_delivery', 'free_delivery_radius_km',
+            'all_free_delivery', 'free_delivery_radius_km', 'delivery_tiers',
             'free_delivery_min_order', 'base_delivery_distance_km', 'per_km_charge', 'max_delivery_fee',
         ]), 'Delivery settings retrieved.');
     }
@@ -211,6 +211,23 @@ class SettingsController extends Controller
         return ApiResponse::success(null, 'Service area deleted.');
     }
 
+    public function uploadBrandLogo(Request $request): JsonResponse
+    {
+        $request->validate([
+            'logo' => ['required', 'file', 'mimes:png,jpg,jpeg,webp,svg', 'max:10240'],
+        ]);
+
+        $path = $request->file('logo')->store('branding', 'public');
+        $url = asset('storage/' . $path);
+
+        SystemSetting::set('brand_logo_url', $url);
+
+        return ApiResponse::success([
+            'url' => $url,
+            'path' => $path,
+        ], 'Brand logo uploaded and updated successfully.', 201);
+    }
+
     // --- store helpers ---
 
     protected function defaults(): array
@@ -218,7 +235,12 @@ class SettingsController extends Controller
         return [
             'app_name' => 'Dastak',
             'tagline' => 'Jo Chahiye, Ghar Par',
-            'support_phone' => '1800-123-4567',
+            'brand_logo_url' => '',
+            'support_phone' => '9005271986',
+            'customer_support_phone' => '9005271986',
+            'partner_support_phone' => '9005271986',
+            'rider_support_phone' => '9005271986',
+            'support_whatsapp' => '9005271986',
             'support_email' => 'support@dastakdelivery.com',
             'cancel_window_mins' => 5,
             'auto_accept' => false,
@@ -227,6 +249,7 @@ class SettingsController extends Controller
             'base_delivery_fee' => 35,
             'all_free_delivery' => false,
             'free_delivery_radius_km' => 0,
+            'delivery_tiers' => [],
             'free_delivery_min_order' => 0,
             'base_delivery_distance_km' => 3,
             'per_km_charge' => 0,

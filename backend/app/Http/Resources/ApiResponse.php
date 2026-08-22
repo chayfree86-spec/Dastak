@@ -21,15 +21,26 @@ class ApiResponse
         return response()->json($payload, $statusCode);
     }
 
-    public static function error(string $message = 'Error', mixed $errors = null, int $statusCode = 400): JsonResponse
+    public static function error(string $message = 'Error', mixed $errors = null, mixed $statusCode = 400): JsonResponse
     {
+        $finalStatus = 400;
+        $finalErrors = null;
+
+        if (is_int($errors)) {
+            $finalStatus = $errors;
+            $finalErrors = is_array($statusCode) || is_string($statusCode) ? $statusCode : null;
+        } else {
+            $finalErrors = $errors;
+            $finalStatus = is_int($statusCode) ? $statusCode : 400;
+        }
+
         $payload = [
             'success' => false,
             'message' => $message,
-            'errors' => $errors,
+            'errors' => $finalErrors,
         ];
 
-        return response()->json($payload, $statusCode);
+        return response()->json($payload, $finalStatus);
     }
 
     public static function paginated(mixed $paginator, mixed $resourceClass, string $message = 'Success', array $extraMeta = []): JsonResponse

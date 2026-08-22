@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Lock,
@@ -22,6 +22,10 @@ import {
   RotateCcw,
   ChevronDown,
   ChevronUp,
+  Phone,
+  MessageSquare,
+  Mail,
+  Globe,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
@@ -30,11 +34,19 @@ import { useToast } from '../../context/ToastContext'
 import Button from '../../components/common/Button'
 import Input from '../../components/common/Input'
 import authApi from '../../api/auth.api'
+import deliveryApi from '../../api/delivery.api'
 
 export const SettingsPage = () => {
   const navigate = useNavigate()
   const { user, logout, changeDevice } = useAuth()
   const { isDark, toggleTheme } = useTheme()
+  const [platformConfig, setPlatformConfig] = useState(null)
+
+  useEffect(() => {
+    deliveryApi.getConfig?.().then((res) => {
+      setPlatformConfig(res?.data?.data || res?.data || null)
+    }).catch(() => {})
+  }, [])
   const {
     soundEnabled,
     soundPreset,
@@ -512,7 +524,124 @@ export const SettingsPage = () => {
             </form>
           </div>
 
-          {/* 4. Logout Button */}
+          {/* 4. Help & Support Multi-Channel Section */}
+          {(() => {
+            const riderPhone = platformConfig?.rider_support_phone || platformConfig?.support_phone || '9005271986'
+            const commonPhone = platformConfig?.support_phone || '9005271986'
+            const whatsappPhone = platformConfig?.support_whatsapp || riderPhone
+            const supportEmail = platformConfig?.support_email || 'support@dastakdelivery.com'
+
+            const cleanCall = riderPhone.replace(/[^0-9+]/g, '')
+            const cleanWhatsapp = whatsappPhone.replace(/[^0-9]/g, '')
+
+            return (
+              <div className="p-5 rounded-3xl bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-800 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                      <HelpCircle className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-900 dark:text-slate-100 text-xs">
+                        Rider Fleet Support & Helpline
+                      </h4>
+                      <p className="text-slate-400 text-[10px] font-medium">
+                        Emergency dispatch & fleet assistance
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">
+                    24x7 Fleet Hub
+                  </span>
+                </div>
+
+                {/* Channels Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Call Fleet Hub */}
+                  <a
+                    href={`tel:${cleanCall}`}
+                    className="p-4 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 transition-all flex flex-col justify-between gap-3 min-h-[104px] group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <Phone className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:underline">
+                        Call Hub ↗
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                        Rider Helpline
+                      </span>
+                      <span className="font-black text-sm text-slate-900 dark:text-slate-100 block truncate mt-0.5">
+                        {riderPhone}
+                      </span>
+                    </div>
+                  </a>
+
+                  {/* WhatsApp Fleet Dispatch */}
+                  <a
+                    href={`https://wa.me/${cleanWhatsapp.startsWith('91') ? cleanWhatsapp : '91' + cleanWhatsapp}?text=Hello%20Dastak%20Fleet%20Support,%20I%20am%20a%20delivery%20partner%20and%20need%20assistance.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-4 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 transition-all flex flex-col justify-between gap-3 min-h-[104px] group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <MessageSquare className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:underline">
+                        WhatsApp ↗
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                        Fleet WhatsApp
+                      </span>
+                      <span className="font-black text-sm text-slate-900 dark:text-slate-100 block truncate mt-0.5">
+                        +91 {whatsappPhone}
+                      </span>
+                    </div>
+                  </a>
+
+                  {/* Email Support */}
+                  <a
+                    href={`mailto:${supportEmail}?subject=Rider%20Support%20Request%20-%20Delivery%20Partner`}
+                    className="p-4 rounded-2xl bg-slate-50 hover:bg-blue-50/80 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 transition-all flex flex-col justify-between gap-3 min-h-[104px] group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-[#113BD0] dark:text-blue-400 group-hover:underline">
+                        Email ↗
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                        Operations Mail
+                      </span>
+                      <span className="font-black text-sm text-slate-900 dark:text-slate-100 block truncate mt-0.5">
+                        {supportEmail}
+                      </span>
+                    </div>
+                  </a>
+                </div>
+
+                {/* Global Common Toll-Free Helpline Footer */}
+                <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800">
+                  <span className="flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-[#113BD0]" />
+                    <span>Common Helpline: <strong className="text-slate-700 dark:text-slate-300 font-bold">{commonPhone}</strong></span>
+                  </span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">Toll-Free 24x7</span>
+                </div>
+              </div>
+            )
+          })()}
+
+          {/* 5. Logout Button */}
           <button
             type="button"
             onClick={handleLogout}

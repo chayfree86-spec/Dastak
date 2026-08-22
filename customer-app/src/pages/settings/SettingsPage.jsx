@@ -17,6 +17,8 @@ import {
   Edit3,
   KeyRound,
   Sparkles,
+  MessageSquare,
+  Mail,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
@@ -49,11 +51,14 @@ export const SettingsPage = () => {
   }, [])
 
   useEffect(() => {
-    if (isAuthenticated) {
+    const token = localStorage.getItem('dastak_customer_token')
+    if (isAuthenticated && token) {
       customerApi
         .getProfile()
         .then((res) => setProfileData(res?.data || res))
         .catch(() => {})
+    } else {
+      setProfileData(null)
     }
   }, [isAuthenticated])
 
@@ -410,38 +415,124 @@ export const SettingsPage = () => {
             </div>
           </div>
         )}
+      </div>
 
-        {/* Row 7: Support & Helpline */}
-        {(() => {
-          const supportPhone = platformConfig?.support_phone || '9005271986'
-          const dialPhone = supportPhone.replace(/[^0-9+]/g, '')
-          return (
-            <div
-              onClick={() => window.open(`tel:${dialPhone}`, '_self')}
-              className="p-3.5 sm:p-4 flex items-center justify-between gap-2.5 sm:gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-slate-800 text-[#113BD0] flex items-center justify-center shrink-0">
-                  <HelpCircle className="w-5 h-5" />
+      {/* 4. Help & Support Multi-Channel Section */}
+      {(() => {
+        const supportPhone = platformConfig?.customer_support_phone || platformConfig?.support_phone || '9005271986'
+        const commonPhone = platformConfig?.support_phone || '9005271986'
+        const whatsappPhone = platformConfig?.support_whatsapp || supportPhone
+        const supportEmail = platformConfig?.support_email || 'support@dastakdelivery.com'
+
+        const cleanCall = supportPhone.replace(/[^0-9+]/g, '')
+        const cleanWhatsapp = whatsappPhone.replace(/[^0-9]/g, '')
+
+        return (
+          <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
+                  <HelpCircle className="w-4 h-4" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h5 className="font-black text-slate-900 dark:text-slate-100 text-xs sm:text-sm truncate">
-                    {lang === 'hi' ? 'ग्राहक सहायता' : 'Support Helpline'}
-                  </h5>
-                  <p className="text-slate-400 text-[11px] font-medium truncate mt-0.5">
-                    24x7 Helpline: <strong className="text-slate-700 dark:text-slate-200 font-bold">{supportPhone}</strong>
+                <div>
+                  <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                    {lang === 'hi' ? 'सहायता एवं संपर्क केंद्र' : 'Help & Customer Support'}
+                  </h4>
+                  <p className="text-slate-400 text-[11px] font-medium">
+                    {lang === 'hi' ? 'ऑर्डर और सहायता के लिए 24x7 उपलब्ध' : 'Available 24x7 for order and platform queries'}
                   </p>
                 </div>
               </div>
-
-              <div className="shrink-0 flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 sm:px-3 py-1.5 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40">
-                <Phone className="w-3.5 h-3.5" />
-                <span>Call</span>
-              </div>
+              <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">
+                24x7 Live
+              </span>
             </div>
-          )
-        })()}
-      </div>
+
+            {/* Channels Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* 1. Phone Call */}
+              <a
+                href={`tel:${cleanCall}`}
+                className="p-4 rounded-2xl bg-slate-50 hover:bg-blue-50/80 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 transition-all flex flex-col justify-between gap-3 min-h-[104px] group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#113BD0] dark:text-blue-400 flex items-center justify-center">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs font-bold text-[#113BD0] dark:text-blue-400 group-hover:underline">
+                    Call Now ↗
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    {lang === 'hi' ? 'हेल्पलाइन' : 'Helpline'}
+                  </span>
+                  <span className="font-black text-sm text-slate-900 dark:text-slate-100 block truncate mt-0.5">
+                    {supportPhone}
+                  </span>
+                </div>
+              </a>
+
+              {/* 2. WhatsApp Support */}
+              <a
+                href={`https://wa.me/${cleanWhatsapp.startsWith('91') ? cleanWhatsapp : '91' + cleanWhatsapp}?text=Hello%20Dastak%20Support,%20I%20need%20help%20with%20my%20order.`}
+                target="_blank"
+                rel="noreferrer"
+                className="p-4 rounded-2xl bg-slate-50 hover:bg-emerald-50/80 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 transition-all flex flex-col justify-between gap-3 min-h-[104px] group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:underline">
+                    WhatsApp ↗
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    WhatsApp Chat
+                  </span>
+                  <span className="font-black text-sm text-slate-900 dark:text-slate-100 block truncate mt-0.5">
+                    +91 {whatsappPhone}
+                  </span>
+                </div>
+              </a>
+
+              {/* 3. Email Support */}
+              <a
+                href={`mailto:${supportEmail}?subject=Support%20Request%20-%20Customer%20App`}
+                className="p-4 rounded-2xl bg-slate-50 hover:bg-purple-50/80 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/70 dark:border-slate-700/70 transition-all flex flex-col justify-between gap-3 min-h-[104px] group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 group-hover:underline">
+                    Email Us ↗
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    Email Support
+                  </span>
+                  <span className="font-black text-sm text-slate-900 dark:text-slate-100 block truncate mt-0.5">
+                    {supportEmail}
+                  </span>
+                </div>
+              </a>
+            </div>
+
+            {/* Global Common Toll-Free Helpline Footer */}
+            <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 dark:border-slate-800">
+              <span className="flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-[#113BD0]" />
+                <span>Global Common Helpline: <strong className="text-slate-700 dark:text-slate-300 font-bold">{commonPhone}</strong></span>
+              </span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">Toll-Free Support</span>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* 5. Logout Button */}
       {isAuthenticated && (
