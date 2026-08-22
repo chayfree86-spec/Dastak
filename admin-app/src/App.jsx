@@ -59,6 +59,15 @@ const RouteLoader = () => (
 )
 
 export const App = () => {
+  React.useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      if (typeof window.dismissSplash === 'function') {
+        window.dismissSplash()
+      }
+    }, 1100)
+    return () => clearTimeout(splashTimer)
+  }, [])
+
   return (
     <ThemeProvider>
       <ToastProvider>

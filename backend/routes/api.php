@@ -134,6 +134,7 @@ Route::prefix('v1')->group(function () {
     // Landing-page public marketing data (real numbers + real reviews)
     Route::get('/stats', [PublicStatsController::class, 'stats']);
     Route::get('/testimonials', [PublicStatsController::class, 'testimonials']);
+    Route::get('/config', [PublicStatsController::class, 'config']);
 
     // Customer home food-category chips (DB driven)
     Route::get('/food-categories', [FoodCategoryPublicController::class, 'index']);

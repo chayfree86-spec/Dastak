@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Receipt,
@@ -22,6 +22,7 @@ import { useTheme } from '../../context/ThemeContext'
 import { useLocationContext } from '../../context/LocationContext'
 import { useToast } from '../../context/ToastContext'
 import Button from '../../components/common/Button'
+import customerApi from '../../api/customer.api'
 
 export const MorePage = () => {
   const navigate = useNavigate()
@@ -30,6 +31,13 @@ export const MorePage = () => {
   const { user, isAuthenticated, logout } = useAuth()
   const { activeAddress } = useLocationContext()
   const toast = useToast()
+  const [platformConfig, setPlatformConfig] = useState(null)
+
+  useEffect(() => {
+    customerApi.getConfig()
+      .then((res) => setPlatformConfig(res?.data || res))
+      .catch(() => {})
+  }, [])
 
   const handleLogout = async () => {
     await logout()
@@ -197,25 +205,31 @@ export const MorePage = () => {
         </div>
 
         {/* 6. Support Helpline */}
-        <div
-          onClick={() => window.open('tel:1800123456', '_blank')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0]">
-              <HelpCircle className="w-5 h-5" />
+        {(() => {
+          const supportPhone = platformConfig?.support_phone || '9005271986'
+          const dialPhone = supportPhone.replace(/[^0-9+]/g, '')
+          return (
+            <div
+              onClick={() => window.open(`tel:${dialPhone}`, '_self')}
+              className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3.5">
+                <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0]">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                    {lang === 'hi' ? '24x7 ग्राहक सहायता' : '24x7 Customer Support'}
+                  </h5>
+                  <p className="text-slate-400 text-[11px] font-medium">
+                    {lang === 'hi' ? 'हेल्पलाइन:' : 'Helpline:'} <strong>{supportPhone}</strong>
+                  </p>
+                </div>
+              </div>
+              <Phone className="w-4 h-4 text-emerald-600" />
             </div>
-            <div>
-              <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                {lang === 'hi' ? '24x7 ग्राहक सहायता' : '24x7 Customer Support'}
-              </h5>
-              <p className="text-slate-400 text-[11px] font-medium">
-                {lang === 'hi' ? 'टोल-फ्री हेल्पलाइन: 1800-123-456' : 'Toll-Free Helpline: 1800-123-456'}
-              </p>
-            </div>
-          </div>
-          <Phone className="w-4 h-4 text-emerald-600" />
-        </div>
+          )
+        })()}
       </div>
 
       {/* Logout Button */}

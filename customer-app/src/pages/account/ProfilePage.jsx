@@ -88,6 +88,8 @@ export const ProfilePage = () => {
   const nameInputRef = useRef(null)
   const fileInputRef = useRef(null)
 
+  const sanitizeEmail = (em) => (em && !em.endsWith('@dastak.local') ? em : '')
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -95,7 +97,7 @@ export const ProfilePage = () => {
         const data = res?.data || res
         if (data) {
           setName(data.name || '')
-          setEmail(data.email || '')
+          setEmail(sanitizeEmail(data.email))
           setMobile(data.mobile || '')
           setAvatar(data.avatar || '')
           setAvatarPreview(data.avatar || '')
@@ -111,7 +113,7 @@ export const ProfilePage = () => {
       } catch (e) {
         if (user) {
           setName(user.name || '')
-          setEmail(user.email || '')
+          setEmail(sanitizeEmail(user.email))
           setMobile(user.mobile || '')
           setAvatar(user.avatar || '')
           setAvatarPreview(user.avatar || '')

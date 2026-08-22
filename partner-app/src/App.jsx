@@ -22,9 +22,8 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center gap-3">
-        <div className="w-10 h-10 border-3 border-[#113BD0] border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-bold text-slate-400">Loading Dastak Kitchen...</span>
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#0284C7] border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -62,6 +61,15 @@ const PwaController = () => {
 }
 
 export function App() {
+  React.useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      if (typeof window.dismissSplash === 'function') {
+        window.dismissSplash()
+      }
+    }, 1100)
+    return () => clearTimeout(splashTimer)
+  }, [])
+
   return (
     <ThemeProvider>
       <BrowserRouter>

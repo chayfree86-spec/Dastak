@@ -90,23 +90,22 @@ export const CustomerLayout = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200 antialiased selection:bg-[#113BD0] selection:text-white">
       {/* 1. Header (Full Width Web Header - Hidden on Auth / Login pages) */}
       {!isAuthPage && (
-        <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs h-14 sm:h-16 flex items-center">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 w-full flex items-center justify-between gap-2.5 sm:gap-4">
+        <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs min-h-[64px] sm:min-h-[72px] h-16 sm:h-20 flex items-center transition-all">
+          <div className="max-w-7xl mx-auto px-3.5 sm:px-6 w-full flex items-center justify-between gap-3 sm:gap-5">
             {/* Logo & Delivery Location */}
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 sm:flex-initial">
+            <div className="flex items-center gap-2.5 sm:gap-5 min-w-0 flex-1 sm:flex-initial">
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="flex items-center gap-2 cursor-pointer select-none shrink-0 bg-transparent border-0 p-0"
+                className="flex items-center gap-2 cursor-pointer select-none shrink-0 bg-transparent border-0 p-0 hover:opacity-90 transition-opacity"
                 aria-label="Dastak Food and Grocery Home"
               >
                 <img
                   src="/logo-horizontal.svg"
                   alt="Dastak Logo"
-                  width="140"
-                  height="36"
-                  className="h-8 sm:h-9 max-h-9 w-auto max-w-[130px] sm:max-w-[170px] object-contain shrink-0"
-                  style={{ height: '32px', maxHeight: '36px', width: 'auto' }}
+                  width="150"
+                  height="42"
+                  className="h-9 sm:h-11 w-auto max-w-[135px] sm:max-w-[190px] object-contain shrink-0"
                   onError={(e) => {
                     e.target.onerror = null
                     e.target.src = '/logo-horizontal.png'
@@ -114,49 +113,51 @@ export const CustomerLayout = () => {
                 />
               </button>
 
-              {/* Location Selector Pill */}
+              {/* Location Selector Pill (Desktop / Tablet only) */}
               <button
                 type="button"
                 onClick={() => setLocationModalOpen(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-left min-w-0 max-w-[130px] xs:max-w-[165px] sm:max-w-xs cursor-pointer border border-slate-200/60 dark:border-slate-700/60 shrink"
+                className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-left min-w-0 max-w-xs cursor-pointer border border-slate-200/80 dark:border-slate-700/80 shrink shadow-2xs"
                 aria-label={`Delivering to: ${activeAddress?.address || 'Set location'}. Click to change address.`}
               >
-                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#F97316] shrink-0" />
+                <div className="p-1 rounded-lg bg-orange-100/80 dark:bg-orange-950/60 text-[#FF5200] shrink-0">
+                  <MapPin className="w-4 h-4" />
+                </div>
                 <div className="min-w-0 truncate flex-1">
-                  <span className="text-[8px] sm:text-[9px] font-black uppercase text-slate-500 dark:text-slate-400 block tracking-wider leading-none">
+                  <span className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 block tracking-wider leading-none">
                     {t.deliveringTo}
                   </span>
-                  <span className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-slate-100 truncate block leading-tight">
+                  <span className="text-sm font-black text-slate-900 dark:text-slate-100 truncate block leading-snug mt-0.5">
                     {activeAddress?.address || (lang === 'hi' ? 'लोकेशन चुनें' : 'Set location')}
                   </span>
                 </div>
-                <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               </button>
             </div>
 
             {/* Right Header Utilities: Language Switcher, Theme Toggle */}
-            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {/* Language Switcher Button [English / हिंदी] */}
               <button
                 type="button"
                 onClick={toggleLanguage}
-                className="px-2.5 py-1.5 sm:px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-[11px] sm:text-xs font-black flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer"
+                className="h-10 sm:h-11 px-3 sm:px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                 title="Toggle English / हिंदी"
                 aria-label="Toggle language between English and Hindi"
               >
-                <Globe className="w-3.5 h-3.5 text-[#113BD0]" />
-                <span>{lang === 'en' ? 'हिंदी' : 'English'}</span>
+                <Globe className="w-4 h-4 text-[#113BD0]" />
+                <span className="font-extrabold">{lang === 'en' ? 'हिंदी' : 'English'}</span>
               </button>
 
               {/* Dark / Light Theme Toggle */}
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="p-1.5 sm:p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200/80 dark:border-slate-700/80 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
                 title="Toggle Theme"
                 aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               >
-                {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+                {isDark ? <Sun className="w-4.5 h-4.5 text-amber-400" /> : <Moon className="w-4.5 h-4.5" />}
               </button>
             </div>
           </div>

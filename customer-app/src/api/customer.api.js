@@ -1,6 +1,12 @@
 import apiClient from './client'
 
 export const customerApi = {
+  // Public platform config (helpline, brand info, etc.)
+  getConfig: async () => {
+    const res = await apiClient.get('/config')
+    return res.data
+  },
+
   // Public: DB-driven food-category chips for the home screen
   getFoodCategories: async () => {
     const res = await apiClient.get('/food-categories')

@@ -246,9 +246,18 @@ export const LocationProvider = ({ children }) => {
     }
 
     setAddresses((prev) => {
+      const filtered = prev.filter(
+        (a) =>
+          a.id !== formatted.id &&
+          !(
+            a.address === formatted.address &&
+            a.latitude === formatted.latitude &&
+            a.longitude === formatted.longitude
+          )
+      )
       let updated = formatted.is_default
-        ? prev.map((a) => ({ ...a, is_default: false }))
-        : [...prev]
+        ? filtered.map((a) => ({ ...a, is_default: false }))
+        : [...filtered]
       return [formatted, ...updated]
     })
 
@@ -269,7 +278,7 @@ export const LocationProvider = ({ children }) => {
         customer_phone: activeAddress?.customer_phone || user?.mobile || '',
         address: geocoded.short_address || geocoded.formatted_address,
         full_address: geocoded.formatted_address,
-        landmark: geocoded.locality || 'Detected via GPS',
+        landmark: '',
         type: 'Current Location',
         is_default: true,
         latitude: geocoded.latitude,

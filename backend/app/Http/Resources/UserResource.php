@@ -18,7 +18,7 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'email' => $this->email,
+            'email' => ($this->email && ! str_ends_with($this->email, '@dastak.local')) ? $this->email : null,
             'mobile' => $this->mobile,
             'status' => $this->status?->value ?? (string) $this->status,
             'avatar' => $this->avatar ? (str_starts_with($this->avatar, 'http') || str_starts_with($this->avatar, 'data:') ? $this->avatar : asset('storage/' . $this->avatar)) : null,

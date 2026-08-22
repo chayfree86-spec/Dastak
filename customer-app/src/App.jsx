@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react'
+import React, { useEffect, Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
@@ -9,8 +9,9 @@ import { ToastProvider } from './context/ToastContext'
 
 import CustomerLayout from './components/layout/CustomerLayout'
 import HomePage from './pages/home/HomePage'
+import LoginPage from './pages/auth/LoginPage'
 
-// Lazy load non-homepage routes for instant FCP and 100% Performance
+// Lazy load non-critical routes
 const SearchPage = lazy(() => import('./pages/search/SearchPage'))
 const RestaurantsPage = lazy(() => import('./pages/restaurants/RestaurantsPage'))
 const RestaurantPage = lazy(() => import('./pages/restaurant/RestaurantPage'))
@@ -25,7 +26,6 @@ const MorePage = lazy(() => import('./pages/more/MorePage'))
 const AccountPage = lazy(() => import('./pages/account/AccountPage'))
 const ProfilePage = lazy(() => import('./pages/account/ProfilePage'))
 const SavedAddressesPage = lazy(() => import('./pages/addresses/SavedAddressesPage'))
-const LoginPage = lazy(() => import('./pages/auth/LoginPage'))
 
 import { PwaInstallModal } from './components/pwa/PwaInstallModal'
 import { usePwaUpdate } from './hooks/usePwaUpdate'
@@ -33,7 +33,7 @@ import AuthGuard from './components/auth/AuthGuard'
 
 const PageLoadingFallback = () => (
   <div className="flex items-center justify-center min-h-[40vh]">
-    <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    <div className="w-8 h-8 border-3 border-[#113BD0] border-t-transparent rounded-full animate-spin" />
   </div>
 )
 
@@ -44,13 +44,24 @@ const PwaController = () => {
       appName="Dastak Food & Grocery"
       appRole="Food, Grocery & Essentials in 10-20 Mins"
       iconSrc="/pwa-512x512.png"
-      accentColor="bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30"
-      accentBadge="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+      accentColor="bg-[#113BD0] hover:bg-blue-700 text-white shadow-blue-600/30"
+      accentBadge="bg-blue-500/10 text-blue-500 border-blue-500/20"
     />
   )
 }
 
 export function App() {
+  useEffect(() => {
+    // Dismiss the native splash screen smoothly only after React app and routes are completely ready
+    const splashTimer = setTimeout(() => {
+      if (typeof window.dismissSplash === 'function') {
+        window.dismissSplash()
+      }
+    }, 1100)
+
+    return () => clearTimeout(splashTimer)
+  }, [])
+
   return (
     <ThemeProvider>
       <LanguageProvider>

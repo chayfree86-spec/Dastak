@@ -12,6 +12,7 @@ import {
   KeyRound,
   CheckCircle2,
   Navigation,
+  MapPin,
   UtensilsCrossed,
   ShoppingBag,
   Coffee,
@@ -43,7 +44,7 @@ export const LoginPage = () => {
   const [searchParams] = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
 
-  const { startVerification, resendOtp, verifyDeviceOtp, verifyDevicePin, isAuthenticated } = useAuth()
+  const { startVerification, resendOtp, verifyDeviceOtp, verifyDevicePin, isAuthenticated, user } = useAuth()
   const { isDark, toggleTheme } = useTheme()
   const { detectCurrentLocation, saveAddressToBook } = useLocationContext()
   const toast = useToast()
@@ -52,10 +53,17 @@ export const LoginPage = () => {
   const [step, setStep] = useState('mobile')
   const [authMode, setAuthMode] = useState('pin') // 'pin' | 'otp'
   // New-customer registration: create PIN + capture address
-  const [createPin, setCreatePin] = useState('')
-  const [confirmPin, setConfirmPin] = useState('')
+  const [createPinDigits, setCreatePinDigits] = useState(['', '', '', ''])
+  const [confirmPinDigits, setConfirmPinDigits] = useState(['', '', '', ''])
+  const [focusedCreatePinIdx, setFocusedCreatePinIdx] = useState(null)
+  const [focusedConfirmPinIdx, setFocusedConfirmPinIdx] = useState(null)
   const [suppressAutoNav, setSuppressAutoNav] = useState(false)
   const [savingAddress, setSavingAddress] = useState(false)
+  const [fetchingGps, setFetchingGps] = useState(false)
+  const [detectedGpsAddress, setDetectedGpsAddress] = useState(null)
+  const [customAddressText, setCustomAddressText] = useState('')
+  const [customLandmarkText, setCustomLandmarkText] = useState('')
+  const [addressType, setAddressType] = useState('Home')
   const [mobile, setMobile] = useState(() => {
     return localStorage.getItem('dastak_last_customer_mobile') || ''
   })
@@ -80,6 +88,8 @@ export const LoginPage = () => {
 
   const nameInputRef = useRef(null)
   const pinInputsRef = [useRef(null), useRef(null), useRef(null), useRef(null)]
+  const createPinInputsRef = [useRef(null), useRef(null), useRef(null), useRef(null)]
+  const confirmPinInputsRef = [useRef(null), useRef(null), useRef(null), useRef(null)]
   const otpInputsRef = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)]
 
   // Track Mouse Movement for 3D Dynamic Parallax
@@ -161,8 +171,8 @@ export const LoginPage = () => {
           toast.success('Welcome Back!', `Welcome back, ${data.user_name || 'Customer'}!`)
         } else {
           // New customer → create account with a PIN, then set address
-          setCreatePin('')
-          setConfirmPin('')
+          setCreatePinDigits(['', '', '', ''])
+          setConfirmPinDigits(['', '', '', ''])
           setStep('register')
           toast.info('New Registration', 'Create your name and a 4-digit PIN.')
         }
@@ -191,7 +201,7 @@ export const LoginPage = () => {
     }
   }
 
-  // 3. Handle 4-Digit PIN Input Changes
+  // 3. Handle 4-Digit PIN Input Changes (Login)
   const handlePinChange = (index, value) => {
     const digit = value.replace(/\D/g, '').slice(-1)
     const newPin = [...pinDigits]
@@ -225,6 +235,80 @@ export const LoginPage = () => {
     }
   }
 
+  // 3b. Handle 4-Digit Create PIN Input Changes (Registration)
+  const handleCreatePinChange = (index, value) => {
+    const digit = value.replace(/\D/g, '').slice(-1)
+    const newPin = [...createPinDigits]
+    newPin[index] = digit
+    setCreatePinDigits(newPin)
+    setError('')
+
+    if (digit) {
+      if (index < 3) {
+        createPinInputsRef[index + 1].current?.focus()
+      } else {
+        confirmPinInputsRef[0].current?.focus()
+      }
+    }
+  }
+
+  const handleCreatePinKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !createPinDigits[index] && index > 0) {
+      createPinInputsRef[index - 1].current?.focus()
+    }
+  }
+
+  const handleCreatePinPaste = (e) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
+    if (pasted) {
+      const newPin = ['', '', '', '']
+      for (let i = 0; i < pasted.length; i++) {
+        newPin[i] = pasted[i]
+      }
+      setCreatePinDigits(newPin)
+      if (pasted.length === 4) {
+        confirmPinInputsRef[0].current?.focus()
+      } else {
+        createPinInputsRef[Math.min(pasted.length, 3)].current?.focus()
+      }
+    }
+  }
+
+  // 3c. Handle 4-Digit Confirm PIN Input Changes (Registration)
+  const handleConfirmPinChange = (index, value) => {
+    const digit = value.replace(/\D/g, '').slice(-1)
+    const newPin = [...confirmPinDigits]
+    newPin[index] = digit
+    setConfirmPinDigits(newPin)
+    setError('')
+
+    if (digit && index < 3) {
+      confirmPinInputsRef[index + 1].current?.focus()
+    }
+  }
+
+  const handleConfirmPinKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !confirmPinDigits[index] && index > 0) {
+      confirmPinInputsRef[index - 1].current?.focus()
+    } else if (e.key === 'Enter') {
+      handleRegister(e)
+    }
+  }
+
+  const handleConfirmPinPaste = (e) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
+    if (pasted) {
+      const newPin = ['', '', '', '']
+      for (let i = 0; i < pasted.length; i++) {
+        newPin[i] = pasted[i]
+      }
+      setConfirmPinDigits(newPin)
+      confirmPinInputsRef[Math.min(pasted.length, 3)].current?.focus()
+    }
+  }
+
   // 4. Verify 4-Digit PIN for Existing User
   const handleVerifyPin = async (e) => {
     e?.preventDefault()
@@ -255,7 +339,7 @@ export const LoginPage = () => {
     }
   }
 
-  // 5. Handle OTP Input Changes
+  // 5. Handle 6-Digit Verification Code (OTP) Changes
   const handleOtpChange = (index, value) => {
     const digit = value.replace(/\D/g, '').slice(-1)
     const newOtp = [...otpDigits]
@@ -289,7 +373,7 @@ export const LoginPage = () => {
     }
   }
 
-  // 6. Verify OTP & Establish Permanent Session
+  // 6. Verify 6-Digit OTP Code
   const handleVerifyOtp = async (e) => {
     e?.preventDefault()
     setError('')
@@ -327,16 +411,25 @@ export const LoginPage = () => {
     e?.preventDefault()
     setError('')
 
+    const pin = createPinDigits.join('')
+    const confirm = confirmPinDigits.join('')
+
     if (!name.trim()) {
       setError('Please enter your full name.')
       if (nameInputRef.current) nameInputRef.current.focus()
       return
     }
-    if (!/^\d{4}$/.test(createPin)) {
-      setError('Please create a 4-digit numeric PIN.')
+    if (pin.length < 4 || !/^\d{4}$/.test(pin)) {
+      setError('Please enter all 4 digits for your PIN.')
+      createPinInputsRef[0].current?.focus()
       return
     }
-    if (createPin !== confirmPin) {
+    if (confirm.length < 4 || !/^\d{4}$/.test(confirm)) {
+      setError('Please enter all 4 digits for Confirm PIN.')
+      confirmPinInputsRef[0].current?.focus()
+      return
+    }
+    if (pin !== confirm) {
       setError('PIN and Confirm PIN do not match.')
       return
     }
@@ -344,7 +437,7 @@ export const LoginPage = () => {
     setLoading(true)
     setSuppressAutoNav(true) // stay on this page for the address step after auth
     try {
-      await verifyDeviceOtp(sessionId, generatedOtp, name.trim(), createPin)
+      await verifyDeviceOtp(sessionId, generatedOtp, name.trim(), pin)
       toast.success('Account Created', `Welcome to Dastak, ${name.trim()}!`)
       setStep('register_address')
     } catch (err) {
@@ -360,18 +453,46 @@ export const LoginPage = () => {
     navigate(redirect, { replace: true })
   }
 
-  // 8. Registration address: fetch via GPS and persist so the new customer
-  //    already has a default delivery address saved.
-  const handleUseGpsAddress = async () => {
+  // 8. Registration address: fetch via GPS without immediate submit,
+  //    letting customer review or add optional village details & landmark.
+  const handleFetchGps = async () => {
+    setError('')
+    setFetchingGps(true)
+    try {
+      const detected = await detectCurrentLocation()
+      setDetectedGpsAddress(detected)
+      setCustomAddressText(detected.address || detected.full_address || '')
+      setCustomLandmarkText('')
+      toast.success('Location Detected', 'GPS location captured. You can add optional landmark or village details below.')
+    } catch (err) {
+      setError('Could not detect your location. Please enable GPS or skip for now.')
+    } finally {
+      setFetchingGps(false)
+    }
+  }
+
+  // Save the final address with optional user-supplied address text & landmark
+  const handleSaveFinalAddress = async (e) => {
+    e?.preventDefault()
+    if (!detectedGpsAddress) return
     setError('')
     setSavingAddress(true)
     try {
-      const detected = await detectCurrentLocation()
-      await saveAddressToBook(detected)
+      const finalAddress = {
+        ...detectedGpsAddress,
+        customer_name: name.trim() || user?.name || 'Customer',
+        customer_phone: mobile.replace(/\D/g, '') || user?.mobile || '',
+        address: customAddressText.trim() || detectedGpsAddress.address,
+        full_address: customAddressText.trim() || detectedGpsAddress.full_address || detectedGpsAddress.address,
+        landmark: customLandmarkText.trim(),
+        type: addressType || 'Home',
+        is_default: true,
+      }
+      await saveAddressToBook(finalAddress)
       toast.success('Address Saved', 'Your delivery location is set.')
       finishRegistration()
     } catch (err) {
-      setError('Could not detect your location. Please enable GPS or skip for now.')
+      setError('Could not save address. Please try again.')
     } finally {
       setSavingAddress(false)
     }
@@ -887,44 +1008,104 @@ export const LoginPage = () => {
             </div>
 
             {/* Create PIN */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <KeyRound className="w-3.5 h-3.5 text-[#FF5200]" />
                 <span>Create 4-Digit PIN</span> <span className="text-rose-500">*</span>
               </label>
-              <input
-                type="password"
-                name="reg-create-pin"
-                autoComplete="new-password"
-                inputMode="numeric"
-                maxLength={4}
-                required
-                placeholder="••••"
-                value={createPin}
-                onChange={(e) => { setCreatePin(e.target.value.replace(/\D/g, '').slice(0, 4)); setError('') }}
-                className="w-full h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold tracking-[0.4em] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
-              />
+              <div className="grid grid-cols-4 gap-3 max-w-[280px] mx-auto">
+                {createPinDigits.map((digit, index) => {
+                  const isFocused = focusedCreatePinIdx === index
+                  return (
+                    <div
+                      key={`create-pin-${index}`}
+                      onClick={() => createPinInputsRef[index].current?.focus()}
+                      className={`relative w-full h-14 rounded-2xl flex items-center justify-center transition-all cursor-text ${
+                        isFocused
+                          ? 'bg-white dark:bg-slate-900 border-2 border-[#FF5200] ring-4 ring-orange-500/20 shadow-xs'
+                          : digit
+                          ? 'bg-orange-50/60 dark:bg-slate-800 border-2 border-orange-200 dark:border-orange-900/60 shadow-xs'
+                          : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      <input
+                        ref={createPinInputsRef[index]}
+                        type="password"
+                        maxLength={1}
+                        inputMode="numeric"
+                        value={digit}
+                        onFocus={() => setFocusedCreatePinIdx(index)}
+                        onBlur={() => setFocusedCreatePinIdx(null)}
+                        onChange={(e) => handleCreatePinChange(index, e.target.value)}
+                        onKeyDown={(e) => handleCreatePinKeyDown(index, e)}
+                        onPaste={index === 0 ? handleCreatePinPaste : undefined}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-text"
+                      />
+                      {digit ? (
+                        <span className="text-2xl font-black text-[#FF5200] pointer-events-none">
+                          ●
+                        </span>
+                      ) : isFocused ? (
+                        <span className="w-0.5 h-5 bg-[#FF5200] animate-pulse pointer-events-none rounded-full" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 pointer-events-none" />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Confirm PIN */}
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <KeyRound className="w-3.5 h-3.5 text-[#FF5200]" />
                 <span>Confirm PIN</span> <span className="text-rose-500">*</span>
               </label>
-              <input
-                type="password"
-                name="reg-confirm-pin"
-                autoComplete="new-password"
-                inputMode="numeric"
-                maxLength={4}
-                required
-                placeholder="••••"
-                value={confirmPin}
-                onChange={(e) => { setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setError('') }}
-                className="w-full h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-bold tracking-[0.4em] text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
-              />
-              <p className="text-[11px] text-slate-400 font-medium">You'll use this PIN to sign in next time.</p>
+              <div className="grid grid-cols-4 gap-3 max-w-[280px] mx-auto">
+                {confirmPinDigits.map((digit, index) => {
+                  const isFocused = focusedConfirmPinIdx === index
+                  return (
+                    <div
+                      key={`confirm-pin-${index}`}
+                      onClick={() => confirmPinInputsRef[index].current?.focus()}
+                      className={`relative w-full h-14 rounded-2xl flex items-center justify-center transition-all cursor-text ${
+                        isFocused
+                          ? 'bg-white dark:bg-slate-900 border-2 border-[#FF5200] ring-4 ring-orange-500/20 shadow-xs'
+                          : digit
+                          ? 'bg-orange-50/60 dark:bg-slate-800 border-2 border-orange-200 dark:border-orange-900/60 shadow-xs'
+                          : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                      }`}
+                    >
+                      <input
+                        ref={confirmPinInputsRef[index]}
+                        type="password"
+                        maxLength={1}
+                        inputMode="numeric"
+                        value={digit}
+                        onFocus={() => setFocusedConfirmPinIdx(index)}
+                        onBlur={() => setFocusedConfirmPinIdx(null)}
+                        onChange={(e) => handleConfirmPinChange(index, e.target.value)}
+                        onKeyDown={(e) => handleConfirmPinKeyDown(index, e)}
+                        onPaste={index === 0 ? handleConfirmPinPaste : undefined}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-text"
+                      />
+                      {digit ? (
+                        <span className="text-2xl font-black text-[#FF5200] pointer-events-none">
+                          ●
+                        </span>
+                      ) : isFocused ? (
+                        <span className="w-0.5 h-5 bg-[#FF5200] animate-pulse pointer-events-none rounded-full" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 pointer-events-none" />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="text-[11px] text-center text-slate-400 font-medium">
+                You'll use this PIN to sign in next time.
+              </p>
             </div>
 
             <div className="flex items-center justify-between text-xs pt-1">
@@ -954,32 +1135,138 @@ export const LoginPage = () => {
 
         {/* STEP 3 (NEW CUSTOMER): FETCH & SAVE DELIVERY ADDRESS */}
         {step === 'register_address' && (
-          <div className="space-y-5 animate-in fade-in">
-            <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
-                <Navigation className="w-6 h-6" />
-              </div>
-              <h4 className="text-sm font-black text-emerald-900 dark:text-emerald-200">Set Your Delivery Location</h4>
-              <p className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium leading-relaxed">
-                We'll use your current location as your default delivery address. You can change it anytime.
-              </p>
-            </div>
+          <div className="space-y-4 animate-in fade-in">
+            {!detectedGpsAddress ? (
+              <>
+                <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-center space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-xs">
+                    <Navigation className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-black text-emerald-900 dark:text-emerald-200">
+                    Set Your Delivery Location
+                  </h4>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300/90 font-medium leading-relaxed">
+                    We'll fetch your exact GPS coordinates for swift delivery to your home or village.
+                  </p>
+                </div>
 
-            <Button
-              variant="primary"
-              size="lg"
-              loading={savingAddress}
-              onClick={handleUseGpsAddress}
-              className="w-full font-bold h-11 bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 cursor-pointer"
-              icon={Navigation}
-            >
-              Use My Current Location (GPS)
-            </Button>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  loading={fetchingGps}
+                  onClick={handleFetchGps}
+                  className="w-full font-bold h-12 bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 cursor-pointer text-sm"
+                  icon={Navigation}
+                >
+                  {fetchingGps ? 'Detecting GPS Location...' : 'Use My Current Location (GPS)'}
+                </Button>
+              </>
+            ) : (
+              <form onSubmit={handleSaveFinalAddress} className="space-y-3.5">
+                {/* GPS Status Card */}
+                <div className="p-3.5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      GPS Location Captured
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleFetchGps}
+                      disabled={fetchingGps}
+                      className="text-[11px] font-bold text-[#FF5200] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${fetchingGps ? 'animate-spin' : ''}`} />
+                      <span>Re-fetch</span>
+                    </button>
+                  </div>
+                  {detectedGpsAddress.latitude && detectedGpsAddress.longitude && (
+                    <span className="text-[10px] font-mono text-emerald-800 dark:text-emerald-300/90 block">
+                      📍 Lat: {Number(detectedGpsAddress.latitude).toFixed(5)}, Lng: {Number(detectedGpsAddress.longitude).toFixed(5)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Editable Full Address / Street / Village (Optional) */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-[#FF5200]" />
+                      <span>Full Address / Village Details</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Optional</span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={customAddressText}
+                    onChange={(e) => setCustomAddressText(e.target.value)}
+                    placeholder="Enter village name, house number, or street..."
+                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
+                  />
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    Auto-filled from GPS. You can edit or add your village/house name if GPS text is incomplete.
+                  </p>
+                </div>
+
+                {/* Landmark (Optional) */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center">
+                    <span className="flex items-center gap-1.5">
+                      <Navigation className="w-3.5 h-3.5 text-[#FF5200]" />
+                      <span>Nearby Landmark</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Optional</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={customLandmarkText}
+                    onChange={(e) => setCustomLandmarkText(e.target.value)}
+                    placeholder="e.g. Near Primary School / Temple / Panchayat"
+                    className="w-full h-11 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs sm:text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
+                  />
+                </div>
+
+                {/* Address Type (Home / Work / Other) */}
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Address Type
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {['Home', 'Work', 'Other'].map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setAddressType(type)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          addressType === type
+                            ? 'bg-[#FF5200] text-white shadow-xs'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit button */}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  loading={savingAddress}
+                  className="w-full font-bold h-11 bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 cursor-pointer mt-2"
+                  icon={CheckCircle2}
+                >
+                  Save Delivery Location & Finish
+                </Button>
+              </form>
+            )}
 
             <button
               type="button"
               onClick={finishRegistration}
-              className="w-full text-center text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
+              className="w-full text-center text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer pt-1"
             >
               Skip for now — I'll add it later
             </button>

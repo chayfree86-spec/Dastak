@@ -14,7 +14,9 @@ export const AuthProvider = ({ children }) => {
   const [sessionToken, setSessionToken] = useState(() => {
     return localStorage.getItem('dastak_customer_session_token') || null
   })
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => {
+    return Boolean(localStorage.getItem('dastak_customer_session_token') || localStorage.getItem('dastak_customer_token'))
+  })
 
   // Verify permanent device session on mount
   useEffect(() => {

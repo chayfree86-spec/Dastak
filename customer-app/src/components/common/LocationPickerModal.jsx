@@ -22,16 +22,23 @@ import { searchPlacesAuto } from '../../utils/geo'
 export const LocationPickerModal = ({ isOpen, onClose }) => {
   const { t } = useLanguage()
   const toast = useToast()
-  const { addresses, activeAddress, selectAddress, detectCurrentLocation } =
-    useLocationContext()
+  const {
+    addresses,
+    activeAddress,
+    selectAddress,
+    detectCurrentLocation,
+    saveAddressToBook,
+  } = useLocationContext()
 
   const [detecting, setDetecting] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [isSearching, setIsSearching] = useState(false)
   const [selectedPlace, setSelectedPlace] = useState(null)
-  const [flatNumber, setFlatNumber] = useState('')
+  const [customAddress, setCustomAddress] = useState('')
   const [landmarkText, setLandmarkText] = useState('')
+  const [addressType, setAddressType] = useState('Home')
+  const [saving, setSaving] = useState(false)
   const debounceRef = useRef(null)
 
   // Reset state on modal open
@@ -40,8 +47,10 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
       setSearchQuery('')
       setSuggestions([])
       setSelectedPlace(null)
-      setFlatNumber('')
+      setCustomAddress('')
       setLandmarkText('')
+      setAddressType('Home')
+      setSaving(false)
     }
   }, [isOpen])
 
@@ -74,18 +83,28 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null
 
-  // 1-Tap Current Location (GPS)
+  // 1-Tap Current Location (GPS) - captures location and opens optional details review
   const handleDetectGPS = async () => {
     setDetecting(true)
     try {
       const detected = await detectCurrentLocation()
+      setSelectedPlace({
+        main_text: detected.locality || detected.city || 'GPS Detected Location',
+        formatted_address: detected.address || detected.full_address || '',
+        latitude: detected.latitude,
+        longitude: detected.longitude,
+        city: detected.city || '',
+        isGps: true,
+      })
+      setCustomAddress(detected.address || detected.full_address || '')
+      setLandmarkText('')
+      setSearchQuery('')
       toast.success(
-        'Current Location Set!',
-        detected.address || 'Delivery address updated via GPS.'
+        'GPS Location Captured!',
+        'You can now review or add optional village/landmark details below.'
       )
-      onClose()
     } catch (e) {
-      onClose() // GpsEnableModal automatically opens via LocationContext
+      // GpsEnableModal automatically opens via LocationContext
     } finally {
       setDetecting(false)
     }
@@ -93,33 +112,58 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
 
   // Handle suggestion selection from auto-search
   const handleSelectSuggestion = (place) => {
-    setSelectedPlace(place)
+    setSelectedPlace({
+      main_text: place.main_text || place.formatted_address,
+      formatted_address: place.formatted_address || place.main_text || '',
+      latitude: place.latitude,
+      longitude: place.longitude,
+      city: place.city || '',
+      isGps: false,
+    })
     setSuggestions([])
-    setSearchQuery(place.main_text || place.formatted_address)
+    setSearchQuery('')
+    setCustomAddress(place.formatted_address || place.main_text || '')
+    setLandmarkText('')
   }
 
   // Confirm and set location
-  const handleConfirmLocation = () => {
+  const handleConfirmLocation = async (e) => {
+    e?.preventDefault()
     if (!selectedPlace) return
 
-    const combinedAddress = flatNumber.trim()
-      ? `${flatNumber.trim()}, ${selectedPlace.formatted_address}`
-      : selectedPlace.formatted_address
+    setSaving(true)
+    try {
+      const finalAddressText =
+        customAddress.trim() ||
+        selectedPlace.formatted_address ||
+        selectedPlace.main_text
 
-    const newLocation = {
-      customer_name: activeAddress?.customer_name || 'My Location',
-      customer_phone: activeAddress?.customer_phone || '',
-      address: combinedAddress,
-      full_address: selectedPlace.formatted_address,
-      landmark: landmarkText.trim() || selectedPlace.main_text || '',
-      latitude: selectedPlace.latitude,
-      longitude: selectedPlace.longitude,
-      city: selectedPlace.city || '',
+      const newLocation = {
+        customer_name: activeAddress?.customer_name || 'Valued Customer',
+        customer_phone: activeAddress?.customer_phone || '',
+        address: finalAddressText,
+        full_address: finalAddressText,
+        landmark: landmarkText.trim(),
+        type: addressType || 'Home',
+        latitude: selectedPlace.latitude,
+        longitude: selectedPlace.longitude,
+        city: selectedPlace.city || '',
+        is_default: true,
+      }
+
+      if (saveAddressToBook) {
+        await saveAddressToBook(newLocation)
+      } else {
+        selectAddress(newLocation)
+      }
+
+      toast.success('Location Saved!', newLocation.address)
+      onClose()
+    } catch (err) {
+      toast.error('Could not save location', err.message)
+    } finally {
+      setSaving(false)
     }
-
-    selectAddress(newLocation)
-    toast.success('Location Set!', newLocation.address)
-    onClose()
   }
 
   return (
@@ -221,52 +265,107 @@ export const LocationPickerModal = ({ isOpen, onClose }) => {
 
         {/* 3. Selected Location Preview & Confirmation */}
         {selectedPlace && (
-          <div className="p-4 rounded-3xl bg-blue-50/70 dark:bg-slate-900 border-2 border-[#113BD0] dark:border-blue-500 shadow-md space-y-3 animate-in slide-in-from-bottom-2">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#113BD0] text-white flex items-center justify-center shrink-0">
-                <MapPin className="w-5 h-5" />
+          <form
+            onSubmit={handleConfirmLocation}
+            className="p-4 rounded-3xl bg-emerald-50/70 dark:bg-slate-900 border-2 border-emerald-500/80 dark:border-emerald-500/60 shadow-md space-y-3.5 animate-in slide-in-from-bottom-2"
+          >
+            {/* Status Header */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+                  <Navigation className="w-4 h-4" />
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <span className="text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400 block tracking-wider">
+                    {selectedPlace.isGps ? '📍 GPS LOCATION DETECTED' : '📍 SELECTED LOCATION'}
+                  </span>
+                  <h4 className="font-black text-slate-900 dark:text-slate-100 text-xs sm:text-sm truncate">
+                    {selectedPlace.main_text}
+                  </h4>
+                  {selectedPlace.latitude && selectedPlace.longitude && (
+                    <span className="text-[10px] font-mono text-emerald-800 dark:text-emerald-300 block">
+                      Lat: {Number(selectedPlace.latitude).toFixed(4)}, Lng: {Number(selectedPlace.longitude).toFixed(4)}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="min-w-0 space-y-0.5">
-                <span className="text-[10px] font-black uppercase text-[#113BD0] dark:text-blue-400 block tracking-wider">
-                  SELECTED LOCATION
-                </span>
-                <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                  {selectedPlace.main_text}
-                </h4>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-                  {selectedPlace.formatted_address}
-                </p>
-              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedPlace(null)}
+                className="text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 underline cursor-pointer shrink-0"
+              >
+                Change
+              </button>
             </div>
 
-            {/* Optional Flat / Floor and Landmark */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-blue-200/60 dark:border-slate-800">
-              <input
-                type="text"
-                value={flatNumber}
-                onChange={(e) => setFlatNumber(e.target.value)}
-                placeholder="House / Flat / Floor (Optional)"
-                className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
+            {/* Editable Full Address / Street / Village (Optional) */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center">
+                <span>Full Address / Village Details</span>
+                <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Optional</span>
+              </label>
+              <textarea
+                rows={2}
+                value={customAddress}
+                onChange={(e) => setCustomAddress(e.target.value)}
+                placeholder="Enter village, house number, or street details..."
+                className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
               />
+              <p className="text-[10px] text-slate-400 font-medium">
+                Auto-filled from location. You can edit or add your village/house info.
+              </p>
+            </div>
+
+            {/* Landmark (Optional) */}
+            <div className="space-y-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center">
+                <span>Nearby Landmark</span>
+                <span className="text-[10px] text-slate-400 font-semibold bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">Optional</span>
+              </label>
               <input
                 type="text"
                 value={landmarkText}
                 onChange={(e) => setLandmarkText(e.target.value)}
-                placeholder="Nearby Landmark (Optional)"
-                className="w-full p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#113BD0]"
+                placeholder="e.g. Near Primary School / Temple / Panchayat"
+                className="w-full h-10 px-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF5200]"
               />
             </div>
 
+            {/* Address Type Selection */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Address Type
+              </label>
+              <div className="flex items-center gap-2">
+                {['Home', 'Work', 'Other'].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setAddressType(type)}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      addressType === type
+                        ? 'bg-[#FF5200] text-white shadow-xs'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <Button
+              type="submit"
               variant="primary"
               size="md"
+              loading={saving}
               icon={Check}
-              onClick={handleConfirmLocation}
-              className="w-full shadow-md text-xs font-black"
+              className="w-full bg-[#FF5200] hover:bg-[#EA580C] text-white shadow-md shadow-orange-500/25 text-xs sm:text-sm font-black h-11 mt-1 cursor-pointer"
             >
-              Confirm & Set Delivery Address
+              Confirm & Save Address
             </Button>
-          </div>
+          </form>
         )}
 
         {/* 4. Saved Addresses Quick List */}

@@ -11,7 +11,7 @@ import {
   XCircle,
   FileText,
 } from 'lucide-react'
-import { formatCurrency, formatDateTime, formatTime, formatPhone } from '../../utils/formatters'
+import { formatCurrency, formatDateTime, formatTime, formatPhone, formatAddress } from '../../utils/formatters'
 import Modal from '../../components/common/Modal'
 import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
@@ -22,6 +22,8 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
   const items = order.items || []
   const bill = order.bill || {}
   const timeline = order.status_history || []
+  const rawAddress = order.delivery_address || order.delivery_address_json || order.address || null
+  const deliveryAddress = formatAddress(rawAddress)
 
   return (
     <Modal
@@ -78,17 +80,19 @@ export const OrderDetailModal = ({ isOpen, onClose, order, onAccepted }) => {
                 )}
               </div>
             </div>
-            {order.delivery_address && (
-              <div className="sm:col-span-2">
-                <span className="text-slate-400 block">Delivery Address</span>
-                <span className="font-bold text-slate-800 leading-snug block mt-0.5">
-                  {typeof order.delivery_address === 'string'
-                    ? order.delivery_address
-                    : order.delivery_address.formatted_address ||
-                      `${order.delivery_address.house_number || ''} ${order.delivery_address.address_line1 || ''}, ${order.delivery_address.city || ''}`}
-                </span>
-              </div>
-            )}
+            <div className="sm:col-span-2">
+              <span className="text-slate-400 block mb-1">Delivery Address</span>
+              {deliveryAddress ? (
+                <div className="flex items-start gap-1.5 text-xs text-slate-800 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+                  <MapPin className="w-4 h-4 text-[#0284C7] shrink-0 mt-0.5" />
+                  <span className="font-semibold leading-relaxed">
+                    {deliveryAddress}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs text-slate-400 italic">In-Store Pickup / Dine-in</span>
+              )}
+            </div>
           </div>
         </div>
 

@@ -49,12 +49,17 @@ export const SavedAddressesPage = () => {
   // Open Edit Modal with pre-filled address details
   const handleOpenEdit = (e, addr) => {
     e.stopPropagation()
+    const isAutoLandmark =
+      addr.landmark === 'Detected via GPS' ||
+      (addr.landmark && addr.city && addr.landmark.toLowerCase() === addr.city.toLowerCase())
+    const cleanLandmark = isAutoLandmark ? '' : (addr.landmark || '')
+
     setEditingAddress({
       id: addr.id,
       customer_name: addr.customer_name || 'Customer',
       customer_phone: addr.customer_phone || '',
       address: addr.address || '',
-      landmark: addr.landmark || '',
+      landmark: cleanLandmark,
       type: addr.type || 'Home',
       is_default: Boolean(addr.is_default),
       latitude: addr.latitude ?? null,
@@ -113,10 +118,10 @@ export const SavedAddressesPage = () => {
 
         <Button
           variant="primary"
-          size="sm"
+          size="md"
           icon={Plus}
           onClick={() => setLocationModalOpen(true)}
-          className="font-bold text-xs shadow-md shadow-blue-600/20"
+          className="font-bold text-xs sm:text-sm shadow-md shadow-blue-600/20 h-10 px-4"
         >
           {t.addAddress || (lang === 'hi' ? 'नया पता जोड़ें' : 'Add Address')}
         </Button>
@@ -135,100 +140,32 @@ export const SavedAddressesPage = () => {
         </p>
       </div>
 
-      {/* 1. Active Delivery Address Banner */}
-      {activeAddress && (
-        <div className="p-5 rounded-3xl bg-blue-50/70 dark:bg-slate-900 border-2 border-[#113BD0] dark:border-blue-500 shadow-md space-y-3">
-          <div className="flex items-start justify-between gap-3 text-xs">
-            <div className="flex items-start gap-3.5 min-w-0">
-              <div className="p-3 rounded-2xl bg-[#113BD0] text-white shrink-0 shadow-md">
-                <Home className="w-5 h-5" />
-              </div>
-              <div className="space-y-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-black uppercase tracking-wider bg-[#113BD0] text-white px-2.5 py-0.5 rounded-md">
-                    {lang === 'hi' ? 'सक्रिय डिलीवरी लोकेशन' : 'ACTIVE DELIVERY LOCATION'}
-                  </span>
-                  {activeAddress.is_default && (
-                    <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-white" />
-                      <span>{lang === 'hi' ? 'डिफ़ॉल्ट' : 'Default'}</span>
-                    </span>
-                  )}
-                  <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm truncate">
-                    {activeAddress.customer_name || (lang === 'hi' ? 'डिलीवरी का पता' : 'My Delivery Address')}
-                  </h4>
-                </div>
-                <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
-                  {activeAddress.address}
-                </p>
-                {activeAddress.landmark && (
-                  <span className="text-amber-700 dark:text-amber-300 font-bold block text-[11px]">
-                    🚩 {lang === 'hi' ? 'लैंडमार्क:' : 'Landmark:'} {activeAddress.landmark}
-                  </span>
-                )}
-                {activeAddress.latitude && activeAddress.longitude && (
-                  <span className="text-[10px] text-slate-400 block pt-0.5">
-                    GPS: {Number(activeAddress.latitude).toFixed(4)}, {Number(activeAddress.longitude).toFixed(4)}
-                  </span>
-                )}
-              </div>
-            </div>
-            <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-xl shrink-0 border border-emerald-200 dark:border-emerald-800">
-              {lang === 'hi' ? '✓ सक्रिय' : '✓ In Use'}
-            </span>
-          </div>
-
-          {/* Quick Actions for Active Address */}
-          <div className="pt-2 border-t border-blue-200/60 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={(e) => handleOpenEdit(e, activeAddress)}
-                className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-300 font-bold border border-slate-200 dark:border-slate-700 flex items-center gap-1.5 cursor-pointer shadow-xs"
-              >
-                <Edit3 className="w-3.5 h-3.5 text-[#113BD0]" />
-                <span>{lang === 'hi' ? 'संपादित करें' : 'Edit Details'}</span>
-              </button>
-
-              {!activeAddress.is_default && (
-                <button
-                  type="button"
-                  onClick={(e) => handleSetDefault(e, activeAddress)}
-                  className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-amber-700 dark:text-amber-400 font-bold border border-amber-300 dark:border-amber-700/60 flex items-center gap-1.5 cursor-pointer shadow-xs"
-                >
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                  <span>{lang === 'hi' ? 'डिफ़ॉल्ट बनाएं' : 'Set Default'}</span>
-                </button>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setLocationModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-[#113BD0] text-white font-bold hover:bg-[#1E3A8A] flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Navigation className="w-3.5 h-3.5" />
-              <span>Change Location</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 2. Saved Addresses List */}
-      <div className="space-y-3">
+      {/* Saved Addresses List */}
+      <div className="space-y-4">
         <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-slate-400">
-          <span>Saved Address Book ({addresses.length})</span>
+          <span>Saved Addresses ({addresses.length})</span>
         </div>
 
         {addresses.length === 0 ? (
-          <div className="p-8 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
-            <MapPin className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
-            <h4 className="font-black text-slate-800 dark:text-slate-200 text-sm">
-              No Additional Saved Addresses
-            </h4>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Use GPS or Map Search to save frequently used locations (Home, Office, Village).
-            </p>
+          <div className="p-8 text-center rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+            <MapPin className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto" />
+            <div className="space-y-1">
+              <h4 className="font-black text-slate-800 dark:text-slate-200 text-sm">
+                No Saved Addresses Yet
+              </h4>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                Use GPS or Map Search to save frequently used locations (Home, Office, Village).
+              </p>
+            </div>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={Plus}
+              onClick={() => setLocationModalOpen(true)}
+              className="mt-2"
+            >
+              Add Your First Address
+            </Button>
           </div>
         ) : (
           addresses.map((addr) => {
@@ -241,18 +178,26 @@ export const SavedAddressesPage = () => {
               <div
                 key={addr.id}
                 onClick={() => {
-                  selectAddress(addr)
-                  toast.success('Active Address Set', addr.address)
+                  if (!isSelected) {
+                    selectAddress(addr)
+                    toast.success('Active Address Set', addr.address)
+                  }
                 }}
-                className={`p-4 sm:p-5 rounded-3xl bg-white dark:bg-slate-900 border transition-all duration-200 shadow-xs hover:shadow-md cursor-pointer flex flex-col justify-between gap-3 text-xs ${
+                className={`p-4 sm:p-5 rounded-3xl transition-all duration-200 shadow-xs flex flex-col justify-between gap-3 text-xs ${
                   isSelected
-                    ? 'border-[#113BD0] ring-2 ring-blue-500/20'
-                    : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300'
+                    ? 'bg-blue-50/70 dark:bg-slate-900 border-2 border-[#113BD0] dark:border-blue-500 shadow-md ring-2 ring-[#113BD0]/15'
+                    : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 cursor-pointer hover:shadow-md'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3.5 min-w-0">
-                    <div className="p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shrink-0">
+                    <div
+                      className={`p-3 rounded-2xl shrink-0 shadow-xs ${
+                        isSelected
+                          ? 'bg-[#113BD0] text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                      }`}
+                    >
                       {addr.type === 'Work' ? (
                         <Briefcase className="w-5 h-5" />
                       ) : (
@@ -261,49 +206,82 @@ export const SavedAddressesPage = () => {
                     </div>
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm truncate">
-                          {addr.customer_name || addr.type || 'Saved Location'}
-                        </h4>
+                        {isSelected && (
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-[#113BD0] text-white px-2 py-0.5 rounded-md">
+                            ACTIVE DELIVERY LOCATION
+                          </span>
+                        )}
                         {isDefault && (
-                          <span className="text-[10px] font-black uppercase bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-md flex items-center gap-1 border border-amber-300 dark:border-amber-700/60">
-                            <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                          <span className="text-[10px] font-black uppercase bg-amber-500 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-white" />
                             <span>Default</span>
                           </span>
                         )}
+                        <h4 className="font-black text-slate-900 dark:text-slate-100 text-sm truncate">
+                          {addr.customer_name || addr.type || 'Saved Location'}
+                        </h4>
                         <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                           {addr.type || 'Home'}
                         </span>
                       </div>
-                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-2 font-medium">
+                      <p className="text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
                         {addr.address}
                       </p>
-                      {addr.landmark && (
-                        <span className="text-[11px] text-amber-700 dark:text-amber-300 font-bold block">
-                          🚩 {addr.landmark}
+                      {addr.landmark &&
+                        addr.landmark !== 'Detected via GPS' &&
+                        addr.landmark.toLowerCase() !== (addr.city || '').toLowerCase() && (
+                          <span className="text-[11px] text-amber-700 dark:text-amber-300 font-bold block">
+                            🚩 Landmark: {addr.landmark}
+                          </span>
+                        )}
+                      {addr.latitude && addr.longitude && (
+                        <span className="text-[10px] text-slate-400 block pt-0.5">
+                          GPS: {Number(addr.latitude).toFixed(4)}, {Number(addr.longitude).toFixed(4)}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {isSelected && (
-                    <div className="w-6 h-6 rounded-full bg-[#113BD0] text-white flex items-center justify-center shrink-0">
-                      <Check className="w-3.5 h-3.5" />
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {isSelected ? (
+                      <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" />
+                        <span>In Use</span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          selectAddress(addr)
+                          toast.success('Active Address Set', addr.address)
+                        }}
+                        className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 hover:text-[#113BD0] dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                      >
+                        Deliver Here
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {/* Bottom Action Strip: Edit, Set Default, Delete */}
-                <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
+                {/* Bottom Action Strip */}
+                <div
+                  className={`pt-2.5 border-t flex items-center justify-between gap-2 ${
+                    isSelected
+                      ? 'border-blue-200/60 dark:border-slate-800'
+                      : 'border-slate-100 dark:border-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
                     {/* Edit Button */}
                     <button
                       type="button"
                       onClick={(e) => handleOpenEdit(e, addr)}
-                      className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                      className="px-4 py-2.5 h-10 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-300 font-black text-xs border border-slate-200 dark:border-slate-700 flex items-center gap-2 cursor-pointer shadow-xs transition-all"
                       title="Edit Address Details"
                     >
-                      <Edit3 className="w-3.5 h-3.5 text-[#113BD0]" />
-                      <span>Edit</span>
+                      <Edit3 className="w-4 h-4 text-[#113BD0]" />
+                      <span>Edit Details</span>
                     </button>
 
                     {/* Set Default Button */}
@@ -311,11 +289,26 @@ export const SavedAddressesPage = () => {
                       <button
                         type="button"
                         onClick={(e) => handleSetDefault(e, addr)}
-                        className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-amber-700 font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        className="px-4 py-2.5 h-10 rounded-2xl bg-white dark:bg-slate-800 hover:bg-amber-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-amber-700 font-black text-xs border border-amber-300 dark:border-amber-700/60 flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
                         title="Make this your default delivery address"
                       >
-                        <Star className="w-3.5 h-3.5 text-amber-500" />
+                        <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
                         <span>Set Default</span>
+                      </button>
+                    )}
+
+                    {/* Change Location Map Trigger if Active */}
+                    {isSelected && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setLocationModalOpen(true)
+                        }}
+                        className="px-4 py-2.5 h-10 rounded-2xl bg-[#113BD0] text-white font-black text-xs hover:bg-[#1E3A8A] flex items-center gap-2 cursor-pointer shadow-xs transition-all"
+                      >
+                        <Navigation className="w-4 h-4" />
+                        <span>Change Location</span>
                       </button>
                     )}
                   </div>
@@ -324,11 +317,11 @@ export const SavedAddressesPage = () => {
                   <button
                     type="button"
                     onClick={(e) => handleDeletePrompt(e, addr)}
-                    className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors flex items-center gap-1 font-bold cursor-pointer"
+                    className="px-3 py-2.5 h-10 rounded-2xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors flex items-center gap-1.5 font-black text-xs cursor-pointer"
                     title="Delete Address"
                   >
                     <Trash2 className="w-4 h-4" />
-                    <span className="hidden sm:inline text-xs">Delete</span>
+                    <span className="hidden sm:inline">Delete</span>
                   </button>
                 </div>
               </div>
@@ -454,11 +447,12 @@ export const SavedAddressesPage = () => {
             </label>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="md"
+                className="h-11 px-5 text-xs sm:text-sm font-black"
                 onClick={() => {
                   setEditModalOpen(false)
                   setEditingAddress(null)
@@ -466,7 +460,13 @@ export const SavedAddressesPage = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="primary" size="sm" icon={Check}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                icon={Check}
+                className="h-11 px-6 text-xs sm:text-sm font-black shadow-md shadow-orange-500/25"
+              >
                 Save Changes
               </Button>
             </div>
@@ -495,10 +495,11 @@ export const SavedAddressesPage = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button
               variant="outline"
-              size="sm"
+              size="md"
+              className="h-11 px-5 font-black text-xs"
               onClick={() =>
                 setDeleteConfirmModal({ isOpen: false, addressId: null, addressName: '' })
               }
@@ -507,8 +508,9 @@ export const SavedAddressesPage = () => {
             </Button>
             <Button
               variant="danger"
-              size="sm"
+              size="md"
               icon={Trash2}
+              className="h-11 px-5 font-black text-xs shadow-md shadow-rose-600/25"
               onClick={handleConfirmDelete}
             >
               Yes, Delete

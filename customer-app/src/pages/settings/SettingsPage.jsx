@@ -43,6 +43,13 @@ export const SettingsPage = () => {
   const [changeDeviceLoading, setChangeDeviceLoading] = useState(false)
   const [showPinModal, setShowPinModal] = useState(false)
   const [profileData, setProfileData] = useState(null)
+  const [platformConfig, setPlatformConfig] = useState(null)
+
+  useEffect(() => {
+    customerApi.getConfig()
+      .then((res) => setPlatformConfig(res?.data || res))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -241,6 +248,28 @@ export const SettingsPage = () => {
             </span>
           </div>
         )}
+
+        {/* Saved Addresses */}
+        <div
+          onClick={() => navigate('/addresses')}
+          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-slate-800 text-[#F97316]">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                {t.savedAddresses || (lang === 'hi' ? 'सहेजे गए डिलीवरी पते' : 'Saved Delivery Addresses')}
+              </h5>
+              <p className="text-slate-400 text-[11px] font-medium">
+                {activeAddress?.address || (lang === 'hi' ? 'घर और ऑफिस के पते प्रबंधित करें' : 'Manage home, work, and village addresses')}
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400" />
+        </div>
+
         {/* Language Switcher */}
         <div
           onClick={toggleLanguage}
@@ -285,27 +314,6 @@ export const SettingsPage = () => {
           <span className="text-xs font-black text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
             {lang === 'hi' ? 'बदलें' : 'Toggle'}
           </span>
-        </div>
-
-        {/* Saved Addresses */}
-        <div
-          onClick={() => navigate('/addresses')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-orange-50 dark:bg-slate-800 text-[#F97316]">
-              <MapPin className="w-5 h-5" />
-            </div>
-            <div>
-              <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                {t.savedAddresses || (lang === 'hi' ? 'सहेजे गए डिलीवरी पते' : 'Saved Delivery Addresses')}
-              </h5>
-              <p className="text-slate-400 text-[11px] font-medium">
-                {activeAddress?.address || (lang === 'hi' ? 'घर और ऑफिस के पते प्रबंधित करें' : 'Manage home, work, and village addresses')}
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-slate-400" />
         </div>
 
         {/* Change Device Feature */}
@@ -360,25 +368,31 @@ export const SettingsPage = () => {
         )}
 
         {/* Support & Helpline */}
-        <div
-          onClick={() => window.open('tel:1800123456', '_blank')}
-          className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0]">
-              <HelpCircle className="w-5 h-5" />
+        {(() => {
+          const supportPhone = platformConfig?.support_phone || '9005271986'
+          const dialPhone = supportPhone.replace(/[^0-9+]/g, '')
+          return (
+            <div
+              onClick={() => window.open(`tel:${dialPhone}`, '_self')}
+              className="p-4 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-slate-800 text-[#113BD0]">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
+                    {lang === 'hi' ? 'ग्राहक सहायता हेल्पलाइन' : 'Customer Support Helpline'}
+                  </h5>
+                  <p className="text-slate-400 text-[11px] font-medium">
+                    {lang === 'hi' ? '24x7 हेल्पलाइन:' : '24x7 Helpline:'} <strong>{supportPhone}</strong>
+                  </p>
+                </div>
+              </div>
+              <Phone className="w-4 h-4 text-emerald-600" />
             </div>
-            <div>
-              <h5 className="font-black text-slate-900 dark:text-slate-100 text-sm">
-                {lang === 'hi' ? 'ग्राहक सहायता हेल्पलाइन' : 'Customer Support Helpline'}
-              </h5>
-              <p className="text-slate-400 text-[11px] font-medium">
-                {lang === 'hi' ? '24x7 टोल-फ्री:' : '24x7 Toll-Free:'} <strong>1800-123-456</strong>
-              </p>
-            </div>
-          </div>
-          <Phone className="w-4 h-4 text-emerald-600" />
-        </div>
+          )
+        })()}
       </div>
 
       {/* Logout */}

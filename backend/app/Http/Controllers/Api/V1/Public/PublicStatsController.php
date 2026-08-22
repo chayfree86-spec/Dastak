@@ -9,16 +9,42 @@ use App\Http\Resources\ApiResponse;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\Review;
+use App\Models\SystemSetting;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Public marketing data for the landing page — 100% real numbers from the DB.
+ * Public marketing and config data — 100% real numbers from the DB.
  * No hardcoded/fabricated stats or testimonials.
  */
 class PublicStatsController extends Controller
 {
+    public function config(): JsonResponse
+    {
+        $all = SystemSetting::getAllSettings();
+        $defaults = [
+            'app_name' => 'Dastak',
+            'tagline' => 'Jo Chahiye, Ghar Par',
+            'support_phone' => '9005271986',
+            'support_email' => 'support@dastakdelivery.com',
+            'cancel_window_mins' => 5,
+            'cod_enabled' => true,
+            'base_delivery_fee' => 35,
+        ];
+        $merged = array_merge($defaults, $all);
+
+        return ApiResponse::success([
+            'app_name' => $merged['app_name'] ?? 'Dastak',
+            'tagline' => $merged['tagline'] ?? 'Jo Chahiye, Ghar Par',
+            'support_phone' => (string) ($merged['support_phone'] ?? '9005271986'),
+            'support_email' => (string) ($merged['support_email'] ?? 'support@dastakdelivery.com'),
+            'cancel_window_mins' => (int) ($merged['cancel_window_mins'] ?? 5),
+            'cod_enabled' => (bool) ($merged['cod_enabled'] ?? true),
+            'base_delivery_fee' => (float) ($merged['base_delivery_fee'] ?? 35),
+        ], 'Platform configuration retrieved.');
+    }
+
     public function stats(): JsonResponse
     {
         $customers = User::whereHas('roles', fn (Builder $q) => $q->where('slug', UserRole::CUSTOMER->value))->count();

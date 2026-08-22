@@ -9,11 +9,30 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     const root = document.documentElement
-    if (theme === 'dark') {
+    const isDarkMode = theme === 'dark'
+    const themeColor = isDarkMode ? '#0f172a' : '#ffffff'
+
+    if (isDarkMode) {
       root.classList.add('dark')
     } else {
       root.classList.remove('dark')
     }
+
+    // Dynamic Mobile Notification / Status Bar theme-color
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]:not([media])')
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta')
+      metaThemeColor.name = 'theme-color'
+      document.head.appendChild(metaThemeColor)
+    }
+    metaThemeColor.setAttribute('content', themeColor)
+
+    // iOS Status Bar Style
+    let appleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
+    if (appleStatusBar) {
+      appleStatusBar.setAttribute('content', isDarkMode ? 'black-translucent' : 'default')
+    }
+
     localStorage.setItem('dastak_customer_theme', theme)
   }, [theme])
 

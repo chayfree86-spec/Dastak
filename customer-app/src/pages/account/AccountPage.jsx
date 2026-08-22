@@ -30,6 +30,13 @@ export const AccountPage = () => {
   const { activeAddress } = useLocationContext()
   const toast = useToast()
   const [profileData, setProfileData] = useState(null)
+  const [platformConfig, setPlatformConfig] = useState(null)
+
+  useEffect(() => {
+    customerApi.getConfig()
+      .then((res) => setPlatformConfig(res?.data || res))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -270,25 +277,31 @@ export const AccountPage = () => {
         </div>
 
         {/* Support Helpline */}
-        <div
-          onClick={() => window.open('tel:1800123456', '_blank')}
-          className="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-purple-50 dark:bg-slate-800 text-purple-600">
-              <HelpCircle className="w-4 h-4" />
+        {(() => {
+          const supportPhone = platformConfig?.support_phone || '9005271986'
+          const dialPhone = supportPhone.replace(/[^0-9+]/g, '')
+          return (
+            <div
+              onClick={() => window.open(`tel:${dialPhone}`, '_self')}
+              className="p-3.5 flex items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-purple-50 dark:bg-slate-800 text-purple-600">
+                  <HelpCircle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h5 className="font-black text-slate-900 dark:text-slate-100">
+                    {t.helpSupport}
+                  </h5>
+                  <p className="text-slate-400 text-[11px] font-medium">
+                    {lang === 'hi' ? 'ग्राहक सेवा हेल्पलाइन:' : 'Customer Support Helpline:'} <strong>{supportPhone}</strong>
+                  </p>
+                </div>
+              </div>
+              <Phone className="w-4 h-4 text-emerald-600" />
             </div>
-            <div>
-              <h5 className="font-black text-slate-900 dark:text-slate-100">
-                {t.helpSupport}
-              </h5>
-              <p className="text-slate-400 text-[11px] font-medium">
-                {lang === 'hi' ? 'टोल-फ्री ग्राहक सेवा: 1800-123-456' : 'Toll-Free Customer Support: 1800-123-456'}
-              </p>
-            </div>
-          </div>
-          <Phone className="w-4 h-4 text-emerald-600" />
-        </div>
+          )
+        })()}
       </div>
 
       {/* Logout */}

@@ -54,3 +54,27 @@ export const formatElapsedTime = (startTime) => {
   const diffHours = Math.floor(diffMin / 60)
   return `${diffHours}h ${diffMin % 60}m ago`
 }
+
+export const formatAddress = (addr) => {
+  if (!addr) return ''
+  if (typeof addr === 'string') return addr
+  if (typeof addr === 'object') {
+    if (addr.formatted_address) return addr.formatted_address
+    if (addr.complete_address) return addr.complete_address
+    if (addr.address && typeof addr.address === 'string') return addr.address
+
+    const parts = [
+      addr.house_number || addr.flat_no || addr.door_no || '',
+      addr.address_line1 || addr.street || addr.area || '',
+      addr.address_line2 || '',
+      addr.landmark ? `Near ${addr.landmark}` : '',
+      addr.city || '',
+      addr.pincode ? `- ${addr.pincode}` : '',
+    ].filter(Boolean)
+
+    if (parts.length > 0) {
+      return parts.join(', ')
+    }
+  }
+  return ''
+}

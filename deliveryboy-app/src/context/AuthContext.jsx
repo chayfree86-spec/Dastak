@@ -11,7 +11,9 @@ export const AuthProvider = ({ children }) => {
   const [riderProfile, setRiderProfile] = useState(null)
   const [token, setToken] = useState(localStorage.getItem('dastak_delivery_token'))
   const [sessionToken, setSessionToken] = useState(localStorage.getItem('dastak_delivery_session_token'))
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => {
+    return Boolean(localStorage.getItem('dastak_delivery_token') || localStorage.getItem('dastak_delivery_session_token'))
+  })
 
   // Active delivery state cached across tabs
   const [activeOrder, setActiveOrder] = useState(null)
